@@ -101,3 +101,19 @@ INSERT INTO audit.events (id, event_type, district_id, school_id, student_id, sc
   FROM school_assignments sa
     INNER JOIN schools sc ON sa.school_id = sc.id
   WHERE sa.assignment_end IS NOT NULL;
+
+-- -- Insert a large number of events representing "the fact that a student attended a particular class"
+-- -- This is meant to be an example of a 1 to n relationship with a very high cardinality
+-- INSERT INTO audit.events (id, event_type, district_id, school_id, student_id, school_assignment_school_id, school_assignment_student_id, created_at)
+--   SELECT
+--     uuid_generate_v4(),
+--     'student_class_attendance_' || seq,
+--     sc.district_id,
+--     sc.id,
+--     sa.student_id,
+--     sa.school_id,
+--     sa.student_id,
+--     now()
+--   FROM school_assignments sa
+--     INNER JOIN schools sc ON sa.school_id = sc.id
+--     CROSS JOIN generate_series(0, 100) as seq;

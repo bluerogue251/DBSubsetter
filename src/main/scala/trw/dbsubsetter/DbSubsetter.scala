@@ -2,6 +2,7 @@ package trw.dbsubsetter
 
 import java.sql.{DriverManager, JDBCType}
 
+import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 object DbSubsetter extends App {
@@ -13,10 +14,6 @@ object DbSubsetter extends App {
 
   val dbConnection = DriverManager.getConnection(connectionString)
   val ddl = dbConnection.getMetaData
-
-  type SchemaName = String
-  type TableName = String
-  type ColumnName = String
 
   val tablesMutable = ArrayBuffer.empty[Table]
   val columnsMutable = ArrayBuffer.empty[Column]
@@ -68,6 +65,8 @@ object DbSubsetter extends App {
     }
   }
 
+  val tables = tablesMutable.toVector
+
   val colsByTable: Map[(SchemaName, TableName), Map[ColumnName, Column]] = {
     columnsMutable
       .groupBy(c => (c.schema, c.table))
@@ -82,60 +81,92 @@ object DbSubsetter extends App {
       }
   }
 
-  val fksFromTable: Map[(SchemaName, TableName), Vector[(Column, Column)]] = {
+  val foreignKeys: Set[ForeignKey] = {
     foreignKeysMutable
-      .groupBy(fk => (fk.fromSchema, fk.fromTable))
-      .map { case (k, partialFks) =>
-        k -> partialFks.map { pfk =>
-          (colsByTable(pfk.fromSchema, pfk.fromTable)(pfk.fromColumn), colsByTable(pfk.toSchema, pfk.toTable)(pfk.toColumn))
-        }.toVector
+      .groupBy(fkm => (fkm.fromSchema, fkm.fromTable, fkm.toSchema, fkm.toTable))
+      .map { case ((fromSchema, fromTable, toSchema, toTable), partialForeignKeys) =>
+        ForeignKey(
+          fromSchema,
+          fromTable,
+          toSchema,
+          toTable,
+          partialForeignKeys.map { pfk => (colsByTable((fromSchema, fromTable))(pfk.fromColumn), colsByTable((toSchema, toTable))(pfk.toColumn)) }.toSet
+        )
       }
+      .toSet
   }
 
-  val fksPointingToTable: Map[(SchemaName, TableName), Vector[(Column, Column)]] = {
-    foreignKeysMutable
-      .groupBy(fk => (fk.toSchema, fk.toTable))
-      .map { case (k, partialFks) =>
-        k -> partialFks.map { pfk =>
-          (colsByTable(pfk.fromSchema, pfk.fromTable)(pfk.fromColumn), colsByTable(pfk.toSchema, pfk.toTable)(pfk.toColumn))
-        }.toVector
+  val fksFromTable: Map[(SchemaName, TableName), Set[ForeignKey]] = {
+    foreignKeys.groupBy(fk => (fk.fromSchema, fk.fromTable)).withDefaultValue(Set.empty)
+  }
+
+  val fksPointingToTable: Map[(SchemaName, TableName), Set[ForeignKey]] = {
+    foreignKeys.groupBy(fk => (fk.toSchema, fk.toTable)).withDefaultValue(Set.empty)
+  }
+
+  // Queue of items still to be processed
+  val processingQueue = mutable.Queue.empty[(SchemaName, TableName, String, Boolean)]
+
+  // In-memory storage for primary key values
+  val primaryKeyStore: Map[(SchemaName, TableName), mutable.HashSet[Vector[AnyRef]]] = {
+    tables.map(table => (table.schema, table.name) -> mutable.HashSet.empty[Vector[AnyRef]]).toMap
+  }
+
+  def process(): Unit = {
+    while (processingQueue.nonEmpty) {
+      val (schema, table, whereClause, fetchChildren) = processingQueue.dequeue()
+      // Figure out which columns we need to select out of this table
+      // So that we don't select any more data than is absolutely necessary
+      val pk = pksOfTable((schema, table))
+      val parentFks = fksFromTable((schema, table))
+      val childFks = fksPointingToTable((schema, table))
+      val columnsToSelect: Seq[Column] = pk ++ parentFks.flatMap(_.columns).map { case (fromCol, _) => fromCol } ++ childFks.flatMap(_.columns).map { case (_, toCol) => toCol }
+
+      // Build and execute the SQL statement to select the data matching the where clause
+      val query =
+        s"""select ${columnsToSelect.map(_.name).mkString(", ")}
+           | from $schema.$table
+           | where $whereClause
+           | """.stripMargin
+      val resultSet = dbConnection.createStatement().executeQuery(query)
+
+      // Put the result in a collection of Maps from column names to values, each element in the collection is a row of the result
+      // Could we be more efficient by doing this by index rather than by column name?
+      val tmpResult = ArrayBuffer.empty[Map[ColumnName, AnyRef]]
+      while (resultSet.next()) {
+        tmpResult += columnsToSelect.map(col => col.name -> resultSet.getObject(col.name)).toMap
       }
+
+      // Find out which rows are "new" in the sense of having not yet been processed by us
+      // Add the primary key of each of the "new" rows to the primaryKeyStore.
+      val newRows = tmpResult.filter { row =>
+        primaryKeyStore((schema, table)).add(pk.map(k => row(k.name)))
+      }
+
+      // For each "new" row, call `process` method recursively on its parents and children
+      newRows.foreach { row =>
+        parentFks.foreach { pfk =>
+          val whereClause = pfk.columns.flatMap { case (fromCol, toCol) =>
+            Option(row(fromCol.name)).map(fromColValue => s"${toCol.name} = '$fromColValue'")
+          }.mkString(" and ")
+          if (whereClause.nonEmpty) processingQueue.enqueue((pfk.toSchema, pfk.toTable, whereClause, false))
+        }
+
+        childFks.foreach { cfk =>
+          val whereClause = cfk.columns.flatMap { case (fromCol, toCol) =>
+            Option(row(toCol.name)).map(toColValue => s"${fromCol.name} = '$toColValue'")
+          }.mkString(" and ")
+          if (whereClause.nonEmpty) processingQueue.enqueue((cfk.fromSchema, cfk.fromTable, whereClause, fetchChildren))
+        }
+      }
+
+      // Print Debug info about what primary keys we have so far
+      primaryKeyStore.foreach { case ((schemaName, tableName), hashSet) =>
+        println(s"$schemaName.$tableName: ${hashSet.size}")
+      }
+    }
   }
 
-  // There must be exactly one primary key
-  val initialPkCols = pksOfTable((startingSchema, startingTable))
-  val initialQuery = s"select ${initialPkCols.map(_.name).mkString(",")} from $startingSchema.$startingTable where $startingWhereClause"
-  val initialParentsToFind = fksFromTable((startingSchema, startingTable))
-  val initialChildrenToFind = fksPointingToTable((startingSchema, startingTable))
-  val columnsWeCareAbout = initialPkCols
-
-  val statement = dbConnection.createStatement()
-  val resultSet = statement.executeQuery(initialQuery)
-  while (resultSet.next()) {
-    println(resultSet.getString("student_id"))
-  }
+  processingQueue.enqueue((startingSchema, startingTable, startingWhereClause, true))
+  process()
 }
-
-case class Table(schema: String,
-                 name: String)
-
-case class Column(schema: String,
-                  table: String,
-                  name: String,
-                  jdbcType: JDBCType,
-                  nullable: Boolean)
-
-case class PartialPrimaryKey(schema: String,
-                             table: String,
-                             column: String)
-
-case class PrimaryKey(tableSchema: String,
-                      tableName: String,
-                      columns: Seq[Column])
-
-case class PartialForeignKey(fromSchema: String,
-                             fromTable: String,
-                             fromColumn: String,
-                             toSchema: String,
-                             toTable: String,
-                             toColumn: String)
