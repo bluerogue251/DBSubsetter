@@ -1,0 +1,11 @@
+CREATE INDEX ON schools (district_id);
+CREATE INDEX ON schools (latest_valedictorian_id_cache);
+CREATE INDEX ON students (current_school_id_cache);
+CREATE INDEX ON school_assignments (school_id);
+CREATE INDEX ON school_assignments (student_id);
+CREATE INDEX ON audit.events (event_type);
+CREATE INDEX ON audit.events (district_id);
+CREATE INDEX ON audit.events (school_id);
+CREATE INDEX ON audit.events (student_id);
+CREATE INDEX ON audit.events (school_assignment_school_id);
+CREATE INDEX ON audit.events (school_assignment_student_id);

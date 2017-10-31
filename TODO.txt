@@ -1,0 +1,9 @@
+Figure out how regular types, postgres-specific types, and composite primary/foreign keys are managed in:
+  - https://github.com/18F/rdbms-subsetter
+  - http://jailer.sourceforge.net/home.htm
+
+
+Read / Watch:
+  http://functionaltalks.org/2013/07/30/miles-sabin-shapeless-exploring-generic-programming-in-scala/
+  https://www.microsoft.com/en-us/research/publication/scrap-your-boilerplate-with-class/
+  https://vimeo.com/128466887

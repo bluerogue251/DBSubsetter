@@ -23,10 +23,6 @@ CREATE TABLE students (
   updated_at              TIMESTAMP NOT NULL
 );
 
--- Circular dependency
-ALTER TABLE schools
-  ADD COLUMN latest_valedictorian_id_cache UUID NULL REFERENCES students (student_id);
-
 CREATE TABLE school_assignments (
   school_id        INTEGER   NOT NULL REFERENCES schools (id),
   student_id       UUID      NOT NULL REFERENCES students (student_id),
@@ -36,6 +32,10 @@ CREATE TABLE school_assignments (
   updated_at       TIMESTAMP NOT NULL,
   PRIMARY KEY (school_id, student_id) -- Composite primary key
 );
+
+-- Circular dependency
+ALTER TABLE schools
+  ADD COLUMN latest_valedictorian_id_cache UUID NULL REFERENCES students (student_id);
 
 CREATE SCHEMA audit;
 
@@ -50,3 +50,6 @@ CREATE TABLE audit.events (
   created_at                   TIMESTAMP NOT NULL,
   FOREIGN KEY (school_assignment_school_id, school_assignment_student_id) REFERENCES school_assignments (school_id, student_id) -- Composite foreign key
 );
+
+
+
