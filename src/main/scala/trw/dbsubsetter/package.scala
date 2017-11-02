@@ -6,6 +6,7 @@ package object dbsubsetter {
   type SchemaName = String
   type TableName = String
   type ColumnName = String
+  type WhereClause = String
 
   case class Table(schema: SchemaName,
                    name: TableName)
