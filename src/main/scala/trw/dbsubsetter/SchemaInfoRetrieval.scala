@@ -4,8 +4,8 @@ import java.sql.{Connection, JDBCType}
 
 import scala.collection.mutable.ArrayBuffer
 
-object DbSchemaInfoRetrieval {
-  def getSchemaInfo(conn: Connection, schemas: Set[String]): DbSchemaInfo = {
+object SchemaInfoRetrieval {
+  def getSchemaInfo(conn: Connection, schemas: Set[String]): SchemaInfo = {
     val ddl = conn.getMetaData
 
     val tablesMutable = ArrayBuffer.empty[Table]
@@ -97,7 +97,7 @@ object DbSchemaInfoRetrieval {
       foreignKeys.groupBy(fk => (fk.toSchema, fk.toTable)).withDefaultValue(Set.empty)
     }
 
-    DbSchemaInfo(
+    SchemaInfo(
       tables,
       colsByTable,
       pksByTable,
@@ -108,9 +108,9 @@ object DbSchemaInfoRetrieval {
   }
 }
 
-case class DbSchemaInfo(tables: Vector[Table],
-                        colsByTable: Map[(SchemaName, TableName), Map[ColumnName, Column]],
-                        pksByTable: Map[(SchemaName, TableName), Vector[Column]],
-                        fks: Set[ForeignKey],
-                        fksFromTable: Map[(SchemaName, TableName), Set[ForeignKey]],
-                        fksToTable: Map[(SchemaName, TableName), Set[ForeignKey]])
+case class SchemaInfo(tables: Vector[Table],
+                      colsByTable: Map[(SchemaName, TableName), Map[ColumnName, Column]],
+                      pksByTable: Map[(SchemaName, TableName), Vector[Column]],
+                      fks: Set[ForeignKey],
+                      fksFromTable: Map[(SchemaName, TableName), Set[ForeignKey]],
+                      fksToTable: Map[(SchemaName, TableName), Set[ForeignKey]])

@@ -2,11 +2,21 @@ package trw
 
 import java.sql.JDBCType
 
+import scala.collection.mutable
+
 package object dbsubsetter {
   type SchemaName = String
   type TableName = String
   type ColumnName = String
   type WhereClause = String
+  type PrimaryKeyStore = Map[(SchemaName, TableName), mutable.HashSet[Vector[AnyRef]]]
+  type Row = Map[ColumnName, AnyRef]
+  type SqlQuery = String
+
+  case class Task(schema: SchemaName,
+                  table: TableName,
+                  whereClause: WhereClause,
+                  fetchChildren: Boolean)
 
   case class Table(schema: SchemaName,
                    name: TableName)
