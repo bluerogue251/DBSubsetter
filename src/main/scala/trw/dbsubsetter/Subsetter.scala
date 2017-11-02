@@ -6,16 +6,18 @@ import scala.collection.mutable
 
 object Subsetter extends App {
   val schemas = Set("public", "audit")
-  val connectionString = "jdbc:postgresql://localhost:5450/db_subsetter_origin?user=postgres"
+  val originConnectionString = "jdbc:postgresql://localhost:5450/db_subsetter_origin?user=postgres"
+  val targetConnectionString = "jdbc:postgresql://localhost:5451/db_subsetter_target?user=postgres"
   val startingSchema = "public"
   val startingTable = "students"
   val startingWhereClause = "random() < 0.001"
 
-  val conn = DriverManager.getConnection(connectionString)
-  conn.setReadOnly(true)
+  val originConn = DriverManager.getConnection(originConnectionString)
+  originConn.setReadOnly(true)
+  val targetConn = DriverManager.getConnection(targetConnectionString)
 
   // DB Schema Info
-  val schemaInfo = SchemaInfoRetrieval.getSchemaInfo(conn, schemas)
+  val schemaInfo = SchemaInfoRetrieval.getSchemaInfo(originConn, schemas)
 
   // Queue of items/tasks still to be processed/worked on
   val processingQueue = mutable.Queue.empty[Task]
@@ -34,8 +36,7 @@ object Subsetter extends App {
     }
     println("*" * 60)
 
-    val newTasks = Processor.process(processingQueue.dequeue(), schemaInfo, conn, pkStore)
+    val newTasks = Processor.process(processingQueue.dequeue(), schemaInfo, originConn, pkStore)
     processingQueue.enqueue(newTasks: _*)
   }
 }
-
