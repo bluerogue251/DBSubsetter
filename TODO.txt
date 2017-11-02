@@ -2,8 +2,24 @@ Figure out how regular types, postgres-specific types, and composite primary/for
   - https://github.com/18F/rdbms-subsetter
   - http://jailer.sourceforge.net/home.htm
 
-
 Read / Watch:
   http://functionaltalks.org/2013/07/30/miles-sabin-shapeless-exploring-generic-programming-in-scala/
   https://www.microsoft.com/en-us/research/publication/scrap-your-boilerplate-with-class/
   https://vimeo.com/128466887
+
+* Address error message during postgresql data loading:
+LOG:  checkpoints are occurring too frequently (5 seconds apart)
+HINT:  Consider increasing the configuration parameter "max_wal_size".
+
+* Try to use JDBC prepared statements, "set object" syntax instead of string interpolation in SQL queries
+* Ensure loose connections are not left hanging in the target or origin DBs
+* Ensure SQL statements are run transactionally (does this matter?)
+* Try to parallelize fetching and calculating tasks
+* Try to parallelize copying data from origin to target
+* Try to allow for incrementally copying data from origin to target while fetching process is still running
+* Try to find memory/performance bottlenecks by profiling against a huge database
+* Try to support MySQL, SQL Server, and Oracle
+* Automated test that origin connection is Read-only
+* Allow for more different data types / foreign key types
+
+
