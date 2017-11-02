@@ -66,11 +66,15 @@ object SchemaInfoRetrieval {
         .map { case ((schema, table), columns) => (schema, table) -> columns.map(c => c.name -> c).toMap }
     }
 
-    val pksByTable: Map[(SchemaName, TableName), Vector[Column]] = {
+    val pksByTable: Map[(SchemaName, TableName), PrimaryKey] = {
       primaryKeysMutable
         .groupBy(pk => (pk.schema, pk.table))
         .map { case ((schema, table), partialPks) =>
-          (schema, table) -> partialPks.map(ppk => colsByTable((schema, table))(ppk.column)).toVector
+          (schema, table) -> PrimaryKey(
+            schema,
+            table,
+            partialPks.map(ppk => colsByTable((schema, table))(ppk.column)).toVector
+          )
         }
     }
 
@@ -110,7 +114,7 @@ object SchemaInfoRetrieval {
 
 case class SchemaInfo(tables: Vector[Table],
                       colsByTable: Map[(SchemaName, TableName), Map[ColumnName, Column]],
-                      pksByTable: Map[(SchemaName, TableName), Vector[Column]],
+                      pksByTable: Map[(SchemaName, TableName), PrimaryKey],
                       fks: Set[ForeignKey],
                       fksFromTable: Map[(SchemaName, TableName), Set[ForeignKey]],
                       fksToTable: Map[(SchemaName, TableName), Set[ForeignKey]])

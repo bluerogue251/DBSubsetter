@@ -19,7 +19,7 @@ object Subsetter extends App {
   // DB Schema Info
   val schemaInfo = SchemaInfoRetrieval.getSchemaInfo(originConn, schemas)
 
-  // Queue of items/tasks still to be processed/worked on
+  // Queue of items/tasks still to be processed
   val processingQueue = mutable.Queue.empty[Task]
 
   // In-memory storage for primary key values
@@ -27,16 +27,25 @@ object Subsetter extends App {
     (table.schema, table.name) -> mutable.HashSet.empty[Vector[AnyRef]]
   }.toMap
 
+  // Queue up the task to start subsetting with based on the user-supplied schema, table, and where-clause
   val startingTask = Task(startingSchema, startingTable, startingWhereClause, true)
   processingQueue.enqueue(startingTask)
 
+  // Continuously read tasks off of the processing queue, adding new tasks to it as necessary
   while (processingQueue.nonEmpty) {
-    pkStore.foreach { case ((schemaName, tableName), hashSet) =>
-      println(s"$schemaName.$tableName: ${hashSet.size}")
-    }
-    println("*" * 60)
-
     val newTasks = Processor.process(processingQueue.dequeue(), schemaInfo, originConn, pkStore)
     processingQueue.enqueue(newTasks: _*)
+  }
+
+  // Once the queue has been completely emptied out, this means the pkStore contains all the primary keys we need
+  // Copy the data matching these primary keys from the origin db to the target db
+  // Consider streaming pks in batches of ~ 10,000 in order to limit memory usage for very large tables
+  pkStore.foreach { case ((schema, table), pks) =>
+    Copier.copyToTargetDB(
+      originConn,
+      targetConn,
+      schemaInfo.pksByTable(schema, table),
+      pks
+    )
   }
 }

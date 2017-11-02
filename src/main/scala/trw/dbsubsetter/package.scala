@@ -33,7 +33,7 @@ package object dbsubsetter {
 
   case class PrimaryKey(tableSchema: SchemaName,
                         tableName: TableName,
-                        columns: Seq[Column])
+                        columns: Vector[Column])
 
   case class PartialForeignKey(fromSchema: SchemaName,
                                fromTable: TableName,

@@ -8,12 +8,12 @@ object Processor {
 
     // Figure out which columns we need to include in the SQL `SELECT` statement
     // So that we don't select any more data than is absolutely necessary
-    val pk = sch.pksByTable((schema, table))
+    val pkColumnsToSelect = sch.pksByTable((schema, table)).columns
     val parentFks = sch.fksFromTable((schema, table))
     val childFks = sch.fksToTable((schema, table))
     val parentFkColsToSelect = parentFks.flatMap(_.columns).map { case (fromCol, _) => fromCol }
     val childFkColsToSelect = if (fetchChildren) childFks.flatMap(_.columns).map { case (_, toCol) => toCol } else Set.empty
-    val columnsToSelect: Seq[Column] = pk ++ parentFkColsToSelect ++ childFkColsToSelect
+    val columnsToSelect: Seq[Column] = pkColumnsToSelect ++ parentFkColsToSelect ++ childFkColsToSelect
 
     // Build and execute the SQL statement to select the data matching the where clause
     val query =
@@ -25,7 +25,7 @@ object Processor {
     // Find out which rows are "new" in the sense of having not yet been processed by us
     // Add the primary key of each of the "new" rows to the primaryKeyStore.
     val allMatchingRows = DbAccess.getRows(conn, query, columnsToSelect)
-    val newRows = allMatchingRows.filter(row => pkStore((schema, table)).add(pk.map(k => row(k.name))))
+    val newRows = allMatchingRows.filter(row => pkStore((schema, table)).add(pkColumnsToSelect.map(k => row(k.name))))
 
     val parentTasks = newRows.flatMap { row =>
       parentFks.flatMap { pfk =>
