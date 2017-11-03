@@ -63,3 +63,8 @@ CREATE TABLE audit.events (
   school_assignment_student_id UUID        NULL,
   created_at                   TIMESTAMP   NOT NULL
 );
+
+-- Table purposely left empty as an edge case
+CREATE TABLE empty_table (
+  id SERIAL PRIMARY KEY
+)

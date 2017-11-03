@@ -10,7 +10,7 @@ object Subsetter extends App {
   val targetConnectionString = "jdbc:postgresql://localhost:5451/db_subsetter_target?user=postgres"
   val startingSchema = "public"
   val startingTable = "students"
-  val startingWhereClause = "random() < 0.001"
+  val startingWhereClause = "current_school_id_cache % 1000 = 0"
 
   val originConn = DriverManager.getConnection(originConnectionString)
   originConn.setReadOnly(true)
@@ -41,11 +41,13 @@ object Subsetter extends App {
   // Copy the data matching these primary keys from the origin db to the target db
   // Consider streaming pks in batches of ~ 10,000 in order to limit memory usage for very large tables
   pkStore.foreach { case ((schema, table), pks) =>
-    Copier.copyToTargetDB(
-      originConn,
-      targetConn,
-      schemaInfo.pksByTable(schema, table),
-      pks
-    )
+    if (pks.nonEmpty) {
+      Copier.copyToTargetDB(
+        originConn,
+        targetConn,
+        schemaInfo.pksByTable(schema, table),
+        pks
+      )
+    }
   }
 }
