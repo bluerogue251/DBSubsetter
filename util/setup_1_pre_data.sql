@@ -54,13 +54,12 @@ CREATE TABLE audit.event_types (
 );
 
 CREATE TABLE audit.events (
-  id                           UUID PRIMARY KEY,
-  event_type_key               VARCHAR(30) NOT NULL REFERENCES audit.event_types (key),
-  district_id                  INTEGER     NULL REFERENCES districts (id),
-  school_id                    INTEGER     NULL REFERENCES schools (id),
-  student_id                   UUID        NULL REFERENCES students (student_id),
+  id                           UUID,
+  event_type_key               VARCHAR(30) NOT NULL,
+  district_id                  INTEGER     NULL,
+  school_id                    INTEGER     NULL,
+  student_id                   UUID        NULL,
   school_assignment_school_id  INTEGER     NULL,
   school_assignment_student_id UUID        NULL,
-  created_at                   TIMESTAMP   NOT NULL,
-  FOREIGN KEY (school_assignment_school_id, school_assignment_student_id) REFERENCES school_assignments (school_id, student_id) -- Composite foreign key
+  created_at                   TIMESTAMP   NOT NULL
 );

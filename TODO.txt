@@ -21,5 +21,3 @@ HINT:  Consider increasing the configuration parameter "max_wal_size".
 * Try to support MySQL, SQL Server, and Oracle
 * Automated test that origin connection is Read-only
 * Allow for more different data types / foreign key types
-
-
