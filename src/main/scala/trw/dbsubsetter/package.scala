@@ -1,7 +1,5 @@
 package trw
 
-import java.sql.JDBCType
-
 import scala.collection.mutable
 
 package object dbsubsetter {
@@ -9,44 +7,26 @@ package object dbsubsetter {
   type TableName = String
   type ColumnName = String
   type WhereClause = String
-  type PrimaryKeyStore = Map[(SchemaName, TableName), mutable.HashSet[Vector[AnyRef]]]
+  type PrimaryKeyStore = Map[Table, mutable.HashSet[Vector[AnyRef]]]
   type Row = Map[ColumnName, AnyRef]
   type SqlQuery = String
 
-  case class Task(schema: SchemaName,
-                  table: TableName,
+  case class Task(table: Table,
                   whereClause: WhereClause,
                   fetchChildren: Boolean)
 
   case class Table(schema: SchemaName,
                    name: TableName)
 
-  case class Column(schema: SchemaName,
-                    table: TableName,
-                    name: ColumnName,
-                    jdbcType: JDBCType,
-                    nullable: Boolean)
+  case class Column(table: Table,
+                    name: ColumnName)
 
-  case class PartialPrimaryKey(schema: SchemaName,
-                               table: TableName,
-                               column: ColumnName)
-
-  case class PrimaryKey(tableSchema: SchemaName,
-                        tableName: TableName,
+  case class PrimaryKey(table: Table,
                         columns: Vector[Column])
 
-  case class PartialForeignKey(fromSchema: SchemaName,
-                               fromTable: TableName,
-                               fromColumn: ColumnName,
-                               toSchema: SchemaName,
-                               toTable: TableName,
-                               toColumn: ColumnName)
-
-  // The left hand column is the `fromColumn`, the right hand column is the `toColumn`
-  case class ForeignKey(fromSchema: SchemaName,
-                        fromTable: TableName,
-                        toSchema: SchemaName,
-                        toTable: TableName,
-                        columns: Set[(Column, Column)])
-
+  // The left hand column in each tuple always belongs to the `fromTable`
+  // The right hand column in each tuple always belongs to the `toTable`
+  case class ForeignKey(fromTable: Table,
+                        toTable: Table,
+                        columns: Seq[(Column, Column)])
 }

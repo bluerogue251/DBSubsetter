@@ -12,6 +12,22 @@ LOG:  checkpoints are occurring too frequently (5 seconds apart)
 HINT:  Consider increasing the configuration parameter "max_wal_size".
 
 * Try to use JDBC prepared statements, "set object" syntax instead of string interpolation in SQL queries
+// We would need a:
+// Map[(ForeignKey, Table, Boolean), PreparedStatement]
+// Then, given this prepared statement, we set the values in it
+// This represents:
+//   The FK and the table (so we know what columns are in the WHERE clause)
+//   The table (so we know what table is in the SELECT clause)
+//   Whether or not we need children (so we know what columns to include in the SELECT clause)
+
+// But prepared statements are mutable in java?? Maybe we need to make one copy per working-unit?
+// This perhaps point to the need to use a connection pool with separate prepared statments per connection
+// https://stackoverflow.com/questions/2713407/is-this-use-of-preparedstatements-in-a-thread-in-java-correct
+// https://stackoverflow.com/questions/7849865/how-to-generate-preparedstatements-in-a-multi-thread-environment
+// https://www.thecodingforums.com/threads/jdbc-preparedstatement-in-a-multi-threaded-environment.644638/
+
+
+
 * Ensure loose connections are not left hanging in the target or origin DBs
 * Ensure SQL statements are run transactionally (does this matter?)
 * Try to parallelize fetching and calculating tasks

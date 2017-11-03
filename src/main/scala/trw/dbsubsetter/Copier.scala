@@ -14,7 +14,7 @@ object Copier {
     val copyOutStatement: SqlQuery =
       s"""copy (
          |        select *
-         |        from ${pkDefinition.tableSchema}.${pkDefinition.tableName}
+         |        from ${pkDefinition.table.schema}.${pkDefinition.table.name}
          |        where (${pkDefinition.columns.map(_.name).mkString(", ")})
          |        in ( ${pkValues.map(pk => pk.mkString("('", "','", "')")).mkString(",\n")})
          |     )
@@ -22,7 +22,7 @@ object Copier {
        """.stripMargin
 
     val copyInStatement: SqlQuery =
-      s"""copy ${pkDefinition.tableSchema}.${pkDefinition.tableName}
+      s"""copy ${pkDefinition.table.schema}.${pkDefinition.table.name}
          |from stdin
        """.stripMargin
 

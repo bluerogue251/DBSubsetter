@@ -1,6 +1,6 @@
 package trw.dbsubsetter
 
-import java.sql.{Connection, JDBCType}
+import java.sql.Connection
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -9,7 +9,7 @@ object SchemaInfoRetrieval {
     val ddl = conn.getMetaData
 
     val tablesMutable = ArrayBuffer.empty[Table]
-    val columnsMutable = ArrayBuffer.empty[Column]
+    val columnsMutable = ArrayBuffer.empty[PartialColumn]
     val primaryKeysMutable = ArrayBuffer.empty[PartialPrimaryKey]
     val foreignKeysMutable = ArrayBuffer.empty[PartialForeignKey]
 
@@ -25,12 +25,10 @@ object SchemaInfoRetrieval {
 
       val columnsJdbcResultSet = ddl.getColumns(null, schema, null, null)
       while (columnsJdbcResultSet.next()) {
-        columnsMutable += Column(
+        columnsMutable += PartialColumn(
           columnsJdbcResultSet.getString("TABLE_SCHEM"),
           columnsJdbcResultSet.getString("TABLE_NAME"),
-          columnsJdbcResultSet.getString("COLUMN_NAME"),
-          JDBCType.valueOf(columnsJdbcResultSet.getInt("DATA_TYPE")),
-          columnsJdbcResultSet.getBoolean("NULLABLE")
+          columnsJdbcResultSet.getString("COLUMN_NAME")
         )
       }
 
@@ -59,21 +57,25 @@ object SchemaInfoRetrieval {
     }
 
     val tables = tablesMutable.toVector
+    val tablesByName = tables.map { table =>
+      (table.schema, table.name) -> table
+    }.toMap
 
-    val colsByTable: Map[(SchemaName, TableName), Map[ColumnName, Column]] = {
+    val colsByTable: Map[Table, Map[ColumnName, Column]] = {
       columnsMutable
-        .groupBy(c => (c.schema, c.table))
-        .map { case ((schema, table), columns) => (schema, table) -> columns.map(c => c.name -> c).toMap }
+        .groupBy(c => tablesByName(c.schema, c.table))
+        .map { case (table, partialColumns) =>
+          table -> partialColumns.map(pc => pc.name -> Column(table, pc.name)).toMap
+        }
     }
 
-    val pksByTable: Map[(SchemaName, TableName), PrimaryKey] = {
+    val pksByTable: Map[Table, PrimaryKey] = {
       primaryKeysMutable
-        .groupBy(pk => (pk.schema, pk.table))
-        .map { case ((schema, table), partialPks) =>
-          (schema, table) -> PrimaryKey(
-            schema,
+        .groupBy(pk => tablesByName(pk.schema, pk.table))
+        .map { case (table, partialPks) =>
+          table -> PrimaryKey(
             table,
-            partialPks.map(ppk => colsByTable((schema, table))(ppk.column)).toVector
+            partialPks.map(ppk => colsByTable(table)(ppk.column)).toVector
           )
         }
     }
@@ -81,40 +83,51 @@ object SchemaInfoRetrieval {
     val foreignKeys: Set[ForeignKey] = {
       foreignKeysMutable
         .groupBy(fkm => (fkm.fromSchema, fkm.fromTable, fkm.toSchema, fkm.toTable))
-        .map { case ((fromSchema, fromTable, toSchema, toTable), partialForeignKeys) =>
+        .map { case ((fromSchemaName, fromTableName, toSchemaName, toTableName), partialForeignKeys) =>
+          val fromTable = tablesByName(fromSchemaName, fromTableName)
+          val toTable = tablesByName(toSchemaName, toTableName)
           ForeignKey(
-            fromSchema,
             fromTable,
-            toSchema,
             toTable,
-            partialForeignKeys.map { pfk => (colsByTable((fromSchema, fromTable))(pfk.fromColumn), colsByTable((toSchema, toTable))(pfk.toColumn)) }.toSet
+            partialForeignKeys.map { pfk => (colsByTable(fromTable)(pfk.fromColumn), colsByTable(toTable)(pfk.toColumn)) }.toVector
           )
         }
         .toSet
     }
 
-    val fksFromTable: Map[(SchemaName, TableName), Set[ForeignKey]] = {
-      foreignKeys.groupBy(fk => (fk.fromSchema, fk.fromTable)).withDefaultValue(Set.empty)
+    val fksFromTable: Map[Table, Set[ForeignKey]] = {
+      foreignKeys.groupBy(_.fromTable).withDefaultValue(Set.empty)
     }
 
-    val fksToTable: Map[(SchemaName, TableName), Set[ForeignKey]] = {
-      foreignKeys.groupBy(fk => (fk.toSchema, fk.toTable)).withDefaultValue(Set.empty)
+    val fksToTable: Map[Table, Set[ForeignKey]] = {
+      foreignKeys.groupBy(_.toTable).withDefaultValue(Set.empty)
     }
 
     SchemaInfo(
-      tables,
-      colsByTable,
+      tablesByName,
       pksByTable,
-      foreignKeys,
       fksFromTable,
       fksToTable
     )
   }
 }
 
-case class SchemaInfo(tables: Vector[Table],
-                      colsByTable: Map[(SchemaName, TableName), Map[ColumnName, Column]],
-                      pksByTable: Map[(SchemaName, TableName), PrimaryKey],
-                      fks: Set[ForeignKey],
-                      fksFromTable: Map[(SchemaName, TableName), Set[ForeignKey]],
-                      fksToTable: Map[(SchemaName, TableName), Set[ForeignKey]])
+case class SchemaInfo(tablesByName: Map[(SchemaName, TableName), Table],
+                      pksByTable: Map[Table, PrimaryKey],
+                      fksFromTable: Map[Table, Set[ForeignKey]],
+                      fksToTable: Map[Table, Set[ForeignKey]])
+
+case class PartialColumn(schema: SchemaName,
+                         table: TableName,
+                         name: ColumnName)
+
+case class PartialPrimaryKey(schema: SchemaName,
+                             table: TableName,
+                             column: ColumnName)
+
+case class PartialForeignKey(fromSchema: SchemaName,
+                             fromTable: TableName,
+                             fromColumn: ColumnName,
+                             toSchema: SchemaName,
+                             toTable: TableName,
+                             toColumn: ColumnName)
