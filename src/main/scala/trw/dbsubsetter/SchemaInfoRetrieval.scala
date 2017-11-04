@@ -106,6 +106,7 @@ object SchemaInfoRetrieval {
     SchemaInfo(
       tablesByName,
       pksByTable,
+      foreignKeys,
       fksFromTable,
       fksToTable
     )
@@ -114,6 +115,7 @@ object SchemaInfoRetrieval {
 
 case class SchemaInfo(tablesByName: Map[(SchemaName, TableName), Table],
                       pksByTable: Map[Table, PrimaryKey],
+                      fks: Set[ForeignKey],
                       fksFromTable: Map[Table, Set[ForeignKey]],
                       fksToTable: Map[Table, Set[ForeignKey]])
 

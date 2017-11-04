@@ -13,8 +13,6 @@ ALTER TABLE audit.events
 ALTER TABLE audit.events
   ADD FOREIGN KEY (school_id) REFERENCES schools (id);
 ALTER TABLE audit.events
-  ADD FOREIGN KEY (school_id) REFERENCES schools (id);
-ALTER TABLE audit.events
   ADD FOREIGN KEY (student_id) REFERENCES students (student_id);
 -- Composite foreign key
 ALTER TABLE audit.events

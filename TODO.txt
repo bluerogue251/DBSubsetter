@@ -21,7 +21,7 @@ HINT:  Consider increasing the configuration parameter "max_wal_size".
 //   Whether or not we need children (so we know what columns to include in the SELECT clause)
 
 // But prepared statements are mutable in java?? Maybe we need to make one copy per working-unit?
-// This perhaps point to the need to use a connection pool with separate prepared statments per connection
+// This perhaps point to the need to use a connection pool with separate prepared statements per connection
 // https://stackoverflow.com/questions/2713407/is-this-use-of-preparedstatements-in-a-thread-in-java-correct
 // https://stackoverflow.com/questions/7849865/how-to-generate-preparedstatements-in-a-multi-thread-environment
 // https://www.thecodingforums.com/threads/jdbc-preparedstatement-in-a-multi-threaded-environment.644638/
@@ -37,3 +37,4 @@ HINT:  Consider increasing the configuration parameter "max_wal_size".
 * Try to support MySQL, SQL Server, and Oracle
 * Automated test that origin connection is Read-only
 * Allow for more different data types / foreign key types
+* Test edge cases involving columns named like keywords and columns requiring double quotes around their names
