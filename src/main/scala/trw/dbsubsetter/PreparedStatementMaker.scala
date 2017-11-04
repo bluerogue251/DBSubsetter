@@ -3,7 +3,7 @@ package trw.dbsubsetter
 import java.sql.{Connection, PreparedStatement}
 
 object PreparedStatementMaker {
-  def prepareStatements(conn: Connection, sch: SchemaInfo): Map[(ForeignKey, Table, Boolean), PreparedStatement] = {
+  def prepareStatements(conn: Connection, sch: SchemaInfo): Map[(ForeignKey, Table, Boolean), (PreparedStatement, Seq[Column])] = {
     val allCombos = for {
       fk <- sch.fks
       table <- Set(fk.fromTable, fk.toTable)
@@ -15,29 +15,30 @@ object PreparedStatementMaker {
       val pkCols = sch
         .pksByTable(table)
         .columns
-        .map(col => s"${table.name}.${table.schema}.${col.name}")
 
       val parentFkCols = sch
         .fksFromTable(table)
         .flatMap(_.columns)
-        .map { case (fromCol, _) => s"${table.name}.${table.schema}.${fromCol.name}" }
+        .map { case (fromCol, _) => fromCol }
 
       val childFkCols = sch
         .fksToTable(table)
         .flatMap(_.columns)
-        .map { case (_, toCol) => s"${table.name}.${table.schema}.${toCol.name}" }
+        .map { case (_, toCol) => toCol }
 
       val selectClauseCols = pkCols ++ parentFkCols ++ (if (includeChildren) childFkCols else Set.empty)
+      val selectClauseColNames = selectClauseCols.map(col => s"${table.name}.${table.schema}.${col.name}")
 
       val whereClauseCols = if (table == fk.toTable) parentFkCols else childFkCols
+      val whereClauseColNames = whereClauseCols.map(col => s"${table.name}.${table.schema}.${col.name}")
 
       val sqlString =
-        s"""select ${selectClauseCols.mkString(", ")}
+        s"""select ${selectClauseColNames.mkString(", ")}
            | from ${table.schema}.${table.name}
-           | where ${whereClauseCols.map(col => s"$col = ?").mkString(" and ")}
+           | where ${whereClauseColNames.map(col => s"$col = ?").mkString(" and ")}
            | """.stripMargin
 
-      (fk, table, includeChildren) -> conn.prepareStatement(sqlString)
+      (fk, table, includeChildren) -> (conn.prepareStatement(sqlString), selectClauseCols)
     }.toMap
   }
 }

@@ -1,17 +1,31 @@
 package trw.dbsubsetter
 
-import java.sql.Connection
+import java.sql.{Connection, PreparedStatement, ResultSet}
 
 import scala.collection.mutable.ArrayBuffer
 
+// Put the result in a collection of Maps from column names to values, each element in the collection is a row of the result
+// Could we be more efficient by doing this by index rather than by column name?
 object DbAccess {
-  def getRows(conn: Connection, query: SqlQuery, columnsToSelect: Seq[Column]): Seq[Row] = {
-    // Put the result in a collection of Maps from column names to values, each element in the collection is a row of the result
-    // Could we be more efficient by doing this by index rather than by column name?
+  def getRows(preparedStatment: PreparedStatement, params: Seq[AnyRef], cols: Seq[Column]): Seq[Row] = {
+    params.zipWithIndex.foreach { case (value, i) =>
+      preparedStatment.setObject(i, value)
+    }
+    val jdbcResult = preparedStatment.executeQuery()
+    preparedStatment.clearParameters()
+    jdbcResultToRows(jdbcResult, cols)
+  }
+
+  def getRows(conn: Connection, query: SqlQuery, cols: Seq[Column]): Seq[Row] = {
     val jdbcResult = conn.createStatement().executeQuery(query)
+    jdbcResultToRows(jdbcResult, cols)
+  }
+
+  private def jdbcResultToRows(res: ResultSet, cols: Seq[Column]): Seq[Row] = {
+    // Could we avoid using ArrayBuffer by knowing up front how many rows were fetched from DB?
     val rows = ArrayBuffer.empty[Row]
-    while (jdbcResult.next()) {
-      rows += columnsToSelect.map(col => col.name -> jdbcResult.getObject(col.name)).toMap
+    while (res.next()) {
+      rows += cols.map(col => col -> res.getObject(col.name)).toMap
     }
     rows
   }

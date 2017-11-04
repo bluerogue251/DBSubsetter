@@ -8,11 +8,12 @@ package object dbsubsetter {
   type ColumnName = String
   type WhereClause = String
   type PrimaryKeyStore = Map[Table, mutable.HashSet[Vector[AnyRef]]]
-  type Row = Map[ColumnName, AnyRef]
+  type Row = Map[Column, AnyRef]
   type SqlQuery = String
 
   case class Task(table: Table,
-                  whereClause: WhereClause,
+                  fk: ForeignKey,
+                  values: Seq[AnyRef],
                   fetchChildren: Boolean)
 
   case class Table(schema: SchemaName,

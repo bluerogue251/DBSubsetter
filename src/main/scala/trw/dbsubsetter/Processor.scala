@@ -1,63 +1,33 @@
 package trw.dbsubsetter
 
-import java.sql.Connection
+import java.sql.{Connection, PreparedStatement}
 
 object Processor {
-  def process(task: Task, sch: SchemaInfo, conn: Connection, pkStore: PrimaryKeyStore): Seq[Task] = {
-    val Task(table, whereClause, fetchChildren) = task
+  def process(task: Task, sch: SchemaInfo, conn: Connection, pkStore: PrimaryKeyStore, preparedStatements: Map[(ForeignKey, Table, Boolean), (PreparedStatement, Seq[Column])]): Seq[Task] = {
+    val Task(table, fk, values, fetchChildren) = task
 
-    // Figure out which columns we need to include in the SQL `SELECT` statement
-    // So that we don't select any more data than is absolutely necessary
-    val pkColumnsToSelect = sch.pksByTable(table).columns
-    val parentFks = sch.fksFromTable(table)
-    val childFks = sch.fksToTable(table)
-    val parentFkColsToSelect = parentFks.flatMap(_.columns).map { case (fromCol, _) => fromCol }
-    val childFkColsToSelect = if (fetchChildren) childFks.flatMap(_.columns).map { case (_, toCol) => toCol } else Set.empty
-    val columnsToSelect: Seq[Column] = pkColumnsToSelect ++ parentFkColsToSelect ++ childFkColsToSelect
-
-    // Build and execute the SQL statement to select the data matching the where clause
-    val query =
-      s"""select ${columnsToSelect.map(_.name).mkString(", ")}
-         | from ${table.schema}.${table.name}
-         | where $whereClause
-         | """.stripMargin
+    val (stmt, selectCols) = preparedStatements((fk, table, fetchChildren))
 
     // Find out which rows are "new" in the sense of having not yet been processed by us
     // Add the primary key of each of the "new" rows to the primaryKeyStore.
-    val allMatchingRows = DbAccess.getRows(conn, query, columnsToSelect)
-    val newRows = allMatchingRows.filter(row => pkStore(table).add(pkColumnsToSelect.map(k => row(k.name))))
-
-    val parentTasks = newRows.flatMap { row =>
-      parentFks.flatMap { pfk =>
-        val whereClause = pfk.columns.flatMap { case (fromCol, toCol) =>
-          Option(row(fromCol.name)).map(fromColValue => s"${toCol.name} = '$fromColValue'")
-        }.mkString(" and ")
-
-        if (whereClause.isEmpty)
-          None
-        else
-          Some(Task(pfk.toTable, whereClause, false))
-      }
+    val allMatchingRows = DbAccess.getRows(stmt, values, selectCols)
+    val newRows = allMatchingRows.filter { row =>
+      pkStore(table).add(selectCols.map(row).toVector)
     }
 
-    val childTasks = {
-      if (!fetchChildren) {
-        Seq.empty[Task]
-      } else {
-        newRows.flatMap { row =>
-          childFks.flatMap { cfk =>
-            val whereClause = cfk.columns.flatMap { case (fromCol, toCol) =>
-              Option(row(toCol.name)).map(toColValue => s"${fromCol.name} = '$toColValue'")
-            }.mkString(" and ")
+    val parentTasks = for {
+      row <- newRows
+      fk <- sch.fksFromTable(table)
+      cols = fk.columns.map { case (from, _) => from }
+      values = cols.map(row)
+    } yield Task(fk.toTable, fk, values, false)
 
-            if (whereClause.isEmpty)
-              None
-            else
-              Some(Task(cfk.fromTable, whereClause, true))
-          }
-        }
-      }
-    }
+    val childTasks = if (!fetchChildren) Seq.empty else for {
+      row <- newRows
+      fk <- sch.fksToTable(table)
+      cols = fk.columns.map { case (_, to) => to }
+      values = cols.map(row)
+    } yield Task(fk.fromTable, fk, values, true)
 
     parentTasks ++ childTasks
   }
