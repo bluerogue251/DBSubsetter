@@ -69,6 +69,9 @@ object Subsetter extends App {
     processingQueue.enqueue(newTasks: _*)
   }
 
+  val doneProcessingTime = System.nanoTime()
+  println(s"Done Processing! Took ${(doneProcessingTime - startingTime) / 1000000000} seconds")
+
   // Once the queue has been completely emptied out, this means the pkStore contains all the primary keys we need
   // Copy the data matching these primary keys from the origin db to the target db
   // Consider streaming pks in batches of ~ 10,000 in order to limit memory usage for very large tables
@@ -84,5 +87,6 @@ object Subsetter extends App {
   }
 
   val endingTime = System.nanoTime()
+  println(s"Done copying! Took ${(endingTime - doneProcessingTime) / 1000000000} seconds")
   println(s"Success! Took ${(endingTime - startingTime) / 1000000000} seconds")
 }

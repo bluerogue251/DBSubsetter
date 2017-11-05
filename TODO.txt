@@ -1,41 +1,29 @@
-Figure out how regular types, postgres-specific types, and composite primary/foreign keys are managed in:
+* Test edge cases involving columns named like keywords and columns requiring double quotes around their names
+
+* Try to parallelize fetching and calculating tasks
+  - But prepared statements are mutable in java? Maybe we need to make one copy per working-unit?
+  - This perhaps points to the need to use a connection pool with separate prepared statements per connection
+  - https://stackoverflow.com/questions/2713407/is-this-use-of-preparedstatements-in-a-thread-in-java-correct
+  - https://stackoverflow.com/questions/7849865/how-to-generate-preparedstatements-in-a-multi-thread-environment
+  - https://www.thecodingforums.com/threads/jdbc-preparedstatement-in-a-multi-threaded-environment.644638/
+
+* Figure out how regular types, postgres-specific types, and composite primary/foreign keys are managed in:
   - https://github.com/18F/rdbms-subsetter
   - http://jailer.sourceforge.net/home.htm
 
-Read / Watch:
-  http://functionaltalks.org/2013/07/30/miles-sabin-shapeless-exploring-generic-programming-in-scala/
-  https://www.microsoft.com/en-us/research/publication/scrap-your-boilerplate-with-class/
-  https://vimeo.com/128466887
-
-* Address error message during postgresql data loading:
-LOG:  checkpoints are occurring too frequently (5 seconds apart)
-HINT:  Consider increasing the configuration parameter "max_wal_size".
-
-* Try to use JDBC prepared statements, "set object" syntax instead of string interpolation in SQL queries
-// We would need a:
-// Map[(ForeignKey, Table, Boolean), PreparedStatement]
-// Then, given this prepared statement, we set the values in it
-// This represents:
-//   The FK and the table (so we know what columns are in the WHERE clause)
-//   The table (so we know what table is in the SELECT clause)
-//   Whether or not we need children (so we know what columns to include in the SELECT clause)
-
-// But prepared statements are mutable in java?? Maybe we need to make one copy per working-unit?
-// This perhaps point to the need to use a connection pool with separate prepared statements per connection
-// https://stackoverflow.com/questions/2713407/is-this-use-of-preparedstatements-in-a-thread-in-java-correct
-// https://stackoverflow.com/questions/7849865/how-to-generate-preparedstatements-in-a-multi-thread-environment
-// https://www.thecodingforums.com/threads/jdbc-preparedstatement-in-a-multi-threaded-environment.644638/
-
-
-
 * Ensure loose connections are not left hanging in the target or origin DBs
 * Ensure SQL statements are run transactionally (does this matter?)
-* Try to parallelize fetching and calculating tasks
 * Try to parallelize copying data from origin to target
+* Investigate memory usage of the COPY command and whether we can reduce it by streaming
 * Try to allow for incrementally copying data from origin to target while fetching process is still running
 * Try to find memory/performance bottlenecks by profiling against a huge database
 * Try to support MySQL, SQL Server, and Oracle
-* Automated test that origin connection is Read-only
-* Allow for more different data types / foreign key types
-* Test edge cases involving columns named like keywords and columns requiring double quotes around their names
+* Test more different data types / foreign key types
+* Allow for specifying a FK from command line even if that FK is not enforced in DB
+* Allow for specifying multiple starting tables/whereClauses
 * Allow for copying all the data of a particular table, even if not pointed to by a FK
+* Test circular dependency effect on fetchChildren and whether this can cause bugs
+* Benchmark against rdms-subsetter and jailer for both computeTime & memoryUsage
+* Docker: address error message during postgresql data loading:
+  LOG:  checkpoints are occurring too frequently (5 seconds apart)
+  HINT:  Consider increasing the configuration parameter "max_wal_size".
