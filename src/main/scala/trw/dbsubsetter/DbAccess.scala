@@ -9,7 +9,7 @@ import scala.collection.mutable.ArrayBuffer
 object DbAccess {
   def getRows(preparedStatment: PreparedStatement, params: Seq[AnyRef], cols: Seq[Column]): Seq[Row] = {
     params.zipWithIndex.foreach { case (value, i) =>
-      preparedStatment.setObject(i, value)
+      preparedStatment.setObject(i + 1, value)
     }
     val jdbcResult = preparedStatment.executeQuery()
     preparedStatment.clearParameters()

@@ -12,7 +12,8 @@ object Processor {
     // Add the primary key of each of the "new" rows to the primaryKeyStore.
     val allMatchingRows = DbAccess.getRows(stmt, values, selectCols)
     val newRows = allMatchingRows.filter { row =>
-      pkStore(table).add(selectCols.map(row).toVector)
+      val pkValues = sch.pksByTable(table).columns.map(row)
+      pkStore(table).add(pkValues)
     }
 
     val parentTasks = for {

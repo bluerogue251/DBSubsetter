@@ -27,10 +27,13 @@ object PreparedStatementMaker {
         .map { case (_, toCol) => toCol }
 
       val selectClauseCols = pkCols ++ parentFkCols ++ (if (includeChildren) childFkCols else Set.empty)
-      val selectClauseColNames = selectClauseCols.map(col => s"${table.name}.${table.schema}.${col.name}")
+      val selectClauseColNames = selectClauseCols.map(col => s"${table.schema}.${table.name}.${col.name}")
 
-      val whereClauseCols = if (table == fk.toTable) parentFkCols else childFkCols
-      val whereClauseColNames = whereClauseCols.map(col => s"${table.name}.${table.schema}.${col.name}")
+      val whereClauseCols = if (table == fk.toTable)
+        fk.columns.map { case (_, to) => to }
+      else
+        fk.columns.map { case (from, _) => from }
+      val whereClauseColNames = whereClauseCols.map(col => s"${table.schema}.${table.name}.${col.name}")
 
       val sqlString =
         s"""select ${selectClauseColNames.mkString(", ")}

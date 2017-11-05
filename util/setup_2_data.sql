@@ -123,3 +123,6 @@ INSERT INTO audit.events (id, event_type_key, district_id, school_id, student_id
   FROM school_assignments sa
     INNER JOIN schools sc ON sa.school_id = sc.id
     CROSS JOIN generate_series(0, 100) AS seq; -- (0, 2000) would generate ~ 66 GB of data
+
+
+-- TODO: add data for homework_grades

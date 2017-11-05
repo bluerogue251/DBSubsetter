@@ -42,8 +42,8 @@ CREATE TABLE homework_grades (
   student_id    UUID      NOT NULL REFERENCES students (student_id),
   homework_type TEXT      NOT NULL,
   grade         DECIMAL(5, 2), -- Number between 0.00 and 100.00 representing the grade. Max of two decimal places.
-  created_at    TIMESTAMP NOT NULL,
   autograded    BOOLEAN   NULL, -- Boolean
+  created_at    TIMESTAMP NOT NULL,
   updated_at    TIMESTAMP NOT NULL
 );
 

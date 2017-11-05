@@ -6,23 +6,23 @@ import java.sql.Connection
 import org.postgresql.PGConnection
 
 object Copier {
-  def copyToTargetDB(originConn: Connection, targetConn: Connection, pkDefinition: PrimaryKey, pkValues: scala.collection.Set[Vector[AnyRef]]): Unit = {
+  def copyToTargetDB(originConn: Connection, targetConn: Connection, pk: PrimaryKey, pkValues: scala.collection.Set[Vector[AnyRef]]): Unit = {
     val originCopyApi = originConn.asInstanceOf[PGConnection].getCopyAPI
     val targetCopyApi = targetConn.asInstanceOf[PGConnection].getCopyAPI
     val outputStream = new ByteArrayOutputStream()
 
     val copyOutStatement: SqlQuery =
       s"""copy (
-         |        select *
-         |        from ${pkDefinition.table.schema}.${pkDefinition.table.name}
-         |        where (${pkDefinition.columns.map(_.name).mkString(", ")})
+         |        select ${pk.table.schema}.${pk.table.name}.*
+         |        from ${pk.table.schema}.${pk.table.name}
+         |        where (${pk.columns.map(_.name).mkString(", ")})
          |        in ( ${pkValues.map(pk => pk.mkString("('", "','", "')")).mkString(",\n")})
          |     )
          |to stdout
        """.stripMargin
 
     val copyInStatement: SqlQuery =
-      s"""copy ${pkDefinition.table.schema}.${pkDefinition.table.name}
+      s"""copy ${pk.table.schema}.${pk.table.name}
          |from stdin
        """.stripMargin
 

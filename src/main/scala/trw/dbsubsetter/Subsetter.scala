@@ -38,7 +38,7 @@ object Subsetter extends App {
       schemaInfo.fksFromTable(startingTable).flatMap(_.columns.map { case (from, _) => from })
   }
   val startingQuery =
-    s"""select ${startingCols.map(_.name)}
+    s"""select ${startingCols.map(_.name).mkString(", ")}
        |from ${startingTable.schema}.${startingTable.name}
        |where $startingWhereClause""".stripMargin
 
