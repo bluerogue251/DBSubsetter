@@ -38,3 +38,4 @@ HINT:  Consider increasing the configuration parameter "max_wal_size".
 * Automated test that origin connection is Read-only
 * Allow for more different data types / foreign key types
 * Test edge cases involving columns named like keywords and columns requiring double quotes around their names
+* Allow for copying all the data of a particular table, even if not pointed to by a FK

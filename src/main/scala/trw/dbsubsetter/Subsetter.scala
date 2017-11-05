@@ -5,12 +5,14 @@ import java.sql.DriverManager
 import scala.collection.mutable
 
 object Subsetter extends App {
+  val startingTime = System.nanoTime()
+
   val schemas = Set("public", "audit")
   val originConnectionString = "jdbc:postgresql://localhost:5450/db_subsetter_origin?user=postgres"
   val targetConnectionString = "jdbc:postgresql://localhost:5451/db_subsetter_target?user=postgres"
   val startingSchemaName = "public"
   val startingTableName = "students"
-  val startingWhereClause = "current_school_id_cache % 1000 = 0"
+  val startingWhereClause = "current_school_id_cache % 100 = 0"
 
   val originConn = DriverManager.getConnection(originConnectionString)
   originConn.setReadOnly(true)
@@ -80,4 +82,7 @@ object Subsetter extends App {
       )
     }
   }
+
+  val endingTime = System.nanoTime()
+  println(s"Success! Took ${(endingTime - startingTime) / 1000000000} seconds")
 }
