@@ -20,14 +20,15 @@ object Processor {
       row <- newRows
       fk <- sch.fksFromTable(table)
       cols = fk.columns.map { case (from, _) => from }
-      values = cols.map(row)
+      // TODO test effect of filtering out nulls on performance against a dataset containing many nulls
+      values = cols.map(row) if !values.contains(null)
     } yield Task(fk.toTable, fk, values, false)
 
     val childTasks = if (!fetchChildren) Seq.empty else for {
       row <- newRows
       fk <- sch.fksToTable(table)
       cols = fk.columns.map { case (_, to) => to }
-      values = cols.map(row)
+      values = cols.map(row) if !values.contains(null)
     } yield Task(fk.fromTable, fk, values, true)
 
     parentTasks ++ childTasks

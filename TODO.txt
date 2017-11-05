@@ -27,3 +27,6 @@
 * Docker: address error message during postgresql data loading:
   LOG:  checkpoints are occurring too frequently (5 seconds apart)
   HINT:  Consider increasing the configuration parameter "max_wal_size".
+* Any way to avoid unnecessary DB calls in the case when FKs point to the PK of the other table (which is most cases)
+  - Therefore instead of looking up the record in the DB then checking the PK store, we could check the PK store first
+  -   and only look up the value in the DB in the case where the record is not already in the PK store
