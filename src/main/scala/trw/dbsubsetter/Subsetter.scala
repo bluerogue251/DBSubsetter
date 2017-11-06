@@ -35,8 +35,8 @@ object Subsetter extends App {
     val startingTable = schemaInfo.tablesByName((schemaName, tableName))
     val startingCols = {
       schemaInfo.pksByTable(startingTable).columns ++
-        schemaInfo.fksToTable(startingTable).flatMap(_.columns.map { case (_, to) => to }) ++
-        schemaInfo.fksFromTable(startingTable).flatMap(_.columns.map { case (from, _) => from })
+        schemaInfo.fksToTable(startingTable).flatMap(_.toCols) ++
+        schemaInfo.fksFromTable(startingTable).flatMap(_.fromCols)
     }
     val startingQuery =
       s"""select ${startingCols.map(_.name).mkString(", ")}
@@ -48,14 +48,14 @@ object Subsetter extends App {
     val startingParentTasks = for {
       row <- startingRows
       fk <- schemaInfo.fksFromTable(startingTable)
-      cols = fk.columns.map { case (from, _) => from }
+      cols = fk.fromCols
       values = cols.map(row)
     } yield Task(fk.toTable, fk, values, false)
 
     val startingChildTasks = for {
       row <- startingRows
       fk <- schemaInfo.fksToTable(startingTable)
-      cols = fk.columns.map { case (_, to) => to }
+      cols = fk.toCols
       values = cols.map(row)
     } yield Task(fk.fromTable, fk, values, true)
 

@@ -16,17 +16,13 @@
 * Try to parallelize copying data from origin to target
 * Investigate memory usage of the COPY command and whether we can reduce it by streaming
 * Try to allow for incrementally copying data from origin to target while fetching process is still running
-* Try to find memory/performance bottlenecks by profiling against a huge database
 * Try to support MySQL, SQL Server, and Oracle
 * Test more different data types / foreign key types
 * Allow for specifying a FK from command line even if that FK is not enforced in DB
-* Allow for specifying multiple starting tables/whereClauses
 * Allow for copying all the data of a particular table, even if not pointed to by a FK
 * Test circular dependency effect on fetchChildren and whether this can cause bugs
 * Benchmark against rdms-subsetter and jailer for both computeTime & memoryUsage
 * Docker: address error message during postgresql data loading:
   LOG:  checkpoints are occurring too frequently (5 seconds apart)
   HINT:  Consider increasing the configuration parameter "max_wal_size".
-* Any way to avoid unnecessary DB calls in the case when FKs point to the PK of the other table (which is most cases)
-  - Therefore instead of looking up the record in the DB then checking the PK store, we could check the PK store first
-  -   and only look up the value in the DB in the case where the record is not already in the PK store
+* Try to find memory/performance bottlenecks by profiling against a huge database

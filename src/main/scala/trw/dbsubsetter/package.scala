@@ -14,7 +14,7 @@ package object dbsubsetter {
 
   case class Task(table: Table,
                   fk: ForeignKey,
-                  values: Seq[AnyRef],
+                  values: Vector[AnyRef],
                   fetchChildren: Boolean)
 
   case class Table(schema: SchemaName,
@@ -28,7 +28,16 @@ package object dbsubsetter {
 
   // The left hand column in each tuple always belongs to the `fromTable`
   // The right hand column in each tuple always belongs to the `toTable`
-  case class ForeignKey(fromTable: Table,
-                        toTable: Table,
-                        columns: Seq[(Column, Column)])
+  case class ForeignKey(fromCols: Vector[Column],
+                        toCols: Vector[Column],
+                        pointsToPk: Boolean) {
+
+    require(fromCols.nonEmpty)
+    require(fromCols.length == toCols.length)
+    require(fromCols.map(_.table).distinct.length == 1)
+    require(toCols.map(_.table).distinct.length == 1)
+
+    val fromTable = fromCols.head.table
+    val toTable = toCols.head.table
+  }
 }

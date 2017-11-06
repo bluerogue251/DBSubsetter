@@ -18,21 +18,16 @@ object PreparedStatementMaker {
 
       val parentFkCols = sch
         .fksFromTable(table)
-        .flatMap(_.columns)
-        .map { case (fromCol, _) => fromCol }
+        .flatMap(_.fromCols)
 
       val childFkCols = sch
         .fksToTable(table)
-        .flatMap(_.columns)
-        .map { case (_, toCol) => toCol }
+        .flatMap(_.toCols)
 
       val selectClauseCols = pkCols ++ parentFkCols ++ (if (includeChildren) childFkCols else Set.empty)
       val selectClauseColNames = selectClauseCols.map(col => s"${table.schema}.${table.name}.${col.name}")
 
-      val whereClauseCols = if (table == fk.toTable)
-        fk.columns.map { case (_, to) => to }
-      else
-        fk.columns.map { case (from, _) => from }
+      val whereClauseCols = if (table == fk.toTable) fk.toCols else fk.fromCols
       val whereClauseColNames = whereClauseCols.map(col => s"${table.schema}.${table.name}.${col.name}")
 
       val sqlString =
