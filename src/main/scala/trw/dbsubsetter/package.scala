@@ -6,6 +6,7 @@ package object dbsubsetter {
   type SchemaName = String
   type TableName = String
   type ColumnName = String
+  type FullyQualifiedTableName = String
   type WhereClause = String
   type PrimaryKeyStore = Map[Table, mutable.HashSet[Vector[AnyRef]]]
   type Row = Map[Column, AnyRef]

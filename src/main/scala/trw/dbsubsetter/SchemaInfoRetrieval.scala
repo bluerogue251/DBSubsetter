@@ -5,7 +5,7 @@ import java.sql.Connection
 import scala.collection.mutable.ArrayBuffer
 
 object SchemaInfoRetrieval {
-  def getSchemaInfo(conn: Connection, schemas: Set[String]): SchemaInfo = {
+  def getSchemaInfo(conn: Connection, schemas: Seq[String]): SchemaInfo = {
     val ddl = conn.getMetaData
 
     val tablesMutable = ArrayBuffer.empty[Table]
