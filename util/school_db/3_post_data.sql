@@ -17,6 +17,16 @@ ALTER TABLE audit.events
 -- Composite foreign key
 ALTER TABLE audit.events
   ADD FOREIGN KEY (school_assignment_school_id, school_assignment_student_id) REFERENCES school_assignments (school_id, student_id);
+ALTER TABLE audit.events
+  ADD FOREIGN KEY (empty_table_1_id) REFERENCES empty_table_1 (id);
+ALTER TABLE audit.events
+  ADD FOREIGN KEY (empty_table_2_id) REFERENCES empty_table_2 (id);
+ALTER TABLE audit.events
+  ADD FOREIGN KEY (empty_table_3_id) REFERENCES empty_table_3 (id);
+ALTER TABLE audit.events
+  ADD FOREIGN KEY (empty_table_4_id) REFERENCES empty_table_4 (id);
+ALTER TABLE audit.events
+  ADD FOREIGN KEY (empty_table_5_id) REFERENCES empty_table_5 (id);
 
 CREATE INDEX ON audit.events (event_type_key);
 CREATE INDEX ON audit.events (district_id);
@@ -24,3 +34,8 @@ CREATE INDEX ON audit.events (school_id);
 CREATE INDEX ON audit.events (student_id);
 CREATE INDEX ON audit.events (school_assignment_school_id);
 CREATE INDEX ON audit.events (school_assignment_student_id);
+CREATE INDEX ON audit.events (empty_table_1_id);
+CREATE INDEX ON audit.events (empty_table_2_id);
+CREATE INDEX ON audit.events (empty_table_3_id);
+CREATE INDEX ON audit.events (empty_table_4_id);
+CREATE INDEX ON audit.events (empty_table_5_id);

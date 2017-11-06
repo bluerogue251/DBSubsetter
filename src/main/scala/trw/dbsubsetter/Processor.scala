@@ -20,7 +20,6 @@ object Processor {
       row <- newRows
       fk <- sch.fksFromTable(table)
       cols = fk.columns.map { case (from, _) => from }
-      // TODO test effect of filtering out nulls on performance against a dataset containing many nulls
       values = cols.map(row) if !values.contains(null)
     } yield Task(fk.toTable, fk, values, false)
 

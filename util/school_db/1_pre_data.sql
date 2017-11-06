@@ -61,10 +61,31 @@ CREATE TABLE audit.events (
   student_id                   UUID        NULL,
   school_assignment_school_id  INTEGER     NULL,
   school_assignment_student_id UUID        NULL,
+  empty_table_1_id             INTEGER     NULL,
+  empty_table_2_id             INTEGER     NULL,
+  empty_table_3_id             INTEGER     NULL,
+  empty_table_4_id             INTEGER     NULL,
+  empty_table_5_id             INTEGER     NULL,
   created_at                   TIMESTAMP   NOT NULL
 );
 
--- Table purposely left empty as an edge case
-CREATE TABLE empty_table (
+-- Tables purposely left empty as edge cases
+CREATE TABLE empty_table_1 (
   id SERIAL PRIMARY KEY
-)
+);
+
+CREATE TABLE empty_table_2 (
+  id SERIAL PRIMARY KEY
+);
+
+CREATE TABLE empty_table_3 (
+  id SERIAL PRIMARY KEY
+);
+
+CREATE TABLE empty_table_4 (
+  id SERIAL PRIMARY KEY
+);
+
+CREATE TABLE empty_table_5 (
+  id SERIAL PRIMARY KEY
+);

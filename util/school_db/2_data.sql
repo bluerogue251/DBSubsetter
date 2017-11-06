@@ -94,14 +94,12 @@ INSERT INTO audit.events (id, event_type_key, district_id, school_id, created_at
   FROM schools sc;
 
 -- Insert some graduation events
-INSERT INTO audit.events (id, event_type_key, district_id, school_id, student_id, school_assignment_school_id, school_assignment_student_id, created_at)
+INSERT INTO audit.events (id, event_type_key, district_id, school_id, student_id, created_at)
   SELECT
     uuid_generate_v4(),
     'graduation',
     sc.district_id,
     sc.id,
-    sa.student_id,
-    sa.school_id,
     sa.student_id,
     sa.assignment_end
   FROM school_assignments sa
