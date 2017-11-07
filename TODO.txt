@@ -1,5 +1,3 @@
-* Test edge cases involving columns named like keywords and columns requiring double quotes around their names
-
 * Try to parallelize fetching and calculating tasks
   - But prepared statements are mutable in java? Maybe we need to make one copy per working-unit?
   - This perhaps points to the need to use a connection pool with separate prepared statements per connection
@@ -26,3 +24,5 @@
   LOG:  checkpoints are occurring too frequently (5 seconds apart)
   HINT:  Consider increasing the configuration parameter "max_wal_size".
 * Try to find memory/performance bottlenecks by profiling against a huge database
+
+* Better validation of user input against actual schema/tables. For instance better error messages when --baseQueries is wrong.

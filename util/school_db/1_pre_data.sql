@@ -1,5 +1,5 @@
 CREATE TABLE districts (
-  id         SERIAL PRIMARY KEY,
+  "Id"       SERIAL PRIMARY KEY, -- Mixed-case column name
   name       TEXT      NOT NULL,
   created_at TIMESTAMP NOT NULL,
   updated_at TIMESTAMP NOT NULL
@@ -7,14 +7,14 @@ CREATE TABLE districts (
 
 CREATE TABLE schools (
   id          SERIAL PRIMARY KEY,
-  district_id INTEGER   NOT NULL REFERENCES districts (id),
+  district_id INTEGER   NOT NULL REFERENCES districts ("Id"),
   name        TEXT      NOT NULL,
   mascot      TEXT      NOT NULL,
   created_at  TIMESTAMP NOT NULL,
   updated_at  TIMESTAMP NOT NULL
 );
 
-CREATE TABLE students (
+CREATE TABLE "Students" (-- Mixed case table name
   student_id              UUID PRIMARY KEY,
   name                    TEXT      NOT NULL,
   date_of_birth           DATE      NULL,
@@ -25,7 +25,7 @@ CREATE TABLE students (
 
 CREATE TABLE school_assignments (
   school_id        INTEGER   NOT NULL REFERENCES schools (id),
-  student_id       UUID      NOT NULL REFERENCES students (student_id),
+  student_id       UUID      NOT NULL REFERENCES "Students" (student_id),
   assignment_start DATE      NOT NULL,
   assignment_end   DATE      NULL,
   created_at       TIMESTAMP NOT NULL,
@@ -33,13 +33,14 @@ CREATE TABLE school_assignments (
   PRIMARY KEY (school_id, student_id) -- Composite primary key
 );
 
--- Circular dependency
+-- Adding circular dependency on purpose
+-- Some legacy DBs have these so we should test against one
 ALTER TABLE schools
-  ADD COLUMN latest_valedictorian_id_cache UUID NULL REFERENCES students (student_id);
+  ADD COLUMN latest_valedictorian_id_cache UUID NULL REFERENCES "Students" (student_id);
 
 CREATE TABLE homework_grades (
   id            BIGSERIAL PRIMARY KEY, -- BIGSERIAL pk type
-  student_id    UUID      NOT NULL REFERENCES students (student_id),
+  student_id    UUID      NOT NULL REFERENCES "Students" (student_id),
   homework_type TEXT      NOT NULL,
   grade         DECIMAL(5, 2), -- Number between 0.00 and 100.00 representing the grade. Max of two decimal places.
   autograded    BOOLEAN   NULL, -- Boolean
@@ -47,13 +48,13 @@ CREATE TABLE homework_grades (
   updated_at    TIMESTAMP NOT NULL
 );
 
-CREATE SCHEMA audit;
+CREATE SCHEMA "Audit"; -- Mixed case schema name
 
-CREATE TABLE audit.event_types (
+CREATE TABLE "Audit".event_types (
   key VARCHAR(30) PRIMARY KEY -- Character-based primary key
 );
 
-CREATE TABLE audit.events (
+CREATE TABLE "Audit".events (
   id                           UUID,
   event_type_key               VARCHAR(30) NOT NULL,
   district_id                  INTEGER     NULL,

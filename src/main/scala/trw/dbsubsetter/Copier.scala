@@ -13,18 +13,15 @@ object Copier {
 
     val copyOutStatement: SqlQuery =
       s"""copy (
-         |        select ${pk.table.schema}.${pk.table.name}.*
-         |        from ${pk.table.schema}.${pk.table.name}
-         |        where (${pk.columns.map(_.name).mkString(", ")})
+         |        select ${pk.table.fullyQualifiedName}.*
+         |        from ${pk.table.fullyQualifiedName}
+         |        where (${pk.columns.map(_.fullyQualifiedName).mkString(", ")})
          |        in ( ${pkValues.map(pk => pk.mkString("('", "','", "')")).mkString(",\n")})
          |     )
          |to stdout
        """.stripMargin
 
-    val copyInStatement: SqlQuery =
-      s"""copy ${pk.table.schema}.${pk.table.name}
-         |from stdin
-       """.stripMargin
+    val copyInStatement: SqlQuery = s"copy ${pk.table.fullyQualifiedName} from stdin"
 
     originCopyApi.copyOut(copyOutStatement, outputStream)
     // Need to replace `toByteArray` with something that won't load everything into memory all at once

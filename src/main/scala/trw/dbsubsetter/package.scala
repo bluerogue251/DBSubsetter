@@ -12,26 +12,21 @@ package object dbsubsetter {
   type Row = Map[Column, AnyRef]
   type SqlQuery = String
 
-  case class Task(table: Table,
-                  fk: ForeignKey,
-                  values: Vector[AnyRef],
-                  fetchChildren: Boolean)
+  case class Task(table: Table, fk: ForeignKey, values: Vector[AnyRef], fetchChildren: Boolean)
 
-  case class Table(schema: SchemaName,
-                   name: TableName)
+  case class Table(schema: SchemaName, name: TableName) {
+    val fullyQualifiedName: String = s""""$schema"."$name""""
+  }
 
-  case class Column(table: Table,
-                    name: ColumnName)
+  case class Column(table: Table, name: ColumnName) {
+    val fullyQualifiedName: String = s"""${table.fullyQualifiedName}."$name""""
+  }
 
-  case class PrimaryKey(table: Table,
-                        columns: Vector[Column])
+  case class PrimaryKey(table: Table, columns: Vector[Column])
 
   // The left hand column in each tuple always belongs to the `fromTable`
   // The right hand column in each tuple always belongs to the `toTable`
-  case class ForeignKey(fromCols: Vector[Column],
-                        toCols: Vector[Column],
-                        pointsToPk: Boolean) {
-
+  case class ForeignKey(fromCols: Vector[Column], toCols: Vector[Column], pointsToPk: Boolean) {
     require(fromCols.nonEmpty)
     require(fromCols.length == toCols.length)
     require(fromCols.map(_.table).distinct.length == 1)

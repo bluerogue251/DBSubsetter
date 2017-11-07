@@ -9,7 +9,7 @@ object Processor {
     val hasEquivalentAlreadyBeenProcessed = fk.pointsToPk && table == fk.toTable && pkStore(table).contains(values)
 
     if (hasEquivalentAlreadyBeenProcessed) {
-      Seq.empty[Task]
+      Seq.empty
     } else {
       val (stmt, selectCols) = preparedStatements((fk, table, fetchChildren))
 
@@ -35,7 +35,10 @@ object Processor {
         values = cols.map(row) if !values.contains(null)
       } yield Task(fk.fromTable, fk, values, true)
 
-      parentTasks ++ childTasks
+      // `distinct` is a performance improvement.
+      // It prevents us from later on needing to check the pkStore for the same values over and over again
+      // Is there a better way to achieve this same performance gain, e.g. by using a HashMap or a Set instead of a Seq?
+      parentTasks.distinct ++ childTasks
     }
   }
 }

@@ -15,7 +15,7 @@ INSERT INTO schools (district_id, name, mascot, created_at, updated_at)
   FROM generate_series(0, 10000) AS seq;
 
 CREATE EXTENSION "uuid-ossp";
-INSERT INTO students (student_id, name, date_of_birth, current_school_id_cache, created_at, updated_at)
+INSERT INTO "Students" (student_id, name, date_of_birth, current_school_id_cache, created_at, updated_at)
   SELECT
     uuid_generate_v4(),
     'Student # ' || seq,
@@ -24,7 +24,7 @@ INSERT INTO students (student_id, name, date_of_birth, current_school_id_cache, 
     now(),
     now()
   FROM generate_series(0, 1000000) AS seq;
-UPDATE students
+UPDATE "Students"
 SET current_school_id_cache = NULL
 WHERE date_of_birth < '1970-01-01';
 
@@ -37,7 +37,7 @@ INSERT INTO school_assignments (school_id, student_id, assignment_start, assignm
     '1904-01-01',
     now(),
     now()
-  FROM students
+  FROM "Students"
   WHERE random() < 0.01;
 
 -- Insert assignments for schools that students are currently assigned to
@@ -50,11 +50,11 @@ INSERT INTO school_assignments (school_id, student_id, assignment_start, assignm
     NULL,
     now(),
     now()
-  FROM students
+  FROM "Students"
   WHERE current_school_id_cache IS NOT NULL
 ON CONFLICT DO NOTHING;
 
--- Populate latest valedictorian cache (watch out this is a circular dependency) (leave 1/10th of these null)
+-- Populate latest valedictorian cache (leave 1/10th of these null)
 UPDATE schools
 SET latest_valedictorian_id_cache = (SELECT student_id
                                      FROM school_assignments
@@ -63,14 +63,14 @@ SET latest_valedictorian_id_cache = (SELECT student_id
                                      LIMIT 1)
 WHERE random() < 0.9;
 
-INSERT INTO audit.event_types (key) VALUES
+INSERT INTO "Audit".event_types (key) VALUES
   ('enrollment'),
   ('standardized_testing'),
   ('graduation'),
   ('student_class_attendance');
 
 -- Insert some enrollment events
-INSERT INTO audit.events (id, event_type_key, district_id, school_id, student_id, school_assignment_school_id, school_assignment_student_id, created_at)
+INSERT INTO "Audit".events (id, event_type_key, district_id, school_id, student_id, school_assignment_school_id, school_assignment_student_id, created_at)
   SELECT
     uuid_generate_v4(),
     'enrollment',
@@ -84,7 +84,7 @@ INSERT INTO audit.events (id, event_type_key, district_id, school_id, student_id
     INNER JOIN schools sc ON sa.school_id = sc.id;
 
 -- Insert some enrollment events
-INSERT INTO audit.events (id, event_type_key, district_id, school_id, created_at)
+INSERT INTO "Audit".events (id, event_type_key, district_id, school_id, created_at)
   SELECT
     uuid_generate_v4(),
     'standardized_testing',
@@ -94,7 +94,7 @@ INSERT INTO audit.events (id, event_type_key, district_id, school_id, created_at
   FROM schools sc;
 
 -- Insert some graduation events
-INSERT INTO audit.events (id, event_type_key, district_id, school_id, student_id, created_at)
+INSERT INTO "Audit".events (id, event_type_key, district_id, school_id, student_id, created_at)
   SELECT
     uuid_generate_v4(),
     'graduation',
@@ -108,7 +108,7 @@ INSERT INTO audit.events (id, event_type_key, district_id, school_id, student_id
 
 -- Insert a large number of events representing "the fact that a student attended a particular class on a particular day"
 -- This is meant to be an example of a 1 to n relationship with a very high cardinality
-INSERT INTO audit.events (id, event_type_key, district_id, school_id, student_id, school_assignment_school_id, school_assignment_student_id, created_at)
+INSERT INTO "Audit".events (id, event_type_key, district_id, school_id, student_id, school_assignment_school_id, school_assignment_student_id, created_at)
   SELECT
     uuid_generate_v4(),
     'student_class_attendance',

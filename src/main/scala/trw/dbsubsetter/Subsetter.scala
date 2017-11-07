@@ -39,8 +39,8 @@ object Subsetter extends App {
         schemaInfo.fksFromTable(startingTable).flatMap(_.fromCols)
     }
     val startingQuery =
-      s"""select ${startingCols.map(_.name).mkString(", ")}
-         |from ${startingTable.schema}.${startingTable.name}
+      s"""select ${startingCols.map(_.fullyQualifiedName).mkString(", ")}
+         |from ${startingTable.fullyQualifiedName}
          |where $whereClause""".stripMargin
 
     val startingRows = DbAccess.getRows(originConn, startingQuery, startingCols)
