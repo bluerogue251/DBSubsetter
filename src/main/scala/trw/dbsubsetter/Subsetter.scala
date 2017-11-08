@@ -27,40 +27,16 @@ object Subsetter extends App {
     table -> mutable.HashSet.empty[Vector[AnyRef]]
   }
 
-  val preparedStatements = PreparedStatementMaker.prepareStatements(originConn, schemaInfo)
+  val preparedStatements = SqlStatementMaker.prepareStatements(originConn, schemaInfo)
 
   config.baseQueries.foreach { case ((schemaName, tableName), whereClause) =>
     // Starting query (a bit of duplication with the PreparedStatementMaker)
     // Still need to add these values to the pkStore?
-    val startingTable = schemaInfo.tablesByName((schemaName, tableName))
-    val startingCols = {
-      schemaInfo.pksByTable(startingTable).columns ++
-        schemaInfo.fksToTable(startingTable).flatMap(_.toCols) ++
-        schemaInfo.fksFromTable(startingTable).flatMap(_.fromCols)
-    }
-    val startingQuery =
-      s"""select ${startingCols.map(_.fullyQualifiedName).mkString(", ")}
-         |from ${startingTable.fullyQualifiedName}
-         |where $whereClause""".stripMargin
-
-    val startingRows = DbAccess.getRows(originConn, startingQuery, startingCols)
-
-    val startingParentTasks = for {
-      row <- startingRows
-      fk <- schemaInfo.fksFromTable(startingTable)
-      cols = fk.fromCols
-      values = cols.map(row)
-    } yield Task(fk.toTable, fk, values, false)
-
-    val startingChildTasks = for {
-      row <- startingRows
-      fk <- schemaInfo.fksToTable(startingTable)
-      cols = fk.toCols
-      values = cols.map(row)
-    } yield Task(fk.fromTable, fk, values, true)
-
-    processingQueue.enqueue(startingParentTasks: _*)
-    processingQueue.enqueue(startingChildTasks: _*)
+    val table = schemaInfo.tablesByName((schemaName, tableName))
+    val (query, selectCols) = SqlStatementMaker.makeSqlString(table, whereClause, schemaInfo, includeChildren = true)
+    val startingRows = DbAccess.getRows(originConn, query, selectCols)
+    val tasks = RowsToTasksConverter.convert(table, startingRows, schemaInfo, fetchChildren = true)
+    processingQueue.enqueue(tasks: _*)
   }
 
   // Continuously read tasks off of the processing queue, adding new tasks to it as necessary

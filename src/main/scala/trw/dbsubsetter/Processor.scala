@@ -21,24 +21,7 @@ object Processor {
         pkStore(table).add(pkValues)
       }
 
-      val parentTasks = for {
-        row <- newRows
-        fk <- sch.fksFromTable(table)
-        cols = fk.fromCols
-        values = cols.map(row) if !values.contains(null)
-      } yield Task(fk.toTable, fk, values, false)
-
-      val childTasks = if (!fetchChildren) Seq.empty else for {
-        row <- newRows
-        fk <- sch.fksToTable(table)
-        cols = fk.toCols
-        values = cols.map(row) if !values.contains(null)
-      } yield Task(fk.fromTable, fk, values, true)
-
-      // `distinct` is a performance improvement.
-      // It prevents us from later on needing to check the pkStore for the same values over and over again
-      // Is there a better way to achieve this same performance gain, e.g. by using a HashMap or a Set instead of a Seq?
-      parentTasks.distinct ++ childTasks
+      RowsToTasksConverter.convert(table, newRows, sch, fetchChildren)
     }
   }
 }
