@@ -11,6 +11,7 @@ package object dbsubsetter {
   type PrimaryKeyStore = Map[Table, mutable.HashSet[Vector[AnyRef]]]
   type Row = Map[Column, AnyRef]
   type SqlQuery = String
+  type SqlTemplates = Map[(ForeignKey, Table, Boolean), (SqlQuery, Seq[Column])]
 
   case class Task(table: Table, fk: ForeignKey, values: Vector[AnyRef], fetchChildren: Boolean)
 

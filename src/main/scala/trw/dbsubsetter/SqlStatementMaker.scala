@@ -1,9 +1,7 @@
 package trw.dbsubsetter
 
-import java.sql.{Connection, PreparedStatement}
-
 object SqlStatementMaker {
-  def prepareStatements(conn: Connection, sch: SchemaInfo): Map[(ForeignKey, Table, Boolean), (PreparedStatement, Seq[Column])] = {
+  def prepareStatementStrings(sch: SchemaInfo): SqlTemplates = {
     val allCombos = for {
       fk <- sch.fks
       table <- Set(fk.fromTable, fk.toTable)
@@ -14,7 +12,7 @@ object SqlStatementMaker {
       val whereClauseCols = if (table == fk.toTable) fk.toCols else fk.fromCols
       val whereClause = s"${whereClauseCols.map(col => s"${col.fullyQualifiedName} = ?").mkString(" and ")}"
       val (sqlString, selectClauseCols) = makeSqlString(table, whereClause, sch, includeChildren)
-      (fk, table, includeChildren) -> (conn.prepareStatement(sqlString), selectClauseCols)
+      (fk, table, includeChildren) -> (sqlString, selectClauseCols)
     }.toMap
   }
 
