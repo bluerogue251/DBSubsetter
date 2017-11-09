@@ -17,6 +17,7 @@
 * Try to support MySQL, SQL Server, and Oracle
 * Test more different data types / foreign key types
 * Allow for specifying a FK from command line even if that FK is not enforced in DB
+* Account for FKs which are Rails-like polymorphism with a hard-coded value as part of the FK.
 * Allow for copying all the data of a particular table, even if not pointed to by a FK
 * Test circular dependency effect on fetchChildren and whether this can cause bugs
 * Benchmark against rdms-subsetter and jailer for both computeTime & memoryUsage
