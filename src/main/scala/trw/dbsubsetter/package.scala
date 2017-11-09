@@ -33,7 +33,7 @@ package object dbsubsetter {
     require(fromCols.map(_.table).distinct.length == 1)
     require(toCols.map(_.table).distinct.length == 1)
 
-    val fromTable = fromCols.head.table
-    val toTable = toCols.head.table
+    val fromTable: Table = fromCols.head.table
+    val toTable: Table = toCols.head.table
   }
 }

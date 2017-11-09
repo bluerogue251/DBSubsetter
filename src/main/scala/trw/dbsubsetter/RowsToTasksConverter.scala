@@ -1,13 +1,16 @@
 package trw.dbsubsetter
 
+import trw.dbsubsetter.db.SchemaInfo
+import trw.dbsubsetter.orchestration.FkTask
+
 object RowsToTasksConverter {
-  def convert(table: Table, rows: Seq[Row], sch: SchemaInfo, fetchChildren: Boolean): Seq[Task] = {
+  def convert(table: Table, rows: Vector[Row], sch: SchemaInfo, fetchChildren: Boolean): Seq[FkTask] = {
     val parentTasks = for {
       row <- rows
       fk <- sch.fksFromTable(table)
       cols = fk.fromCols
       values = cols.map(row) if !values.contains(null)
-    } yield Task(fk.toTable, fk, values, fetchChildren = false)
+    } yield FkTask(fk.toTable, fk, values, fetchChildren = false)
 
     val childTasks = if (!fetchChildren) {
       Seq.empty
@@ -16,7 +19,7 @@ object RowsToTasksConverter {
       fk <- sch.fksToTable(table)
       cols = fk.toCols
       values = cols.map(row) if !values.contains(null)
-    } yield Task(fk.fromTable, fk, values, fetchChildren = true)
+    } yield FkTask(fk.fromTable, fk, values, fetchChildren = true)
 
     // `distinct` is a performance improvement.
     // It prevents us from later on needing to check the pkStore for the same values over and over again

@@ -1,4 +1,6 @@
-package trw.dbsubsetter
+package trw.dbsubsetter.config
+
+import trw.dbsubsetter.{FullyQualifiedTableName, WhereClause}
 
 object CommandLineParser {
   val parser: scopt.OptionParser[Config] = new scopt.OptionParser[Config]("DBSubsetter") {

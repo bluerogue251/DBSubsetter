@@ -1,6 +1,8 @@
-package trw.dbsubsetter
+package trw.dbsubsetter.db
 
-object SqlStatementMaker {
+import trw.dbsubsetter._
+
+object Sql {
   def prepareStatementStrings(sch: SchemaInfo): SqlTemplates = {
     val allCombos = for {
       fk <- sch.fks
@@ -11,12 +13,12 @@ object SqlStatementMaker {
     allCombos.map { case (fk, table, includeChildren) =>
       val whereClauseCols = if (table == fk.toTable) fk.toCols else fk.fromCols
       val whereClause = s"${whereClauseCols.map(col => s"${col.fullyQualifiedName} = ?").mkString(" and ")}"
-      val (sqlString, selectClauseCols) = makeSqlString(table, whereClause, sch, includeChildren)
+      val (sqlString, selectClauseCols) = makeQueryString(table, whereClause, sch, includeChildren)
       (fk, table, includeChildren) -> (sqlString, selectClauseCols)
     }.toMap
   }
 
-  def makeSqlString(table: Table, whereClause: WhereClause, sch: SchemaInfo, includeChildren: Boolean): (SqlQuery, Seq[Column]) = {
+  def makeQueryString(table: Table, whereClause: WhereClause, sch: SchemaInfo, includeChildren: Boolean): (SqlQuery, Seq[Column]) = {
     val pkCols = sch.pksByTable(table).columns
     val parentFkCols = sch.fksFromTable(table).flatMap(_.fromCols)
     val childFkCols = sch.fksToTable(table).flatMap(_.toCols)

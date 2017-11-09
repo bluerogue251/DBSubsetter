@@ -1,6 +1,8 @@
-package trw.dbsubsetter
+package trw.dbsubsetter.db
 
 import java.sql.Connection
+
+import trw.dbsubsetter._
 
 import scala.collection.mutable.ArrayBuffer
 

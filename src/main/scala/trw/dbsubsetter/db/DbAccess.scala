@@ -1,9 +1,10 @@
-package trw.dbsubsetter
+package trw.dbsubsetter.db
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 import java.sql.{DriverManager, ResultSet}
 
 import org.postgresql.PGConnection
+import trw.dbsubsetter._
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -13,11 +14,11 @@ class DbAccess(originConnStr: String, targetConnStr: String, sch: SchemaInfo) {
   private val originConn = DriverManager.getConnection(originConnStr)
   originConn.setReadOnly(true)
   private val targetConn = DriverManager.getConnection(targetConnStr)
-  private val statements = SqlStatementMaker.prepareStatementStrings(sch).map { case ((fk, table, fetchChildren), (sqlStr, cols)) =>
+  private val statements = Sql.prepareStatementStrings(sch).map { case ((fk, table, fetchChildren), (sqlStr, cols)) =>
     (fk, table, fetchChildren) -> (originConn.prepareStatement(sqlStr), cols)
   }
 
-  def getRowsFromTemplate(fk: ForeignKey, table: Table, fetchChildren: Boolean, params: Seq[AnyRef]): Seq[Row] = {
+  def getRowsFromTemplate(fk: ForeignKey, table: Table, fetchChildren: Boolean, params: Seq[AnyRef]): Vector[Row] = {
     val (stmt, cols) = statements(fk, table, fetchChildren)
     stmt.clearParameters()
     params.zipWithIndex.foreach { case (value, i) =>
@@ -27,7 +28,7 @@ class DbAccess(originConnStr: String, targetConnStr: String, sch: SchemaInfo) {
     jdbcResultToRows(jdbcResult, cols)
   }
 
-  def getRows(query: SqlQuery, cols: Seq[Column]): Seq[Row] = {
+  def getRows(query: SqlQuery, cols: Seq[Column]): Vector[Row] = {
     val jdbcResult = originConn.createStatement().executeQuery(query)
     jdbcResultToRows(jdbcResult, cols)
   }
@@ -54,12 +55,12 @@ class DbAccess(originConnStr: String, targetConnStr: String, sch: SchemaInfo) {
     targetCopyApi.copyIn(copyInStatement, new ByteArrayInputStream(outputStream.toByteArray))
   }
 
-  private def jdbcResultToRows(res: ResultSet, cols: Seq[Column]): Seq[Row] = {
+  private def jdbcResultToRows(res: ResultSet, cols: Seq[Column]): Vector[Row] = {
     // Could we avoid using ArrayBuffer by knowing up front how many rows were fetched from DB?
     val rows = ArrayBuffer.empty[Row]
     while (res.next()) {
       rows += cols.map(col => col -> res.getObject(col.name)).toMap
     }
-    rows
+    rows.toVector
   }
 }
