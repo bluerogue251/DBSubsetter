@@ -1,7 +1,7 @@
 package trw.dbsubsetter
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
-import java.sql.{PreparedStatement, ResultSet}
+import java.sql.{DriverManager, ResultSet}
 
 import org.postgresql.PGConnection
 
@@ -9,15 +9,21 @@ import scala.collection.mutable.ArrayBuffer
 
 // Put the result in a collection of Maps from column names to values, each element in the collection is a row of the result
 // Could we be more efficient by doing this by index rather than by column name?
-class DbAccess(originConnStr: String, targetConnStr: String, sqlTemplates: SqlTemplates) {
+class DbAccess(originConnStr: String, targetConnStr: String, sch: SchemaInfo) {
+  private val originConn = DriverManager.getConnection(originConnStr)
+  originConn.setReadOnly(true)
+  private val targetConn = DriverManager.getConnection(targetConnStr)
+  private val statements = SqlStatementMaker.prepareStatementStrings(sch).map { case ((fk, table, fetchChildren), (sqlStr, cols)) =>
+    (fk, table, fetchChildren) -> (originConn.prepareStatement(sqlStr), cols)
+  }
 
-
-  def getRows(preparedStatment: PreparedStatement, params: Seq[AnyRef], cols: Seq[Column]): Seq[Row] = {
+  def getRowsFromTemplate(fk: ForeignKey, table: Table, fetchChildren: Boolean, params: Seq[AnyRef]): Seq[Row] = {
+    val (stmt, cols) = statements(fk, table, fetchChildren)
+    stmt.clearParameters()
     params.zipWithIndex.foreach { case (value, i) =>
-      preparedStatment.setObject(i + 1, value)
+      stmt.setObject(i + 1, value)
     }
-    val jdbcResult = preparedStatment.executeQuery()
-    preparedStatment.clearParameters()
+    val jdbcResult = stmt.executeQuery()
     jdbcResultToRows(jdbcResult, cols)
   }
 

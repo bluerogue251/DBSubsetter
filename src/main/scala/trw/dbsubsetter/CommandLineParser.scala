@@ -34,6 +34,10 @@ object CommandLineParser {
       ))
       .text("Starting tables and where-clauses for initial queries to kick off subsetting.")
 
+    opt[Int]("dbParallelism")
+      .action((dbp, c) => c.copy(dbParallelism = dbp))
+      .text("Maximum number of simultaneous open connections to origin DB")
+
     val usageExamples =
       """
         |Examples:

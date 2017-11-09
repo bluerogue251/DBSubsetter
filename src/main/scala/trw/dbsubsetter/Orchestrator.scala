@@ -11,7 +11,7 @@ import akka.stream.scaladsl.{Balance, Broadcast, Flow, GraphDSL, Merge, Runnable
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext
 
-object SubsettingOrchestrator {
+object Orchestrator {
   def doSubset(config: Config): Unit = {
     implicit val system: ActorSystem = ActorSystem("DbSubsetter")
     implicit val materializer: ActorMaterializer = ActorMaterializer()
@@ -22,32 +22,28 @@ object SubsettingOrchestrator {
       originConnForSchema.setReadOnly(true)
       SchemaInfoRetrieval.getSchemaInfo(originConnForSchema, config.schemas)
     }
-    val sqlTemplates = SqlStatementMaker.prepareStatementStrings(schemaInfo)
 
-    val baseQueryTasks: Source[InitialTask, NotUsed] = Source(List(
-      InitialTask("BaseQueryTask-1", fetchChildren = true),
-      InitialTask("BaseQueryTask-2", fetchChildren = true),
-      InitialTask("BaseQueryTask-3", fetchChildren = false),
-      InitialTask("BaseQueryTask-4", fetchChildren = true)
-    ))
-
-    val dbParallelism = 3
+    val baseQueryDbRequests = config.baseQueries.map { case ((schemaName, tableName), whereClause) =>
+      val table = schemaInfo.tablesByName((schemaName, tableName))
+      val (sqlString, cols) = SqlStatementMaker.makeSqlString(table, whereClause, schemaInfo, includeChildren = true)
+      SqlString(table, cols, sqlString)
+    }
 
     val dbSubsettingGraph = RunnableGraph.fromGraph(GraphDSL.create() { implicit b =>
-      // Flows
-      val fkToDb: Flow[FkTask, FkQuery, NotUsed] = Flow[FkTask].filter(_.fkPointsToPk).map(t => FkQuery(s"From $t"))
-      val fkToPkExists: Flow[FkTask, PkExists, NotUsed] = Flow[FkTask].filterNot(_.fkPointsToPk).map(t => PkExists(s"From $t"))
-      val kickoffToDb: Flow[InitialTask, SqlString, NotUsed] = Flow[InitialTask].map(bq => SqlString(s"From $bq"))
+      val fkToDb: Flow[FkTask, FkQuery, NotUsed] = Flow[FkTask].filterNot(_.fk.pointsToPk).map(FkQuery)
+      val fkToPkExists: Flow[FkTask, PkExists, NotUsed] = Flow[FkTask].filter(_.fk.pointsToPk).map(t => PkExists(s"From $t"))
 
       val dbRequestToResult: Flow[DbRequest, DbResult, NotUsed] = Flow[DbRequest].statefulMapConcat { () =>
-        val db = new DbAccess(config.originDbConnectionString, config.targetDbConnectionString, sqlTemplates)
+        val db = new DbAccess(config.originDbConnectionString, config.targetDbConnectionString, schemaInfo)
         req => {
           val res = req match {
-            case FkQuery(FkTask(table,, fk, values, fetchChildren)) =>
-              val template = sqlTemplates(fk, table, fetchChildren)
-              DbResult(req, db.getRows(template))
-            case SqlString(sql) => DbResult(req, db.getRows(sql, Seq.empty)
-            case Copy(pk, pkValues) => DbResult(req, db.copyToTargetDB(pk, pkValues))
+            case FkQuery(t: FkTask) =>
+              DbResult(req, db.getRowsFromTemplate(t.fk, t.table, t.fetchChildren, t.values))
+            case SqlString(_, columns, sql) =>
+              DbResult(req, db.getRows(sql, columns))
+            case Copy(pk, pkValues) =>
+              db.copyToTargetDB(pk, pkValues)
+              DbResult(req, Seq.empty)
           }
           List(res)
         }
@@ -72,20 +68,21 @@ object SubsettingOrchestrator {
 
       // Merges and Broadcasts
       val mergeDbRequests = b.add(Merge[DbRequest](4))
-      val balanceDbQueries = b.add(Balance[DbRequest](dbParallelism))
+      val balanceDbQueries = b.add(Balance[DbRequest](config.dbParallelism))
       val broadcastFkTasks = b.add(Broadcast[FkTask](2))
-      val mergeToPkRequest = b.add(Merge[PkRequest](dbParallelism + 1))
+      val mergeToPkRequest = b.add(Merge[PkRequest](config.dbParallelism + 1))
       val splitPkResults = b.add(Broadcast[PkQueryResult](2))
       val broadcastPkAdded = b.add(Broadcast[PkQueryResult](2))
 
-      // Processing FK tasks
-      baseQueryTasks ~> kickoffToDb ~> mergeDbRequests.in(0)
+      // Merging all database query requests to allow for balancing them
+      Source(baseQueryDbRequests) ~> mergeDbRequests.in(0)
       broadcastFkTasks.out(0) ~> fkToDb ~> mergeDbRequests.in(1)
       splitPkResults.out(0) ~> pkExistsToDb ~> mergeDbRequests.in(2)
+      broadcastPkAdded.out(1) ~> pkAddedToDbCopy ~> mergeDbRequests.in(3)
 
       // Processing DB Queries in Parallel
       mergeDbRequests.out ~> balanceDbQueries
-      for (i <- 0 until dbParallelism) {
+      for (i <- 0 until config.dbParallelism) {
         balanceDbQueries.out(i) ~> dbRequestToResult.async ~> dbResultToPkAdd ~> mergeToPkRequest.in(i + 1)
       }
 
@@ -93,7 +90,6 @@ object SubsettingOrchestrator {
       mergeToPkRequest.out ~> pkQueryToResult ~> splitPkResults
       splitPkResults.out(1) ~> pkAdded ~> broadcastPkAdded
       broadcastPkAdded.out(0) ~> pkAddedToFkTask ~> broadcastFkTasks.in
-      broadcastPkAdded.out(1) ~> pkAddedToDbCopy ~> mergeDbRequests.in(3)
 
       ClosedShape
     })
@@ -103,8 +99,6 @@ object SubsettingOrchestrator {
 }
 
 sealed trait Task
-
-case class InitialTask(name: String, fetchChildren: Boolean) extends Task
 
 case class FkTask(table: Table, fk: ForeignKey, values: Seq[Vector[AnyRef]], fetchChildren: Boolean) extends Task
 
@@ -116,9 +110,9 @@ sealed trait DbCopy extends DbRequest
 
 case class FkQuery(task: FkTask) extends DbFetch
 
-case class SqlString(sql: SqlQuery) extends DbFetch
+case class SqlString(table: Table, cols: Seq[Column], sql: SqlQuery) extends DbFetch
 
-case class Copy(name: String) extends DbCopy
+case class Copy(pk: PrimaryKey, pkValues: Set[Vector[AnyRef]]) extends DbCopy
 
 case class DbResult(request: DbRequest, rows: Seq[Row])
 
