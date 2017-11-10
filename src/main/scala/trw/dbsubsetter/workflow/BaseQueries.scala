@@ -1,12 +1,11 @@
-package trw.dbsubsetter.orchestration
+package trw.dbsubsetter.workflow
 
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.{SchemaInfo, Sql}
 
-import scala.collection.immutable
 
-object BaseQueryMaker {
-  def makeBaseQueries(config: Config, sch: SchemaInfo): immutable.Iterable[SqlStrQuery] = {
+object BaseQueries {
+  def get(config: Config, sch: SchemaInfo): Iterable[SqlStrQuery] = {
     config.baseQueries.map { case ((schemaName, tableName), whereClause) =>
       val table = sch.tablesByName((schemaName, tableName))
       val (sqlString, cols) = Sql.makeQueryString(table, whereClause, sch, includeChildren = true)

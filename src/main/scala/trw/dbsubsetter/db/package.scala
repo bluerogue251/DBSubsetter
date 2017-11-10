@@ -1,8 +1,8 @@
-package trw
+package trw.dbsubsetter
 
 import scala.collection.mutable
 
-package object dbsubsetter {
+package object db {
   type SchemaName = String
   type TableName = String
   type ColumnName = String
@@ -12,8 +12,6 @@ package object dbsubsetter {
   type Row = Map[Column, AnyRef]
   type SqlQuery = String
   type SqlTemplates = Map[(ForeignKey, Table, Boolean), (SqlQuery, Seq[Column])]
-
-  case class Task(table: Table, fk: ForeignKey, values: Vector[AnyRef], fetchChildren: Boolean)
 
   case class Table(schema: SchemaName, name: TableName) {
     val fullyQualifiedName: String = s""""$schema"."$name""""
@@ -28,12 +26,8 @@ package object dbsubsetter {
   // The left hand column in each tuple always belongs to the `fromTable`
   // The right hand column in each tuple always belongs to the `toTable`
   case class ForeignKey(fromCols: Vector[Column], toCols: Vector[Column], pointsToPk: Boolean) {
-    require(fromCols.nonEmpty)
-    require(fromCols.length == toCols.length)
-    require(fromCols.map(_.table).distinct.length == 1)
-    require(toCols.map(_.table).distinct.length == 1)
-
     val fromTable: Table = fromCols.head.table
     val toTable: Table = toCols.head.table
   }
+
 }

@@ -1,10 +1,9 @@
-package trw.dbsubsetter
+package trw.dbsubsetter.workflow
 
-import trw.dbsubsetter.db.SchemaInfo
-import trw.dbsubsetter.orchestration.FkTask
+import trw.dbsubsetter.db.{SchemaInfo, _}
 
 object RowsToTasksConverter {
-  def convert(table: Table, rows: Vector[Row], sch: SchemaInfo, fetchChildren: Boolean): Seq[FkTask] = {
+  def convert(table: Table, rows: Vector[Row], sch: SchemaInfo, fetchChildren: Boolean): Vector[FkTask] = {
     val parentTasks = for {
       row <- rows
       fk <- sch.fksFromTable(table)

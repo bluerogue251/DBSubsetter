@@ -1,6 +1,6 @@
 package trw.dbsubsetter.config
 
-import trw.dbsubsetter.{SchemaName, TableName, WhereClause}
+import trw.dbsubsetter.db.{SchemaName, TableName, WhereClause}
 
 case class Config(schemas: Seq[String] = Seq.empty,
                   originDbConnectionString: String = "",
