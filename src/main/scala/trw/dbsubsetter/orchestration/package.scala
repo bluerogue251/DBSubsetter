@@ -18,7 +18,7 @@ package object orchestration {
 
   case class SqlStrQuery(table: Table, cols: Seq[Column], sql: SqlQuery) extends DbFetch
 
-  case class DbCopy(pk: PrimaryKey, pkValues: Set[Vector[AnyRef]])
+  case class DbCopy(pk: PrimaryKey, pkValues: Set[Vector[AnyRef]]) extends DbRequest
 
   // DbResult Domain Object
   case class DbResult(request: DbRequest, rows: Vector[Row])
@@ -29,8 +29,4 @@ package object orchestration {
   case class PkExists(task: FkTask) extends PkRequest
 
   case class PkAdd(table: Table, rows: Vector[Row]) extends PkRequest
-
-  // PK Result Domain Object
-  case class PkResult(request: PkRequest, existed: Boolean)
-
 }

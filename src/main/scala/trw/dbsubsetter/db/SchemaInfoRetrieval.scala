@@ -1,13 +1,16 @@
 package trw.dbsubsetter.db
 
-import java.sql.Connection
+import java.sql.DriverManager
 
 import trw.dbsubsetter._
+import trw.dbsubsetter.config.Config
 
 import scala.collection.mutable.ArrayBuffer
 
 object SchemaInfoRetrieval {
-  def getSchemaInfo(conn: Connection, schemas: Seq[String]): SchemaInfo = {
+  def getSchemaInfo(config: Config): SchemaInfo = {
+    val conn = DriverManager.getConnection(config.originDbConnectionString)
+    conn.setReadOnly(true)
     val ddl = conn.getMetaData
 
     val tablesQueryResult = ArrayBuffer.empty[Table]
@@ -15,7 +18,7 @@ object SchemaInfoRetrieval {
     val primaryKeysQueryResult = ArrayBuffer.empty[PrimaryKeyQueryRow]
     val foreignKeysQueryResult = ArrayBuffer.empty[ForeignKeyQueryRow]
 
-    schemas.foreach { schema =>
+    config.schemas.foreach { schema =>
       // Args: catalog, schemaPattern, tableNamePattern, types
       val tablesJdbcResultSet = ddl.getTables(null, schema, "%", Array("TABLE"))
       while (tablesJdbcResultSet.next()) {
