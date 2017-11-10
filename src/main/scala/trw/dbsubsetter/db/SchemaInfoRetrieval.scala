@@ -2,7 +2,6 @@ package trw.dbsubsetter.db
 
 import java.sql.DriverManager
 
-import trw.dbsubsetter._
 import trw.dbsubsetter.config.Config
 
 import scala.collection.mutable.ArrayBuffer
@@ -117,23 +116,17 @@ object SchemaInfoRetrieval {
   }
 }
 
-case class SchemaInfo(tablesByName: Map[(SchemaName, TableName), Table],
-                      pksByTable: Map[Table, PrimaryKey],
-                      fks: Set[ForeignKey],
-                      fksFromTable: Map[Table, Set[ForeignKey]],
-                      fksToTable: Map[Table, Set[ForeignKey]])
+private case class ColumnQueryRow(schema: SchemaName,
+                                  table: TableName,
+                                  name: ColumnName)
 
-case class ColumnQueryRow(schema: SchemaName,
-                          table: TableName,
-                          name: ColumnName)
+private case class PrimaryKeyQueryRow(schema: SchemaName,
+                                      table: TableName,
+                                      column: ColumnName)
 
-case class PrimaryKeyQueryRow(schema: SchemaName,
-                              table: TableName,
-                              column: ColumnName)
-
-case class ForeignKeyQueryRow(fromSchema: SchemaName,
-                              fromTable: TableName,
-                              fromColumn: ColumnName,
-                              toSchema: SchemaName,
-                              toTable: TableName,
-                              toColumn: ColumnName)
+private case class ForeignKeyQueryRow(fromSchema: SchemaName,
+                                      fromTable: TableName,
+                                      fromColumn: ColumnName,
+                                      toSchema: SchemaName,
+                                      toTable: TableName,
+                                      toColumn: ColumnName)

@@ -33,8 +33,8 @@ object SubsettingFlow {
 
       // Broadcast DB Results
       mergeDbResults ~> broadcastDbResults
-      broadcastDbResults ~> DbResultFlow.toPkAddRequest ~> mergePkRequests
-      val out = broadcastDbResults ~> DbResultFlow.toDbCopyResult
+      broadcastDbResults ~> DbResultFlows.toPkAddRequest ~> mergePkRequests
+      val out = broadcastDbResults ~> DbResultFlows.toDbCopyResult
 
       mergePkRequests ~> PkStoreQueryFlow.flow(schemaInfo) ~> broadcastPkResults
       broadcastPkResults ~> PkResultFlows.pkAddedToNewTasks(schemaInfo) ~> broadcastFkTasks

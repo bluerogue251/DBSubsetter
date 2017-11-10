@@ -13,6 +13,12 @@ package object db {
   type SqlQuery = String
   type SqlTemplates = Map[(ForeignKey, Table, Boolean), (SqlQuery, Seq[Column])]
 
+  case class SchemaInfo(tablesByName: Map[(SchemaName, TableName), Table],
+                        pksByTable: Map[Table, PrimaryKey],
+                        fks: Set[ForeignKey],
+                        fksFromTable: Map[Table, Set[ForeignKey]],
+                        fksToTable: Map[Table, Set[ForeignKey]])
+
   case class Table(schema: SchemaName, name: TableName) {
     val fullyQualifiedName: String = s""""$schema"."$name""""
   }
@@ -29,5 +35,4 @@ package object db {
     val fromTable: Table = fromCols.head.table
     val toTable: Table = toCols.head.table
   }
-
 }
