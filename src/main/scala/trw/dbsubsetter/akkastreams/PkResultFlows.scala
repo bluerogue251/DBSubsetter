@@ -5,8 +5,8 @@ import akka.stream.scaladsl.Flow
 import trw.dbsubsetter.db.SchemaInfo
 import trw.dbsubsetter.workflow._
 
-object PkAddedFlows {
-  def pkAddedToNewTasksFlow(sch: SchemaInfo): Flow[PkResult, FkTask, NotUsed] = {
+object PkResultFlows {
+  def pkAddedToNewTasks(sch: SchemaInfo): Flow[PkResult, FkTask, NotUsed] = {
     Flow[PkResult]
       .mapConcat {
         case PksAdded(table, rows, fetchChildren) => RowsToTasksConverter.convert(table, rows, sch, fetchChildren)
@@ -16,7 +16,7 @@ object PkAddedFlows {
 
   // TODO add parallelism and batching
   // TODO DRY up logic for getting PK value from a `Row`
-  def pkAddedToDbCopyFlow(sch: SchemaInfo): Flow[PkResult, DbCopy, NotUsed] = {
+  def pkAddedToDbCopy(sch: SchemaInfo): Flow[PkResult, DbCopy, NotUsed] = {
     Flow[PkResult].mapConcat {
       case PksAdded(table, rows, _) =>
         rows.map { row =>
@@ -25,5 +25,10 @@ object PkAddedFlows {
         }
       case _ => List.empty
     }
+  }
+
+  def pkMissingToFkQuery: Flow[PkResult, FkQuery, NotUsed] = {
+    Flow[PkResult]
+      .collect { case PkMissing(fkTask) => FkQuery(fkTask) }
   }
 }

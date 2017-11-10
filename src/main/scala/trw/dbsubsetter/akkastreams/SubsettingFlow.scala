@@ -22,20 +22,23 @@ object SubsettingFlow {
 
       // Merging all database query requests to allow for balancing them
       broadcastFkTasks ~> FkTaskFlows.toDbQuery ~> mergeDbRequests
-      broadcastPkResults ~> PkMissingFlow.flow ~> mergeDbRequests
-      broadcastPkResults ~> PkAddedFlows.pkAddedToDbCopyFlow(schemaInfo) ~> mergeDbRequests
+      broadcastPkResults ~> PkResultFlows.pkMissingToFkQuery ~> mergeDbRequests
+      broadcastPkResults ~> PkResultFlows.pkAddedToDbCopy(schemaInfo) ~> mergeDbRequests
 
       // Processing DB Queries in Parallel
       mergeDbRequests.out ~> balanceDbQueries
       for (_ <- 0 until config.dbParallelism) {
         balanceDbQueries ~> DbCallFlow.flow(config, schemaInfo).async ~> mergeDbResults
       }
-      mergeDbResults ~> broadcastDbResults ~> DbResultFlow.toPkAddRequest ~> mergePkRequests
+
+      // Broadcast DB Results
+      mergeDbResults ~> broadcastDbResults
+      broadcastDbResults ~> DbResultFlow.toPkAddRequest ~> mergePkRequests
       val out = broadcastDbResults ~> DbResultFlow.toDbCopyResult
 
+      mergePkRequests ~> PkStoreQueryFlow.flow(schemaInfo) ~> broadcastPkResults
+      broadcastPkResults ~> PkResultFlows.pkAddedToNewTasks(schemaInfo) ~> broadcastFkTasks
       broadcastFkTasks ~> FkTaskFlows.toPkStoreQuery ~> mergePkRequests
-      mergePkRequests.out ~> PkStoreQueryFlow.flow(schemaInfo) ~> broadcastPkResults
-      broadcastPkResults ~> PkAddedFlows.pkAddedToNewTasksFlow(schemaInfo) ~> broadcastFkTasks
 
       FlowShape(mergeDbRequests.in(3), out.outlet)
     })
