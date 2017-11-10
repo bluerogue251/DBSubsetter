@@ -6,6 +6,7 @@ import trw.dbsubsetter.workflow.{FkQuery, PkMissing, PkResult}
 
 object PkMissingFlow {
   def flow: Flow[PkResult, FkQuery, NotUsed] = {
-    Flow[PkResult].collect { case PkMissing(fkTask) => FkQuery(fkTask) }
+    Flow[PkResult]
+      .collect { case PkMissing(fkTask) => FkQuery(fkTask) }
   }
 }

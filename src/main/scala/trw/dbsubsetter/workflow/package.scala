@@ -8,23 +8,20 @@ package object workflow {
   case class FkTask(table: Table, fk: ForeignKey, values: Vector[AnyRef], fetchChildren: Boolean)
 
   // DbRequest Domain Objects
-  sealed trait DbRequest {
-  }
+  sealed trait DbRequest
 
-  sealed trait DbFetch extends DbRequest {
-    def table: Table
-  }
+  case class FkQuery(task: FkTask) extends DbRequest
 
-  case class FkQuery(task: FkTask) extends DbFetch {
-    override def table: Table = task.table
-  }
-
-  case class SqlStrQuery(table: Table, cols: Seq[Column], sql: SqlQuery) extends DbFetch
+  case class SqlStrQuery(table: Table, cols: Seq[Column], sql: SqlQuery) extends DbRequest
 
   case class DbCopy(pk: PrimaryKey, pkValues: Set[Vector[AnyRef]]) extends DbRequest
 
   // DbResult Domain Object
-  case class DbResult(table: Table, rows: Vector[Row], fetchChildren: Boolean)
+  sealed trait DbResult
+
+  case class DbFetchResult(table: Table, rows: Vector[Row], fetchChildren: Boolean) extends DbResult
+
+  case class DbCopyResult(table: Table, rowsCopied: Long) extends DbResult
 
   // PK Request Domain Objects
   sealed trait PkRequest

@@ -2,12 +2,14 @@ package trw.dbsubsetter
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import trw.dbsubsetter.akkastreams.SubsettingProcessGraph
+import akka.stream.scaladsl.{Sink, Source}
+import trw.dbsubsetter.akkastreams.SubsettingFlow
 import trw.dbsubsetter.config.{CommandLineParser, Config}
 import trw.dbsubsetter.db.SchemaInfoRetrieval
 import trw.dbsubsetter.workflow.BaseQueries
 
 import scala.concurrent.ExecutionContext
+import scala.util.{Failure, Success}
 
 object Application extends App {
   CommandLineParser.parser.parse(args, Config()) match {
@@ -19,7 +21,16 @@ object Application extends App {
 
       val schemaInfo = SchemaInfoRetrieval.getSchemaInfo(config)
       val baseQueries = BaseQueries.get(config, schemaInfo)
-      val subsettingGraph = SubsettingProcessGraph.graph(config, schemaInfo, baseQueries.toList)
-      subsettingGraph.run
+      val subsettingFlow = SubsettingFlow.flow(config, schemaInfo).recover { case e => throw e }
+      val (_, future) = subsettingFlow.runWith(Source(baseQueries.toList), Sink.ignore)
+
+      future.onComplete { res =>
+        system.terminate()
+
+        res match {
+          case Success(_) => println("Success!")
+          case Failure(e) => throw e
+        }
+      }
   }
 }
