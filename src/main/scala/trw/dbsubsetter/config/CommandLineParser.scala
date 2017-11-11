@@ -40,7 +40,7 @@ object CommandLineParser {
       .action((dbp, c) => c.copy(dbParallelism = dbp))
       .text("Maximum number of simultaneous open connections to origin DB")
 
-    val usageExamples =
+    private val usageExamples =
       """
         |Examples:
         |

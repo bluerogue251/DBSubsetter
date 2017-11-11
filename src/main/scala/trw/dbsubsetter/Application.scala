@@ -21,7 +21,7 @@ object Application extends App {
 
       val schemaInfo = SchemaInfoRetrieval.getSchemaInfo(config)
       val baseQueries = BaseQueries.get(config, schemaInfo)
-      val subsettingFlow = SubsettingFlow.flow(config, schemaInfo).recover { case e => throw e }
+      val subsettingFlow = SubsettingFlow.flow(config, schemaInfo)
       val (_, future) = subsettingFlow.runWith(Source(baseQueries.toList), Sink.ignore)
 
       future.onComplete { res =>

@@ -1,7 +1,5 @@
 package trw.dbsubsetter.db
 
-import trw.dbsubsetter._
-
 object Sql {
   def prepareStatementStrings(sch: SchemaInfo): SqlTemplates = {
     val allCombos = for {

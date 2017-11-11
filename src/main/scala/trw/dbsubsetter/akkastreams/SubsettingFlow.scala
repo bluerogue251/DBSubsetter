@@ -1,9 +1,9 @@
 package trw.dbsubsetter.akkastreams
 
 import akka.NotUsed
-import akka.stream.FlowShape
 import akka.stream.scaladsl.GraphDSL.Implicits._
 import akka.stream.scaladsl.{Balance, Broadcast, Flow, GraphDSL, Merge}
+import akka.stream.{FlowShape, OverflowStrategy}
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.SchemaInfo
 import trw.dbsubsetter.workflow._
@@ -37,7 +37,7 @@ object SubsettingFlow {
       val out = broadcastDbResults ~> DbResultFlows.toDbCopyResult
 
       mergePkRequests ~> PkStoreQueryFlow.flow(schemaInfo) ~> broadcastPkResults
-      broadcastPkResults ~> PkResultFlows.pkAddedToNewTasks(schemaInfo) ~> broadcastFkTasks
+      broadcastPkResults ~> PkResultFlows.pkAddedToNewTasks(schemaInfo) ~> Flow[FkTask].buffer(10000000, OverflowStrategy.fail) ~> broadcastFkTasks
       broadcastFkTasks ~> FkTaskFlows.toPkStoreQuery ~> mergePkRequests
 
       FlowShape(mergeDbRequests.in(3), out.outlet)

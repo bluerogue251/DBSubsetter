@@ -114,19 +114,22 @@ object SchemaInfoRetrieval {
       fksToTable
     )
   }
+
+  private[this] case class ColumnQueryRow(schema: SchemaName,
+                                          table: TableName,
+                                          name: ColumnName)
+
+  private[this] case class PrimaryKeyQueryRow(schema: SchemaName,
+                                              table: TableName,
+                                              column: ColumnName)
+
+  private[this] case class ForeignKeyQueryRow(fromSchema: SchemaName,
+                                              fromTable: TableName,
+                                              fromColumn: ColumnName,
+                                              toSchema: SchemaName,
+                                              toTable: TableName,
+                                              toColumn: ColumnName)
+
 }
 
-private case class ColumnQueryRow(schema: SchemaName,
-                                  table: TableName,
-                                  name: ColumnName)
 
-private case class PrimaryKeyQueryRow(schema: SchemaName,
-                                      table: TableName,
-                                      column: ColumnName)
-
-private case class ForeignKeyQueryRow(fromSchema: SchemaName,
-                                      fromTable: TableName,
-                                      fromColumn: ColumnName,
-                                      toSchema: SchemaName,
-                                      toTable: TableName,
-                                      toColumn: ColumnName)
