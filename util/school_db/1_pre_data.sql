@@ -7,7 +7,7 @@ CREATE TABLE districts (
 
 CREATE TABLE schools (
   id          SERIAL PRIMARY KEY,
-  district_id INTEGER   NOT NULL REFERENCES districts ("Id"),
+  district_id INTEGER   NOT NULL, -- Foreign Key purposely left out (must be specified manually as argument on program startup)
   name        TEXT      NOT NULL,
   mascot      TEXT      NOT NULL,
   created_at  TIMESTAMP NOT NULL,
