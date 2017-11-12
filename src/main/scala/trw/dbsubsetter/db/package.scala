@@ -9,11 +9,12 @@ package object db {
   type FullyQualifiedTableName = String
   type WhereClause = String
   type PrimaryKeyStore = Map[Table, mutable.HashSet[Vector[AnyRef]]]
-  type Row = Map[Column, AnyRef]
+  type Row = Map[ColumnName, AnyRef]
   type SqlQuery = String
-  type SqlTemplates = Map[(ForeignKey, Table, Boolean), (SqlQuery, Seq[Column])]
+  type SqlTemplates = Map[(ForeignKey, Table), SqlQuery]
 
   case class SchemaInfo(tablesByName: Map[(SchemaName, TableName), Table],
+                        colsByTable: Map[Table, Vector[ColumnName]],
                         pksByTable: Map[Table, PrimaryKey],
                         fks: Set[ForeignKey],
                         fksFromTable: Map[Table, Set[ForeignKey]],

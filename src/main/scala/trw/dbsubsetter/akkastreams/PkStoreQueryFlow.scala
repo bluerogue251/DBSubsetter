@@ -17,7 +17,7 @@ object PkStoreQueryFlow {
             if (pkStore(fkTask.table).contains(fkTask.values)) List.empty else List(PkMissing(fkTask))
           case PkAddRequest(table, rows, fetchChildren) =>
             val newRows = rows.filter { row =>
-              val pkValues = schemaInfo.pksByTable(table).columns.map(row)
+              val pkValues = schemaInfo.pksByTable(table).columns.map(c => row(c.name))
               pkStore(table).add(pkValues)
             }
             List(PksAdded(table, newRows, fetchChildren))

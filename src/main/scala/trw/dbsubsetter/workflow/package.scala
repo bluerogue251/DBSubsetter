@@ -7,21 +7,19 @@ package object workflow {
   // Fk Task Domain Object
   case class FkTask(table: Table, fk: ForeignKey, values: Vector[AnyRef], fetchChildren: Boolean)
 
-  // DbRequest Domain Objects
-  sealed trait DbRequest
+  // Origin Db Domain Objects
+  sealed trait OriginDbRequest
 
-  case class FkQuery(task: FkTask) extends DbRequest
+  case class FkQuery(task: FkTask) extends OriginDbRequest
 
-  case class SqlStrQuery(table: Table, cols: Seq[Column], sql: SqlQuery) extends DbRequest
+  case class SqlStrQuery(table: Table, sql: SqlQuery) extends OriginDbRequest
 
-  case class DbCopy(pk: PrimaryKey, pkValues: Set[Vector[AnyRef]]) extends DbRequest
+  case class OriginDbResult(table: Table, rows: Vector[Row], fetchChildren: Boolean)
 
-  // DbResult Domain Object
-  sealed trait DbResult
+  // Target DB Domain Objects
+  case class DbInsertRequest(table: Table, rows: Vector[Row])
 
-  case class DbFetchResult(table: Table, rows: Vector[Row], fetchChildren: Boolean) extends DbResult
-
-  case class DbCopyResult(table: Table, rowsCopied: Long) extends DbResult
+  case class DbInsertResult(table: Table, rowsCopied: Long)
 
   // PK Request Domain Objects
   sealed trait PkRequest

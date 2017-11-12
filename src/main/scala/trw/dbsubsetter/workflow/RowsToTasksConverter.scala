@@ -8,7 +8,7 @@ object RowsToTasksConverter {
       row <- rows
       fk <- sch.fksFromTable(table)
       cols = fk.fromCols
-      values = cols.map(row) if !values.contains(null)
+      values = cols.map(c => row(c.name)) if !values.contains(null)
     } yield FkTask(fk.toTable, fk, values, fetchChildren = false)
 
     val childTasks = if (!fetchChildren) {
@@ -17,7 +17,7 @@ object RowsToTasksConverter {
       row <- rows
       fk <- sch.fksToTable(table)
       cols = fk.toCols
-      values = cols.map(row) if !values.contains(null)
+      values = cols.map(c => row(c.name)) if !values.contains(null)
     } yield FkTask(fk.fromTable, fk, values, fetchChildren = true)
 
     // `distinct` is a performance improvement.

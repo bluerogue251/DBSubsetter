@@ -16,13 +16,9 @@ object PkResultFlows {
 
   // TODO add parallelism and batching
   // TODO DRY up logic for getting PK value from a `Row`
-  def pkAddedToDbCopy(sch: SchemaInfo): Flow[PkResult, DbCopy, NotUsed] = {
+  def pkAddedToDbInsert(sch: SchemaInfo): Flow[PkResult, DbInsertRequest, NotUsed] = {
     Flow[PkResult].mapConcat {
-      case PksAdded(table, rows, _) =>
-        rows.map { row =>
-          val pkValue = sch.pksByTable(table).columns.map(row)
-          DbCopy(sch.pksByTable(table), Set(pkValue))
-        }
+      case PksAdded(table, rows, _) => List(DbInsertRequest(table, rows))
       case _ => List.empty
     }
   }

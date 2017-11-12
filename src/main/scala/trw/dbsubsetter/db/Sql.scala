@@ -1,33 +1,35 @@
 package trw.dbsubsetter.db
 
 object Sql {
-  def prepareStatementStrings(sch: SchemaInfo): SqlTemplates = {
+  def preparedQueryStatementStrings(sch: SchemaInfo): SqlTemplates = {
     val allCombos = for {
       fk <- sch.fks
       table <- Set(fk.fromTable, fk.toTable)
-      includeChildren <- Set(true, false)
-    } yield (fk, table, includeChildren)
+    } yield (fk, table)
 
-    allCombos.map { case (fk, table, includeChildren) =>
+    allCombos.map { case (fk, table) =>
       val whereClauseCols = if (table == fk.toTable) fk.toCols else fk.fromCols
       val whereClause = s"${whereClauseCols.map(col => s"${col.fullyQualifiedName} = ?").mkString(" and ")}"
-      val (sqlString, selectClauseCols) = makeQueryString(table, whereClause, sch, includeChildren)
-      (fk, table, includeChildren) -> (sqlString, selectClauseCols)
+      val sqlString = makeQueryString(table, whereClause)
+      (fk, table) -> sqlString
     }.toMap
   }
 
-  def makeQueryString(table: Table, whereClause: WhereClause, sch: SchemaInfo, includeChildren: Boolean): (SqlQuery, Seq[Column]) = {
-    val pkCols = sch.pksByTable(table).columns
-    val parentFkCols = sch.fksFromTable(table).flatMap(_.fromCols)
-    val childFkCols = sch.fksToTable(table).flatMap(_.toCols)
-    val selectClauseCols = pkCols ++ parentFkCols ++ (if (includeChildren) childFkCols else Set.empty)
+  def preparedInsertStatementStrings(sch: SchemaInfo): Map[Table, SqlQuery] = {
+    sch.tablesByName.map { case (tableName, table) =>
+      val cols = sch.colsByTable(table)
+      val sqlString =
+        s"""insert into ${table.fullyQualifiedName}
+           |${cols.map(c => s""""$c"""").mkString("(", ",", ")")}
+           |values ${(1 to cols.size).map(_ => '?').mkString("(", ",", ")")}""".stripMargin
+      table -> sqlString
+    }
+  }
 
-    val sqlString =
-      s"""select ${selectClauseCols.map(_.fullyQualifiedName).mkString(", ")}
+  def makeQueryString(table: Table, whereClause: WhereClause): SqlQuery = {
+    s"""select ${table.fullyQualifiedName}.*
          | from ${table.fullyQualifiedName}
          | where $whereClause
          | """.stripMargin
-
-    (sqlString, selectClauseCols)
   }
 }

@@ -65,12 +65,15 @@ object SchemaInfoRetrieval {
       (table.schema, table.name) -> table
     }.toMap
 
-    val colsByTable: Map[Table, Map[ColumnName, Column]] = {
+    val colsByTableAndName: Map[Table, Map[ColumnName, Column]] = {
       columnsQueryResult
         .groupBy(c => tablesByName(c.schema, c.table))
         .map { case (table, partialColumns) =>
           table -> partialColumns.map(pc => pc.name -> Column(table, pc.name)).toMap
         }
+    }
+    val colNamesByTableOrdered: Map[Table, Vector[ColumnName]] = {
+      colsByTableAndName.map { case (table, map) => table -> map.keys.toVector }
     }
 
     val pksByTable: Map[Table, PrimaryKey] = {
@@ -79,7 +82,7 @@ object SchemaInfoRetrieval {
         .map { case (table, partialPks) =>
           table -> PrimaryKey(
             table,
-            partialPks.map(ppk => colsByTable(table)(ppk.column)).toVector
+            partialPks.map(ppk => colsByTableAndName(table)(ppk.column)).toVector
           )
         }
     }
@@ -89,9 +92,9 @@ object SchemaInfoRetrieval {
         .groupBy(fkm => (fkm.fromSchema, fkm.fromTable, fkm.toSchema, fkm.toTable))
         .map { case ((fromSchemaName, fromTableName, toSchemaName, toTableName), partialForeignKeys) =>
           val fromTable = tablesByName(fromSchemaName, fromTableName)
-          val fromCols = partialForeignKeys.map { pfk => colsByTable(fromTable)(pfk.fromColumn) }.toVector
+          val fromCols = partialForeignKeys.map { pfk => colsByTableAndName(fromTable)(pfk.fromColumn) }.toVector
           val toTable = tablesByName(toSchemaName, toTableName)
-          val toCols = partialForeignKeys.map { pfk => colsByTable(toTable)(pfk.toColumn) }.toVector
+          val toCols = partialForeignKeys.map { pfk => colsByTableAndName(toTable)(pfk.toColumn) }.toVector
           val pointsToPk = pksByTable(toTable).columns == toCols
 
           ForeignKey(fromCols, toCols, pointsToPk)
@@ -108,6 +111,7 @@ object SchemaInfoRetrieval {
 
     SchemaInfo(
       tablesByName,
+      colNamesByTableOrdered,
       pksByTable,
       foreignKeys,
       fksFromTable,

@@ -8,8 +8,8 @@ object BaseQueries {
   def get(config: Config, sch: SchemaInfo): Iterable[SqlStrQuery] = {
     config.baseQueries.map { case ((schemaName, tableName), whereClause) =>
       val table = sch.tablesByName((schemaName, tableName))
-      val (sqlString, cols) = Sql.makeQueryString(table, whereClause, sch, includeChildren = true)
-      SqlStrQuery(table, cols, sqlString)
+      val sqlString = Sql.makeQueryString(table, whereClause)
+      SqlStrQuery(table, sqlString)
     }
   }
 }
