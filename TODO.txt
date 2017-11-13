@@ -1,26 +1,12 @@
-* Try to parallelize fetching and calculating tasks
-  - But prepared statements are mutable in java? Maybe we need to make one copy per working-unit?
-  - This perhaps points to the need to use a connection pool with separate prepared statements per connection
-  - https://stackoverflow.com/questions/2713407/is-this-use-of-preparedstatements-in-a-thread-in-java-correct
-  - https://stackoverflow.com/questions/7849865/how-to-generate-preparedstatements-in-a-multi-thread-environment
-  - https://www.thecodingforums.com/threads/jdbc-preparedstatement-in-a-multi-threaded-environment.644638/
-
-* Figure out how regular types, postgres-specific types, and composite primary/foreign keys are managed in:
-  - https://github.com/18F/rdbms-subsetter
-  - http://jailer.sourceforge.net/home.htm
-
-* Ensure loose connections are not left hanging in the target or origin DBs
-* Ensure SQL statements are run transactionally (does this matter?)
-* Try to parallelize copying data from origin to target
-* Investigate memory usage of the COPY command and whether we can reduce it by streaming
-* Try to allow for incrementally copying data from origin to target while fetching process is still running
+* Try to parallelize fetching and calculating tasks with Akka Streams
 * Try to support MySQL, SQL Server, and Oracle
 * Test more different data types / foreign key types
 * Allow for specifying a FK from command line even if that FK is not enforced in DB
+  --fk "public.homework_grades:public.essay_assignments:public.homework_grades.assignment_type = 'essay' and public.homework_grades.assignment_id = public.essay_assignments.id"
 * Account for FKs which are Rails-like polymorphism with a hard-coded value as part of the FK.
 * Allow for copying all the data of a particular table, even if not pointed to by a FK
 * Test circular dependency effect on fetchChildren and whether this can cause bugs
-* Benchmark against rdms-subsetter and jailer for both computeTime & memoryUsage
+* Benchmark against rdms-subsetter / jailer / single-threaded DBSubsetter for both computeTime & memoryUsage
 * Docker: address error message during postgresql data loading:
   LOG:  checkpoints are occurring too frequently (5 seconds apart)
   HINT:  Consider increasing the configuration parameter "max_wal_size".

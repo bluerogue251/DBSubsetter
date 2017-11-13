@@ -120,7 +120,7 @@ INSERT INTO "Audit".events (id, event_type_key, district_id, school_id, student_
     now()
   FROM school_assignments sa
     INNER JOIN schools sc ON sa.school_id = sc.id
-    CROSS JOIN generate_series(0, 100) AS seq; -- (0, 2000) would generate ~ 100 GB of data with indices
+    CROSS JOIN generate_series(0, 100) AS seq; -- (0, 2000) would generate ~ 200 GB of data once indices are created
 
 -- "Polymorphic foreign key" data
 INSERT INTO multiple_choice_assignments (id, assignment_name, created_at) VALUES

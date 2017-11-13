@@ -39,7 +39,7 @@ ALTER TABLE schools
   ADD COLUMN latest_valedictorian_id_cache UUID NULL REFERENCES "Students" (student_id);
 
 CREATE TABLE homework_grades (
-  id              BIGSERIAL PRIMARY KEY, -- BIGSERIAL pk type
+  id              BIGSERIAL, -- BIGSERIAL pk type (pk added in post-data)
   student_id      UUID      NOT NULL REFERENCES "Students" (student_id),
   assignment_type TEXT      NOT NULL, -- "Polymorphic Foreign Key" (enforced at application-level, not at DB-level)
   assignment_id   INTEGER   NOT NULL, -- with the "type" column deciding which table the "id" column points to
