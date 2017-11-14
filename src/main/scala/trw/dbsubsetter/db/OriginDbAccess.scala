@@ -30,12 +30,14 @@ class OriginDbAccess(connStr: String, sch: SchemaInfo) {
 
   private def jdbcResultToRows(res: ResultSet, table: Table): Vector[Row] = {
     // Could we avoid using ArrayBuffer by knowing up front how many rows were fetched from DB?
-    val cols = sch.colsByTable(table)
+    val cols = sch.colsByTable(table).size
 
     val rows = ArrayBuffer.empty[Row]
 
     while (res.next()) {
-      rows += cols.map(col => col -> res.getObject(col)).toMap
+      val row = new Array[AnyRef](cols)
+      (1 to cols).foreach(i => row(i - 1) = res.getObject(i))
+      rows += row
     }
     rows.toVector
   }

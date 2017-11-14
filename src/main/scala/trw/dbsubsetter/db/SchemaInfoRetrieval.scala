@@ -32,7 +32,8 @@ object SchemaInfoRetrieval {
         columnsQueryResult += ColumnQueryRow(
           columnsJdbcResultSet.getString("TABLE_SCHEM"),
           columnsJdbcResultSet.getString("TABLE_NAME"),
-          columnsJdbcResultSet.getString("COLUMN_NAME")
+          columnsJdbcResultSet.getString("COLUMN_NAME"),
+          columnsJdbcResultSet.getInt("ORDINAL_POSITION")
         )
       }
 
@@ -69,7 +70,7 @@ object SchemaInfoRetrieval {
       columnsQueryResult
         .groupBy(c => tablesByName(c.schema, c.table))
         .map { case (table, partialColumns) =>
-          table -> partialColumns.map(pc => pc.name -> Column(table, pc.name)).toMap
+          table -> partialColumns.map(pc => pc.name -> Column(table, pc.name, pc.ordinalPosition)).toMap
         }
     }
     val colNamesByTableOrdered: Map[Table, Vector[ColumnName]] = {
@@ -121,7 +122,8 @@ object SchemaInfoRetrieval {
 
   private[this] case class ColumnQueryRow(schema: SchemaName,
                                           table: TableName,
-                                          name: ColumnName)
+                                          name: ColumnName,
+                                          ordinalPosition: Int)
 
   private[this] case class PrimaryKeyQueryRow(schema: SchemaName,
                                               table: TableName,

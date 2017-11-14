@@ -17,10 +17,8 @@ object PkResultFlows {
   // TODO add parallelism and batching
   // TODO DRY up logic for getting PK value from a `Row`
   def pkAddedToDbInsert(sch: SchemaInfo): Flow[PkResult, DbInsertRequest, NotUsed] = {
-    Flow[PkResult].mapConcat {
-      case PksAdded(table, rows, _) => List(DbInsertRequest(table, rows))
-      case _ => List.empty
-    }
+    Flow[PkResult]
+      .collect { case PksAdded(table, rows, _) => DbInsertRequest(table, rows) }
   }
 
   def pkMissingToFkQuery: Flow[PkResult, FkTask, NotUsed] = {

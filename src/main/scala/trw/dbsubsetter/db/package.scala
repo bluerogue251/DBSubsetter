@@ -9,7 +9,7 @@ package object db {
   type FullyQualifiedTableName = String
   type WhereClause = String
   type PrimaryKeyStore = Map[Table, mutable.HashSet[Vector[AnyRef]]]
-  type Row = Map[ColumnName, AnyRef]
+  type Row = Array[AnyRef]
   type SqlQuery = String
   type SqlTemplates = Map[(ForeignKey, Table), SqlQuery]
 
@@ -24,7 +24,7 @@ package object db {
     val fullyQualifiedName: String = s""""$schema"."$name""""
   }
 
-  case class Column(table: Table, name: ColumnName) {
+  case class Column(table: Table, name: ColumnName, ordinalPosition: Int) {
     val fullyQualifiedName: String = s"""${table.fullyQualifiedName}."$name""""
   }
 

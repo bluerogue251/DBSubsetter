@@ -10,12 +10,10 @@ class TargetDbAccess(connStr: String, sch: SchemaInfo) {
 
   def insertRows(table: Table, rows: Vector[Row]): Int = {
     val stmt = statements(table)
-    val cols = sch.colsByTable(table)
+    val cols = sch.colsByTable(table).size
 
     rows.foreach { row =>
-      cols.zipWithIndex.foreach { case (colName, i) =>
-        stmt.setObject(i + 1, row(colName))
-      }
+      (1 to cols).foreach(i => stmt.setObject(i, row(i - 1)))
       stmt.addBatch()
     }
 
