@@ -2,16 +2,16 @@ package trw.dbsubsetter.akkastreams
 
 import akka.NotUsed
 import akka.stream.scaladsl.Flow
-import trw.dbsubsetter.workflow.{FkQuery, FkTask, PkExistRequest}
+import trw.dbsubsetter.workflow.FkTask
 
 object FkTaskFlows {
-  def toDbQuery: Flow[FkTask, FkQuery, NotUsed] = {
+  def toDbQuery: Flow[FkTask, FkTask, NotUsed] = {
     Flow[FkTask]
-      .filterNot(_.fk.pointsToPk).map(FkQuery)
+      .filterNot(_.fk.pointsToPk)
   }
 
-  def toPkStoreQuery: Flow[FkTask, PkExistRequest, NotUsed] = {
+  def toPkStoreQuery: Flow[FkTask, FkTask, NotUsed] = {
     Flow[FkTask]
-      .filter(_.fk.pointsToPk).map(PkExistRequest)
+      .filter(_.fk.pointsToPk)
   }
 }

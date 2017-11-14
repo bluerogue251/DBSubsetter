@@ -23,8 +23,8 @@ object PkResultFlows {
     }
   }
 
-  def pkMissingToFkQuery: Flow[PkResult, FkQuery, NotUsed] = {
+  def pkMissingToFkQuery: Flow[PkResult, FkTask, NotUsed] = {
     Flow[PkResult]
-      .collect { case PkMissing(fkTask) => FkQuery(fkTask) }
+      .collect { case fkTask: FkTask => fkTask }
   }
 }

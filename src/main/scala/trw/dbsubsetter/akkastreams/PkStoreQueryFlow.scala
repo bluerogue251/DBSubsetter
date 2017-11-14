@@ -13,9 +13,9 @@ object PkStoreQueryFlow {
       val pkStore = schemaInfo.pksByTable.keys.map(t => t -> mutable.HashSet.empty[Vector[Any]]).toMap
       request => {
         request match {
-          case PkExistRequest(fkTask) =>
-            if (pkStore(fkTask.table).contains(fkTask.values)) List.empty else List(PkMissing(fkTask))
-          case PkAddRequest(table, rows, fetchChildren) =>
+          case fkt@FkTask(table, _, fkValue, _) =>
+            if (pkStore(table).contains(fkValue)) List.empty else List(fkt)
+          case OriginDbResult(table, rows, fetchChildren) =>
             val newRows = rows.filter { row =>
               val pkValues = schemaInfo.pksByTable(table).columns.map(c => row(c.name))
               pkStore(table).add(pkValues)

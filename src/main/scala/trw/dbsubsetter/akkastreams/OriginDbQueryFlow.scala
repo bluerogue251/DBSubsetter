@@ -12,9 +12,9 @@ object OriginDbQueryFlow {
       val db = new OriginDbAccess(config.originDbConnectionString, schemaInfo)
       req => {
         req match {
-          case FkQuery(t: FkTask) =>
-            val rows = db.getRowsFromTemplate(t.fk, t.table, t.values)
-            List(OriginDbResult(t.table, rows, t.fetchChildren))
+          case FkTask(table, foreignKey, values, fetchChildren) =>
+            val rows = db.getRowsFromTemplate(foreignKey, table, values)
+            List(OriginDbResult(table, rows, fetchChildren))
           case SqlStrQuery(table, sql) =>
             val rows = db.getRows(sql, table)
             List(OriginDbResult(table, rows, fetchChildren = true))
