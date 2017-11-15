@@ -13,25 +13,21 @@ object ApplicationSingleThreaded extends App {
       val schemaInfo = SchemaInfoRetrieval.getSchemaInfo(config)
       val dbWorkflow = new OriginDbWorkflow(config, schemaInfo)
       val pkWorkflow = new PkStoreWorkflow(schemaInfo)
+      val queue = mutable.Queue.empty[OriginDbRequest]
 
       val baseQueries = BaseQueries.get(config, schemaInfo)
-      val baseResults = baseQueries.map(dbWorkflow.process)
-      val basePkResults = baseResults.flatMap(br => pkWorkflow.process(br))
-      val newTasks: Iterable[FkTask] = basePkResults.flatMap {
-        case pka: PksAdded => NewFkTaskWorkflow.process(pka, schemaInfo)
-      }
-      val queue = mutable.Queue.empty[FkTask]
-      newTasks.foreach(t => queue.enqueue(t))
+      baseQueries.foreach(t => queue.enqueue(t))
 
-      val taskQueue = scala.collection.mutable.Queue.empty[FkTask]
-      while (taskQueue.nonEmpty) {
-        val next = taskQueue.dequeue()
-        val nextOpt = if (next.fk.pointsToPk) pkWorkflow.process(next) else List(next)
-        nextOpt.collect { case fkTask: FkTask => fkTask }.foreach { fkTask =>
-          val dbResult = dbWorkflow.process(fkTask)
+      while (queue.nonEmpty) {
+        val taskOpt: List[OriginDbRequest] = queue.dequeue() match {
+          case t: FkTask if t.fk.pointsToPk => pkWorkflow.process(t).collect { case t: FkTask => t }
+          case t: OriginDbRequest => List(t)
+        }
+        taskOpt.foreach { task =>
+          val dbResult = dbWorkflow.process(task)
           val pksAdded = pkWorkflow.process(dbResult)
           val newTasks = pksAdded.collect { case pka: PksAdded => pka }.flatMap(pka => NewFkTaskWorkflow.process(pka, schemaInfo))
-          newTasks.foreach(fkt => taskQueue.enqueue(fkt))
+          newTasks.foreach(fkt => queue.enqueue(fkt))
         }
       }
   }
