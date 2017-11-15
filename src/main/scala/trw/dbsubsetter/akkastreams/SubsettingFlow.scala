@@ -18,7 +18,7 @@ object SubsettingFlow {
       val broadcastFkTasks = b.add(Broadcast[FkTask](2))
       val mergePkRequests = b.add(Merge[PkRequest](2))
       val broadcastPkResults = b.add(Broadcast[PkResult](3))
-      val balanceTargetDbInserts = b.add(Balance[TargetDbInsertRequest](config.targetDbParallelism, waitForAllDownstreams = true))
+      val balanceTargetDbInserts = b.add(Balance[PksAdded](config.targetDbParallelism, waitForAllDownstreams = true))
       val mergeTargetDbInsertResults = b.add(Merge[TargetDbInsertResult](config.targetDbParallelism))
 
       // Merging all database query requests to allow for balancing them

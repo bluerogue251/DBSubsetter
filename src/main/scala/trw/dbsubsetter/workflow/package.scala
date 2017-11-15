@@ -11,8 +11,6 @@ package object workflow {
 
   case class OriginDbResult(table: Table, rows: Vector[Row], fetchChildren: Boolean) extends PkRequest
 
-  case class TargetDbInsertRequest(table: Table, rows: Vector[Row])
-
   case class TargetDbInsertResult(table: Table, rowsCopied: Long)
 
   sealed trait PkRequest

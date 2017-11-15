@@ -9,20 +9,16 @@ object PkResultFlows {
   def pkAddedToNewTasks(sch: SchemaInfo): Flow[PkResult, FkTask, NotUsed] = {
     Flow[PkResult]
       .mapConcat {
-        case PksAdded(table, rows, fetchChildren) => RowsToTasksConverter.convert(table, rows, sch, fetchChildren)
+        case pka: PksAdded => NewFkTaskWorkflow.process(pka, sch)
         case _ => List.empty
       }
   }
 
-  // TODO add parallelism and batching
-  // TODO DRY up logic for getting PK value from a `Row`
-  def pkAddedToDbInsert(sch: SchemaInfo): Flow[PkResult, TargetDbInsertRequest, NotUsed] = {
-    Flow[PkResult]
-      .collect { case PksAdded(table, rows, _) => TargetDbInsertRequest(table, rows) }
+  def pkAddedToDbInsert(sch: SchemaInfo): Flow[PkResult, PksAdded, NotUsed] = {
+    Flow[PkResult].collect { case pka: PksAdded => pka }
   }
 
   def pkMissingToFkQuery: Flow[PkResult, FkTask, NotUsed] = {
-    Flow[PkResult]
-      .collect { case fkTask: FkTask => fkTask }
+    Flow[PkResult].collect { case fkTask: FkTask => fkTask }
   }
 }
