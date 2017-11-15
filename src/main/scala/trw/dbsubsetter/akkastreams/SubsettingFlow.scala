@@ -9,7 +9,7 @@ import trw.dbsubsetter.db.SchemaInfo
 import trw.dbsubsetter.workflow._
 
 object SubsettingFlow {
-  def flow(config: Config, schemaInfo: SchemaInfo): Flow[SqlStrQuery, DbInsertResult, NotUsed] = {
+  def flow(config: Config, schemaInfo: SchemaInfo): Flow[SqlStrQuery, TargetDbInsertResult, NotUsed] = {
     Flow.fromGraph(GraphDSL.create() { implicit b =>
       // Merges and Broadcasts
       val mergeDbRequests = b.add(Merge[OriginDbRequest](3))
@@ -18,8 +18,8 @@ object SubsettingFlow {
       val broadcastFkTasks = b.add(Broadcast[FkTask](2))
       val mergePkRequests = b.add(Merge[PkRequest](2))
       val broadcastPkResults = b.add(Broadcast[PkResult](3))
-      val balanceTargetDbInserts = b.add(Balance[DbInsertRequest](config.targetDbParallelism, waitForAllDownstreams = true))
-      val mergeTargetDbInsertResults = b.add(Merge[DbInsertResult](config.targetDbParallelism))
+      val balanceTargetDbInserts = b.add(Balance[TargetDbInsertRequest](config.targetDbParallelism, waitForAllDownstreams = true))
+      val mergeTargetDbInsertResults = b.add(Merge[TargetDbInsertResult](config.targetDbParallelism))
 
       // Merging all database query requests to allow for balancing them
       broadcastFkTasks ~> FkTaskFlows.toDbQuery ~> mergeDbRequests

@@ -60,6 +60,7 @@ object SchemaInfoRetrieval {
         )
       }
     }
+    conn.close()
 
     val tables = tablesQueryResult.toVector
     val tablesByName = tables.map(t => (t.schema, t.name) -> t).toMap

@@ -4,8 +4,6 @@ import java.sql.{DriverManager, ResultSet}
 
 import scala.collection.mutable.ArrayBuffer
 
-// Put the result in a collection of Maps from column names to values, each element in the collection is a row of the result
-// Could we be more efficient by doing this by index rather than by column name?
 class OriginDbAccess(connStr: String, sch: SchemaInfo) {
   private val originConn = DriverManager.getConnection(connStr)
   originConn.setReadOnly(true)

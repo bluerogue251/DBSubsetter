@@ -28,9 +28,7 @@ package object db {
     val quotedName: String = s""""$name""""
     val fullyQualifiedName: String = s"""${table.fullyQualifiedName}.$quotedName"""
   }
-
-  // The left hand column in each tuple always belongs to the `fromTable`
-  // The right hand column in each tuple always belongs to the `toTable`
+  
   case class ForeignKey(fromCols: Vector[Column], toCols: Vector[Column], pointsToPk: Boolean) {
     val fromTable: Table = fromCols.head.table
     val toTable: Table = toCols.head.table
