@@ -7,8 +7,8 @@ import trw.dbsubsetter.db.SchemaInfo
 import trw.dbsubsetter.workflow._
 
 object TargetDbInsertFlow {
-  def flow(config: Config, schemaInfo: SchemaInfo): Flow[TargetDbInsertRequest, TargetDbInsertResult, NotUsed] = {
-    Flow[TargetDbInsertRequest].statefulMapConcat { () =>
+  def flow(config: Config, schemaInfo: SchemaInfo): Flow[PksAdded, TargetDbInsertResult, NotUsed] = {
+    Flow[PksAdded].statefulMapConcat { () =>
       val db = new TargetDbWorkflow(config, schemaInfo)
       req => {
         List(db.process(req))

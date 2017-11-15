@@ -11,12 +11,11 @@ object ApplicationSingleThreaded extends App {
     case None => System.exit(1)
     case Some(config) =>
       val schemaInfo = SchemaInfoRetrieval.getSchemaInfo(config)
-      val dbWorkflow = new OriginDbWorkflow(config, schemaInfo)
+      val originDbWorkflow = new OriginDbWorkflow(config, schemaInfo)
+      val targetDbWorkflow = new TargetDbWorkflow(config, schemaInfo)
       val pkWorkflow = new PkStoreWorkflow(schemaInfo)
       val queue = mutable.Queue.empty[OriginDbRequest]
-
-      val baseQueries = BaseQueries.get(config, schemaInfo)
-      baseQueries.foreach(t => queue.enqueue(t))
+      BaseQueries.get(config, schemaInfo).foreach(t => queue.enqueue(t))
 
       while (queue.nonEmpty) {
         val taskOpt: List[OriginDbRequest] = queue.dequeue() match {
@@ -24,9 +23,10 @@ object ApplicationSingleThreaded extends App {
           case t: OriginDbRequest => List(t)
         }
         taskOpt.foreach { task =>
-          val dbResult = dbWorkflow.process(task)
-          val pksAdded = pkWorkflow.process(dbResult)
-          val newTasks = pksAdded.collect { case pka: PksAdded => pka }.flatMap(pka => NewFkTaskWorkflow.process(pka, schemaInfo))
+          val dbResult = originDbWorkflow.process(task)
+          val pksAdded = pkWorkflow.process(dbResult).collect { case pka: PksAdded => pka }
+          pksAdded.foreach(targetDbWorkflow.process)
+          val newTasks = pksAdded.flatMap(pka => NewFkTaskWorkflow.process(pka, schemaInfo))
           newTasks.foreach(fkt => queue.enqueue(fkt))
         }
       }
