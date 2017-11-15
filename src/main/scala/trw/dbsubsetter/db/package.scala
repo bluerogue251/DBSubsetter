@@ -15,20 +15,17 @@ package object db {
 
   case class SchemaInfo(tablesByName: Map[(SchemaName, TableName), Table],
                         colsByTable: Map[Table, Vector[ColumnName]],
-                        pksByTable: Map[Table, PrimaryKey],
                         fks: Set[ForeignKey],
                         fksFromTable: Map[Table, Set[ForeignKey]],
                         fksToTable: Map[Table, Set[ForeignKey]])
 
-  case class Table(schema: SchemaName, name: TableName) {
+  case class Table(schema: SchemaName, name: TableName, pkColumnOrdinals: Seq[Int]) {
     val fullyQualifiedName: String = s""""$schema"."$name""""
   }
 
   case class Column(table: Table, name: ColumnName, ordinalPosition: Int) {
     val fullyQualifiedName: String = s"""${table.fullyQualifiedName}."$name""""
   }
-
-  case class PrimaryKey(table: Table, columns: Vector[Column])
 
   // The left hand column in each tuple always belongs to the `fromTable`
   // The right hand column in each tuple always belongs to the `toTable`
