@@ -19,7 +19,7 @@ package object db {
                         fksFromTable: Map[Table, Set[ForeignKey]],
                         fksToTable: Map[Table, Set[ForeignKey]])
 
-  case class Table(schema: SchemaName, name: TableName, pkColumnOrdinals: Seq[Int]) {
+  case class Table(schema: SchemaName, name: TableName, pkColumnOrdinals: Vector[Int]) {
     val fullyQualifiedName: String = s""""$schema"."$name""""
   }
 
