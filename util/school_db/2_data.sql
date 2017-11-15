@@ -120,7 +120,52 @@ INSERT INTO "Audit".events (id, event_type_key, district_id, school_id, student_
     now()
   FROM school_assignments sa
     INNER JOIN schools sc ON sa.school_id = sc.id
-    CROSS JOIN generate_series(0, 100) AS seq; -- (0, 2000) would generate ~ 66 GB of data
+    CROSS JOIN generate_series(0, 100) AS seq; -- (0, 2000) would generate ~ 200 GB of data once indices are created
 
+-- "Polymorphic foreign key" data
+INSERT INTO multiple_choice_assignments (id, assignment_name, created_at) VALUES
+  (1, 'Biology 1 Midterm - Take Home', now()),
+  (2, 'Biology 1 Final - Take Home', now()),
+  (3, 'Biology 2 Midterm - Take Home', now()),
+  (4, 'Biology 2 Final Exam - Take Home', now());
 
--- TODO: add data for homework_grades
+INSERT INTO worksheet_assignments (id, worksheet_assignment_name) VALUES
+  (1, 'Chemistry 1 Midterm - Take Home'),
+  (2, 'Chemistry 1 Final - Take Home'),
+  (3, 'Chemistry 2 Midterm - Take Home'),
+  (4, 'Chemistry 2 Final - Take Home');
+
+INSERT INTO essay_assignments (id, name, created_at) VALUES
+  (1, 'Persuasive Writing Assignment', now()),
+  (2, 'Personal Narrative Assignment', now()),
+  (3, 'Journalism Midterm', now()),
+  (4, 'Journalism Final', now()),
+  (5, 'Biographical Writing Assignment', now());
+
+INSERT INTO homework_grades (student_id, assignment_type, assignment_id, grade, autograded, created_at, updated_at)
+  SELECT
+    s.student_id,
+    (SELECT sub.*
+     FROM (SELECT unnest(ARRAY ['worksheet', 'essay', 'multiple choice'])) sub
+     ORDER BY random()
+     LIMIT 1),
+    (SELECT sub.*
+     FROM (SELECT unnest(ARRAY [1, 2, 3, 4])) sub
+     ORDER BY random()
+     LIMIT 1),
+    random(),
+    (SELECT sub.*
+     FROM (SELECT unnest(ARRAY [TRUE, FALSE])) sub
+     ORDER BY random()
+     LIMIT 1),
+    now(),
+    now()
+  FROM "Students" s
+    CROSS JOIN generate_series(0, 100) AS seq;
+
+-- Isolated table data
+INSERT INTO standalone_table (note, created_on) VALUES
+  ('Note # 1', '1990-01-01'),
+  ('Note # 2', '1991-01-01'),
+  ('Note # 3', '1992-01-01'),
+  ('Note # 4', '1993-01-01');

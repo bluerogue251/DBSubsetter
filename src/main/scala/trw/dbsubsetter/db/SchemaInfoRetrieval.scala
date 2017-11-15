@@ -1,11 +1,15 @@
-package trw.dbsubsetter
+package trw.dbsubsetter.db
 
-import java.sql.Connection
+import java.sql.DriverManager
+
+import trw.dbsubsetter.config.Config
 
 import scala.collection.mutable.ArrayBuffer
 
 object SchemaInfoRetrieval {
-  def getSchemaInfo(conn: Connection, schemas: Seq[String]): SchemaInfo = {
+  def getSchemaInfo(config: Config): SchemaInfo = {
+    val conn = DriverManager.getConnection(config.originDbConnectionString)
+    conn.setReadOnly(true)
     val ddl = conn.getMetaData
 
     val tablesQueryResult = ArrayBuffer.empty[Table]
@@ -13,7 +17,7 @@ object SchemaInfoRetrieval {
     val primaryKeysQueryResult = ArrayBuffer.empty[PrimaryKeyQueryRow]
     val foreignKeysQueryResult = ArrayBuffer.empty[ForeignKeyQueryRow]
 
-    schemas.foreach { schema =>
+    config.schemas.foreach { schema =>
       // Args: catalog, schemaPattern, tableNamePattern, types
       val tablesJdbcResultSet = ddl.getTables(null, schema, "%", Array("TABLE"))
       while (tablesJdbcResultSet.next()) {
@@ -28,7 +32,8 @@ object SchemaInfoRetrieval {
         columnsQueryResult += ColumnQueryRow(
           columnsJdbcResultSet.getString("TABLE_SCHEM"),
           columnsJdbcResultSet.getString("TABLE_NAME"),
-          columnsJdbcResultSet.getString("COLUMN_NAME")
+          columnsJdbcResultSet.getString("COLUMN_NAME"),
+          columnsJdbcResultSet.getInt("ORDINAL_POSITION")
         )
       }
 
@@ -55,28 +60,27 @@ object SchemaInfoRetrieval {
         )
       }
     }
+    conn.close()
 
     val tables = tablesQueryResult.toVector
-    val tablesByName = tables.map { table =>
-      (table.schema, table.name) -> table
-    }.toMap
+    val tablesByName = tables.map(t => (t.schema, t.name) -> t).toMap
 
-    val colsByTable: Map[Table, Map[ColumnName, Column]] = {
+    val colsByTableAndName: Map[Table, Map[ColumnName, Column]] = {
       columnsQueryResult
         .groupBy(c => tablesByName(c.schema, c.table))
         .map { case (table, partialColumns) =>
-          table -> partialColumns.map(pc => pc.name -> Column(table, pc.name)).toMap
+          table -> partialColumns.map(pc => pc.name -> Column(table, pc.name, pc.ordinalPosition)).toMap
         }
     }
+    val colByTableOrdered: Map[Table, Vector[Column]] = {
+      colsByTableAndName.map { case (table, map) => table -> map.values.toVector.sortBy(_.ordinalPosition) }
+    }
 
-    val pksByTable: Map[Table, PrimaryKey] = {
+    val pkColsByTable: Map[Table, Vector[Column]] = {
       primaryKeysQueryResult
         .groupBy(pk => tablesByName(pk.schema, pk.table))
         .map { case (table, partialPks) =>
-          table -> PrimaryKey(
-            table,
-            partialPks.map(ppk => colsByTable(table)(ppk.column)).toVector
-          )
+          table -> partialPks.map(ppk => colsByTableAndName(table)(ppk.column)).toVector.sortBy(_.ordinalPosition)
         }
     }
 
@@ -85,10 +89,10 @@ object SchemaInfoRetrieval {
         .groupBy(fkm => (fkm.fromSchema, fkm.fromTable, fkm.toSchema, fkm.toTable))
         .map { case ((fromSchemaName, fromTableName, toSchemaName, toTableName), partialForeignKeys) =>
           val fromTable = tablesByName(fromSchemaName, fromTableName)
-          val fromCols = partialForeignKeys.map { pfk => colsByTable(fromTable)(pfk.fromColumn) }.toVector
+          val fromCols = partialForeignKeys.map { pfk => colsByTableAndName(fromTable)(pfk.fromColumn) }.toVector
           val toTable = tablesByName(toSchemaName, toTableName)
-          val toCols = partialForeignKeys.map { pfk => colsByTable(toTable)(pfk.toColumn) }.toVector
-          val pointsToPk = pksByTable(toTable).columns == toCols
+          val toCols = partialForeignKeys.map { pfk => colsByTableAndName(toTable)(pfk.toColumn) }.toVector
+          val pointsToPk = pkColsByTable(toTable) == toCols
 
           ForeignKey(fromCols, toCols, pointsToPk)
         }.toSet
@@ -104,31 +108,30 @@ object SchemaInfoRetrieval {
 
     SchemaInfo(
       tablesByName,
-      pksByTable,
+      colByTableOrdered,
+      pkColsByTable,
       foreignKeys,
       fksFromTable,
       fksToTable
     )
   }
+
+  private[this] case class ColumnQueryRow(schema: SchemaName,
+                                          table: TableName,
+                                          name: ColumnName,
+                                          ordinalPosition: Int)
+
+  private[this] case class PrimaryKeyQueryRow(schema: SchemaName,
+                                              table: TableName,
+                                              column: ColumnName)
+
+  private[this] case class ForeignKeyQueryRow(fromSchema: SchemaName,
+                                              fromTable: TableName,
+                                              fromColumn: ColumnName,
+                                              toSchema: SchemaName,
+                                              toTable: TableName,
+                                              toColumn: ColumnName)
+
 }
 
-case class SchemaInfo(tablesByName: Map[(SchemaName, TableName), Table],
-                      pksByTable: Map[Table, PrimaryKey],
-                      fks: Set[ForeignKey],
-                      fksFromTable: Map[Table, Set[ForeignKey]],
-                      fksToTable: Map[Table, Set[ForeignKey]])
 
-case class ColumnQueryRow(schema: SchemaName,
-                          table: TableName,
-                          name: ColumnName)
-
-case class PrimaryKeyQueryRow(schema: SchemaName,
-                              table: TableName,
-                              column: ColumnName)
-
-case class ForeignKeyQueryRow(fromSchema: SchemaName,
-                              fromTable: TableName,
-                              fromColumn: ColumnName,
-                              toSchema: SchemaName,
-                              toTable: TableName,
-                              toColumn: ColumnName)

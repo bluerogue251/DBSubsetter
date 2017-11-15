@@ -7,7 +7,7 @@ CREATE TABLE districts (
 
 CREATE TABLE schools (
   id          SERIAL PRIMARY KEY,
-  district_id INTEGER   NOT NULL REFERENCES districts ("Id"),
+  district_id INTEGER   NOT NULL, -- Foreign Key purposely left out (must be specified manually as argument on program startup)
   name        TEXT      NOT NULL,
   mascot      TEXT      NOT NULL,
   created_at  TIMESTAMP NOT NULL,
@@ -39,13 +39,34 @@ ALTER TABLE schools
   ADD COLUMN latest_valedictorian_id_cache UUID NULL REFERENCES "Students" (student_id);
 
 CREATE TABLE homework_grades (
-  id            BIGSERIAL PRIMARY KEY, -- BIGSERIAL pk type
-  student_id    UUID      NOT NULL REFERENCES "Students" (student_id),
-  homework_type TEXT      NOT NULL,
-  grade         DECIMAL(5, 2), -- Number between 0.00 and 100.00 representing the grade. Max of two decimal places.
-  autograded    BOOLEAN   NULL, -- Boolean
-  created_at    TIMESTAMP NOT NULL,
-  updated_at    TIMESTAMP NOT NULL
+  id              BIGSERIAL, -- BIGSERIAL pk type (pk added in post-data)
+  student_id      UUID      NOT NULL REFERENCES "Students" (student_id),
+  assignment_type TEXT      NOT NULL, -- "Polymorphic Foreign Key" (enforced at application-level, not at DB-level)
+  assignment_id   INTEGER   NOT NULL, -- with the "type" column deciding which table the "id" column points to
+  grade           DECIMAL(5, 2),
+  autograded      BOOLEAN   NULL,
+  created_at      TIMESTAMP NOT NULL,
+  updated_at      TIMESTAMP NOT NULL
+);
+
+-- Part of the "Polymorphic Foreign Keys" test
+CREATE TABLE essay_assignments (
+  id         SERIAL PRIMARY KEY,
+  "name"     TEXT      NOT NULL,
+  created_at TIMESTAMP NOT NULL
+);
+
+-- Part of the "Polymorphic Foreign Keys" test
+CREATE TABLE multiple_choice_assignments (
+  id              SERIAL PRIMARY KEY,
+  assignment_name TEXT      NOT NULL,
+  created_at      TIMESTAMP NOT NULL
+);
+
+-- Part of the "Polymorphic Foreign Keys" test
+CREATE TABLE worksheet_assignments (
+  id                          SERIAL PRIMARY KEY,
+  "worksheet_assignment_name" TEXT NOT NULL
 );
 
 CREATE SCHEMA "Audit"; -- Mixed case schema name
@@ -90,3 +111,10 @@ CREATE TABLE empty_table_4 (
 CREATE TABLE empty_table_5 (
   id SERIAL PRIMARY KEY
 );
+
+-- Standalone table purposely not referenced from any other table as edge case
+CREATE TABLE standalone_table (
+  id         BIGSERIAL PRIMARY KEY,
+  note       TEXT NULL,
+  created_on DATE
+)
