@@ -14,17 +14,19 @@ package object db {
   type SqlTemplates = Map[(ForeignKey, Table), SqlQuery]
 
   case class SchemaInfo(tablesByName: Map[(SchemaName, TableName), Table],
-                        colsByTable: Map[Table, Vector[ColumnName]],
+                        colsByTable: Map[Table, Vector[Column]],
+                        pkColsByTable: Map[Table, Vector[Column]],
                         fks: Set[ForeignKey],
                         fksFromTable: Map[Table, Set[ForeignKey]],
                         fksToTable: Map[Table, Set[ForeignKey]])
 
-  case class Table(schema: SchemaName, name: TableName, pkColumnOrdinals: Vector[Int]) {
+  case class Table(schema: SchemaName, name: TableName) {
     val fullyQualifiedName: String = s""""$schema"."$name""""
   }
 
   case class Column(table: Table, name: ColumnName, ordinalPosition: Int) {
-    val fullyQualifiedName: String = s"""${table.fullyQualifiedName}."$name""""
+    val quotedName: String = s""""$name""""
+    val fullyQualifiedName: String = s"""${table.fullyQualifiedName}.$quotedName"""
   }
 
   // The left hand column in each tuple always belongs to the `fromTable`

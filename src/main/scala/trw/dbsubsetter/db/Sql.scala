@@ -20,7 +20,7 @@ object Sql {
       val cols = sch.colsByTable(table)
       val sqlString =
         s"""insert into ${table.fullyQualifiedName}
-           |${cols.map(c => s""""$c"""").mkString("(", ",", ")")}
+           |${cols.map(_.quotedName).mkString("(", ",", ")")}
            |values ${(1 to cols.size).map(_ => '?').mkString("(", ",", ")")}""".stripMargin
       table -> sqlString
     }

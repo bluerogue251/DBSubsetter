@@ -12,7 +12,7 @@ object SchemaInfoRetrieval {
     conn.setReadOnly(true)
     val ddl = conn.getMetaData
 
-    val tablesQueryResult = ArrayBuffer.empty[TableQueryRow]
+    val tablesQueryResult = ArrayBuffer.empty[Table]
     val columnsQueryResult = ArrayBuffer.empty[ColumnQueryRow]
     val primaryKeysQueryResult = ArrayBuffer.empty[PrimaryKeyQueryRow]
     val foreignKeysQueryResult = ArrayBuffer.empty[ForeignKeyQueryRow]
@@ -21,7 +21,7 @@ object SchemaInfoRetrieval {
       // Args: catalog, schemaPattern, tableNamePattern, types
       val tablesJdbcResultSet = ddl.getTables(null, schema, "%", Array("TABLE"))
       while (tablesJdbcResultSet.next()) {
-        tablesQueryResult += TableQueryRow(
+        tablesQueryResult += Table(
           tablesJdbcResultSet.getString("TABLE_SCHEM"),
           tablesJdbcResultSet.getString("TABLE_NAME")
         )
@@ -62,16 +62,7 @@ object SchemaInfoRetrieval {
     }
 
     val tables = tablesQueryResult.toVector
-    val tablesByName = tables.map { table =>
-      val pkColumnNames = primaryKeysQueryResult
-        .filter(pk => pk.schema == table.schema && pk.table == table.name)
-        .map(_.column).toSet
-      val pkColumnOrdinals = columnsQueryResult
-        .filter(col => pkColumnNames.contains(col.name))
-        .map(_.ordinalPosition)
-        .sorted
-      (table.schema, table.name) -> Table(table.schema, table.name, pkColumnOrdinals)
-    }.toMap
+    val tablesByName = tables.map(t => (t.schema, t.name) -> t).toMap
 
     val colsByTableAndName: Map[Table, Map[ColumnName, Column]] = {
       columnsQueryResult
@@ -80,8 +71,16 @@ object SchemaInfoRetrieval {
           table -> partialColumns.map(pc => pc.name -> Column(table, pc.name, pc.ordinalPosition)).toMap
         }
     }
-    val colNamesByTableOrdered: Map[Table, Vector[ColumnName]] = {
-      colsByTableAndName.map { case (table, map) => table -> map.keys.toVector }
+    val colByTableOrdered: Map[Table, Vector[Column]] = {
+      colsByTableAndName.map { case (table, map) => table -> map.values.toVector.sortBy(_.ordinalPosition) }
+    }
+
+    val pkColsByTable: Map[Table, Vector[Column]] = {
+      primaryKeysQueryResult
+        .groupBy(pk => tablesByName(pk.schema, pk.table))
+        .map { case (table, partialPks) =>
+          table -> partialPks.map(ppk => colsByTableAndName(table)(ppk.column)).toVector.sortBy(_.ordinalPosition)
+        }
     }
 
     val foreignKeys: Set[ForeignKey] = {
@@ -92,7 +91,7 @@ object SchemaInfoRetrieval {
           val fromCols = partialForeignKeys.map { pfk => colsByTableAndName(fromTable)(pfk.fromColumn) }.toVector
           val toTable = tablesByName(toSchemaName, toTableName)
           val toCols = partialForeignKeys.map { pfk => colsByTableAndName(toTable)(pfk.toColumn) }.toVector
-          val pointsToPk = pksByTable(toTable).columns == toCols
+          val pointsToPk = pkColsByTable(toTable) == toCols
 
           ForeignKey(fromCols, toCols, pointsToPk)
         }.toSet
@@ -108,15 +107,13 @@ object SchemaInfoRetrieval {
 
     SchemaInfo(
       tablesByName,
-      colNamesByTableOrdered,
+      colByTableOrdered,
+      pkColsByTable,
       foreignKeys,
       fksFromTable,
       fksToTable
     )
   }
-
-  private[this] case class TableQueryRow(schema: SchemaName,
-                                         name: TableName)
 
   private[this] case class ColumnQueryRow(schema: SchemaName,
                                           table: TableName,
