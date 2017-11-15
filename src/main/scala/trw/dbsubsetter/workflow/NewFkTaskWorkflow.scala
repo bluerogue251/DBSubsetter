@@ -1,9 +1,11 @@
 package trw.dbsubsetter.workflow
 
-import trw.dbsubsetter.db.{SchemaInfo, _}
+import trw.dbsubsetter.db.SchemaInfo
 
-object RowsToTasksConverter {
-  def convert(table: Table, rows: Vector[Row], sch: SchemaInfo, fetchChildren: Boolean): Vector[FkTask] = {
+object NewFkTaskWorkflow {
+  def process(pksAdded: PksAdded, sch: SchemaInfo): Vector[FkTask] = {
+    val PksAdded(table, rows, fetchChildren) = pksAdded
+
     // `distinct` is a performance improvement which prevents duplicate tasks from being created
     // As far as I can tell, it is only necessary for parent tasks
     val parentTasks = sch.fksFromTable(table).toVector.flatMap { fk =>
