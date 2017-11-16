@@ -76,11 +76,11 @@ object SchemaInfoRetrieval {
       colsByTableAndName.map { case (table, map) => table -> map.values.toVector.sortBy(_.ordinalPosition) }
     }
 
-    val pkColsByTable: Map[Table, Vector[Column]] = {
+    val pkColumnOrdinalsByTable: Map[Table, Vector[Int]] = {
       primaryKeysQueryResult
         .groupBy(pk => tablesByName(pk.schema, pk.table))
         .map { case (table, partialPks) =>
-          table -> partialPks.map(ppk => colsByTableAndName(table)(ppk.column)).toVector.sortBy(_.ordinalPosition)
+          table -> partialPks.map(ppk => colsByTableAndName(table)(ppk.column)).toVector.map(_.ordinalPosition - 1).sorted
         }
     }
 
@@ -92,7 +92,7 @@ object SchemaInfoRetrieval {
           val fromCols = partialForeignKeys.map { pfk => colsByTableAndName(fromTable)(pfk.fromColumn) }.toVector
           val toTable = tablesByName(toSchemaName, toTableName)
           val toCols = partialForeignKeys.map { pfk => colsByTableAndName(toTable)(pfk.toColumn) }.toVector
-          val pointsToPk = pkColsByTable(toTable) == toCols
+          val pointsToPk = pkColumnOrdinalsByTable(toTable) == toCols.map(_.ordinalPosition - 1).sorted
 
           ForeignKey(fromCols, toCols, pointsToPk)
         }.toSet
@@ -109,7 +109,7 @@ object SchemaInfoRetrieval {
     SchemaInfo(
       tablesByName,
       colByTableOrdered,
-      pkColsByTable,
+      pkColumnOrdinalsByTable,
       foreignKeys,
       fksFromTable,
       fksToTable

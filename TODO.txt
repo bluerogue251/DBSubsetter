@@ -15,3 +15,4 @@
 * Make it configurable to run as single-threaded or as akka-streams version
 * Add some sort of way to shut down or otherwise finish the akka-streams version instead of hanging forever
 * Consider the value in parallelizing or otherwise optimizing PkStore lookups
+* Add retry logic to DB Queries in case of failure

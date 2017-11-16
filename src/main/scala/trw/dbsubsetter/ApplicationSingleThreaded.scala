@@ -13,7 +13,8 @@ object ApplicationSingleThreaded extends App {
       val schemaInfo = SchemaInfoRetrieval.getSchemaInfo(config)
       val originDbWorkflow = new OriginDbWorkflow(config, schemaInfo)
       val targetDbWorkflow = new TargetDbWorkflow(config, schemaInfo)
-      val pkWorkflow = new PkStoreWorkflow(schemaInfo)
+
+      val pkWorkflow = new PkStoreWorkflow(schemaInfo.pkOrdinalsByTable)
       val queue = mutable.Queue.empty[OriginDbRequest]
       BaseQueries.get(config, schemaInfo).foreach(t => queue.enqueue(t))
 

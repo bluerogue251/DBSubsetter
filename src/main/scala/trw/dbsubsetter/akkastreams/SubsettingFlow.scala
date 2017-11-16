@@ -40,7 +40,7 @@ object SubsettingFlow {
       // Broadcast DB Results
       mergeDbResults ~> mergePkRequests
 
-      mergePkRequests ~> PkStoreQueryFlow.flow(schemaInfo) ~> broadcastPkResults
+      mergePkRequests ~> PkStoreQueryFlow.flow(schemaInfo.pkOrdinalsByTable) ~> broadcastPkResults
       broadcastPkResults ~> PkResultFlows.pkAddedToNewTasks(schemaInfo) ~> Flow[FkTask].buffer(10000000, OverflowStrategy.fail) ~> broadcastFkTasks
       broadcastFkTasks ~> FkTaskFlows.toPkStoreQuery ~> mergePkRequests
 

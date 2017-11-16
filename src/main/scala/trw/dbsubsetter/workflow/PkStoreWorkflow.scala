@@ -1,14 +1,13 @@
 package trw.dbsubsetter.workflow
 
-import trw.dbsubsetter.db.SchemaInfo
+import trw.dbsubsetter.db.Table
 
 import scala.collection.mutable
 
 
-class PkStoreWorkflow(schemaInfo: SchemaInfo) {
-  private val tables = schemaInfo.tablesByName.values
+class PkStoreWorkflow(pkOrdinalsByTable: Map[Table, Seq[Int]]) {
+  private val tables = pkOrdinalsByTable.keys
   private val pkStore = tables.map(t => t -> mutable.HashSet.empty[AnyRef]).toMap
-  private val pkOrdinalsByTable = tables.map(t => t -> schemaInfo.pkColsByTable(t).map(_.ordinalPosition - 1)).toMap
 
   def process(request: PkRequest): List[PkResult] = {
     request match {

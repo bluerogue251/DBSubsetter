@@ -18,5 +18,5 @@ package object workflow {
 
   sealed trait PkResult
 
-  case class PksAdded(table: Table, rows: Vector[Row], fetchChildren: Boolean) extends PkResult
+  case class PksAdded(table: Table, rows: Vector[Row], fetchParents: Boolean, fetchChildren: Boolean) extends PkResult
 }
