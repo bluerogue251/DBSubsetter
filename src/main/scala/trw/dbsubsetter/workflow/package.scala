@@ -14,9 +14,11 @@ package object workflow {
 
   case class TargetDbInsertResult(table: Table, rowsCopied: Long)
 
-  sealed trait PkRequest
+  sealed trait PkRequest {
+    def table: Table
+  }
 
   sealed trait PkResult
 
-  case class PksAdded(table: Table, rows: Vector[Row], fetchParents: Boolean, fetchChildren: Boolean) extends PkResult
+  case class PksAdded(table: Table, rows: Vector[Row], fetchChildren: Boolean) extends PkResult
 }

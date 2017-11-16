@@ -5,11 +5,13 @@ import trw.dbsubsetter.db._
 object NewFkTaskWorkflow {
   def process(pksAdded: PksAdded, sch: SchemaInfo): Vector[FkTask] = {
     val PksAdded(table, rows, fetchChildren) = pksAdded
-    parentTasks(sch, table, rows) ++ childTasks(sch, table, rows, fetchChildren)
+    val parentTasks = calcParentTasks(sch, table, rows)
+    val childTasks = if (fetchChildren) calcChildTasks(sch, table, rows) else Vector.empty
+    parentTasks ++ childTasks
   }
 
-  private def parentTasks(sch: SchemaInfo, table: Table, rows: Vector[Row]): Vector[FkTask] = {
-    // `distinct` is a performance improvement which prevents duplicate tasks from being created
+  private def calcParentTasks(sch: SchemaInfo, table: Table, rows: Vector[Row]): Vector[FkTask] = {
+    // `distinct` is (hopefully) a performance improvement which prevents duplicate tasks from being created
     // As far as I can tell, it is only necessary for parent tasks
     sch.fksFromTable(table).toVector.flatMap { fk =>
       val distinctFkValues = getForeignKeyValues(fk, fk.fromCols, rows).distinct
@@ -17,14 +19,10 @@ object NewFkTaskWorkflow {
     }
   }
 
-  private def childTasks(sch: SchemaInfo, table: Table, rows: Vector[Row], fetchChildren: Boolean): Vector[FkTask] = {
-    if (fetchChildren) {
-      sch.fksToTable(table).toVector.flatMap { fk =>
-        val fkValues = getForeignKeyValues(fk, fk.toCols, rows)
-        fkValues.map(fkValue => FkTask(fk.fromTable, fk, fkValue, fetchChildren = true))
-      }
-    } else {
-      Vector.empty
+  private def calcChildTasks(sch: SchemaInfo, table: Table, rows: Vector[Row]): Vector[FkTask] = {
+    sch.fksToTable(table).toVector.flatMap { fk =>
+      val fkValues = getForeignKeyValues(fk, fk.toCols, rows)
+      fkValues.map(fkValue => FkTask(fk.fromTable, fk, fkValue, fetchChildren = true))
     }
   }
 
