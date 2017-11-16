@@ -11,11 +11,15 @@ class OriginDbAccess(connStr: String, sch: SchemaInfo) {
     (fk, table) -> originConn.prepareStatement(sqlStr)
   }
 
-  def getRowsFromTemplate(fk: ForeignKey, table: Table, params: Seq[AnyRef]): Vector[Row] = {
+  def getRowsFromTemplate(fk: ForeignKey, table: Table, fkValue: AnyRef): Vector[Row] = {
     val stmt = statements(fk, table)
     stmt.clearParameters()
-    params.zipWithIndex.foreach { case (value, i) =>
-      stmt.setObject(i + 1, value)
+    if (fk.isSingleCol) {
+      stmt.setObject(1, fkValue)
+    } else {
+      fkValue.asInstanceOf[Vector[AnyRef]].zipWithIndex.foreach { case (value, i) =>
+        stmt.setObject(i + 1, value)
+      }
     }
     val jdbcResult = stmt.executeQuery()
     jdbcResultToRows(jdbcResult, table)

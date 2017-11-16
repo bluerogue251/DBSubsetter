@@ -3,7 +3,8 @@ package trw.dbsubsetter
 import trw.dbsubsetter.db._
 
 package object workflow {
-  case class FkTask(table: Table, fk: ForeignKey, fkValue: Vector[AnyRef], fetchChildren: Boolean) extends OriginDbRequest with PkRequest with PkResult
+
+  case class FkTask(table: Table, fk: ForeignKey, fkValue: AnyRef, fetchChildren: Boolean) extends OriginDbRequest with PkRequest with PkResult
 
   sealed trait OriginDbRequest
 
