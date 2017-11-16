@@ -32,5 +32,7 @@ package object db {
   case class ForeignKey(fromCols: Vector[Column], toCols: Vector[Column], pointsToPk: Boolean) {
     val fromTable: Table = fromCols.head.table
     val toTable: Table = toCols.head.table
+
+    val isSingleCol: Boolean = fromCols.size == 1
   }
 }
