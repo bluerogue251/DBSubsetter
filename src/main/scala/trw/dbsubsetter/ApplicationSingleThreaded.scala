@@ -20,7 +20,7 @@ object ApplicationSingleThreaded extends App {
 
       while (queue.nonEmpty) {
         val taskOpt: List[OriginDbRequest] = queue.dequeue() match {
-          case t: FkTask if t.fk.pointsToPk => pkWorkflow.process(t).collect { case t: FkTask => t }
+          case t: FkTask if FkTaskPreCheck.canBePrechecked(t) => pkWorkflow.process(t).collect { case t: FkTask => t }
           case t => List(t)
         }
         taskOpt.foreach { task =>
