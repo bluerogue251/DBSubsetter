@@ -15,8 +15,8 @@ class CircularDepTest extends FunSuite with BeforeAndAfterAll {
 
   override protected def beforeAll(): Unit = {
     super.beforeAll()
-    "./util/circular_dep/reset_origin_db.sh".!
-    "./util/circular_dep/reset_target_db.sh".!
+    "./util/circular_dep/reset_origin_db.sh".!!
+    "./util/circular_dep/reset_target_db.sh".!!
 
     val args = Array(
       "--schemas", "public",
@@ -28,7 +28,7 @@ class CircularDepTest extends FunSuite with BeforeAndAfterAll {
     )
     ApplicationSingleThreaded.main(args)
 
-    "./util/circular_dep/post_subset_target.sh".!
+    "./util/circular_dep/post_subset_target.sh".!!
 
     targetConn = DriverManager.getConnection(targetConnString)
     targetConn.setReadOnly(true)
@@ -78,11 +78,20 @@ class CircularDepTest extends FunSuite with BeforeAndAfterAll {
     assert(count === 1)
   }
 
+  test("All grandparents have 100 parents") {
+    (0 to 1000 by 6).foreach { i =>
+      val parentResultSet = targetConn.createStatement().executeQuery(s"select count(*) from parents where grandparent_id = $i")
+      parentResultSet.next()
+      val parentCount = parentResultSet.getInt(1)
+      assert(parentCount === 100, s"Grandparent id $i had $parentCount parents, expected 100")
+    }
+  }
+
   test("All parents have 10 children") {
     (0 to 9).foreach { i =>
-      val parentZeroResultSet = targetConn.createStatement().executeQuery(s"select count(*) from children where parent_id = $i")
-      parentZeroResultSet.next()
-      val childCount = parentZeroResultSet.getInt(1)
+      val childrenResultSet = targetConn.createStatement().executeQuery(s"select count(*) from children where parent_id = $i")
+      childrenResultSet.next()
+      val childCount = childrenResultSet.getInt(1)
       assert(childCount === 10, s"Parent id $i had $childCount children, expected 10")
     }
   }
