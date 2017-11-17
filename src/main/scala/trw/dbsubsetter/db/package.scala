@@ -7,6 +7,7 @@ package object db {
   type TableName = String
   type ColumnName = String
   type FullyQualifiedTableName = String
+  type JoinClause = String
   type WhereClause = String
   type PrimaryKeyStore = Map[Table, mutable.HashSet[Vector[AnyRef]]]
   type Row = Array[AnyRef]
@@ -28,8 +29,8 @@ package object db {
     val quotedName: String = s""""$name""""
     val fullyQualifiedName: String = s"""${table.fullyQualifiedName}.$quotedName"""
   }
-  
-  case class ForeignKey(fromCols: Vector[Column], toCols: Vector[Column], pointsToPk: Boolean) {
+
+  case class ForeignKey(fromCols: Vector[Column], toCols: Vector[Column], pointsToPk: Boolean, additionalWhereClauseOpt: Option[WhereClause]) {
     val fromTable: Table = fromCols.head.table
     val toTable: Table = toCols.head.table
 

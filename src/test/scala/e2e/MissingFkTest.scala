@@ -23,6 +23,7 @@ class MissingFkTest extends FunSuite with BeforeAndAfterAll {
       "--baseQuery", "public.table_1=id = 2",
       "--baseQuery", "public.table_a=id in (1, 2, 4, 5)",
       "--foreignKey", "public.table_2(table_1_id) ::: public.table_1(id)",
+      "--foreignKey", "public.table_a(points_to_table_id) ::: public.table_b(id) ::: table_a.points_to_table_name='points_to_table_b'",
       "--originDbParallelism", "1",
       "--targetDbParallelism", "1"
     )
