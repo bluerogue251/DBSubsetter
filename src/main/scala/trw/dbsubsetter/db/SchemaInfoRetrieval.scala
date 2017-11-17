@@ -85,7 +85,12 @@ object SchemaInfoRetrieval {
     }
 
     val foreignKeys: Set[ForeignKey] = {
-      foreignKeysQueryResult
+      val userSuppliedFks = config.cmdLineStandardFks.flatMap { cfk =>
+        cfk.fromColumns.zip(cfk.toColumns).map { case (fromCol, toCol) =>
+          ForeignKeyQueryRow(cfk.fromSchema, cfk.fromTable, fromCol, cfk.toSchema, cfk.toTable, toCol)
+        }
+      }
+      (foreignKeysQueryResult ++ userSuppliedFks)
         .groupBy(fkm => (fkm.fromSchema, fkm.fromTable, fkm.toSchema, fkm.toTable))
         .map { case ((fromSchemaName, fromTableName, toSchemaName, toTableName), partialForeignKeys) =>
           val fromTable = tablesByName(fromSchemaName, fromTableName)

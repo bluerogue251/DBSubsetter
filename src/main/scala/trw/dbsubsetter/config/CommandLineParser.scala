@@ -1,9 +1,10 @@
 package trw.dbsubsetter.config
 
 import scopt.OptionParser
+import trw.dbsubsetter.db.{ColumnName, SchemaName, TableName}
 
 object CommandLineParser {
-  val parser: OptionParser[Config] = new OptionParser("DBSubsetter") {
+  val parser: OptionParser[Config] = new OptionParser[Config]("DBSubsetter") {
     head("DBSubsetter", "0.1")
     help("help").text("prints this usage text")
     version("version").text("prints the application version")
@@ -29,9 +30,33 @@ object CommandLineParser {
       .maxOccurs(Int.MaxValue)
       .valueName("<schema.table>=<whereClause>")
       .action { case (bq, c) =>
-        val Array(fullyQualifiedTable, whereClause) = bq.split("=", 2)
-        val Array(schema, table) = fullyQualifiedTable.split("""\.""", 2)
-        c.copy(baseQueries = ((schema, table), whereClause) :: c.baseQueries)
+        val r = """(.+)\.([^=]+)\=(.+)""".r
+        bq match {
+          case r(schema, table, whereClause) =>
+            c.copy(baseQueries = ((schema, table), whereClause) :: c.baseQueries)
+          case _ => throw new RuntimeException()
+        }
+      }
+      .text("Starting table and where-clause to kick off subsetting. Can be specified multiple times.")
+
+    opt[String]("foreignKey")
+      .maxOccurs(Int.MaxValue)
+      .valueName("<schema.table(column1, column2, column3)> ::: schema2.table2(column4, column5, column6)")
+      .action { case (fk, c) =>
+        val r = """(.+)\.(.+)\((.+)\)\s*:::\s*(.+)\.(.+)\((.+)\)""".r
+        fk match {
+          case r(fromSchema, fromTable, fromColumns, toSchema, toTable, toColumns) =>
+            val fk = CommandLineForeignKey(
+              fromSchema,
+              fromTable,
+              fromColumns.split(",").toList,
+              toSchema,
+              toTable,
+              toColumns.split(",").toList
+            )
+            c.copy(cmdLineStandardFks = fk :: c.cmdLineStandardFks)
+          case _ => throw new RuntimeException()
+        }
       }
       .text("Starting table and where-clause to kick off subsetting. Can be specified multiple times.")
 
@@ -69,3 +94,10 @@ object CommandLineParser {
     note(usageExamples)
   }
 }
+
+case class CommandLineForeignKey(fromSchema: SchemaName,
+                                 fromTable: TableName,
+                                 fromColumns: List[ColumnName],
+                                 toSchema: SchemaName,
+                                 toTable: TableName,
+                                 toColumns: List[ColumnName])
