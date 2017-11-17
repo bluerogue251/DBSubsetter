@@ -56,7 +56,8 @@ object SchemaInfoRetrieval {
           foreignKeysJdbcResultSet.getString("FKCOLUMN_NAME"),
           foreignKeysJdbcResultSet.getString("PKTABLE_SCHEM"),
           foreignKeysJdbcResultSet.getString("PKTABLE_NAME"),
-          foreignKeysJdbcResultSet.getString("PKCOLUMN_NAME")
+          foreignKeysJdbcResultSet.getString("PKCOLUMN_NAME"),
+          None
         )
       }
     }
@@ -85,8 +86,14 @@ object SchemaInfoRetrieval {
     }
 
     val foreignKeys: Set[ForeignKey] = {
-      foreignKeysQueryResult
-        .groupBy(fkm => (fkm.fromSchema, fkm.fromTable, fkm.toSchema, fkm.toTable))
+      val userSuppliedPartialFks: Seq[ForeignKeyQueryRow] = config.cmdLineForeignKeys.flatMap { cfk =>
+        cfk.fromColumns.zip(cfk.toColumns).map { case (fromCol, toCol) =>
+          ForeignKeyQueryRow(cfk.fromSchema, cfk.fromTable, fromCol, cfk.toSchema, cfk.toTable, toCol, cfk.whereClause)
+        }
+      }
+      val allPartialFKs = userSuppliedPartialFks ++ foreignKeysQueryResult
+
+      allPartialFKs.groupBy(fkm => (fkm.fromSchema, fkm.fromTable, fkm.toSchema, fkm.toTable))
         .map { case ((fromSchemaName, fromTableName, toSchemaName, toTableName), partialForeignKeys) =>
           val fromTable = tablesByName(fromSchemaName, fromTableName)
           val fromCols = partialForeignKeys.map { pfk => colsByTableAndName(fromTable)(pfk.fromColumn) }.toVector
@@ -94,7 +101,7 @@ object SchemaInfoRetrieval {
           val toCols = partialForeignKeys.map { pfk => colsByTableAndName(toTable)(pfk.toColumn) }.toVector
           val pointsToPk = pkColumnOrdinalsByTable(toTable) == toCols.map(_.ordinalPosition - 1).sorted
 
-          ForeignKey(fromCols, toCols, pointsToPk)
+          ForeignKey(fromCols, toCols, pointsToPk, partialForeignKeys.head.whereClauseOpt)
         }.toSet
     }
 
@@ -130,7 +137,8 @@ object SchemaInfoRetrieval {
                                               fromColumn: ColumnName,
                                               toSchema: SchemaName,
                                               toTable: TableName,
-                                              toColumn: ColumnName)
+                                              toColumn: ColumnName,
+                                              whereClauseOpt: Option[WhereClause])
 
 }
 
