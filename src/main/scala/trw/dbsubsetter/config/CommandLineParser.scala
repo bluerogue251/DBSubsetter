@@ -1,9 +1,9 @@
 package trw.dbsubsetter.config
 
-import trw.dbsubsetter.db.{FullyQualifiedTableName, WhereClause}
+import scopt.OptionParser
 
 object CommandLineParser {
-  val parser: scopt.OptionParser[Config] = new scopt.OptionParser[Config]("DBSubsetter") {
+  val parser: OptionParser[Config] = new OptionParser("DBSubsetter") {
     head("DBSubsetter", "0.1")
     help("help").text("prints this usage text")
     version("version").text("prints the application version")
@@ -24,17 +24,16 @@ object CommandLineParser {
       .action((cs, c) => c.copy(targetDbConnectionString = cs))
       .text("JDBC connection string to the resulting small db")
 
-    opt[Map[FullyQualifiedTableName, WhereClause]]("baseQueries")
+    opt[String]("baseQuery")
       .required()
-      .valueName("<schema1.table1>=<whereClause1>,<schema2.table2>=<whereClause2>")
-      .validate(m => if (m.keys.forall(str => str.split("\\.").length == 2)) success else failure("Invalid format for --baseQueries"))
-      .action((bq, c) => c.copy(
-        baseQueries = bq.map { case (fqtn, whereClause) =>
-          val Array(schemaName, tableName) = fqtn.split("\\.")
-          (schemaName, tableName) -> whereClause
-        }
-      ))
-      .text("Starting tables and where-clauses for initial queries to kick off subsetting.")
+      .maxOccurs(Int.MaxValue)
+      .valueName("<schema.table>=<whereClause>")
+      .action { case (bq, c) =>
+        val Array(fullyQualifiedTable, whereClause) = bq.split("=", 2)
+        val Array(schema, table) = fullyQualifiedTable.split("""\.""", 2)
+        c.copy(baseQueries = ((schema, table), whereClause) :: c.baseQueries)
+      }
+      .text("Starting table and where-clause to kick off subsetting. Can be specified multiple times.")
 
     opt[Int]("originDbParallelism")
       .required()

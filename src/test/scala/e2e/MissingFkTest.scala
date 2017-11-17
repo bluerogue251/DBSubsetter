@@ -13,14 +13,15 @@ class MissingFkTest extends FunSuite with BeforeAndAfterAll {
 
   override protected def beforeAll(): Unit = {
     super.beforeAll()
-    "./util/missing_fk/reset_origin_db.sh".!!
+    //    "./util/missing_fk/reset_origin_db.sh".!!
     "./util/missing_fk/reset_target_db.sh".!!
 
     val args = Array(
       "--schemas", "public",
       "--originDbConnStr", "jdbc:postgresql://localhost:5490/missing_fk_origin?user=postgres",
       "--targetDbConnStr", targetConnString,
-      "--baseQueries", "public.table_1=id = 2", "public.table_a=id in (1,2,4)",
+      "--baseQuery", "public.table_1=id = 2",
+      "--baseQuery", "public.table_a=id in (1, 2, 4, 5)",
       "--originDbParallelism", "1",
       "--targetDbParallelism", "1"
     )
@@ -64,8 +65,12 @@ class MissingFkTest extends FunSuite with BeforeAndAfterAll {
     resultSet.next()
     val id2 = resultSet.getInt("id")
     assert(id2 === 2)
+    resultSet.next()
     val id4 = resultSet.getInt("id")
     assert(id4 === 4)
+    resultSet.next()
+    val id5 = resultSet.getInt("id")
+    assert(id5 === 5)
     assert(resultSet.next() === false)
   }
 
@@ -78,8 +83,10 @@ class MissingFkTest extends FunSuite with BeforeAndAfterAll {
   }
 
   test("Correct table_c records were included") {
-    val resultSet = targetConn.createStatement().executeQuery("select * from table_c")
-    assert(resultSet.next() === false)
+    val resultSet = targetConn.createStatement().executeQuery("select count(*) from table_c")
+    resultSet.next()
+    val count = resultSet.getInt(1)
+    assert(count === 0)
   }
 
   test("Correct table_d records were included") {

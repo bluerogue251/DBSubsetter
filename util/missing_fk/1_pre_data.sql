@@ -4,7 +4,7 @@ CREATE TABLE table_1 (
 
 CREATE TABLE table_2 (
   id         SERIAL PRIMARY KEY,
-  table_1_id INTEGER NOT NULL REFERENCES table_1 (id)
+  table_1_id INTEGER NOT NULL -- This points to table_1 (id), but we purposely leave off the FK at the DB level
 );
 
 CREATE TABLE table_a (
