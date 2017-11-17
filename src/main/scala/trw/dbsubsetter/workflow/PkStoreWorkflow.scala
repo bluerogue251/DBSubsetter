@@ -1,36 +1,45 @@
 package trw.dbsubsetter.workflow
 
-import trw.dbsubsetter.db.SchemaInfo
+import trw.dbsubsetter.db.{Row, Table}
 
 import scala.collection.mutable
 
 
-class PkStoreWorkflow(schemaInfo: SchemaInfo) {
-  private val tables = schemaInfo.tablesByName.values
-  private val pkStore = tables.map(t => t -> mutable.HashSet.empty[AnyRef]).toMap
-  private val pkOrdinalsByTable = tables.map(t => t -> schemaInfo.pkColsByTable(t).map(_.ordinalPosition - 1)).toMap
+class PkStoreWorkflow(pkOrdinalsByTable: Map[Table, Seq[Int]]) {
+  private val tables = pkOrdinalsByTable.keys
+  // Left side of the tuple is for parents, right side of the tuple is for children
+  // If a PK is on the children side, then both its children AND its parents have been fetched.
+  // IF a PK is on the parent side, then only its parents have been fetched
+  // There is no such thing as having fetched a row's children but not having fetched its parents
+  // If a PK is in there at all, then at any given time, it is either in the parent set or child set, never both at once.
+  private val pkStore: Map[Table, (mutable.HashSet[AnyRef], mutable.HashSet[AnyRef])] = tables.map { t =>
+    t -> (mutable.HashSet.empty[AnyRef], mutable.HashSet.empty[AnyRef])
+  }.toMap
 
   def process(request: PkRequest): List[PkResult] = {
+    val (parentStore, childStore) = pkStore(request.table)
     request match {
-      case fkt@FkTask(table, _, fkValue, _) =>
-        if (pkStore(table).contains(fkValue)) List.empty else List(fkt)
+      case fkt@FkTask(_, _, fkValue, true) =>
+        if (childStore.contains(fkValue)) List.empty else List(fkt)
+      case fkt@FkTask(_, _, fkValue, _) =>
+        if (parentStore.contains(fkValue) || childStore.contains(fkValue)) List.empty else List(fkt)
       case OriginDbResult(table, rows, fetchChildren) =>
-        val ordinals = pkOrdinalsByTable(table)
-        val isSingleColPk = ordinals.size == 1
-        val newRows = if (isSingleColPk) {
-          val pkOrdinal = ordinals.head
-          rows.filter { row =>
-            val pkValue = row(pkOrdinal)
-            pkStore(table).add(pkValue)
-          }
-        } else {
-          rows.filter { row =>
-            val pkValue = ordinals.map(row)
-            pkStore(table).add(pkValue)
-          }
-        }
+        val pkOrdinals = pkOrdinalsByTable(request.table)
+        val pkOrdinal = pkOrdinals.head
+        val isSingleColPk = pkOrdinals.size == 1
+        val getPkValue: Row => AnyRef = if (isSingleColPk) row => row(pkOrdinal) else row => pkOrdinals.map(row)
 
-        List(PksAdded(table, newRows, fetchChildren))
+        if (fetchChildren) {
+          val childrenNotYetFetched = rows.filter(row => childStore.add(getPkValue(row)))
+          val parentsNotYetFetched = childrenNotYetFetched.filterNot(row => parentStore.remove(getPkValue(row)))
+          List(PksAdded(table, parentsNotYetFetched, childrenNotYetFetched))
+        } else {
+          val newRows = rows.filter { row =>
+            val pkValue = getPkValue(row)
+            !childStore.contains(pkValue) && parentStore.add(pkValue)
+          }
+          List(PksAdded(table, newRows, Vector.empty))
+        }
     }
   }
 }

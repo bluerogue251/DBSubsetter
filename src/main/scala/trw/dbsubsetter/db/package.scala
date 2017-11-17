@@ -15,7 +15,7 @@ package object db {
 
   case class SchemaInfo(tablesByName: Map[(SchemaName, TableName), Table],
                         colsByTable: Map[Table, Vector[Column]],
-                        pkColsByTable: Map[Table, Vector[Column]],
+                        pkOrdinalsByTable: Map[Table, Vector[Int]],
                         fks: Set[ForeignKey],
                         fksFromTable: Map[Table, Set[ForeignKey]],
                         fksToTable: Map[Table, Set[ForeignKey]])
