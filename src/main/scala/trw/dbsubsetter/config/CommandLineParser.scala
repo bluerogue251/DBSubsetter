@@ -80,6 +80,17 @@ object CommandLineParser {
       .action((dbp, c) => c.copy(targetDbParallelism = dbp))
       .text("Maximum number of simultaneous open connections to the smaller target DB\n")
 
+    opt[Unit]("singleThreadedDebugMode")
+      .action((_, c) => c.copy(isSingleThreadedDebugMode = true))
+      .text(
+        """ (NOT Recommended) Run DBSubsetter in debug mode. This means:
+          |                               * We use a simpler single-threaded setup, avoid akka-streams, and avoid any parallel computations
+          |                               * `originDbParallelism` and `targetDbParallelism` values are ignored and implicitly set to 1
+          |                               * Subsetting may be significantly slower
+          |                               * The resulting subset should be exactly the same as in regular mode
+          |                               * This is not well tested so use with caution
+          |                               """.stripMargin)
+
     private val usageExamples =
       """
         |Examples:

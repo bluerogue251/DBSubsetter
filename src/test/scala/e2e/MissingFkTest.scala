@@ -3,7 +3,7 @@ package e2e
 import java.sql.{Connection, DriverManager}
 
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
-import trw.dbsubsetter.ApplicationSingleThreaded
+import trw.dbsubsetter.Application
 
 import scala.sys.process._
 
@@ -27,9 +27,10 @@ class MissingFkTest extends FunSuite with BeforeAndAfterAll {
       "--foreignKey", "public.table_a(points_to_table_id) ::: public.table_c(id) ::: table_a.points_to_table_name='points_to_table_c'",
       "--foreignKey", "public.table_a(points_to_table_id) ::: public.table_d(id) ::: table_a.points_to_table_name='points_to_table_d'",
       "--originDbParallelism", "1",
-      "--targetDbParallelism", "1"
+      "--targetDbParallelism", "1",
+      "--singleThreadedDebugMode"
     )
-    ApplicationSingleThreaded.main(args)
+    Application.main(args)
 
     "./util/missing_fk/post_subset_target.sh".!!
 

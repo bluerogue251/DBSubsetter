@@ -8,4 +8,5 @@ case class Config(schemas: Seq[String] = Seq.empty,
                   baseQueries: List[((SchemaName, TableName), WhereClause)] = List.empty,
                   cmdLineForeignKeys: List[CommandLineStandardForeignKey] = List.empty,
                   originDbParallelism: Int = 1,
-                  targetDbParallelism: Int = 1)
+                  targetDbParallelism: Int = 1,
+                  isSingleThreadedDebugMode: Boolean = false)

@@ -4,9 +4,6 @@
   LOG:  checkpoints are occurring too frequently (5 seconds apart)
   HINT:  Consider increasing the configuration parameter "max_wal_size".
 * Try to find memory/performance bottlenecks by profiling against a huge database
-* Better validation of user input against actual schema/tables. For instance better error messages when --baseQuery is wrong.
-* Make it configurable to run as single-threaded or as akka-streams version
 * Add some sort of way to shut down or otherwise finish the akka-streams version instead of hanging forever (otherwise how can we do automated tests of it?)
 * Add retry logic to DB Queries in case of failure
-* Allow for copying all the data of a particular table, regardless of whether it is pointed to by a FK (performance / memory usage improvement?)
-  -- Maybe allow for not fetching children of baseQuery (on a per-baseQuery basis) would do this without additional code -- but shouldn't/couldn't that feature be further optimized anyways?)
+* Allow for not fetching children of baseQuery (on a per-baseQuery basis)

@@ -3,7 +3,7 @@ package e2e
 import java.sql.{Connection, DriverManager}
 
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
-import trw.dbsubsetter.ApplicationSingleThreaded
+import trw.dbsubsetter.Application
 
 import scala.sys.process._
 
@@ -22,9 +22,10 @@ class CircularDepTest extends FunSuite with BeforeAndAfterAll {
       "--targetDbConnStr", targetConnString,
       "--baseQuery", "public.grandparents=id % 6 = 0",
       "--originDbParallelism", "1",
-      "--targetDbParallelism", "1"
+      "--targetDbParallelism", "1",
+      "--singleThreadedDebugMode"
     )
-    ApplicationSingleThreaded.main(args)
+    Application.main(args)
 
     "./util/circular_dep/post_subset_target.sh".!!
 
