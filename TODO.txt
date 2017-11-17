@@ -3,7 +3,6 @@
   --fk "public.homework_grades:public.essay_assignments:public.homework_grades.assignment_type = 'essay' and public.homework_grades.assignment_id = public.essay_assignments.id"
 * Account for FKs which are Rails-like polymorphism with a hard-coded value as part of the FK.
 * Allow for copying all the data of a particular table, even if not pointed to by a FK
-* Test circular dependency effect on fetchChildren and whether this can cause bugs
 * Try to support MySQL, SQL Server, and Oracle
 * Benchmark against rdms-subsetter / jailer / single-threaded DBSubsetter for both computeTime & memoryUsage
 * Docker: address error message during postgresql data loading:
@@ -13,6 +12,6 @@
 
 * Better validation of user input against actual schema/tables. For instance better error messages when --baseQueries is wrong.
 * Make it configurable to run as single-threaded or as akka-streams version
-* Add some sort of way to shut down or otherwise finish the akka-streams version instead of hanging forever
+* Add some sort of way to shut down or otherwise finish the akka-streams version instead of hanging forever (otherwise how can we do automated tests of it?)
 * Consider the value in parallelizing or otherwise optimizing PkStore lookups
 * Add retry logic to DB Queries in case of failure

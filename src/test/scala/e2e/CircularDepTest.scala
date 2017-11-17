@@ -44,27 +44,6 @@ class CircularDepTest extends FunSuite with BeforeAndAfterAll {
     assert(grandparentCount === 167)
   }
 
-  test("Correct number of parents were included") {
-    val resultSet = targetConn.createStatement().executeQuery("select count(*) from parents")
-    resultSet.next()
-    val parentCount = resultSet.getInt(1)
-    assert(parentCount === 16700)
-  }
-
-  test("Correct number of children were included") {
-    val resultSet = targetConn.createStatement().executeQuery("select count(*) from children")
-    resultSet.next()
-    val childrenCount = resultSet.getInt(1)
-    assert(childrenCount === 167000)
-  }
-
-  test("Duplicate rows are not inserted") {
-    val resultSet = targetConn.createStatement().executeQuery("select count(*) from parents where id = 0 and grandparent_id = 0")
-    resultSet.next()
-    val count = resultSet.getInt(1)
-    assert(count === 1)
-  }
-
   test("All grandparents have 100 parents") {
     (0 to 1000 by 6).foreach { i =>
       val parentResultSet = targetConn.createStatement().executeQuery(s"select count(*) from parents where grandparent_id = $i")

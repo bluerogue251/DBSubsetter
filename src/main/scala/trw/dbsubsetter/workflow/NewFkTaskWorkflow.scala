@@ -4,9 +4,9 @@ import trw.dbsubsetter.db._
 
 object NewFkTaskWorkflow {
   def process(pksAdded: PksAdded, sch: SchemaInfo): Vector[FkTask] = {
-    val PksAdded(table, rows, fetchChildren) = pksAdded
-    val parentTasks = calcParentTasks(sch, table, rows)
-    val childTasks = if (fetchChildren) calcChildTasks(sch, table, rows) else Vector.empty
+    val PksAdded(table, rowsNeedingParentTasks, rowsNeedingChildTasks) = pksAdded
+    val parentTasks = calcParentTasks(sch, table, rowsNeedingParentTasks)
+    val childTasks = calcChildTasks(sch, table, rowsNeedingChildTasks)
     parentTasks ++ childTasks
   }
 
