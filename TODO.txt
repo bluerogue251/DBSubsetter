@@ -1,8 +1,5 @@
 * Test more different data types / foreign key types
-* Allow for specifying a FK from command line even if that FK is not enforced in DB
-  --fk "public.homework_grades:public.essay_assignments:public.homework_grades.assignment_type = 'essay' and public.homework_grades.assignment_id = public.essay_assignments.id"
-* Account for FKs which are Rails-like polymorphism with a hard-coded value as part of the FK.
-* Allow for copying all the data of a particular table, even if not pointed to by a FK
+* Allow for copying all the data of a particular table, regardless of whether it is pointed to by a FK
 * Try to support MySQL, SQL Server, and Oracle
 * Benchmark against rdms-subsetter / jailer / single-threaded DBSubsetter for both computeTime & memoryUsage
 * Docker: address error message during postgresql data loading:
