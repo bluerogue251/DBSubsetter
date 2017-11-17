@@ -24,6 +24,8 @@ class MissingFkTest extends FunSuite with BeforeAndAfterAll {
       "--baseQuery", "public.table_a=id in (1, 2, 4, 5)",
       "--foreignKey", "public.table_2(table_1_id) ::: public.table_1(id)",
       "--foreignKey", "public.table_a(points_to_table_id) ::: public.table_b(id) ::: table_a.points_to_table_name='points_to_table_b'",
+      "--foreignKey", "public.table_a(points_to_table_id) ::: public.table_c(id) ::: table_a.points_to_table_name='points_to_table_c'",
+      "--foreignKey", "public.table_a(points_to_table_id) ::: public.table_d(id) ::: table_a.points_to_table_name='points_to_table_d'",
       "--originDbParallelism", "1",
       "--targetDbParallelism", "1"
     )
@@ -81,6 +83,9 @@ class MissingFkTest extends FunSuite with BeforeAndAfterAll {
     resultSet.next()
     val id1 = resultSet.getInt("id")
     assert(id1 === 1)
+    resultSet.next()
+    val id2 = resultSet.getInt("id")
+    assert(id2 === 2)
     assert(resultSet.next() === false)
   }
 

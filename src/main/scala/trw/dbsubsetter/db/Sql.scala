@@ -13,15 +13,14 @@ object Sql {
 
       val sqlString = fk match {
         case ForeignKey(_, _, _, None) =>
-          val whereClause = whereClauseColumnParts.mkString(" and ")
-          makeQueryString(table, whereClause)
-        case ForeignKey(fromCols, toCols, _, Some(whereClause)) =>
-          val wc = (whereClauseColumnParts :+ whereClause).mkString(" and ")
+          makeQueryString(table, whereClauseColumnParts.mkString(" and "))
+        case ForeignKey(fromCols, toCols, _, Some(additionalWhereClause)) =>
+          val whereClause = (whereClauseColumnParts :+ additionalWhereClause).mkString(" and ")
           val otherTable = if (table == fk.toTable) fk.fromTable else fk.toTable
           val joinClause = fromCols.zip(toCols).map { case (f, t) => s"${f.fullyQualifiedName} = ${t.fullyQualifiedName}" }.mkString(" and ")
           s"""select ${table.fullyQualifiedName}.*
-              | from ${table.fullyQualifiedName}
-              | inner join $otherTable on $joinClause
+             | from ${table.fullyQualifiedName}
+              | inner join ${otherTable.fullyQualifiedName} on $joinClause
               | where $whereClause""".stripMargin
 
       }
