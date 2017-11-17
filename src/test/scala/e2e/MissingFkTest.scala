@@ -13,7 +13,7 @@ class MissingFkTest extends FunSuite with BeforeAndAfterAll {
 
   override protected def beforeAll(): Unit = {
     super.beforeAll()
-    //    "./util/missing_fk/reset_origin_db.sh".!!
+    "./util/missing_fk/reset_origin_db.sh".!!
     "./util/missing_fk/reset_target_db.sh".!!
 
     val args = Array(
