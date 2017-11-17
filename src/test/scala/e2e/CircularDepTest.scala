@@ -1,12 +1,10 @@
 package e2e
 
-import java.sql.{Connection, DriverManager, ResultSet}
+import java.sql.{Connection, DriverManager}
 
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 import trw.dbsubsetter.ApplicationSingleThreaded
-import trw.dbsubsetter.db.Row
 
-import scala.collection.mutable.ArrayBuffer
 import scala.sys.process._
 
 class CircularDepTest extends FunSuite with BeforeAndAfterAll {
@@ -39,43 +37,11 @@ class CircularDepTest extends FunSuite with BeforeAndAfterAll {
     targetConn.close()
   }
 
-  def jdbcResultToRows(res: ResultSet, numCols: Int): Vector[Row] = {
-    val rows = ArrayBuffer.empty[Row]
-
-    while (res.next()) {
-      val row = new Array[AnyRef](numCols)
-      (1 to numCols).foreach(i => row(i - 1) = res.getObject(i))
-      rows += row
-    }
-    rows.toVector
-  }
-
   test("Correct number of grandparents were included") {
     val resultSet = targetConn.createStatement().executeQuery("select count(*) from grandparents")
     resultSet.next()
     val grandparentCount = resultSet.getInt(1)
     assert(grandparentCount === 167)
-  }
-
-  test("Correct number of parents were included") {
-    val resultSet = targetConn.createStatement().executeQuery("select count(*) from parents")
-    resultSet.next()
-    val parentCount = resultSet.getInt(1)
-    assert(parentCount === 16700)
-  }
-
-  test("Correct number of children were included") {
-    val resultSet = targetConn.createStatement().executeQuery("select count(*) from children")
-    resultSet.next()
-    val childrenCount = resultSet.getInt(1)
-    assert(childrenCount === 167000)
-  }
-
-  test("Duplicate rows are not inserted") {
-    val resultSet = targetConn.createStatement().executeQuery("select count(*) from parents where id = 0 and grandparent_id = 0")
-    resultSet.next()
-    val count = resultSet.getInt(1)
-    assert(count === 1)
   }
 
   test("All grandparents have 100 parents") {
