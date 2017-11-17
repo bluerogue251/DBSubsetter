@@ -48,15 +48,8 @@ object CommandLineParser {
       .action { case (fk, c) =>
         val r = """(.+)\.(.+)\((.+)\)\s*:::\s*(.+)\.(.+)\((.+)\)""".r
         fk match {
-          case r(fromSchema, fromTable, fromColumns, toSchema, toTable, toColumns) =>
-            val fk = CommandLineStandardForeignKey(
-              fromSchema,
-              fromTable,
-              fromColumns.split(",").toList,
-              toSchema,
-              toTable,
-              toColumns.split(",").toList
-            )
+          case r(fromSch, fromTbl, fromCols, toSch, toTbl, toCols) =>
+            val fk = CommandLineStandardForeignKey(fromSch, fromTbl, fromCols.split(",").toList, toSch, toTbl, toCols.split(",").toList)
             c.copy(cmdLineStandardFks = fk :: c.cmdLineStandardFks)
           case _ => throw new RuntimeException()
         }
@@ -73,13 +66,7 @@ object CommandLineParser {
         val r = """(.+)\.(.+)\s*:::\s*(.+)\.(.+)\s*:::\s*(.+)""".r
         fk match {
           case r(fromSchema, fromTable, toSchema, toTable, whereClause) =>
-            val fk = CommandLineWhereClauseForeignKey(
-              fromSchema,
-              fromTable,
-              toSchema,
-              toTable,
-              whereClause
-            )
+            val fk = CommandLineWhereClauseForeignKey(fromSchema, fromTable, toSchema, toTable, whereClause)
             c.copy(cmdLineWhereClauseFks = fk :: c.cmdLineWhereClauseFks)
           case _ => throw new RuntimeException()
         }
