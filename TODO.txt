@@ -1,4 +1,6 @@
-* Test more different data types / foreign key types
+* Test custom postgres data types -- add feature to exclude columns
+* Test the school DB in an automated test
+* Test the akka-streams versions of things alongside the singleThreadedDebugMode
 * Try to support MySQL, SQL Server, and Oracle
 * Docker: address error message during postgresql data loading:
   LOG:  checkpoints are occurring too frequently (5 seconds apart)
@@ -7,3 +9,5 @@
 * Add some sort of way to shut down or otherwise finish the akka-streams version instead of hanging forever (otherwise how can we do automated tests of it?)
 * Add retry logic to DB Queries in case of failure
 * Allow for not fetching children of baseQuery (on a per-baseQuery basis)
+* Support tables without primary keys
+* Investigate whether optimization is possible via changing AnyRef to Any and then using primitive Ints instead of Integer for PK storage, etc.
