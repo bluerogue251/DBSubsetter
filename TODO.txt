@@ -1,3 +1,4 @@
+* Test primary key comes AFTER a column that has been excluded -- column Ordinal should take into account excluded columns
 * Test the school DB in an automated test
 * Test the akka-streams versions of things alongside the singleThreadedDebugMode
 * Try to support MySQL, SQL Server, and Oracle
