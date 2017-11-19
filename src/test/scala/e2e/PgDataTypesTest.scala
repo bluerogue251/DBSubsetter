@@ -22,17 +22,21 @@ class PgDataTypesTest extends FunSuite with BeforeAndAfterAll {
       "--targetDbConnStr", targetConnString,
       "--baseQuery", "public.arrays_table=true",
       "--baseQuery", "public.binary_table=true",
-      //      "--baseQuery", "public.bit_string_table=true", // not working
-      //      "--baseQuery", "public.enum_table=true", // not working
+      "--baseQuery", "public.bit_string_table=true",
+      "--baseQuery", "public.enum_table=true",
       "--baseQuery", "public.geometric_table=true",
       "--baseQuery", "public.hstore_table=true",
       "--baseQuery", "public.json_table=true",
-      //      "--baseQuery", "public.money_table=true", // not working
+      "--baseQuery", "public.money_table=true",
       "--baseQuery", "public.network_address_table=true",
       "--baseQuery", "public.range_table=true",
       "--baseQuery", "public.text_search_table=true",
       "--baseQuery", "public.times_table=true",
       "--baseQuery", "public.xml_table=true",
+      // The following data types are unfortunately not working yet
+      "--excludeColumns", "public.money_table(money)",
+      "--excludeColumns", "public.enum_table(enum)",
+      "--excludeColumns", "public.bit_string_table(bit_1, bit_5)",
       "--originDbParallelism", "1",
       "--targetDbParallelism", "1",
       "--singleThreadedDebugMode"

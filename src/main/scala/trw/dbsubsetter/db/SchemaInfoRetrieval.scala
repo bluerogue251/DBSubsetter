@@ -29,12 +29,14 @@ object SchemaInfoRetrieval {
 
       val columnsJdbcResultSet = ddl.getColumns(null, schema, null, null)
       while (columnsJdbcResultSet.next()) {
-        columnsQueryResult += ColumnQueryRow(
-          columnsJdbcResultSet.getString("TABLE_SCHEM"),
-          columnsJdbcResultSet.getString("TABLE_NAME"),
-          columnsJdbcResultSet.getString("COLUMN_NAME"),
-          columnsJdbcResultSet.getInt("ORDINAL_POSITION")
-        )
+        val schema = columnsJdbcResultSet.getString("TABLE_SCHEM")
+        val table = columnsJdbcResultSet.getString("TABLE_NAME")
+        val columnName = columnsJdbcResultSet.getString("COLUMN_NAME")
+        val ordinalPosition = columnsJdbcResultSet.getInt("ORDINAL_POSITION")
+
+        if (!config.excludeColumns((schema, table)).contains(columnName)) {
+          columnsQueryResult += ColumnQueryRow(schema, table, columnName, ordinalPosition)
+        }
       }
 
       // Args: catalog, schema, table

@@ -54,10 +54,10 @@ object CommandLineParser {
 
         fk match {
           case whereClauseFkRegex(fromSch, fromTbl, fromCols, toSch, toTbl, toCols, whereClause) =>
-            val fk = CommandLineStandardForeignKey(fromSch, fromTbl, fromCols.split(",").toList, toSch, toTbl, toCols.split(",").toList, Some(whereClause))
+            val fk = CmdLineForeignKey(fromSch, fromTbl, fromCols.split(",").toList, toSch, toTbl, toCols.split(",").toList, Some(whereClause))
             c.copy(cmdLineForeignKeys = fk :: c.cmdLineForeignKeys)
           case standardFkRegex(fromSch, fromTbl, fromCols, toSch, toTbl, toCols) =>
-            val fk = CommandLineStandardForeignKey(fromSch, fromTbl, fromCols.split(",").toList, toSch, toTbl, toCols.split(",").toList, None)
+            val fk = CmdLineForeignKey(fromSch, fromTbl, fromCols.split(",").toList, toSch, toTbl, toCols.split(",").toList, None)
             c.copy(cmdLineForeignKeys = fk :: c.cmdLineForeignKeys)
           case _ => throw new RuntimeException()
         }
@@ -65,6 +65,27 @@ object CommandLineParser {
       .text(
         """Foreign keys to enforce during subsetting even though they are not defined in the database
           |                           Optionally specify a "where clause" to additionally restrict the defined foreign key as needed
+          |                           Can be specified multiple times
+          |                           """.stripMargin)
+
+    opt[String]("excludeColumns")
+      .valueName("<schema>.<table>(<column1>, <column2>, ...)")
+      .maxOccurs(Int.MaxValue)
+      .action { (ic, c) =>
+        val regex = """\s*(.+)\.(.+)\((.+)\)\s*""".r
+        ic match {
+          case regex(schema, table, columnListString) =>
+            val alreadyExcluded = c.excludeColumns((schema, table))
+            val newlyExcluded = columnListString.split(",").map(_.trim).toSet
+            c.copy(excludeColumns = c.excludeColumns.updated((schema, table), alreadyExcluded ++ newlyExcluded))
+          case _ => throw new RuntimeException
+
+        }
+      }
+      .text(
+        """Exclude a list of columns from the resulting subsetted data
+          |                           Intended only for columns that are not part of any primary keys or foreign keys
+          |                           Useful as a workaround if DBSubsetter does not support a vendor-specific data type
           |                           Can be specified multiple times
           |                           """.stripMargin)
 
@@ -83,12 +104,11 @@ object CommandLineParser {
     opt[Unit]("singleThreadedDebugMode")
       .action((_, c) => c.copy(isSingleThreadedDebugMode = true))
       .text(
-        """ (NOT Recommended) Run DBSubsetter in debug mode. This means:
-          |                               * We use a simpler single-threaded setup, avoid akka-streams, and avoid any parallel computations
-          |                               * `originDbParallelism` and `targetDbParallelism` values are ignored and implicitly set to 1
-          |                               * Subsetting may be significantly slower
-          |                               * The resulting subset should be exactly the same as in regular mode
-          |                               * This is not well tested so use with caution
+        """ (NOT Recommended) Run DBSubsetter in debug mode
+          |                               Uses a simple single-threaded setup, avoids akka-streams and parallel computations
+          |                               Ignores `originDbParallelism` and `targetDbParallelism` settings and uses just 1 connection to each
+          |                               Subsetting may be significantly slower
+          |                               The resulting subset should be exactly the same as in regular mode
           |                               """.stripMargin)
 
     private val usageExamples =
@@ -116,10 +136,10 @@ object CommandLineParser {
   }
 }
 
-case class CommandLineStandardForeignKey(fromSchema: SchemaName,
-                                         fromTable: TableName,
-                                         fromColumns: List[ColumnName],
-                                         toSchema: SchemaName,
-                                         toTable: TableName,
-                                         toColumns: List[ColumnName],
-                                         whereClause: Option[WhereClause])
+case class CmdLineForeignKey(fromSchema: SchemaName,
+                             fromTable: TableName,
+                             fromColumns: List[ColumnName],
+                             toSchema: SchemaName,
+                             toTable: TableName,
+                             toColumns: List[ColumnName],
+                             whereClause: Option[WhereClause])
