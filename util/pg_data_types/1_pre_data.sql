@@ -53,11 +53,12 @@ CREATE TABLE network_address_table (
 );
 
 CREATE TABLE bit_string_table (
-  id                    SERIAL PRIMARY KEY,
   bit_1                 BIT,
   bit_5                 BIT(5),
   bit_varying_unlimited BIT VARYING,
-  bit_varying_10        BIT VARYING(10)
+  bit_varying_10        BIT VARYING(10),
+  -- edge case: primary key after a column that will be configured as excluded
+  id                    SERIAL PRIMARY KEY
 );
 
 CREATE TABLE text_search_table (

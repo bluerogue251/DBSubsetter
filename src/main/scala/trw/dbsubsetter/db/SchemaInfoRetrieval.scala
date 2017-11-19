@@ -32,10 +32,9 @@ object SchemaInfoRetrieval {
         val schema = columnsJdbcResultSet.getString("TABLE_SCHEM")
         val table = columnsJdbcResultSet.getString("TABLE_NAME")
         val columnName = columnsJdbcResultSet.getString("COLUMN_NAME")
-        val ordinalPosition = columnsJdbcResultSet.getInt("ORDINAL_POSITION")
 
         if (!config.excludeColumns((schema, table)).contains(columnName)) {
-          columnsQueryResult += ColumnQueryRow(schema, table, columnName, ordinalPosition)
+          columnsQueryResult += ColumnQueryRow(schema, table, columnName)
         }
       }
 
@@ -72,7 +71,7 @@ object SchemaInfoRetrieval {
       columnsQueryResult
         .groupBy(c => tablesByName(c.schema, c.table))
         .map { case (table, partialColumns) =>
-          table -> partialColumns.map(pc => pc.name -> Column(table, pc.name, pc.ordinalPosition)).toMap
+          table -> partialColumns.zipWithIndex.map { case (pc, i) => pc.name -> Column(table, pc.name, i) }.toMap
         }
     }
     val colByTableOrdered: Map[Table, Vector[Column]] = {
@@ -83,7 +82,7 @@ object SchemaInfoRetrieval {
       primaryKeysQueryResult
         .groupBy(pk => tablesByName(pk.schema, pk.table))
         .map { case (table, partialPks) =>
-          table -> partialPks.map(ppk => colsByTableAndName(table)(ppk.column)).toVector.map(_.ordinalPosition - 1).sorted
+          table -> partialPks.map(ppk => colsByTableAndName(table)(ppk.column)).toVector.map(_.ordinalPosition).sorted
         }
     }
 
@@ -101,7 +100,7 @@ object SchemaInfoRetrieval {
           val fromCols = partialForeignKeys.map { pfk => colsByTableAndName(fromTable)(pfk.fromColumn) }.toVector
           val toTable = tablesByName(toSchemaName, toTableName)
           val toCols = partialForeignKeys.map { pfk => colsByTableAndName(toTable)(pfk.toColumn) }.toVector
-          val pointsToPk = pkColumnOrdinalsByTable(toTable) == toCols.map(_.ordinalPosition - 1).sorted
+          val pointsToPk = pkColumnOrdinalsByTable(toTable) == toCols.map(_.ordinalPosition).sorted
 
           ForeignKey(fromCols, toCols, pointsToPk, partialForeignKeys.head.whereClauseOpt)
         }.toSet
@@ -127,8 +126,7 @@ object SchemaInfoRetrieval {
 
   private[this] case class ColumnQueryRow(schema: SchemaName,
                                           table: TableName,
-                                          name: ColumnName,
-                                          ordinalPosition: Int)
+                                          name: ColumnName)
 
   private[this] case class PrimaryKeyQueryRow(schema: SchemaName,
                                               table: TableName,

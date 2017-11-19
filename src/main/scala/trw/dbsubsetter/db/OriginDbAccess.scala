@@ -31,7 +31,7 @@ class OriginDbAccess(connStr: String, sch: SchemaInfo) {
   }
 
   private def jdbcResultToRows(res: ResultSet, table: Table): Vector[Row] = {
-    val cols = sch.colsByTable(table).size
+    val cols = sch.colsByTableOrdered(table).size
     val rows = ArrayBuffer.empty[Row]
     while (res.next()) {
       val row = new Array[AnyRef](cols)

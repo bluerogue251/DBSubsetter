@@ -27,7 +27,7 @@ object NewFkTaskWorkflow {
   }
 
   private def getForeignKeyValues(fk: ForeignKey, cols: Vector[Column], rows: Vector[Row]): Vector[AnyRef] = {
-    val ordinalPositions = cols.map(_.ordinalPosition - 1)
+    val ordinalPositions = cols.map(_.ordinalPosition)
     if (fk.isSingleCol) {
       val ordinalPosition = ordinalPositions.head
       rows.map(row => row(ordinalPosition))
