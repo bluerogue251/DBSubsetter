@@ -13,12 +13,13 @@ object Sql {
 
       val sqlString = fk match {
         case ForeignKey(_, _, _, None) =>
-          makeQueryString(table, whereClauseColumnParts.mkString(" and "))
+          makeQueryString(table, whereClauseColumnParts.mkString(" and "), sch)
         case ForeignKey(fromCols, toCols, _, Some(additionalWhereClause)) =>
+          val selectCols = sch.colsByTableOrdered(table).map(_.fullyQualifiedName).mkString(", ")
           val whereClause = (whereClauseColumnParts :+ additionalWhereClause).mkString(" and ")
           val otherTable = if (table == fk.toTable) fk.fromTable else fk.toTable
           val joinClause = fromCols.zip(toCols).map { case (f, t) => s"${f.fullyQualifiedName} = ${t.fullyQualifiedName}" }.mkString(" and ")
-          s"""select ${table.fullyQualifiedName}.*
+          s"""select $selectCols
              | from ${table.fullyQualifiedName}
               | inner join ${otherTable.fullyQualifiedName} on $joinClause
               | where $whereClause""".stripMargin
@@ -30,7 +31,7 @@ object Sql {
 
   def preparedInsertStatementStrings(sch: SchemaInfo): Map[Table, SqlQuery] = {
     sch.tablesByName.map { case (tableName, table) =>
-      val cols = sch.colsByTable(table)
+      val cols = sch.colsByTableOrdered(table)
       val sqlString =
         s"""insert into ${table.fullyQualifiedName}
            |${cols.map(_.quotedName).mkString("(", ",", ")")}
@@ -39,8 +40,9 @@ object Sql {
     }
   }
 
-  def makeQueryString(table: Table, whereClause: WhereClause): SqlQuery = {
-    s"""select ${table.fullyQualifiedName}.*
+  def makeQueryString(table: Table, whereClause: WhereClause, sch: SchemaInfo): SqlQuery = {
+    val selectCols = sch.colsByTableOrdered(table).map(_.fullyQualifiedName).mkString(", ")
+    s"""select $selectCols
          | from ${table.fullyQualifiedName}
          | where $whereClause
          | """.stripMargin

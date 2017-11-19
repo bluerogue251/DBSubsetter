@@ -6,10 +6,10 @@ CREATE TABLE districts (
 );
 
 CREATE TABLE schools (
-  id          SERIAL PRIMARY KEY,
   district_id INTEGER   NOT NULL, -- Foreign Key purposely left out (must be specified manually as argument on program startup)
   name        TEXT      NOT NULL,
-  mascot      TEXT      NOT NULL,
+  mascot      TEXT      NULL,
+  id          SERIAL PRIMARY KEY, -- Edge case: PK is not first column in table and appears after a column that is marked as excluded (mascot).
   created_at  TIMESTAMP NOT NULL,
   updated_at  TIMESTAMP NOT NULL
 );
