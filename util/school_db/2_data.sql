@@ -120,7 +120,7 @@ INSERT INTO "Audit".events (id, event_type_key, district_id, school_id, student_
     now()
   FROM school_assignments sa
     INNER JOIN schools sc ON sa.school_id = sc.id
-    CROSS JOIN generate_series(0, 100) AS seq; -- (0, 2000) would generate ~ 200 GB of data once indices are created
+    CROSS JOIN generate_series(0, 10) AS seq; -- (0, 2000) would generate ~ 200 GB of data once indices are created
 
 -- "Polymorphic foreign key" data
 INSERT INTO multiple_choice_assignments (id, assignment_name, created_at) VALUES
@@ -145,23 +145,22 @@ INSERT INTO essay_assignments (id, name, created_at) VALUES
 INSERT INTO homework_grades (student_id, assignment_type, assignment_id, grade, autograded, created_at, updated_at)
   SELECT
     s.student_id,
-    (SELECT sub.*
-     FROM (SELECT unnest(ARRAY ['worksheet', 'essay', 'multiple choice'])) sub
-     ORDER BY random()
-     LIMIT 1),
-    (SELECT sub.*
-     FROM (SELECT unnest(ARRAY [1, 2, 3, 4])) sub
-     ORDER BY random()
-     LIMIT 1),
+    CASE WHEN seq % 3 = 0
+      THEN 'worksheet'
+    WHEN seq % 5 = 0
+      THEN 'essay'
+    ELSE 'multiple choice' END,
+    -- randomly pick an assignment type
+    seq % 4 + 1,
+    -- random number from 1 to 4
     random(),
-    (SELECT sub.*
-     FROM (SELECT unnest(ARRAY [TRUE, FALSE])) sub
-     ORDER BY random()
-     LIMIT 1),
+    CASE WHEN seq % 3 = 0
+      THEN TRUE
+    ELSE FALSE END,
     now(),
     now()
   FROM "Students" s
-    CROSS JOIN generate_series(0, 100) AS seq;
+    CROSS JOIN generate_series(0, 3) AS seq;
 
 -- Isolated table data
 INSERT INTO standalone_table (note, created_on) VALUES
