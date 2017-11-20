@@ -1,7 +1,7 @@
 package trw.dbsubsetter.config
 
 import scopt.OptionParser
-import trw.dbsubsetter.db.{ColumnName, SchemaName, TableName, WhereClause}
+import trw.dbsubsetter.db.{ColumnName, SchemaName, TableName}
 
 object CommandLineParser {
   val parser: OptionParser[Config] = new OptionParser[Config]("DBSubsetter") {
@@ -47,17 +47,13 @@ object CommandLineParser {
 
     opt[String]("foreignKey")
       .maxOccurs(Int.MaxValue)
-      .valueName("<schema1>.<table1>(<column1>, <column2>, ...) ::: <schema2>.<table2>(<column3>, <column4>, ...) [::: whereClause]")
+      .valueName("<schema1>.<table1>(<column1>, <column2>, ...) ::: <schema2>.<table2>(<column3>, <column4>, ...)")
       .action { case (fk, c) =>
-        val whereClauseFkRegex = """(.+)\.(.+)\((.+)\)\s*:::\s*(.+)\.(.+)\((.+)\)\s*:::\s*(.+)""".r
-        val standardFkRegex = """(.+)\.(.+)\((.+)\)\s*:::\s*(.+)\.(.+)\((.+)\)""".r
+        val regex = """(.+)\.(.+)\((.+)\)\s*:::\s*(.+)\.(.+)\((.+)\)""".r
 
         fk match {
-          case whereClauseFkRegex(fromSch, fromTbl, fromCols, toSch, toTbl, toCols, whereClause) =>
-            val fk = CmdLineForeignKey(fromSch, fromTbl, fromCols.split(",").toList.map(_.trim), toSch, toTbl, toCols.split(",").toList, Some(whereClause))
-            c.copy(cmdLineForeignKeys = fk :: c.cmdLineForeignKeys)
-          case standardFkRegex(fromSch, fromTbl, fromCols, toSch, toTbl, toCols) =>
-            val fk = CmdLineForeignKey(fromSch, fromTbl, fromCols.split(",").toList.map(_.trim), toSch, toTbl, toCols.split(",").toList, None)
+          case regex(fromSch, fromTbl, fromCols, toSch, toTbl, toCols) =>
+            val fk = CmdLineForeignKey(fromSch, fromTbl, fromCols.split(",").toList.map(_.trim), toSch, toTbl, toCols.split(",").toList)
             c.copy(cmdLineForeignKeys = fk :: c.cmdLineForeignKeys)
           case _ => throw new RuntimeException()
         }
@@ -158,8 +154,7 @@ case class CmdLineForeignKey(fromSchema: SchemaName,
                              fromColumns: List[ColumnName],
                              toSchema: SchemaName,
                              toTable: TableName,
-                             toColumns: List[ColumnName],
-                             whereClause: Option[WhereClause])
+                             toColumns: List[ColumnName])
 
 case class CmdLinePrimaryKey(schema: SchemaName,
                              table: TableName,

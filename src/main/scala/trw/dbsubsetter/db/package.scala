@@ -30,7 +30,7 @@ package object db {
     val fullyQualifiedName: String = s"""${table.fullyQualifiedName}.$quotedName"""
   }
 
-  case class ForeignKey(fromCols: Vector[Column], toCols: Vector[Column], pointsToPk: Boolean, additionalWhereClauseOpt: Option[WhereClause]) {
+  case class ForeignKey(fromCols: Vector[Column], toCols: Vector[Column], pointsToPk: Boolean) {
     val fromTable: Table = fromCols.head.table
     val toTable: Table = toCols.head.table
 

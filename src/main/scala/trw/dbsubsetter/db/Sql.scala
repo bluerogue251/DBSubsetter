@@ -9,23 +9,8 @@ object Sql {
 
     allCombos.map { case (fk, table) =>
       val whereClauseCols = if (table == fk.toTable) fk.toCols else fk.fromCols
-      val whereClauseColumnParts = whereClauseCols.map(col => s"${col.fullyQualifiedName} = ?")
-
-      val sqlString = fk match {
-        case ForeignKey(_, _, _, None) =>
-          makeQueryString(table, whereClauseColumnParts.mkString(" and "), sch)
-        case ForeignKey(fromCols, toCols, _, Some(additionalWhereClause)) =>
-          val selectCols = sch.colsByTableOrdered(table).map(_.fullyQualifiedName).mkString(", ")
-          val whereClause = (whereClauseColumnParts :+ additionalWhereClause).mkString(" and ")
-          val otherTable = if (table == fk.toTable) fk.fromTable else fk.toTable
-          val joinClause = fromCols.zip(toCols).map { case (f, t) => s"${f.fullyQualifiedName} = ${t.fullyQualifiedName}" }.mkString(" and ")
-          s"""select $selectCols
-             | from ${table.fullyQualifiedName}
-              | inner join ${otherTable.fullyQualifiedName} on $joinClause
-              | where $whereClause""".stripMargin
-
-      }
-      (fk, table) -> sqlString
+      val whereClause = whereClauseCols.map(col => s"${col.fullyQualifiedName} = ?").mkString(" and ")
+      (fk, table) -> makeQueryString(table, whereClause, sch)
     }.toMap
   }
 

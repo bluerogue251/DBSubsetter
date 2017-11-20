@@ -9,3 +9,5 @@
 * Consider better support for uncommon data types such as money, enums, arrays of enums, etc
   -- Could the enum case be addressed via type casting in a way that does not cause other bugs or harm performance?
 * Add README.md
+* Test a self-referencing foreign key
+* Add option to support Rails "polymorphic associations" / Hibernate "discriminator column STI"
