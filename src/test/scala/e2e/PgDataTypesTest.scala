@@ -32,6 +32,7 @@ class PgDataTypesTest extends FunSuite with BeforeAndAfterAll {
       "--baseQuery", "public.range_table=true",
       "--baseQuery", "public.text_search_table=true",
       "--baseQuery", "public.times_table=true",
+      "--baseQuery", "public.uuid_child_table=true",
       "--baseQuery", "public.xml_table=true",
       // The following data types are unfortunately not working yet
       "--excludeColumns", "public.money_table(money)",
