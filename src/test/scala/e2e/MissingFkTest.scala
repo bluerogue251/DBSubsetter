@@ -26,6 +26,7 @@ class MissingFkTest extends FunSuite with BeforeAndAfterAll {
       "--foreignKey", "public.table_a(points_to_table_id) ::: public.table_b(id) ::: table_a.points_to_table_name='points_to_table_b'",
       "--foreignKey", "public.table_a(points_to_table_id) ::: public.table_c(id) ::: table_a.points_to_table_name='points_to_table_c'",
       "--foreignKey", "public.table_a(points_to_table_id) ::: public.table_d(id) ::: table_a.points_to_table_name='points_to_table_d'",
+      "--primaryKey", "public.table_4(table_1_id, table_3_id)",
       "--originDbParallelism", "1",
       "--targetDbParallelism", "1",
       "--singleThreadedDebugMode"
@@ -59,6 +60,40 @@ class MissingFkTest extends FunSuite with BeforeAndAfterAll {
     resultSet.next()
     val id2 = resultSet.getInt("id")
     assert(id2 === 2)
+    assert(resultSet.next() === false)
+  }
+
+  test("Correct table_3 records were included") {
+    val resultSet = targetConn.createStatement().executeQuery("select * from table_3 order by id asc")
+    resultSet.next()
+    val id1 = resultSet.getInt("id")
+    assert(id1 === 45)
+    resultSet.next()
+    val id2 = resultSet.getInt("id")
+    assert(id2 === 50)
+    assert(resultSet.next() === false)
+  }
+
+  test("Correct table_4 records were included") {
+    val resultSet = targetConn.createStatement().executeQuery("select * from table_4 order by table_1_id asc, table_3_id asc")
+    resultSet.next()
+    val id1 = resultSet.getInt("table_1_id")
+    val id2 = resultSet.getInt("table_3_id")
+    assert(id1 === 2)
+    assert(id2 === 45)
+    resultSet.next()
+    val id3 = resultSet.getInt("table_1_id")
+    val id4 = resultSet.getInt("table_3_id")
+    assert(id3 === 2)
+    assert(id4 === 50)
+    assert(resultSet.next() === false)
+  }
+
+  test("Correct table_5 records were included") {
+    val resultSet = targetConn.createStatement().executeQuery("select * from table_5 order by id asc")
+    resultSet.next()
+    val id1 = resultSet.getInt("id")
+    assert(id1 === 99)
     assert(resultSet.next() === false)
   }
 

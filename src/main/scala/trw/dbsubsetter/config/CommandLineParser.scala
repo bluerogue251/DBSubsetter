@@ -54,10 +54,10 @@ object CommandLineParser {
 
         fk match {
           case whereClauseFkRegex(fromSch, fromTbl, fromCols, toSch, toTbl, toCols, whereClause) =>
-            val fk = CmdLineForeignKey(fromSch, fromTbl, fromCols.split(",").toList, toSch, toTbl, toCols.split(",").toList, Some(whereClause))
+            val fk = CmdLineForeignKey(fromSch, fromTbl, fromCols.split(",").toList.map(_.trim), toSch, toTbl, toCols.split(",").toList, Some(whereClause))
             c.copy(cmdLineForeignKeys = fk :: c.cmdLineForeignKeys)
           case standardFkRegex(fromSch, fromTbl, fromCols, toSch, toTbl, toCols) =>
-            val fk = CmdLineForeignKey(fromSch, fromTbl, fromCols.split(",").toList, toSch, toTbl, toCols.split(",").toList, None)
+            val fk = CmdLineForeignKey(fromSch, fromTbl, fromCols.split(",").toList.map(_.trim), toSch, toTbl, toCols.split(",").toList, None)
             c.copy(cmdLineForeignKeys = fk :: c.cmdLineForeignKeys)
           case _ => throw new RuntimeException()
         }
@@ -65,6 +65,23 @@ object CommandLineParser {
       .text(
         """Foreign keys to enforce during subsetting even though they are not defined in the database
           |                           Optionally specify a "where clause" to additionally restrict the defined foreign key as needed
+          |                           Can be specified multiple times
+          |                           """.stripMargin)
+
+    opt[String]("primaryKey")
+      .maxOccurs(Int.MaxValue)
+      .valueName("<schema1>.<table1>(<column1>, <column2>, ...)")
+      .action { case (fk, c) =>
+        val regex = """(.+)\.(.+)\((.+)\)\s*""".r
+        fk match {
+          case regex(sch, tbl, cols) =>
+            val pk = CmdLinePrimaryKey(sch, tbl, cols.split(",").toList.map(_.trim))
+            c.copy(cmdLinePrimaryKeys = pk :: c.cmdLinePrimaryKeys)
+          case _ => throw new RuntimeException()
+        }
+      }
+      .text(
+        """Primary key to recognize during subsetting when it is not defined in the database
           |                           Can be specified multiple times
           |                           """.stripMargin)
 
@@ -143,3 +160,7 @@ case class CmdLineForeignKey(fromSchema: SchemaName,
                              toTable: TableName,
                              toColumns: List[ColumnName],
                              whereClause: Option[WhereClause])
+
+case class CmdLinePrimaryKey(schema: SchemaName,
+                             table: TableName,
+                             columns: List[ColumnName])

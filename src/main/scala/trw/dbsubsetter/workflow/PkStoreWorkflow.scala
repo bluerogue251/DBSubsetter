@@ -17,7 +17,7 @@ class PkStoreWorkflow(pkOrdinalsByTable: Map[Table, Seq[Int]]) {
   }.toMap
 
   def process(request: PkRequest): List[PkResult] = {
-    val (parentStore, childStore) = pkStore(request.table)
+    val (parentStore, childStore) = pkStore.getOrElse(request.table, throw new RuntimeException(s"No primary key defined for table ${request.table.fullyQualifiedName}"))
     request match {
       case fkt@FkTask(_, _, fkValue, true) =>
         if (childStore.contains(fkValue)) List.empty else List(fkt)

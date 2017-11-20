@@ -92,4 +92,14 @@ CREATE TABLE range_table (
   tsrange   TSRANGE,
   tstzrange TSTZRANGE,
   daterange DATERANGE
-)
+);
+
+CREATE EXTENSION "uuid-ossp";
+CREATE TABLE uuid_table (
+  id UUID PRIMARY KEY
+);
+
+CREATE TABLE uuid_child_table (
+  id            BIGSERIAL PRIMARY KEY,
+  uuid_table_id UUID NULL REFERENCES uuid_table (id)
+);
