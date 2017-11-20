@@ -81,8 +81,7 @@ object CommandLineParser {
         }
       }
       .text(
-        """Primary key to recognize during subsetting even though they are not defined in the database
-          |                           Useful when a primary key is missing from the DB schema
+        """Primary key to recognize during subsetting when it is not defined in the database
           |                           Can be specified multiple times
           |                           """.stripMargin)
 
