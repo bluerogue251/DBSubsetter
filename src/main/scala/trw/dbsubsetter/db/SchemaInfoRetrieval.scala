@@ -47,6 +47,9 @@ object SchemaInfoRetrieval {
           primaryKeysJdbcResultSet.getString("COLUMN_NAME")
         )
       }
+      config.cmdLinePrimaryKeys.foreach { clpk =>
+        clpk.columns.foreach(c => primaryKeysQueryResult += PrimaryKeyQueryRow(clpk.schema, clpk.table, c))
+      }
 
       // Args: catalog, schema, table
       val foreignKeysJdbcResultSet = ddl.getExportedKeys(null, schema, null)
@@ -100,7 +103,10 @@ object SchemaInfoRetrieval {
           val fromCols = partialForeignKeys.map { pfk => colsByTableAndName(fromTable)(pfk.fromColumn) }.toVector
           val toTable = tablesByName(toSchemaName, toTableName)
           val toCols = partialForeignKeys.map { pfk => colsByTableAndName(toTable)(pfk.toColumn) }.toVector
-          val pointsToPk = pkColumnOrdinalsByTable(toTable) == toCols.map(_.ordinalPosition).sorted
+          val pointsToPk = {
+            val pkOpt = pkColumnOrdinalsByTable.get(toTable)
+            pkOpt.fold(false)(pkColOrdinals => pkColOrdinals == toCols.map(_.ordinalPosition))
+          }
 
           ForeignKey(fromCols, toCols, pointsToPk, partialForeignKeys.head.whereClauseOpt)
         }.toSet
