@@ -7,6 +7,25 @@ CREATE TABLE table_2 (
   table_1_id INTEGER NOT NULL -- This points to table_1 (id), but we purposely leave off the FK at the DB level
 );
 
+CREATE TABLE table_3 (
+  id SERIAL PRIMARY KEY
+);
+
+-- This table's "primary key" is defined by a tuple (table_1_id, table_3_id)
+-- But this primary key is not defined at the DB level. We have to define it as user-supplied config
+CREATE TABLE table_4 (
+  table_1_id INTEGER NOT NULL REFERENCES table_1 (id),
+  table_3_id INTEGER NOT NULL REFERENCES table_3 (id),
+  UNIQUE (table_1_id, table_3_id)
+);
+
+CREATE TABLE table_5 (
+  id                 SERIAL PRIMARY KEY,
+  table_4_table_1_id INTEGER NOT NULL,
+  table_4_table_3_id INTEGER NOT NULL,
+  FOREIGN KEY (table_4_table_1_id, table_4_table_3_id) REFERENCES table_4 (table_1_id, table_3_id)
+);
+
 CREATE TABLE table_a (
   id                   SERIAL PRIMARY KEY,
   points_to_table_name VARCHAR NOT NULL,

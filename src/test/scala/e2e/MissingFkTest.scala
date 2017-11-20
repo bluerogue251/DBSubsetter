@@ -62,6 +62,43 @@ class MissingFkTest extends FunSuite with BeforeAndAfterAll {
     assert(resultSet.next() === false)
   }
 
+  test("Correct table_2 records were included") {
+    val resultSet = targetConn.createStatement().executeQuery("select * from table_2 order by id asc")
+    resultSet.next()
+    val id1 = resultSet.getInt("id")
+    assert(id1 === 1)
+    resultSet.next()
+    val id2 = resultSet.getInt("id")
+    assert(id2 === 2)
+    assert(resultSet.next() === false)
+  }
+
+  test("Correct table_3 records were included") {
+    val resultSet = targetConn.createStatement().executeQuery("select * from table_3 order by id asc")
+    resultSet.next()
+    val id1 = resultSet.getInt("id")
+    assert(id1 === 47)
+    assert(resultSet.next() === false)
+  }
+
+  test("Correct table_4 records were included") {
+    val resultSet = targetConn.createStatement().executeQuery("select * from table_4 order by table_1_id asc, table_3_id_asc")
+    resultSet.next()
+    val id1 = resultSet.getInt("table_1_id")
+    val id2 = resultSet.getInt("table_3_id")
+    assert(id1 === 1)
+    assert(id1 === 47)
+    assert(resultSet.next() === false)
+  }
+
+  test("Correct table_5 records were included") {
+    val resultSet = targetConn.createStatement().executeQuery("select * from table_5 order by id asc")
+    resultSet.next()
+    val id1 = resultSet.getInt("id")
+    assert(id1 === 98)
+    assert(resultSet.next() === false)
+  }
+
   test("Correct table_a records were included") {
     val resultSet = targetConn.createStatement().executeQuery("select * from table_a order by id asc")
     resultSet.next()
