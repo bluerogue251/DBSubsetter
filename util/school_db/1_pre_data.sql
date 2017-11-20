@@ -6,7 +6,7 @@ CREATE TABLE districts (
 );
 
 CREATE TABLE schools (
-  district_id INTEGER   NOT NULL REFERENCES districts (id),
+  district_id INTEGER   NOT NULL REFERENCES districts ("Id"),
   name        TEXT      NOT NULL,
   mascot      TEXT      NULL,
   id          SERIAL PRIMARY KEY, -- Edge case: PK is not first column in table and appears after a column that is marked as excluded (mascot).

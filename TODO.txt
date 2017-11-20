@@ -1,5 +1,6 @@
 * Support tables without primary keys
 * Test the school DB in an automated test
+* Investigate seemingly broken where-clause foreign key feature in school db
 * Test the akka-streams versions of things alongside the singleThreadedDebugMode
 * Try to support MySQL, SQL Server, and Oracle
 * Add some sort of way to shut down or otherwise finish the akka-streams version instead of hanging forever (otherwise how can we do automated tests of it?)
