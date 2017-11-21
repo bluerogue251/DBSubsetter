@@ -20,7 +20,7 @@ class CircularDepTest extends FunSuite with BeforeAndAfterAll {
       "--schemas", "public",
       "--originDbConnStr", "jdbc:postgresql://localhost:5480/circular_dep_origin?user=postgres",
       "--targetDbConnStr", targetConnString,
-      "--baseQuery", "public.grandparents=id % 6 = 0",
+      "--baseQuery", "public.grandparents ::: id % 6 = 0 ::: true",
       "--originDbParallelism", "1",
       "--targetDbParallelism", "1",
       "--singleThreadedDebugMode"

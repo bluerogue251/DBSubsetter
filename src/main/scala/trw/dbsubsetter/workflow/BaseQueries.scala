@@ -6,10 +6,10 @@ import trw.dbsubsetter.db.{SchemaInfo, Sql}
 
 object BaseQueries {
   def get(config: Config, sch: SchemaInfo): Iterable[SqlStrQuery] = {
-    config.baseQueries.map { case ((schemaName, tableName), whereClause) =>
+    config.baseQueries.map { case ((schemaName, tableName), whereClause, fetchChildren) =>
       val table = sch.tablesByName((schemaName, tableName))
       val sqlString = Sql.makeQueryString(table, whereClause, sch)
-      SqlStrQuery(table, sqlString)
+      SqlStrQuery(table, sqlString, fetchChildren)
     }
   }
 }

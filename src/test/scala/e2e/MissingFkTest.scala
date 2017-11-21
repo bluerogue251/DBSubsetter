@@ -20,7 +20,7 @@ class MissingFkTest extends FunSuite with BeforeAndAfterAll {
       "--schemas", "public",
       "--originDbConnStr", "jdbc:postgresql://localhost:5490/missing_fk_origin?user=postgres",
       "--targetDbConnStr", targetConnString,
-      "--baseQuery", "public.table_1=id = 2",
+      "--baseQuery", "public.table_1 ::: id = 2 ::: true",
       "--foreignKey", "public.table_2(table_1_id) ::: public.table_1(id)",
       "--primaryKey", "public.table_4(table_1_id, table_3_id)",
       "--originDbParallelism", "1",
