@@ -24,7 +24,7 @@ object SubsettingFlow {
       // Merging all database query requests to allow for balancing them
       broadcastFkTasks ~> FkTaskFlows.toDbQuery ~> mergeDbRequests
       broadcastPkResults ~> PkResultFlows.pkMissingToFkQuery ~> mergeDbRequests
-      broadcastPkResults ~> PkResultFlows.pkAddedToDbInsert(schemaInfo) ~> balanceTargetDbInserts
+      broadcastPkResults ~> PkResultFlows.pkAddedToDbInsert(schemaInfo) ~> Flow[PksAdded].buffer(Int.MaxValue, OverflowStrategy.fail) ~> balanceTargetDbInserts
 
       // Processing Origin DB Queries in Parallel
       mergeDbRequests.out ~> balanceDbQueries
@@ -41,7 +41,7 @@ object SubsettingFlow {
       mergeDbResults ~> mergePkRequests
 
       mergePkRequests ~> PkStoreQueryFlow.flow(schemaInfo.pkOrdinalsByTable) ~> broadcastPkResults
-      broadcastPkResults ~> PkResultFlows.pkAddedToNewTasks(schemaInfo) ~> Flow[FkTask].buffer(10000000, OverflowStrategy.fail) ~> broadcastFkTasks
+      broadcastPkResults ~> PkResultFlows.pkAddedToNewTasks(schemaInfo) ~> Flow[FkTask].buffer(Int.MaxValue, OverflowStrategy.fail) ~> broadcastFkTasks
       broadcastFkTasks ~> FkTaskFlows.toPkStoreQuery ~> mergePkRequests
 
       FlowShape(mergeDbRequests.in(2), mergeTargetDbInsertResults.out)
