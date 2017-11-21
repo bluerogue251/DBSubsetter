@@ -2,7 +2,6 @@
 * Add some sort of way to shut down or otherwise finish the akka-streams version instead of hanging forever (otherwise how can we do automated tests of it?)
 * Try to support MySQL, SQL Server, and Oracle
 * Add retry logic to DB Queries in case of failure, e.g. due to temporary network problem
-* Allow for not fetching children of baseQuery (on a per-baseQuery basis)
 * Try to find memory/performance bottlenecks by profiling against a huge database
 * Investigate whether optimization is possible via changing AnyRef to Any and then using primitive Ints instead of Integer for PK storage, etc.
 * Consider better support for uncommon data types such as money, enums, arrays of enums, etc

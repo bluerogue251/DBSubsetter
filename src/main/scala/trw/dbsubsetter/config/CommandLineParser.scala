@@ -30,30 +30,35 @@ object CommandLineParser {
     opt[String]("baseQuery")
       .required()
       .maxOccurs(Int.MaxValue)
-      .valueName("<schema>.<table> ::: <whereClause>")
+      .valueName("<schema>.<table> ::: <whereClause> ::: <fetchChildren (true/false)>")
       .action { case (bq, c) =>
-        val r = """(.+)\.([^=]+)\=(.+)""".r
+        val r = """^\s*(.+)\.(.+)\s+:::\s+(.+)\s+:::\s+(true|false)\s*$""".r
         bq match {
-          case r(schema, table, whereClause) =>
-            c.copy(baseQueries = ((schema, table), whereClause) :: c.baseQueries)
+          case r(schema, table, whereClause, fetchChildren) =>
+            val fc = fetchChildren == "true"
+            c.copy(baseQueries = ((schema.trim, table.trim), whereClause.trim, fc) :: c.baseQueries)
           case _ => throw new RuntimeException()
         }
       }
       .text(
-        """Starting table and where-clause to kick off subsetting
-          |                           Both parents and children of these initial rows will be fetched
+        """Starting table, where-clause, and fetchChildren to kick off subsetting
+          |                           About fetchChildren:
+          |                              It works recursively. So the children of the children will also be fetched, and so on
+          |                              `true` is recommended for most common use cases
+          |                              `false` works in edge cases such as including a whole table: --baseQuery public.invoice_types ::: true ::: false
+          |                              That example includes the entire invoice_types table but would *not* fetch any of its children
           |                           Can be specified multiple times
-          |                           """.stripMargin)
+          |""".stripMargin)
 
     opt[String]("foreignKey")
       .maxOccurs(Int.MaxValue)
       .valueName("<schema1>.<table1>(<column1>, <column2>, ...) ::: <schema2>.<table2>(<column3>, <column4>, ...)")
       .action { case (fk, c) =>
-        val regex = """(.+)\.(.+)\((.+)\)\s*:::\s*(.+)\.(.+)\((.+)\)""".r
+        val regex = """^(.+)\.(.+)\((.+)\)\s+:::\s+(.+)\.(.+)\((.+)\)\s*$""".r
 
         fk match {
           case regex(fromSch, fromTbl, fromCols, toSch, toTbl, toCols) =>
-            val fk = CmdLineForeignKey(fromSch, fromTbl, fromCols.split(",").toList.map(_.trim), toSch, toTbl, toCols.split(",").toList)
+            val fk = CmdLineForeignKey(fromSch.trim, fromTbl.trim, fromCols.split(",").toList.map(_.trim), toSch.trim, toTbl.trim, toCols.split(",").toList.map(_.trim))
             c.copy(cmdLineForeignKeys = fk :: c.cmdLineForeignKeys)
           case _ => throw new RuntimeException()
         }
@@ -62,16 +67,16 @@ object CommandLineParser {
         """Foreign keys to enforce during subsetting even though they are not defined in the database
           |                           Optionally specify a "where clause" to additionally restrict the defined foreign key as needed
           |                           Can be specified multiple times
-          |                           """.stripMargin)
+          |""".stripMargin)
 
     opt[String]("primaryKey")
       .maxOccurs(Int.MaxValue)
       .valueName("<schema1>.<table1>(<column1>, <column2>, ...)")
       .action { case (fk, c) =>
-        val regex = """(.+)\.(.+)\((.+)\)\s*""".r
+        val regex = """^\s*(.+)\.(.+)\((.+)\)\s*$""".r
         fk match {
           case regex(sch, tbl, cols) =>
-            val pk = CmdLinePrimaryKey(sch, tbl, cols.split(",").toList.map(_.trim))
+            val pk = CmdLinePrimaryKey(sch.trim, tbl.trim, cols.split(",").toList.map(_.trim))
             c.copy(cmdLinePrimaryKeys = pk :: c.cmdLinePrimaryKeys)
           case _ => throw new RuntimeException()
         }
@@ -79,16 +84,18 @@ object CommandLineParser {
       .text(
         """Primary key to recognize during subsetting when it is not defined in the database
           |                           Can be specified multiple times
-          |                           """.stripMargin)
+          |""".stripMargin)
 
     opt[String]("excludeColumns")
       .valueName("<schema>.<table>(<column1>, <column2>, ...)")
       .maxOccurs(Int.MaxValue)
       .action { (ic, c) =>
-        val regex = """\s*(.+)\.(.+)\((.+)\)\s*""".r
+        val regex = """^\s*(.+)\.(.+)\((.+)\)\s*$""".r
         ic match {
-          case regex(schema, table, columnListString) =>
-            val alreadyExcluded = c.excludeColumns((schema, table))
+          case regex(sch, tbl, columnListString) =>
+            val schema = sch.trim
+            val table = tbl.trim
+            val alreadyExcluded = c.excludeColumns((schema.trim, table.trim))
             val newlyExcluded = columnListString.split(",").map(_.trim).toSet
             c.copy(excludeColumns = c.excludeColumns.updated((schema, table), alreadyExcluded ++ newlyExcluded))
           case _ => throw new RuntimeException
@@ -100,7 +107,7 @@ object CommandLineParser {
           |                           Intended only for columns that are not part of any primary keys or foreign keys
           |                           Useful as a workaround if DBSubsetter does not support a vendor-specific data type
           |                           Can be specified multiple times
-          |                           """.stripMargin)
+          |""".stripMargin)
 
     opt[Int]("originDbParallelism")
       .valueName("<int>")
@@ -122,7 +129,7 @@ object CommandLineParser {
           |                               Ignores `originDbParallelism` and `targetDbParallelism` settings and uses just 1 connection to each
           |                               Subsetting may be significantly slower
           |                               The resulting subset should be exactly the same as in regular mode
-          |                               """.stripMargin)
+          |""".stripMargin)
 
     private val usageExamples =
       """

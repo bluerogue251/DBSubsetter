@@ -4,11 +4,11 @@ import java.sql.{Connection, DriverManager}
 
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 import trw.dbsubsetter.Application
-import trw.dbsubsetter.db.{ColumnName, SchemaName, TableName}
+import util.QueryUtil
 
 import scala.sys.process._
 
-class SchoolDbTest extends FunSuite with BeforeAndAfterAll {
+class SchoolDbTest extends FunSuite with BeforeAndAfterAll with QueryUtil {
   val targetConnString = "jdbc:postgresql://localhost:5451/school_db_target?user=postgres"
   var targetConn: Connection = _
 
@@ -21,8 +21,8 @@ class SchoolDbTest extends FunSuite with BeforeAndAfterAll {
       "--schemas", "public,Audit",
       "--originDbConnStr", "jdbc:postgresql://localhost:5450/school_db_origin?user=postgres",
       "--targetDbConnStr", targetConnString,
-      "--baseQuery", "public.Students=student_id % 100 = 0",
-      "--baseQuery", "public.standalone_table=id < 4",
+      "--baseQuery", "public.Students ::: student_id % 100 = 0 ::: true",
+      "--baseQuery", "public.standalone_table ::: id < 4 ::: true",
       "--excludeColumns", "public.schools(mascot)",
       "--originDbParallelism", "1",
       "--targetDbParallelism", "1",
@@ -95,17 +95,5 @@ class SchoolDbTest extends FunSuite with BeforeAndAfterAll {
 
   test("Correct multiple_choice_assignments were included") {
     pending
-  }
-
-  private def countTable(schema: SchemaName, table: TableName): Long = {
-    val resultSet = targetConn.createStatement().executeQuery(s"""select count(*) from "$schema"."$table"""")
-    resultSet.next()
-    resultSet.getLong(1)
-  }
-
-  private def sumColumn(schema: SchemaName, table: TableName, column: ColumnName): Long = {
-    val resultSet = targetConn.createStatement().executeQuery(s"""select sum("$column") from "$schema"."$table"""")
-    resultSet.next()
-    resultSet.getLong(1)
   }
 }
