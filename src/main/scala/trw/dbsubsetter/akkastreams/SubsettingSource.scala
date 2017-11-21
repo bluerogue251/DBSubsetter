@@ -19,6 +19,9 @@ object SubsettingSource {
     val balanceTargetDbInserts = b.add(Balance[PksAdded](config.targetDbParallelism, waitForAllDownstreams = true))
     val mergeTargetDbInsertResults = b.add(Merge[TargetDbInsertResult](config.targetDbParallelism))
 
+    // Start everything off
+    Source(baseQueries) ~> mergeDbRequests
+
     // Merging all database query requests to allow for balancing them
     broadcastFkTasks ~> FkTaskFlows.toDbQuery ~> mergeDbRequests
     broadcastPkResults ~> PkResultFlows.pkMissingToFkQuery ~> mergeDbRequests

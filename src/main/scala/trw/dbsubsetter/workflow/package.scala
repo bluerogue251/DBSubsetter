@@ -21,4 +21,6 @@ package object workflow {
   sealed trait PkResult
 
   case class PksAdded(table: Table, rowsNeedingParentTasks: Vector[Row], rowsNeedingChildTasks: Vector[Row]) extends PkResult
+
+  case object DuplicateTask extends PkResult
 }

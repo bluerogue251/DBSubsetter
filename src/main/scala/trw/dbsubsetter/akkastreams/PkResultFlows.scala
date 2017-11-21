@@ -9,7 +9,7 @@ object PkResultFlows {
   def pkAddedToNewTasks(sch: SchemaInfo, numBaseQueries: Int): Flow[PkResult, (Long, Vector[FkTask]), NotUsed] = {
     Flow[PkResult]
       .statefulMapConcat[(Long, Vector[FkTask])] { () =>
-      var counter: Long = numBaseQueries.toLong
+      var counter: Long = numBaseQueries
 
       pkResult => {
         pkResult match {
@@ -17,6 +17,9 @@ object PkResultFlows {
             val newTasks = NewFkTaskWorkflow.process(pka, sch)
             counter += (newTasks.size - 1)
             List((counter, newTasks))
+          case DuplicateTask =>
+            counter -= 1
+            List((counter, Vector.empty))
           case _ => List.empty
         }
       }

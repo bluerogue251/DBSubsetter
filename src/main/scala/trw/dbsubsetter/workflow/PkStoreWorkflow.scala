@@ -20,9 +20,9 @@ class PkStoreWorkflow(pkOrdinalsByTable: Map[Table, Seq[Int]]) {
     val (parentStore, childStore) = pkStore.getOrElse(request.table, throw new RuntimeException(s"No primary key defined for table ${request.table.fullyQualifiedName}"))
     request match {
       case fkt@FkTask(_, _, fkValue, true) =>
-        if (childStore.contains(fkValue)) List.empty else List(fkt)
+        if (childStore.contains(fkValue)) List(DuplicateTask) else List(fkt)
       case fkt@FkTask(_, _, fkValue, _) =>
-        if (parentStore.contains(fkValue) || childStore.contains(fkValue)) List.empty else List(fkt)
+        if (parentStore.contains(fkValue) || childStore.contains(fkValue)) List(DuplicateTask) else List(fkt)
       case OriginDbResult(table, rows, fetchChildren) =>
         val pkOrdinals = pkOrdinalsByTable(request.table)
         val pkOrdinal = pkOrdinals.head

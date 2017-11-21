@@ -2,12 +2,13 @@ package trw.dbsubsetter
 
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.SchemaInfo
+import trw.dbsubsetter.util.Util
 import trw.dbsubsetter.workflow._
 
 import scala.collection.mutable
 
 object ApplicationSingleThreaded {
-  def run(config: Config, schemaInfo: SchemaInfo, baseQueries: Iterable[SqlStrQuery]): Unit = {
+  def run(config: Config, schemaInfo: SchemaInfo, baseQueries: Iterable[SqlStrQuery], startingTime: Long): Unit = {
     // Set up workflow objects
     val originDbWorkflow = new OriginDbWorkflow(config, schemaInfo)
     val targetDbWorkflow = new TargetDbWorkflow(config, schemaInfo)
@@ -31,5 +32,7 @@ object ApplicationSingleThreaded {
         newTasks.foreach(fkt => queue.enqueue(fkt))
       }
     }
+
+    Util.printRuntime(startingTime)
   }
 }
