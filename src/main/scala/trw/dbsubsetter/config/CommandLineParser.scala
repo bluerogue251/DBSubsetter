@@ -92,12 +92,10 @@ object CommandLineParser {
       .action { (ic, c) =>
         val regex = """^\s*(.+)\.(.+)\((.+)\)\s*$""".r
         ic match {
-          case regex(sch, tbl, columnListString) =>
-            val schema = sch.trim
-            val table = tbl.trim
+          case regex(schema, table, columnListString) =>
             val alreadyExcluded = c.excludeColumns((schema.trim, table.trim))
             val newlyExcluded = columnListString.split(",").map(_.trim).toSet
-            c.copy(excludeColumns = c.excludeColumns.updated((schema, table), alreadyExcluded ++ newlyExcluded))
+            c.copy(excludeColumns = c.excludeColumns.updated((schema.trim, table.trim), alreadyExcluded ++ newlyExcluded))
           case _ => throw new RuntimeException
 
         }
