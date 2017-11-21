@@ -21,11 +21,7 @@ class MissingFkTest extends FunSuite with BeforeAndAfterAll {
       "--originDbConnStr", "jdbc:postgresql://localhost:5490/missing_fk_origin?user=postgres",
       "--targetDbConnStr", targetConnString,
       "--baseQuery", "public.table_1=id = 2",
-      "--baseQuery", "public.table_a=id in (1, 2, 4, 5)",
       "--foreignKey", "public.table_2(table_1_id) ::: public.table_1(id)",
-      "--foreignKey", "public.table_a(points_to_table_id) ::: public.table_b(id) ::: table_a.points_to_table_name='points_to_table_b'",
-      "--foreignKey", "public.table_a(points_to_table_id) ::: public.table_c(id) ::: table_a.points_to_table_name='points_to_table_c'",
-      "--foreignKey", "public.table_a(points_to_table_id) ::: public.table_d(id) ::: table_a.points_to_table_name='points_to_table_d'",
       "--primaryKey", "public.table_4(table_1_id, table_3_id)",
       "--originDbParallelism", "1",
       "--targetDbParallelism", "1",
@@ -98,6 +94,7 @@ class MissingFkTest extends FunSuite with BeforeAndAfterAll {
   }
 
   test("Correct table_a records were included") {
+    pending
     val resultSet = targetConn.createStatement().executeQuery("select * from table_a order by id asc")
     resultSet.next()
     val id1 = resultSet.getInt("id")
@@ -115,6 +112,7 @@ class MissingFkTest extends FunSuite with BeforeAndAfterAll {
   }
 
   test("Correct table_b records were included") {
+    pending
     val resultSet = targetConn.createStatement().executeQuery("select * from table_b")
     resultSet.next()
     val id1 = resultSet.getInt("id")
@@ -126,6 +124,7 @@ class MissingFkTest extends FunSuite with BeforeAndAfterAll {
   }
 
   test("Correct table_c records were included") {
+    pending
     val resultSet = targetConn.createStatement().executeQuery("select count(*) from table_c")
     resultSet.next()
     val count = resultSet.getInt(1)
@@ -133,7 +132,8 @@ class MissingFkTest extends FunSuite with BeforeAndAfterAll {
   }
 
   test("Correct table_d records were included") {
-    val resultSet = targetConn.createStatement().executeQuery("select * from table_d")
+    pending
+    val resultSet = targetConn.createStatement().executeQuery("select * from table_d order by id asc")
     resultSet.next()
     val id1 = resultSet.getInt("id")
     assert(id1 === 2)

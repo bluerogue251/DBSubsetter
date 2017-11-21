@@ -17,6 +17,7 @@ object ApplicationSingleThreaded {
     val queue = mutable.Queue.empty[OriginDbRequest]
     baseQueries.foreach(t => queue.enqueue(t))
 
+    val start = System.nanoTime()
     // Run task queue until empty
     while (queue.nonEmpty) {
       val taskOpt: List[OriginDbRequest] = queue.dequeue() match {
@@ -31,5 +32,8 @@ object ApplicationSingleThreaded {
         newTasks.foreach(fkt => queue.enqueue(fkt))
       }
     }
+    val end = System.nanoTime()
+    val tookSeconds = (end - start) / 1000000000
+    println(s"Done! Took $tookSeconds seconds")
   }
 }

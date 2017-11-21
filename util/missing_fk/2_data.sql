@@ -9,7 +9,13 @@ INSERT INTO table_a (id, points_to_table_name, points_to_table_id) VALUES
   (2, 'points_to_table_b', 1),
   (3, 'points_to_table_b', 2),
   (4, 'points_to_table_d', 2),
-  (5, 'points_to_table_d', 30); -- edge case -- id does not exist in target table
+  -- edge case -- id does not exist in target table
+  (5, 'points_to_table_d', 30),
+  -- edge case -- Row 6 is NOT part of the subset, so row 1 of table_d should NOT be included
+  -- however, row #1 of table_b SHOULD be included.
+  -- This helps to test that table_b subsetting is not accidentally leaking over into table_d
+  -- This is based on a real bug that used to exist in our code
+  (6, 'points_to_table_d', 1);
 
 INSERT INTO table_b (id) VALUES (1), (2), (3);
 INSERT INTO table_c (id) VALUES (1), (2), (3);

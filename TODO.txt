@@ -1,4 +1,3 @@
-* Investigate seemingly broken where-clause foreign key feature in school db
 * Test the akka-streams versions of things against the singleThreadedDebugMode
 * Add some sort of way to shut down or otherwise finish the akka-streams version instead of hanging forever (otherwise how can we do automated tests of it?)
 * Try to support MySQL, SQL Server, and Oracle
@@ -9,3 +8,6 @@
 * Consider better support for uncommon data types such as money, enums, arrays of enums, etc
   -- Could the enum case be addressed via type casting in a way that does not cause other bugs or harm performance?
 * Add README.md
+* Test a self-referencing foreign key
+* Add option to support Rails "polymorphic associations" / Hibernate "discriminator column STI"
+* Consider if/how PkStore could use TreeSet instead of HashSet, and if that would be faster in practice
