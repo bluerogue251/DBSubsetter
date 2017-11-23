@@ -4,19 +4,15 @@ import trw.dbsubsetter.db._
 
 package object workflow {
 
-  case class FkTask(table: Table, fk: ForeignKey, fkValue: AnyRef, fetchChildren: Boolean) extends OriginDbRequest with PkRequest with PkResult
+  case class FkTask(table: Table, fk: ForeignKey, fkValue: AnyRef, fetchChildren: Boolean) extends OriginDbRequest with PkResult
 
   sealed trait OriginDbRequest
 
   case class SqlStrQuery(table: Table, sql: SqlQuery, fetchChildren: Boolean) extends OriginDbRequest
 
-  case class OriginDbResult(table: Table, rows: Vector[Row], fetchChildren: Boolean) extends PkRequest
+  case class OriginDbResult(table: Table, rows: Vector[Row], fetchChildren: Boolean)
 
-  case class TargetDbInsertResult(table: Table, rowsCopied: Long)
-
-  sealed trait PkRequest {
-    def table: Table
-  }
+  case class TargetDbInsertResult(table: Table, numRowsInserted: Long)
 
   sealed trait PkResult
 

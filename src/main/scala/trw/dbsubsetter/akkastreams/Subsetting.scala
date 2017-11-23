@@ -1,7 +1,5 @@
 package trw.dbsubsetter.akkastreams
 
-import java.util.concurrent.TimeUnit
-
 import akka.NotUsed
 import akka.actor.ActorRef
 import akka.pattern.ask
@@ -14,12 +12,12 @@ import trw.dbsubsetter.db.SchemaInfo
 import trw.dbsubsetter.workflow._
 
 import scala.concurrent.ExecutionContext
-import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.duration._
 
 object Subsetting {
   def source(config: Config, schemaInfo: SchemaInfo, baseQueries: List[SqlStrQuery], pkStore: ActorRef)(implicit ec: ExecutionContext): Source[TargetDbInsertResult, NotUsed] = Source.fromGraph(GraphDSL.create() { implicit b =>
     // Infrastructure: Timeouts, Merges, and Broadcasts
-    implicit val askTimeout: Timeout = Timeout(FiniteDuration(100, TimeUnit.DAYS))
+    implicit val askTimeout: Timeout = Timeout(48.hours)
     val mergeOriginDbRequests = b.add(Merge[OriginDbRequest](3))
     val balanceOriginDb = b.add(Balance[OriginDbRequest](config.originDbParallelism, waitForAllDownstreams = true))
     val mergeOriginDbResults = b.add(Merge[OriginDbResult](config.originDbParallelism))
@@ -68,7 +66,7 @@ object Subsetting {
 
     broadcastFkTasks ~>
       Flow[FkTask].filter(FkTaskPreCheck.canPrecheck) ~>
-      Flow[PkRequest].mapAsync(500)(req => (pkStore ? req).mapTo[PkResult]) ~>
+      Flow[FkTask].mapAsync(500)(req => (pkStore ? req).mapTo[PkResult]) ~>
       broadcastPkExistResult
 
     broadcastPkExistResult ~>
