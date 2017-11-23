@@ -40,14 +40,14 @@ object Subsetting {
     }
 
     // Process Target DB Inserts in Parallel
-    for (_ <- 1 to config.targetDbParallelism) {
+    for (_ <- 0 until config.targetDbParallelism) {
       balanceTargetDb ~> TargetDb.insert(config, schemaInfo).async ~> mergeTargetDbResults
     }
 
     // DB Results ~> PkStoreAdd ~> NewTasks
     //                          ~> TargetDbInserts
     mergeOriginDbResults ~>
-      Flow[OriginDbResult].mapAsync(Int.MaxValue)(dbResult => (pkStore ? dbResult).mapTo[PksAdded]) ~>
+      Flow[OriginDbResult].mapAsync(500)(dbResult => (pkStore ? dbResult).mapTo[PksAdded]) ~>
       broadcastPksAdded
 
     broadcastPksAdded ~>
@@ -63,12 +63,12 @@ object Subsetting {
     // FkTasks ~> canBePrechecked ~> PkStoreQuery ~> OriginDbRequest
     //                                            ~> DuplicateTask
     broadcastFkTasks ~>
-      Flow[FkTask].filterNot(FkTaskPreCheck.canBePrechecked) ~>
+      Flow[FkTask].filterNot(FkTaskPreCheck.canPrecheck) ~>
       mergeOriginDbRequests
 
     broadcastFkTasks ~>
-      Flow[FkTask].filter(FkTaskPreCheck.canBePrechecked) ~>
-      Flow[PkRequest].mapAsync(Int.MaxValue)(req => (pkStore ? req).mapTo[PkResult]) ~>
+      Flow[FkTask].filter(FkTaskPreCheck.canPrecheck) ~>
+      Flow[PkRequest].mapAsync(500)(req => (pkStore ? req).mapTo[PkResult]) ~>
       broadcastPkExistResult
 
     broadcastPkExistResult ~>
