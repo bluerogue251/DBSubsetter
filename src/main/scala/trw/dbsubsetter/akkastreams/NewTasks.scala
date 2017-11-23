@@ -26,7 +26,7 @@ object NewTasks {
       }
     }
 
-    // Do buffer before mapConcat to make the buffer less likely to fill up
+    // Buffer comes before mapConcat so that the buffer is less likely to fill up
     f.takeWhile { case (count, _) => count != 0 }
       .buffer(Int.MaxValue, OverflowStrategy.fail)
       .mapConcat { case (_, tasks) => tasks }

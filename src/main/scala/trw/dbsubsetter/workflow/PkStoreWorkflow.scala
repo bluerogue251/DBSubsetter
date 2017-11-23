@@ -17,21 +17,21 @@ class PkStoreWorkflow(pkOrdinalsByTable: Map[Table, Seq[Int]]) {
   }.toMap
 
   def exists(req: FkTask): PkResult = {
-    val (parentStore, childStore) = getStorage(req.table)
+    val FkTask(table, _, fkValue, fetchChildren) = req
+    val (parentStore, childStore) = getStorage(table)
 
-    req match {
-      case fkt@FkTask(_, _, fkValue, true) =>
-        if (childStore.contains(fkValue)) DuplicateTask else fkt
-      case fkt@FkTask(_, _, fkValue, _) =>
-        if (parentStore.contains(fkValue) || childStore.contains(fkValue)) DuplicateTask else fkt
+    if (fetchChildren) {
+      if (childStore.contains(fkValue)) DuplicateTask else req
+    } else {
+      if (parentStore.contains(fkValue) || childStore.contains(fkValue)) DuplicateTask else req
     }
   }
 
   def add(req: OriginDbResult): PksAdded = {
-    val (parentStore, childStore) = getStorage(req.table)
     val OriginDbResult(table, rows, fetchChildren) = req
+    val (parentStore, childStore) = getStorage(table)
 
-    val pkOrdinals = pkOrdinalsByTable(req.table)
+    val pkOrdinals = pkOrdinalsByTable(table)
     val pkOrdinal = pkOrdinals.head
     val isSingleColPk = pkOrdinals.size == 1
     val getPkValue: Row => AnyRef = if (isSingleColPk) row => row(pkOrdinal) else row => pkOrdinals.map(row)
