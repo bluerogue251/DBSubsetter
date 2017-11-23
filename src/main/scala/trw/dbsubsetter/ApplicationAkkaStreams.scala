@@ -4,7 +4,7 @@ import akka.Done
 import akka.actor.{Actor, ActorRef, ActorSystem, Props, Status}
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
-import trw.dbsubsetter.akkastreams.{PkStore, SubsettingSource}
+import trw.dbsubsetter.akkastreams.{PkStore, Subsetting}
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.SchemaInfo
 import trw.dbsubsetter.util.Util
@@ -21,7 +21,7 @@ object ApplicationAkkaStreams {
     val monitor: ActorRef = system.actorOf(Props[Monitor])
     val pkStore: ActorRef = system.actorOf(Props(classOf[PkStore], schemaInfo.pkOrdinalsByTable))
 
-    SubsettingSource
+    Subsetting
       .source(config, schemaInfo, baseQueries, monitor, pkStore)
       .runWith(Sink.ignore)
       .onComplete { result =>

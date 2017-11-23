@@ -16,7 +16,7 @@ import trw.dbsubsetter.workflow._
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.FiniteDuration
 
-object SubsettingSource {
+object Subsetting {
   def source(config: Config, schemaInfo: SchemaInfo, baseQueries: List[SqlStrQuery], monitor: ActorRef, pkStore: ActorRef)(implicit ec: ExecutionContext): Source[TargetDbInsertResult, NotUsed] = Source.fromGraph(GraphDSL.create() { implicit b =>
     // Infrastructure: Timeouts, Merges, and Broadcasts
     implicit val askTimeout: Timeout = Timeout(FiniteDuration(100, TimeUnit.DAYS))
@@ -52,7 +52,7 @@ object SubsettingSource {
 
     broadcastPksAdded ~>
       mergeNewTaskRequests ~>
-      PkResultFlows.newTaskFlow(schemaInfo, baseQueries.size) ~>
+      NewTasks.flow(schemaInfo, baseQueries.size) ~>
       broadcastFkTasks
 
     broadcastPksAdded ~>

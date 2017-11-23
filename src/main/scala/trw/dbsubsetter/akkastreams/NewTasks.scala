@@ -6,8 +6,8 @@ import akka.stream.scaladsl.Flow
 import trw.dbsubsetter.db.SchemaInfo
 import trw.dbsubsetter.workflow._
 
-object PkResultFlows {
-  def newTaskFlow(sch: SchemaInfo, numBaseQueries: Int): Flow[PkResult, FkTask, NotUsed] = {
+object NewTasks {
+  def flow(sch: SchemaInfo, numBaseQueries: Int): Flow[PkResult, FkTask, NotUsed] = {
     val f = Flow[PkResult].statefulMapConcat[(Long, Vector[FkTask])] { () =>
       var counter: Long = numBaseQueries
 
