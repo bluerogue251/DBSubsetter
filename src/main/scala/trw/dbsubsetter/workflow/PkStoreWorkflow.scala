@@ -16,13 +16,13 @@ class PkStoreWorkflow(pkOrdinalsByTable: Map[Table, Seq[Int]]) {
     t -> (mutable.HashSet.empty[AnyRef], mutable.HashSet.empty[AnyRef])
   }.toMap
 
-  def process(request: PkRequest): List[PkResult] = {
+  def process(request: PkRequest): PkResult = {
     val (parentStore, childStore) = pkStore.getOrElse(request.table, throw new RuntimeException(s"No primary key defined for table ${request.table.fullyQualifiedName}"))
     request match {
       case fkt@FkTask(_, _, fkValue, true) =>
-        if (childStore.contains(fkValue)) List(DuplicateTask) else List(fkt)
+        if (childStore.contains(fkValue)) DuplicateTask else fkt
       case fkt@FkTask(_, _, fkValue, _) =>
-        if (parentStore.contains(fkValue) || childStore.contains(fkValue)) List(DuplicateTask) else List(fkt)
+        if (parentStore.contains(fkValue) || childStore.contains(fkValue)) DuplicateTask else fkt
       case OriginDbResult(table, rows, fetchChildren) =>
         val pkOrdinals = pkOrdinalsByTable(request.table)
         val pkOrdinal = pkOrdinals.head
@@ -32,13 +32,13 @@ class PkStoreWorkflow(pkOrdinalsByTable: Map[Table, Seq[Int]]) {
         if (fetchChildren) {
           val childrenNotYetFetched = rows.filter(row => childStore.add(getPkValue(row)))
           val parentsNotYetFetched = childrenNotYetFetched.filterNot(row => parentStore.remove(getPkValue(row)))
-          List(PksAdded(table, parentsNotYetFetched, childrenNotYetFetched))
+          PksAdded(table, parentsNotYetFetched, childrenNotYetFetched)
         } else {
           val newRows = rows.filter { row =>
             val pkValue = getPkValue(row)
             !childStore.contains(pkValue) && parentStore.add(pkValue)
           }
-          List(PksAdded(table, newRows, Vector.empty))
+          PksAdded(table, newRows, Vector.empty)
         }
     }
   }

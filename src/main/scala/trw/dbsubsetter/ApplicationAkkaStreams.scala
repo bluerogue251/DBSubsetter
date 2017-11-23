@@ -1,9 +1,10 @@
 package trw.dbsubsetter
 
-import akka.actor.ActorSystem
+import akka.Done
+import akka.actor.{Actor, ActorRef, ActorSystem, Props, Status}
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
-import trw.dbsubsetter.akkastreams.SubsettingSource
+import trw.dbsubsetter.akkastreams.{PrimaryKeyStore, SubsettingSource}
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.SchemaInfo
 import trw.dbsubsetter.util.Util
@@ -17,9 +18,11 @@ object ApplicationAkkaStreams {
     implicit val system: ActorSystem = ActorSystem("DbSubsetter")
     implicit val materializer: ActorMaterializer = ActorMaterializer()
     implicit val ec: ExecutionContext = system.dispatcher
+    val monitor: ActorRef = system.actorOf(Props[Monitor])
+    val pkStore: ActorRef = system.actorOf(Props(classOf[PrimaryKeyStore], schemaInfo.pkOrdinalsByTable))
 
     SubsettingSource
-      .source(config, schemaInfo, baseQueries)
+      .source(config, schemaInfo, baseQueries, monitor)
       .runWith(Sink.ignore)
       .onComplete { result =>
         system.terminate()
@@ -28,5 +31,12 @@ object ApplicationAkkaStreams {
           case Failure(e) => throw e
         }
       }
+  }
+}
+
+class Monitor extends Actor {
+  override def receive: Receive = {
+    case (name: String, Done) => println(s"$name completed")
+    case Status.Failure(e) => println(s"Failed: ${e.getMessage}")
   }
 }
