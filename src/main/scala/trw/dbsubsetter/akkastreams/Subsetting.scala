@@ -17,7 +17,7 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.FiniteDuration
 
 object Subsetting {
-  def source(config: Config, schemaInfo: SchemaInfo, baseQueries: List[SqlStrQuery], monitor: ActorRef, pkStore: ActorRef)(implicit ec: ExecutionContext): Source[TargetDbInsertResult, NotUsed] = Source.fromGraph(GraphDSL.create() { implicit b =>
+  def source(config: Config, schemaInfo: SchemaInfo, baseQueries: List[SqlStrQuery], pkStore: ActorRef)(implicit ec: ExecutionContext): Source[TargetDbInsertResult, NotUsed] = Source.fromGraph(GraphDSL.create() { implicit b =>
     // Infrastructure: Timeouts, Merges, and Broadcasts
     implicit val askTimeout: Timeout = Timeout(FiniteDuration(100, TimeUnit.DAYS))
     val mergeOriginDbRequests = b.add(Merge[OriginDbRequest](3))
