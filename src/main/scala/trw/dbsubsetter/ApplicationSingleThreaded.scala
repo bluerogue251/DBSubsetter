@@ -21,12 +21,12 @@ object ApplicationSingleThreaded {
     // Run task queue until empty
     while (queue.nonEmpty) {
       val taskOpt: List[OriginDbRequest] = queue.dequeue() match {
-        case t: FkTask if FkTaskPreCheck.canBePrechecked(t) => pkWorkflow.process(t).collect { case t: FkTask => t }
+        case t: FkTask if FkTaskPreCheck.canBePrechecked(t) => List(pkWorkflow.process(t)).collect { case t: FkTask => t }
         case t => List(t)
       }
       taskOpt.foreach { task =>
         val dbResult = originDbWorkflow.process(task)
-        val pksAdded = pkWorkflow.process(dbResult).collect { case pka: PksAdded => pka }
+        val pksAdded = List(pkWorkflow.process(dbResult)).collect { case pka: PksAdded => pka }
         pksAdded.foreach(targetDbWorkflow.process)
         val newTasks = pksAdded.flatMap(pka => NewFkTaskWorkflow.process(pka, schemaInfo))
         newTasks.foreach(fkt => queue.enqueue(fkt))

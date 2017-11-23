@@ -1,14 +1,14 @@
 package trw.dbsubsetter.akkastreams
 
 import akka.NotUsed
+import akka.stream.OverflowStrategy
 import akka.stream.scaladsl.Flow
 import trw.dbsubsetter.db.SchemaInfo
 import trw.dbsubsetter.workflow._
 
 object PkResultFlows {
-  def pkAddedToNewTasks(sch: SchemaInfo, numBaseQueries: Int): Flow[PkResult, (Long, Vector[FkTask]), NotUsed] = {
-    Flow[PkResult]
-      .statefulMapConcat[(Long, Vector[FkTask])] { () =>
+  def newTaskFlow(sch: SchemaInfo, numBaseQueries: Int): Flow[PkResult, FkTask, NotUsed] = {
+    val f = Flow[PkResult].statefulMapConcat[(Long, Vector[FkTask])] { () =>
       var counter: Long = numBaseQueries
 
       pkResult => {
@@ -20,23 +20,14 @@ object PkResultFlows {
           case DuplicateTask =>
             counter -= 1
             List((counter, Vector.empty))
-          case _ => List.empty
+          case other => throw new RuntimeException(s"Cannot handle $other")
         }
       }
     }
-  }
 
-  def tripSwitch: Flow[(Long, Vector[FkTask]), FkTask, NotUsed] = {
-    Flow[(Long, Vector[FkTask])]
-      .takeWhile { case (counter, _) => counter != 0 }
-      .mapConcat { case (_, newTasks) => newTasks }
-  }
-
-  def pkAddedToDbInsert(sch: SchemaInfo): Flow[PkResult, PksAdded, NotUsed] = {
-    Flow[PkResult].collect { case pka: PksAdded => pka }
-  }
-
-  def pkMissingToFkQuery: Flow[PkResult, FkTask, NotUsed] = {
-    Flow[PkResult].collect { case fkTask: FkTask => fkTask }
+    // Do buffer before mapConcat to make the buffer less likely to fill up
+    f.takeWhile { case (count, _) => count != 0 }
+      .buffer(Int.MaxValue, OverflowStrategy.fail)
+      .mapConcat { case (_, tasks) => tasks }
   }
 }

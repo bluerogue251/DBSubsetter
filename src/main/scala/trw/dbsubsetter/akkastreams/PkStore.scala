@@ -4,7 +4,7 @@ import akka.actor.Actor
 import trw.dbsubsetter.db.Table
 import trw.dbsubsetter.workflow.{PkRequest, PkStoreWorkflow}
 
-class PrimaryKeyStore(pkOrdinalsByTable: Map[Table, Seq[Int]]) extends Actor {
+class PkStore(pkOrdinalsByTable: Map[Table, Seq[Int]]) extends Actor {
   val pkStoreWorkflow = new PkStoreWorkflow(pkOrdinalsByTable)
 
   override def receive: Receive = {
