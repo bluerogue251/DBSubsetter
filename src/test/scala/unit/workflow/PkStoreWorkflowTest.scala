@@ -2,7 +2,7 @@ package unit.workflow
 
 import org.scalatest.FunSuite
 import trw.dbsubsetter.db.{Row, Table}
-import trw.dbsubsetter.workflow.{FkTask, OriginDbResult, PkStoreWorkflow, PksAdded}
+import trw.dbsubsetter.workflow._
 
 class PkStoreWorkflowTest extends FunSuite {
   test("PkStore is conscious of fetchChildren for `exists` requests") {
@@ -15,34 +15,34 @@ class PkStoreWorkflowTest extends FunSuite {
 
     // Add the PK to the pkStore, noting that we have NOT yet fetched children
     val pkAddRequest1 = OriginDbResult(table, rows, fetchChildren = false)
-    val pkAddResult1 = pkStore.process(pkAddRequest1)
-    assert(pkAddResult1 === List(PksAdded(table, rows, Vector.empty)))
+    val pkAddResult1 = pkStore.add(pkAddRequest1)
+    assert(pkAddResult1 === PksAdded(table, rows, Vector.empty))
 
     // Query whether the PK is in the pkStore given that we are only interested in parent records
     // The empty list result tells us that the PK exists already
     val pkQueryRequest1 = FkTask(table, null, fkValue, fetchChildren = false)
-    val pkQueryResult1 = pkStore.process(pkQueryRequest1)
-    assert(pkQueryResult1 === List.empty)
+    val pkQueryResult1 = pkStore.exists(pkQueryRequest1)
+    assert(pkQueryResult1 === DuplicateTask)
 
     // This time query whether the PK is in the pkStore given that we ARE interested in both parents AND children
     // The result tells us that the PK's children have not yet been fetched.
     // Even though its parents have already been fetched, that is not relevant
     val pkQueryRequest2 = FkTask(table, null, fkValue, fetchChildren = true)
-    val pkQueryResult2 = pkStore.process(pkQueryRequest2)
-    assert(pkQueryResult2 === List(pkQueryRequest2))
+    val pkQueryResult2 = pkStore.exists(pkQueryRequest2)
+    assert(pkQueryResult2 === pkQueryRequest2)
 
     // Now we add the the PK to the pkStore noting that we will fetch children for it
     // The fact that it was already in the PK store for having its parents fetched means that
     // It will only appear in the collection of rows still needing children processing
     // It will not appear in the collection of rows needing parents (and therefore will not be added duplicate to the target db either)
     val pkAddRequest2 = OriginDbResult(table, rows, fetchChildren = true)
-    val pkAddResult2 = pkStore.process(pkAddRequest2)
-    assert(pkAddResult2 === List(PksAdded(table, Vector.empty, rows)))
+    val pkAddResult2 = pkStore.add(pkAddRequest2)
+    assert(pkAddResult2 === PksAdded(table, Vector.empty, rows))
 
     // Now we query again and since we've already fetched children, we should never get anything back from the queries
-    val pkQueryResult3 = pkStore.process(pkQueryRequest1)
-    assert(pkQueryResult3 === List.empty)
-    val pkQueryResult4 = pkStore.process(pkQueryRequest2)
-    assert(pkQueryResult4 === List.empty)
+    val pkQueryResult3 = pkStore.exists(pkQueryRequest1)
+    assert(pkQueryResult3 === DuplicateTask)
+    val pkQueryResult4 = pkStore.exists(pkQueryRequest2)
+    assert(pkQueryResult4 === DuplicateTask)
   }
 }

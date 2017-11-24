@@ -6,8 +6,8 @@ import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.SchemaInfo
 import trw.dbsubsetter.workflow._
 
-object OriginDbQueryFlow {
-  def flow(config: Config, schemaInfo: SchemaInfo): Flow[OriginDbRequest, OriginDbResult, NotUsed] = {
+object OriginDb {
+  def query(config: Config, schemaInfo: SchemaInfo): Flow[OriginDbRequest, OriginDbResult, NotUsed] = {
     Flow[OriginDbRequest].statefulMapConcat { () =>
       val dbWorkflow = new OriginDbWorkflow(config, schemaInfo)
       req => {

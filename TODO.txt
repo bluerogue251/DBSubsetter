@@ -1,16 +1,11 @@
-* Add some sort of way to shut down or otherwise finish the akka-streams version instead of hanging forever (otherwise how can we do automated tests of it?)
-  -- Could this be possible by tracking which FkTasks have *not* yet been processed, and how many new tasks each FK task turns into?
-  -- Keep track of this in custom graph processing step
-  -- Or, a simpler:
-    -- NewFkTaskFlow --> StatefulMapConcat of # of outstanding Tasks --> Flow.takeWhile(outstandingTasks != 0) --> FkTaskWorkflow
-    -- Just a simple `Long` number, not a Map from Task -> Long. Initial state is the size of the baseQueries collection.
-* Add retry logic to DB Queries in case of failure, e.g. due to temporary network problem
 * Test the akka-streams versions of things against the singleThreadedDebugMode
+* Make sure system exits with exit code 1 in case of error
+* Add README.md
+* Add retry logic to DB Queries in case of failure, e.g. due to temporary network problem
+* Add option to support Rails "polymorphic associations" / Hibernate "discriminator column STI"
 * Try to support MySQL, SQL Server, and Oracle
 * Try to find memory/performance bottlenecks by profiling against a huge database
-* Investigate whether optimization is possible via changing AnyRef to Any and then using primitive Ints instead of Integer for PK storage, etc.
 * Consider better support for uncommon data types such as money, enums, arrays of enums, etc
   -- Could the enum case be addressed via type casting in a way that does not cause other bugs or harm performance?
-* Add README.md
-* Add option to support Rails "polymorphic associations" / Hibernate "discriminator column STI"
+* Investigate whether optimization is possible via changing AnyRef to Any and then using primitive Ints instead of Integer for PK storage, etc.
 * Consider if/how PkStore could use TreeSet instead of HashSet, and if that would be faster in practice

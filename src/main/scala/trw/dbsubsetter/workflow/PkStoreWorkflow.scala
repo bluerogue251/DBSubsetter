@@ -16,30 +16,40 @@ class PkStoreWorkflow(pkOrdinalsByTable: Map[Table, Seq[Int]]) {
     t -> (mutable.HashSet.empty[AnyRef], mutable.HashSet.empty[AnyRef])
   }.toMap
 
-  def process(request: PkRequest): List[PkResult] = {
-    val (parentStore, childStore) = pkStore.getOrElse(request.table, throw new RuntimeException(s"No primary key defined for table ${request.table.fullyQualifiedName}"))
-    request match {
-      case fkt@FkTask(_, _, fkValue, true) =>
-        if (childStore.contains(fkValue)) List.empty else List(fkt)
-      case fkt@FkTask(_, _, fkValue, _) =>
-        if (parentStore.contains(fkValue) || childStore.contains(fkValue)) List.empty else List(fkt)
-      case OriginDbResult(table, rows, fetchChildren) =>
-        val pkOrdinals = pkOrdinalsByTable(request.table)
-        val pkOrdinal = pkOrdinals.head
-        val isSingleColPk = pkOrdinals.size == 1
-        val getPkValue: Row => AnyRef = if (isSingleColPk) row => row(pkOrdinal) else row => pkOrdinals.map(row)
+  def exists(req: FkTask): PkResult = {
+    val FkTask(table, _, fkValue, fetchChildren) = req
+    val (parentStore, childStore) = getStorage(table)
 
-        if (fetchChildren) {
-          val childrenNotYetFetched = rows.filter(row => childStore.add(getPkValue(row)))
-          val parentsNotYetFetched = childrenNotYetFetched.filterNot(row => parentStore.remove(getPkValue(row)))
-          List(PksAdded(table, parentsNotYetFetched, childrenNotYetFetched))
-        } else {
-          val newRows = rows.filter { row =>
-            val pkValue = getPkValue(row)
-            !childStore.contains(pkValue) && parentStore.add(pkValue)
-          }
-          List(PksAdded(table, newRows, Vector.empty))
-        }
+    if (fetchChildren) {
+      if (childStore.contains(fkValue)) DuplicateTask else req
+    } else {
+      if (parentStore.contains(fkValue) || childStore.contains(fkValue)) DuplicateTask else req
     }
+  }
+
+  def add(req: OriginDbResult): PksAdded = {
+    val OriginDbResult(table, rows, fetchChildren) = req
+    val (parentStore, childStore) = getStorage(table)
+
+    val pkOrdinals = pkOrdinalsByTable(table)
+    val pkOrdinal = pkOrdinals.head
+    val isSingleColPk = pkOrdinals.size == 1
+    val getPkValue: Row => AnyRef = if (isSingleColPk) row => row(pkOrdinal) else row => pkOrdinals.map(row)
+
+    if (fetchChildren) {
+      val childrenNotYetFetched = rows.filter(row => childStore.add(getPkValue(row)))
+      val parentsNotYetFetched = childrenNotYetFetched.filterNot(row => parentStore.remove(getPkValue(row)))
+      PksAdded(table, parentsNotYetFetched, childrenNotYetFetched)
+    } else {
+      val newRows = rows.filter { row =>
+        val pkValue = getPkValue(row)
+        !childStore.contains(pkValue) && parentStore.add(pkValue)
+      }
+      PksAdded(table, newRows, Vector.empty)
+    }
+  }
+
+  def getStorage(t: Table): (mutable.HashSet[AnyRef], mutable.HashSet[AnyRef]) = {
+    pkStore.getOrElse(t, throw new RuntimeException(s"No primary key defined for table ${t.fullyQualifiedName}"))
   }
 }

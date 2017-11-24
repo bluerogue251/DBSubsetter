@@ -1,7 +1,7 @@
 package trw.dbsubsetter.workflow
 
 object FkTaskPreCheck {
-  def canBePrechecked(task: FkTask): Boolean = {
+  def canPrecheck(task: FkTask): Boolean = {
     task.fk.pointsToPk && task.table == task.fk.toTable
   }
 }
