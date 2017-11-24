@@ -27,6 +27,9 @@ object NewTasks {
     }
 
     // Buffer comes before mapConcat so that the buffer is less likely to fill up
+    // OverflowStrategy.fail may help avoid deadlocks given that this is a feedback loop.
+    // But I haven't fully thought through whether there is a better way using backpressure or not
+    // See https://doc.akka.io/docs/akka/2.5.6/scala/stream/stream-graphs.html#graph-cycles-liveness-and-deadlocks
     f.takeWhile { case (count, _) => count != 0 }
       .buffer(Int.MaxValue, OverflowStrategy.fail)
       .mapConcat { case (_, tasks) => tasks }

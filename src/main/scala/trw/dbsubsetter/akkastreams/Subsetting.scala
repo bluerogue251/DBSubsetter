@@ -54,7 +54,7 @@ object Subsetting {
       broadcastFkTasks
 
     broadcastPksAdded ~>
-      Flow[PksAdded].buffer(Int.MaxValue, OverflowStrategy.fail) ~>
+      Flow[PksAdded].buffer(Int.MaxValue, OverflowStrategy.backpressure) ~>
       balanceTargetDb
 
     // FkTasks ~> cannotBePrechecked       ~>        OriginDbRequest
