@@ -11,21 +11,15 @@ import scala.sys.process._
 
 abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
   def dataSetName: String
-
   def originPort: Int
-
   def targetPort: Int
-
   def programArgs: Array[String]
 
   var targetConn: Connection = _
 
   def originDbName = s"${dataSetName}_origin"
-
   def targetDbName = s"${dataSetName}_target"
-
   def originConnString = s"jdbc:postgresql://localhost:$originPort/$originDbName?user=postgres"
-
   def targetConnString = s"jdbc:postgresql://localhost:$targetPort/$targetDbName?user=postgres"
 
   override protected def beforeAll(): Unit = {
