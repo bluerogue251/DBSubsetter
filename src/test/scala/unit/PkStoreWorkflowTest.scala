@@ -1,4 +1,4 @@
-package unit.workflow
+package unit
 
 import org.scalatest.FunSuite
 import trw.dbsubsetter.db.{Row, Table}

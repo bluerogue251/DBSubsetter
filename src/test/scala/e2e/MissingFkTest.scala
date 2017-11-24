@@ -1,44 +1,21 @@
 package e2e
 
-import java.sql.{Connection, DriverManager}
+class MissingFkTest extends AbstractEndToEndTest {
+  override val dataSetName = "missing_fk"
+  override val originPort = 5490
+  override val targetPort = 5491
 
-import org.scalatest.{BeforeAndAfterAll, FunSuite}
-import trw.dbsubsetter.Application
-
-import scala.sys.process._
-
-class MissingFkTest extends FunSuite with BeforeAndAfterAll {
-  val targetConnString = "jdbc:postgresql://localhost:5491/missing_fk_target?user=postgres"
-  var targetConn: Connection = _
-
-  override protected def beforeAll(): Unit = {
-    super.beforeAll()
-    "./util/missing_fk/reset_origin_db.sh".!!
-    "./util/missing_fk/reset_target_db.sh".!!
-
-    val args = Array(
-      "--schemas", "public",
-      "--originDbConnStr", "jdbc:postgresql://localhost:5490/missing_fk_origin?user=postgres",
-      "--targetDbConnStr", targetConnString,
-      "--baseQuery", "public.table_1 ::: id = 2 ::: true",
-      "--foreignKey", "public.table_2(table_1_id) ::: public.table_1(id)",
-      "--primaryKey", "public.table_4(table_1_id, table_3_id)",
-      "--originDbParallelism", "1",
-      "--targetDbParallelism", "1",
-      "--singleThreadedDebugMode"
-    )
-    Application.main(args)
-
-    "./util/missing_fk/post_subset_target.sh".!!
-
-    targetConn = DriverManager.getConnection(targetConnString)
-    targetConn.setReadOnly(true)
-  }
-
-  override protected def afterAll(): Unit = {
-    super.afterAll()
-    targetConn.close()
-  }
+  override val programArgs = Array(
+    "--schemas", "public",
+    "--originDbConnStr", originConnString,
+    "--targetDbConnStr", targetConnString,
+    "--baseQuery", "public.table_1 ::: id = 2 ::: true",
+    "--foreignKey", "public.table_2(table_1_id) ::: public.table_1(id)",
+    "--primaryKey", "public.table_4(table_1_id, table_3_id)",
+    "--originDbParallelism", "1",
+    "--targetDbParallelism", "1",
+    "--singleThreadedDebugMode"
+  )
 
   test("Correct table_1 records were included") {
     val resultSet = targetConn.createStatement().executeQuery("select * from table_1")

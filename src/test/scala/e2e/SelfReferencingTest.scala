@@ -1,43 +1,22 @@
 package e2e
 
-import java.sql.{Connection, DriverManager}
+class SelfReferencingTest extends AbstractEndToEndTest {
 
-import org.scalatest.{BeforeAndAfterAll, FunSuite}
-import trw.dbsubsetter.Application
-import util.QueryUtil
+  override val dataSetName = "self_referencing"
 
-import scala.sys.process._
+  override val originPort = 5520
 
-class SelfReferencingTest extends FunSuite with BeforeAndAfterAll with QueryUtil {
-  val targetConnString = "jdbc:postgresql://localhost:5521/self_referencing_target?user=postgres"
-  var targetConn: Connection = _
+  override val targetPort = 5521
 
-  override protected def beforeAll(): Unit = {
-    super.beforeAll()
-    "./util/self_referencing/reset_origin_db.sh".!!
-    "./util/self_referencing/reset_target_db.sh".!!
-
-    val args = Array(
-      "--schemas", "public",
-      "--originDbConnStr", "jdbc:postgresql://localhost:5520/self_referencing_origin?user=postgres",
-      "--targetDbConnStr", targetConnString,
-      "--baseQuery", "public.self_referencing_table ::: id in (1, 3, 13, 14, 15) ::: true",
-      "--originDbParallelism", "1",
-      "--targetDbParallelism", "1",
-      "--singleThreadedDebugMode"
-    )
-    Application.main(args)
-
-    "./util/self_referencing/post_subset_target.sh".!!
-
-    targetConn = DriverManager.getConnection(targetConnString)
-    targetConn.setReadOnly(true)
-  }
-
-  override protected def afterAll(): Unit = {
-    super.afterAll()
-    targetConn.close()
-  }
+  override val programArgs = Array(
+    "--schemas", "public",
+    "--originDbConnStr", "jdbc:postgresql://localhost:5520/self_referencing_origin?user=postgres",
+    "--targetDbConnStr", targetConnString,
+    "--baseQuery", "public.self_referencing_table ::: id in (1, 3, 13, 14, 15) ::: true",
+    "--originDbParallelism", "1",
+    "--targetDbParallelism", "1",
+    "--singleThreadedDebugMode"
+  )
 
   test("Correct self_referencing_table records were included") {
     assert(countTable("public", "self_referencing_table") === 10)
