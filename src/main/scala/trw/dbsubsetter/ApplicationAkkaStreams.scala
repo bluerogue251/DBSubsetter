@@ -1,6 +1,6 @@
 package trw.dbsubsetter
 
-import akka.actor.{ActorRef, ActorSystem, Props}
+import akka.actor.{ActorRef, ActorSystem}
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
 import trw.dbsubsetter.akkastreams.{PkStore, Subsetting}
@@ -17,7 +17,7 @@ object ApplicationAkkaStreams {
     implicit val system: ActorSystem = ActorSystem("DbSubsetter")
     implicit val materializer: ActorMaterializer = ActorMaterializer()
     implicit val ec: ExecutionContext = system.dispatcher
-    val pkStore: ActorRef = system.actorOf(Props(classOf[PkStore], schemaInfo.pkOrdinalsByTable))
+    val pkStore: ActorRef = system.actorOf(PkStore.props(schemaInfo.pkOrdinalsByTable))
 
     Subsetting
       .source(config, schemaInfo, baseQueries, pkStore)
