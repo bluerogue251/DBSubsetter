@@ -26,28 +26,31 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
   def targetAkkaStreamsPort: Int = originPort + 2
   def originDbName = s"${dataSetName}_origin"
 
-  def targetDbSingleThreadedName = s"${dataSetName}_target_1"
+  def targetDbName = s"${dataSetName}_target"
 
-  def targetDbAkkaStreamsName = s"${dataSetName}_target_2"
   def originConnString = s"jdbc:postgresql://localhost:$originPort/$originDbName?user=postgres"
 
-  def targetSingleThreadedConnString = s"jdbc:postgresql://localhost:$targetSingleThreadedPort/$targetDbSingleThreadedName?user=postgres"
+  def targetSingleThreadedConnString = s"jdbc:postgresql://localhost:$targetSingleThreadedPort/$targetDbName?user=postgres"
 
-  def targetAkkaStreamsConnString = s"jdbc:postgresql://localhost:$targetAkkaStreamsPort/$targetDbAkkaStreamsName?user=postgres"
+  def targetAkkaStreamsConnString = s"jdbc:postgresql://localhost:$targetAkkaStreamsPort/$targetDbName?user=postgres"
 
   override protected def beforeAll(): Unit = {
     super.beforeAll()
 
     s"./util/reset_origin_db.sh $dataSetName $originDbName $originPort".!!
-    s"./util/reset_target_db.sh $originDbName $originPort $targetDbSingleThreadedName $targetSingleThreadedPort".!!
-    s"./util/reset_target_db.sh $originDbName $originPort $targetDbAkkaStreamsName $targetAkkaStreamsPort".!!
+    s"./util/reset_target_db.sh $originDbName $originPort $targetDbName $targetSingleThreadedPort".!!
+    s"./util/reset_target_db.sh $originDbName $originPort $targetDbName $targetAkkaStreamsPort".!!
 
-    val singleThreadedArgs = programArgs ++ Array(
+    val parallelismArgs = Array(
+      "--originDbParallelism", "10",
+      "--targetDbParallelism", "10"
+    )
+    val singleThreadedArgs = programArgs ++ parallelismArgs ++ Array(
       "--originDbConnStr", originConnString,
       "--targetDbConnStr", targetSingleThreadedConnString,
       "--singleThreadedDebugMode"
     )
-    val akkaStreamsArgs = programArgs ++ Array(
+    val akkaStreamsArgs = programArgs ++ parallelismArgs ++ Array(
       "--originDbConnStr", originConnString,
       "--targetDbConnStr", targetAkkaStreamsConnString,
     )
@@ -61,8 +64,8 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
     val futureResult = ApplicationAkkaStreams.run(akkaStreamsConfig, schemaInfo, baseQueries)
     Await.result(futureResult, Duration.Inf)
 
-    s"./util/post_subset_target.sh $originDbName $originPort $targetDbSingleThreadedName $targetSingleThreadedPort".!!
-    s"./util/post_subset_target.sh $originDbName $originPort $targetDbAkkaStreamsName $targetAkkaStreamsPort".!!
+    s"./util/post_subset_target.sh $originDbName $originPort $targetDbName $targetSingleThreadedPort".!!
+    s"./util/post_subset_target.sh $originDbName $originPort $targetDbName $targetAkkaStreamsPort".!!
 
     targetSingleThreadedConn = DriverManager.getConnection(targetSingleThreadedConnString)
     targetSingleThreadedConn.setReadOnly(true)
