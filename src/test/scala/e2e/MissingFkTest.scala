@@ -12,11 +12,10 @@ class MissingFkTest extends AbstractEndToEndTest {
   )
 
   test("Correct table_1 records were included") {
-    val resultSet = targetSingleThreadedConn.createStatement().executeQuery("select * from table_1")
-    resultSet.next()
-    val id = resultSet.getInt("id")
-    assert(id === 2)
-    assert(resultSet.next() === false)
+    val table_1_count = countTable("public", "table_1")
+    assert(table_1_count === 1)
+    val table_1_sum = sumColumn("public", "table_1", "id")
+    assert(table_1_sum === 2)
   }
 
   test("Correct table_2 records were included") {

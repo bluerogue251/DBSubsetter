@@ -10,9 +10,7 @@ class CircularDepTest extends AbstractEndToEndTest {
   )
 
   test("Correct number of grandparents were included") {
-    val resultSet = targetSingleThreadedConn.createStatement().executeQuery("select count(*) from grandparents")
-    resultSet.next()
-    val grandparentCount = resultSet.getInt(1)
+    val grandparentCount = countTable("public", "grandparents")
     assert(grandparentCount === 167)
   }
 

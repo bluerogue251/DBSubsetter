@@ -7,7 +7,7 @@ origin_db_port=$2
 target_db_name=$3
 target_db_port=$4
 
-docker rm --force --volumes $target_db_name
+docker rm --force --volumes $target_db_name || true
 
 docker create --name $target_db_name -p $target_db_port:5432 postgres:9.6.3
 
