@@ -3,12 +3,9 @@ package e2e
 class PgDataTypesTest extends AbstractEndToEndTest {
   override val dataSetName = "pg_data_types"
   override val originPort = 5500
-  override val targetPort = 5501
 
   override val programArgs = Array(
     "--schemas", "public",
-    "--originDbConnStr", originConnString,
-    "--targetDbConnStr", targetConnString,
     "--baseQuery", "public.arrays_table ::: true ::: true",
     "--baseQuery", "public.binary_table ::: true ::: true",
     "--baseQuery", "public.bit_string_table ::: true ::: true",
@@ -26,10 +23,7 @@ class PgDataTypesTest extends AbstractEndToEndTest {
     // The following data types are unfortunately not working yet
     "--excludeColumns", "public.money_table(money)",
     "--excludeColumns", "public.enum_table(enum)",
-    "--excludeColumns", "public.bit_string_table(bit_1, bit_5)",
-    "--originDbParallelism", "1",
-    "--targetDbParallelism", "1",
-    "--singleThreadedDebugMode"
+    "--excludeColumns", "public.bit_string_table(bit_1, bit_5)"
   )
 
   test("No error was thrown during subsetting") {

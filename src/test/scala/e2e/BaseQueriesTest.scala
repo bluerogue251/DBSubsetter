@@ -3,16 +3,10 @@ package e2e
 class BaseQueriesTest extends AbstractEndToEndTest {
   override val dataSetName = "base_queries"
   override val originPort = 5510
-  override val targetPort = 5511
 
   override val programArgs = Array(
     "--schemas", "public",
-    "--originDbConnStr", originConnString,
-    "--targetDbConnStr", targetConnString,
-    "--baseQuery", "public.base_table ::: true ::: false",
-    "--originDbParallelism", "1",
-    "--targetDbParallelism", "1",
-    "--singleThreadedDebugMode"
+    "--baseQuery", "public.base_table ::: true ::: false"
   )
 
   test("Correct base_table records were included") {

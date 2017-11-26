@@ -3,18 +3,12 @@ package e2e
 class SchoolDbTest extends AbstractEndToEndTest {
   override val dataSetName = "school_db"
   override val originPort = 5450
-  override val targetPort = 5451
 
   override val programArgs = Array(
     "--schemas", "public,Audit",
-    "--originDbConnStr", "jdbc:postgresql://localhost:5450/school_db_origin?user=postgres",
-    "--targetDbConnStr", targetConnString,
     "--baseQuery", "public.Students ::: student_id % 100 = 0 ::: true",
     "--baseQuery", "public.standalone_table ::: id < 4 ::: true",
-    "--excludeColumns", "public.schools(mascot)",
-    "--originDbParallelism", "1",
-    "--targetDbParallelism", "1",
-    "--singleThreadedDebugMode"
+    "--excludeColumns", "public.schools(mascot)"
   )
 
   test("Correct students were included") {
