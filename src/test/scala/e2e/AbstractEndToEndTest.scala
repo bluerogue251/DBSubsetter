@@ -85,6 +85,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
   protected def assertCount(schema: SchemaName, table: TableName, whereClauseOpt: Option[String], expected: Long): Unit = {
     val baseSql = s"""select count(*) from "$schema"."$table""""
     val sql = whereClauseOpt.fold(baseSql) { wc => s"$baseSql where $wc" }
+
     val singleThreadedJdbcResult = targetSingleThreadedConn.createStatement().executeQuery(sql)
     singleThreadedJdbcResult.next()
     val singleThreadedCount = singleThreadedJdbcResult.getLong(1)
