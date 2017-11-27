@@ -75,13 +75,18 @@ The only condition for contributing to this project is to follow our [code of co
 
 ## Related projects and resources
 
-DBSubsetter was inspired by and borrowed ideas from many of the following projects:
+DBSubsetter was inspired by and borrowed ideas from:
 
 * [Jailer](http://jailer.sourceforge.net/home.htm)
 * [rdbms-subsetter](https://github.com/18F/rdbms-subsetter)
+
+Here are some other similar or related resources:
+
 * [DataBee](https://www.databee.com/)
 * [pg_sample](https://github.com/mla/pg_sample)
 * [This stack overflow question](https://stackoverflow.com/questions/3980379/how-to-export-consistent-subset-of-database)
+* [DATPROF](http://www.datprof.com/products/datprof-subset/)
+* [db_subsetter](https://github.com/lostapathy/db_subsetter)
 
 
 ## License
