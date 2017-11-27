@@ -31,7 +31,7 @@ class SchoolDbTest extends AbstractEndToEndTest {
 
   test("Correct homework grades were included") {
     assertCount("public", "homework_grades", None, 36057)
-    assertSum("public", "homework_grades", "id", 93303124010l)
+    assertSum("public", "homework_grades", "id", 51948824979l)
   }
 
   test("Correct school_assignments were included") {
@@ -52,7 +52,7 @@ class SchoolDbTest extends AbstractEndToEndTest {
 
   test("Correct Audit.events were included") {
     assertCount("Audit", "events", None, 122175)
-    assertSum("Audit", "events", "id", 445186981712l)
+    assertSum("Audit", "events", "id", 86209965622l)
   }
 
   test("Correct essay_assignments were included") {
