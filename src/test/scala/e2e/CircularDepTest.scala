@@ -13,13 +13,13 @@ class CircularDepTest extends AbstractEndToEndTest {
     assertCount("public", "grandparents", None, 167)
   }
 
-  test("All grandparents have 100 parents") {
+  test("All grandparents have correct number of parents") {
     (0 to 1000 by 6).foreach { i =>
       assertCount("public", "parents", Some(s"grandparent_id = $i"), 10)
     }
   }
 
-  test("All parents have 10 children") {
+  test("All parents have correct number of children") {
     (0 to 9).foreach { i =>
       assertCount("public", "children", Some(s"parent_id = $i"), 5)
     }

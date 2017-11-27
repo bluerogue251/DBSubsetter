@@ -1,6 +1,6 @@
+* Try to support MySQL, SQL Server, and Oracle
 * Add retry logic to DB Queries in case of failure, e.g. due to temporary network problem
 * Add option to support Rails "polymorphic associations" / Hibernate "discriminator column STI"
-* Try to support MySQL, SQL Server, and Oracle
 * Try to find memory/performance bottlenecks by profiling against a huge database
 * Investigate whether optimization is possible via changing AnyRef to Any and then using primitive Ints instead of Integer for PK storage, etc.
 * Consider better support for uncommon data types such as money, enums, arrays of enums, etc
