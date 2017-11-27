@@ -64,7 +64,7 @@ Memory usage will be proportional to the size of all the primary keys in the tar
 
 Contributions of all kinds are welcome and appreciated here!
 
-Whether it is to fix a typo, improve the documentation, add more tests, fix a bug, add a new feature, or whatever else you have in mind, feel free to open a pull request on GitHub.
+Whether it is to fix a typo, improve the documentation, add more tests, fix or even just report a bug, add a new feature, or whatever else you have in mind, feel free to open an issue or a pull request on GitHub.
 
 The only condition for contributing to this project is to follow our [code of conduct](CODE_OF_CONDUCT.md) so that everyone is treated with respect.
 
