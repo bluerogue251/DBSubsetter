@@ -1,6 +1,4 @@
 * Add retry logic to DB Queries in case of failure, e.g. due to temporary network problem
-* Add README.md
-  -- Include resetting sequence values for postgres
 * Add option to support Rails "polymorphic associations" / Hibernate "discriminator column STI"
 * Try to support MySQL, SQL Server, and Oracle
 * Try to find memory/performance bottlenecks by profiling against a huge database
