@@ -117,7 +117,7 @@ INSERT INTO "Audit".events (event_type_key, district_id, school_id, student_id, 
     '1999-10-25 11:19:27.888999'
   FROM school_assignments sa
     INNER JOIN schools sc ON sa.school_id = sc.id
-    CROSS JOIN generate_series(0, 10) AS seq; -- (0, 2000) would generate ~ 200 GB of data once indices are created
+    CROSS JOIN generate_series(0, 3) AS seq; -- (0, 2000) would generate ~ 200 GB of data once indices are created
 
 -- "Polymorphic foreign key" data
 INSERT INTO multiple_choice_assignments (id, assignment_name, created_at) VALUES
@@ -157,7 +157,7 @@ INSERT INTO homework_grades (student_id, assignment_type, assignment_id, grade, 
     now(),
     now()
   FROM "Students" s
-    CROSS JOIN generate_series(0, 3) AS seq;
+    CROSS JOIN generate_series(0, 2) AS seq;
 
 -- Isolated table data
 INSERT INTO standalone_table (note, created_on) VALUES

@@ -1,11 +1,9 @@
-* Test the akka-streams versions of things against the singleThreadedDebugMode
-* Make sure system exits with exit code 1 in case of error
-* Add README.md
 * Add retry logic to DB Queries in case of failure, e.g. due to temporary network problem
+* Add README.md
+  -- Include resetting sequence values for postgres
 * Add option to support Rails "polymorphic associations" / Hibernate "discriminator column STI"
 * Try to support MySQL, SQL Server, and Oracle
 * Try to find memory/performance bottlenecks by profiling against a huge database
+* Investigate whether optimization is possible via changing AnyRef to Any and then using primitive Ints instead of Integer for PK storage, etc.
 * Consider better support for uncommon data types such as money, enums, arrays of enums, etc
   -- Could the enum case be addressed via type casting in a way that does not cause other bugs or harm performance?
-* Investigate whether optimization is possible via changing AnyRef to Any and then using primitive Ints instead of Integer for PK storage, etc.
-* Consider if/how PkStore could use TreeSet instead of HashSet, and if that would be faster in practice
