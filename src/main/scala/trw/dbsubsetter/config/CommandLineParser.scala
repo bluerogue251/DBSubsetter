@@ -138,7 +138,9 @@ object CommandLineParser {
         |     --schemas "public" \
         |     --originDbConnStr "jdbc:postgresql://localhost:5450/origin_db_name?user=yourUser&password=yourPassword" \
         |     --targetDbConnStr "jdbc:postgresql://localhost:5451/target_db_name?user=yourUser&password=yourPassword" \
-        |     --baseQuery "public.users=id % 100 = 0"
+        |     --baseQuery "public.users ::: id % 100 = 0 ::: true" \
+        |     --originDbParallelism 10 \
+        |     --targetDbParallelism 10
         |
         |
         |   # With multiple starting conditions (a.k.a. multiple "base queries"):
@@ -146,9 +148,11 @@ object CommandLineParser {
         |     --schemas "public","audit","finance" \
         |     --originDbConnStr "jdbc:postgresql://localhost:5450/origin_db_name?user=yourUser&password=yourPassword" \
         |     --targetDbConnStr "jdbc:postgresql://localhost:5451/target_db_name?user=yourUser&password=yourPassword" \
-        |     --baseQuery "public.students=student_id in (select v.student_id from valedictorians as v where v.year = 2017)", \
-        |     --baseQuery "public.users=random() < 0.001", \
-        |     --baseQuery "finance.transactions=finance.transactions.created_at < '2017-12-25'"
+        |     --baseQuery "public.students ::: student_id in (select v.student_id from valedictorians as v where v.year = 2017) ::: true", \
+        |     --baseQuery "public.users ::: random() < 0.001 :::", \
+        |     --baseQuery "finance.transactions ::: created_at < '2017-12-25' ::: false" \
+        |     --originDbParallelism 15 \
+        |     --targetDbParallelism 20
       """.stripMargin
     note(usageExamples)
   }
