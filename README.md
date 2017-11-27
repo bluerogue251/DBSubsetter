@@ -6,9 +6,9 @@ Starting with a set of rows from a particular table, it respects foreign key con
 
 This is useful for local development and testing or for exporting all the data belonging to a particular set of users or customers for debugging and sharing.
 
-Design principles and goals of the project include:
+# Design principles
 
-* High performance: optimized for speed and to take advantage of multi-core machines.
+* High performance: optimized to run as fast as possible and to take full advantage of multi-core machines.
 * Determinism: identical inputs should yield identical outputs. Random subsets are possible, but only if purposely configured.
 * Do one thing well: a tiny codebase with a small and focused set of features.
 
