@@ -4,7 +4,7 @@ DBSubsetter is a tool for taking a logically consistent subset of the contents o
 
 Starting with a set of rows from a particular table, it respects foreign key constraints by recursively fetching the "parents" and (optionally) the "children" of those rows.
 
-It is useful for making a small copy of a production database for local development and testing, or for exporting all the data related to a particular set of users or customers for debugging or sharing.
+It is useful for making a small copy of a production database for local development and testing, or for exporting all the data belonging to a particular set of users or customers for debugging or sharing.
 
 
 ## Design principles
