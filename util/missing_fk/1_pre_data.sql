@@ -28,8 +28,8 @@ CREATE TABLE table_5 (
 
 CREATE TABLE table_a (
   id                   SERIAL PRIMARY KEY,
-  points_to_table_name VARCHAR NOT NULL,
-  points_to_table_id   INTEGER NOT NULL
+  points_to_table_name VARCHAR(255) NOT NULL,
+  points_to_table_id   INTEGER      NOT NULL
 );
 
 CREATE TABLE table_b (

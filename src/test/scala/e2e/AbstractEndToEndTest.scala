@@ -30,18 +30,18 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
 
   def targetDbAkkaStreamsName = s"${dataSetName}_target_as"
 
-  def originConnString = s"jdbc:postgresql://localhost:$originPort/$originDbName?user=postgres"
+  def originConnString = s"jdbc:mysql://localhost:$originPort/$originDbName?user=root"
 
-  def targetSingleThreadedConnString = s"jdbc:postgresql://localhost:$targetSingleThreadedPort/$targetDbSingleThreadedName?user=postgres"
+  def targetSingleThreadedConnString = s"jdbc:mysql://0.0.0.0:$targetSingleThreadedPort/$targetDbSingleThreadedName?user=root"
 
-  def targetAkkaStreamsConnString = s"jdbc:postgresql://localhost:$targetAkkaStreamsPort/$targetDbAkkaStreamsName?user=postgres"
+  def targetAkkaStreamsConnString = s"jdbc:mysql://0.0.0.0:$targetAkkaStreamsPort/$targetDbAkkaStreamsName?user=root"
 
   override protected def beforeAll(): Unit = {
     super.beforeAll()
 
-    s"./util/reset_origin_db.sh $dataSetName $originDbName $originPort".!!
-    s"./util/reset_target_db.sh $originDbName $originPort $targetDbSingleThreadedName $targetSingleThreadedPort".!!
-    s"./util/reset_target_db.sh $originDbName $originPort $targetDbAkkaStreamsName $targetAkkaStreamsPort".!!
+    //    s"./util/reset_origin_db.sh $dataSetName $originDbName $originPort".!!
+    //    s"./util/reset_target_db.sh $originDbName $originPort $targetDbSingleThreadedName $targetSingleThreadedPort".!!
+    //    s"./util/reset_target_db.sh $originDbName $originPort $targetDbAkkaStreamsName $targetAkkaStreamsPort".!!
 
     val parallelismArgs = Array(
       "--originDbParallelism", "10",

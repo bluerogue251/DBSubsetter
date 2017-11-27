@@ -10,6 +10,7 @@ object SchemaInfoRetrieval {
   def getSchemaInfo(config: Config): SchemaInfo = {
     val conn = DriverManager.getConnection(config.originDbConnectionString)
     conn.setReadOnly(true)
+    val catalog = conn.getCatalog
     val ddl = conn.getMetaData
 
     val tablesQueryResult = ArrayBuffer.empty[Table]
@@ -19,17 +20,16 @@ object SchemaInfoRetrieval {
 
     config.schemas.foreach { schema =>
       // Args: catalog, schemaPattern, tableNamePattern, types
-      val tablesJdbcResultSet = ddl.getTables(null, schema, "%", Array("TABLE"))
+      val tablesJdbcResultSet = ddl.getTables(catalog, schema, "%", Array("TABLE"))
       while (tablesJdbcResultSet.next()) {
         tablesQueryResult += Table(
-          tablesJdbcResultSet.getString("TABLE_SCHEM"),
+          schema,
           tablesJdbcResultSet.getString("TABLE_NAME")
         )
       }
 
-      val columnsJdbcResultSet = ddl.getColumns(null, schema, null, null)
+      val columnsJdbcResultSet = ddl.getColumns(catalog, schema, "%", "%")
       while (columnsJdbcResultSet.next()) {
-        val schema = columnsJdbcResultSet.getString("TABLE_SCHEM")
         val table = columnsJdbcResultSet.getString("TABLE_NAME")
         val columnName = columnsJdbcResultSet.getString("COLUMN_NAME")
 
@@ -39,29 +39,33 @@ object SchemaInfoRetrieval {
       }
 
       // Args: catalog, schema, table
-      val primaryKeysJdbcResultSet = ddl.getPrimaryKeys(null, schema, null)
-      while (primaryKeysJdbcResultSet.next()) {
-        primaryKeysQueryResult += PrimaryKeyQueryRow(
-          primaryKeysJdbcResultSet.getString("TABLE_SCHEM"),
-          primaryKeysJdbcResultSet.getString("TABLE_NAME"),
-          primaryKeysJdbcResultSet.getString("COLUMN_NAME")
-        )
+      tablesQueryResult.foreach { table =>
+        val primaryKeysJdbcResultSet = ddl.getPrimaryKeys(catalog, schema, table.name)
+        while (primaryKeysJdbcResultSet.next()) {
+          primaryKeysQueryResult += PrimaryKeyQueryRow(
+            schema,
+            primaryKeysJdbcResultSet.getString("TABLE_NAME"),
+            primaryKeysJdbcResultSet.getString("COLUMN_NAME")
+          )
+        }
       }
       config.cmdLinePrimaryKeys.foreach { clpk =>
         clpk.columns.foreach(c => primaryKeysQueryResult += PrimaryKeyQueryRow(clpk.schema, clpk.table, c))
       }
 
-      // Args: catalog, schema, table
-      val foreignKeysJdbcResultSet = ddl.getExportedKeys(null, schema, null)
-      while (foreignKeysJdbcResultSet.next()) {
-        foreignKeysQueryResult += ForeignKeyQueryRow(
-          foreignKeysJdbcResultSet.getString("FKTABLE_SCHEM"),
-          foreignKeysJdbcResultSet.getString("FKTABLE_NAME"),
-          foreignKeysJdbcResultSet.getString("FKCOLUMN_NAME"),
-          foreignKeysJdbcResultSet.getString("PKTABLE_SCHEM"),
-          foreignKeysJdbcResultSet.getString("PKTABLE_NAME"),
-          foreignKeysJdbcResultSet.getString("PKCOLUMN_NAME")
-        )
+      tablesQueryResult.foreach { table =>
+        // Args: catalog, schema, table
+        val foreignKeysJdbcResultSet = ddl.getExportedKeys(catalog, schema, table.name)
+        while (foreignKeysJdbcResultSet.next()) {
+          foreignKeysQueryResult += ForeignKeyQueryRow(
+            schema,
+            foreignKeysJdbcResultSet.getString("FKTABLE_NAME"),
+            foreignKeysJdbcResultSet.getString("FKCOLUMN_NAME"),
+            schema,
+            foreignKeysJdbcResultSet.getString("PKTABLE_NAME"),
+            foreignKeysJdbcResultSet.getString("PKCOLUMN_NAME")
+          )
+        }
       }
     }
     conn.close()
@@ -145,5 +149,3 @@ object SchemaInfoRetrieval {
                                               toColumn: ColumnName)
 
 }
-
-

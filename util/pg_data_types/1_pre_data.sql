@@ -1,9 +1,9 @@
 CREATE TABLE arrays_table (
   id            SERIAL PRIMARY KEY,
-  string_array  VARCHAR [],
+  string_array  VARCHAR(255) [],
   int_array     INT [],
   decimal_array DECIMAL [],
-  nested_array  VARCHAR [] []
+  nested_array  VARCHAR(255) [] []
 );
 -- Still need array of an enum and array of json, array of jsonb, etc.
 

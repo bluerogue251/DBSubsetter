@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -eou pipefail
+set -eoux pipefail
 
 data_set_name=$1
 origin_db_name=$2
@@ -8,14 +8,13 @@ origin_db_port=$3
 
 docker rm --force --volumes $origin_db_name || true
 
-docker create --name $origin_db_name -p $origin_db_port:5432 postgres:9.6.3
+docker create --name $origin_db_name -p $origin_db_port:3306 --env MYSQL_ALLOW_EMPTY_PASSWORD=true mysql:8.0
 
 docker start $origin_db_name
 
-sleep 5
+sleep 15
 
-createdb -p $origin_db_port -h localhost -U postgres $origin_db_name
-
-psql -f ./util/$data_set_name/1_pre_data.sql -p $origin_db_port -h localhost -U postgres $origin_db_name -v ON_ERROR_STOP=1
-psql -f ./util/$data_set_name/2_data.sql -p $origin_db_port -h localhost -U postgres $origin_db_name -v ON_ERROR_STOP=1
-psql -f ./util/$data_set_name/3_post_data.sql -p $origin_db_port -h localhost -U postgres $origin_db_name -v ON_ERROR_STOP=1
+mysql --port $origin_db_port --host 0.0.0.0 --user root -e "create database $origin_db_name"
+mysql --port $origin_db_port --host 0.0.0.0 --user root $origin_db_name < ./util/$data_set_name/1_pre_data.sql
+mysql --port $origin_db_port --host 0.0.0.0 --user root $origin_db_name < ./util/$data_set_name/2_data.sql
+mysql --port $origin_db_port --host 0.0.0.0 --user root $origin_db_name < ./util/$data_set_name/3_post_data.sql

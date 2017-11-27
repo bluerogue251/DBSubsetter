@@ -5,10 +5,10 @@ class MissingFkTest extends AbstractEndToEndTest {
   override val originPort = 5490
 
   override val programArgs = Array(
-    "--schemas", "public",
-    "--baseQuery", "public.table_1 ::: id = 2 ::: true",
-    "--foreignKey", "public.table_2(table_1_id) ::: public.table_1(id)",
-    "--primaryKey", "public.table_4(table_1_id, table_3_id)"
+    "--schemas", "missing_fk_origin",
+    "--baseQuery", "missing_fk_origin.table_1 ::: id = 2 ::: true",
+    "--foreignKey", "missing_fk_origin.table_2(table_1_id) ::: missing_fk_origin.table_1(id)",
+    "--primaryKey", "missing_fk_origin.table_4(table_1_id, table_3_id)"
   )
 
   test("Correct table_1 records were included") {
