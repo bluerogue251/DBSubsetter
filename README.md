@@ -6,10 +6,10 @@ Starting with a set of rows from a particular table, it respects foreign key con
 
 This is useful for local development and testing or for exporting all the data belonging to a particular set of users or customers for debugging and sharing.
 
-## Design principles
+Design principles and goals of the project include:
 
-* Be deterministic: identical inputs should yield identical outputs. Random subsets are possible, but only if purposely configured.
-* Be highly performant: the more cores you have, the faster it should be.
+* High performance: optimized for speed and to take advantage of multi-core machines.
+* Determinism: identical inputs should yield identical outputs. Random subsets are possible, but only if purposely configured.
 * Do one thing well: a tiny codebase with a small and focused set of features.
 
 ## Supported Databases
