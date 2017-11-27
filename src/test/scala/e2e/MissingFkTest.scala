@@ -17,48 +17,29 @@ class MissingFkTest extends AbstractEndToEndTest {
   }
 
   test("Correct table_2 records were included") {
-    val resultSet = targetSingleThreadedConn.createStatement().executeQuery("select * from table_2 order by id asc")
-    resultSet.next()
-    val id1 = resultSet.getInt("id")
-    assert(id1 === 1)
-    resultSet.next()
-    val id2 = resultSet.getInt("id")
-    assert(id2 === 2)
-    assert(resultSet.next() === false)
+    // 1, 2
+    assertCount("public", "table_2", None, 2)
+    assertSum("public", "table_2", "id", 3)
   }
 
   test("Correct table_3 records were included") {
-    val resultSet = targetSingleThreadedConn.createStatement().executeQuery("select * from table_3 order by id asc")
-    resultSet.next()
-    val id1 = resultSet.getInt("id")
-    assert(id1 === 45)
-    resultSet.next()
-    val id2 = resultSet.getInt("id")
-    assert(id2 === 50)
-    assert(resultSet.next() === false)
+    // 45, 50
+    assertCount("public", "table_3", None, 2)
+    assertSum("public", "table_3", "id", 95)
   }
 
   test("Correct table_4 records were included") {
-    val resultSet = targetSingleThreadedConn.createStatement().executeQuery("select * from table_4 order by table_1_id asc, table_3_id asc")
-    resultSet.next()
-    val id1 = resultSet.getInt("table_1_id")
-    val id2 = resultSet.getInt("table_3_id")
-    assert(id1 === 2)
-    assert(id2 === 45)
-    resultSet.next()
-    val id3 = resultSet.getInt("table_1_id")
-    val id4 = resultSet.getInt("table_3_id")
-    assert(id3 === 2)
-    assert(id4 === 50)
-    assert(resultSet.next() === false)
+    // 2, 2
+    assertCount("public", "table_4", None, 2)
+    assertSum("public", "table_4", "table_1_id", 4)
+    // 45, 50
+    assertCount("public", "table_4", None, 2)
+    assertSum("public", "table_4", "table_3_id", 95)
   }
 
   test("Correct table_5 records were included") {
-    val resultSet = targetSingleThreadedConn.createStatement().executeQuery("select * from table_5 order by id asc")
-    resultSet.next()
-    val id1 = resultSet.getInt("id")
-    assert(id1 === 99)
-    assert(resultSet.next() === false)
+    assertCount("public", "table_5", None, 1)
+    assertSum("public", "table_5", "id", 99)
   }
 
   test("Correct table_a records were included") {
