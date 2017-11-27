@@ -6,7 +6,7 @@ Starting with a set of rows from a particular table, it respects foreign key con
 
 This is useful for local development and testing or for exporting all the data belonging to a particular set of users or customers for debugging and sharing.
 
-# Design principles
+## Design principles
 
 * High performance: optimized to run as fast as possible and to take full advantage of multi-core machines.
 * Determinism: identical inputs should yield identical outputs. Random subsets are possible, but only if purposely configured.
