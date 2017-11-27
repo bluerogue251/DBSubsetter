@@ -6,15 +6,18 @@ Starting with a set of rows from a particular table, it respects foreign key con
 
 This is useful for local development and testing or for exporting all the data belonging to a particular set of users or customers for debugging and sharing.
 
+
 ## Design principles
 
 * High performance: optimized to run as fast as possible and to take full advantage of multi-core machines.
 * Determinism: identical inputs should yield identical outputs. Random subsets are possible, but only if purposely configured.
 * Do one thing well: a tiny codebase with a small and focused set of features.
 
+
 ## Supported Databases
 
 DBSubsetter has only been tested against recent versions of PostgreSQL. Support for MySQL, Oracle, and SQL Server is coming soon.
+
 
 ## Download / installation / usage
   
@@ -60,6 +63,7 @@ $ pg_restore --host target_host --port 5432 --user target_user --dbname target_d
 
 Memory usage will be proportional to the size of all the primary keys in the target database. Temporary spikes above this amount are also possible.
 
+
 ## Contributing
 
 Contributions of all kinds are welcome and appreciated here!
@@ -67,6 +71,7 @@ Contributions of all kinds are welcome and appreciated here!
 Whether it is to fix a typo, improve the documentation, add more tests, report or fix a bug, add a new feature, or whatever else you have in mind, feel free to open an issue or a pull request on GitHub.
 
 The only condition for contributing to this project is to follow our [code of conduct](CODE_OF_CONDUCT.md) so that everyone is treated with respect.
+
 
 ## Related projects and resources
 
@@ -77,3 +82,8 @@ DBSubsetter was inspired by and borrowed ideas from many of the following projec
 * [DataBee](https://www.databee.com/)
 * [pg_sample](https://github.com/mla/pg_sample)
 * [This stack overflow question](https://stackoverflow.com/questions/3980379/how-to-export-consistent-subset-of-database)
+
+
+## License
+
+DBSubsetter is released under the [MIT License](LICENSE.txt).
