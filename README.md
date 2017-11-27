@@ -70,6 +70,8 @@ The only condition for contributing to this project is to follow our [code of co
 
 ## Related projects and resources
 
+DBSubsetter was inspired by and borrowed ideas from many of the following projects:
+
 * [Jailer](http://jailer.sourceforge.net/home.htm)
 * [rdbms-subsetter](https://github.com/18F/rdbms-subsetter)
 * [DataBee](https://www.databee.com/)
