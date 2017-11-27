@@ -10,7 +10,7 @@ class SelfReferencingTest extends AbstractEndToEndTest {
   )
 
   test("Correct self_referencing_table records were included") {
-    assert(countTable("public", "self_referencing_table") === 10)
-    assert(sumColumn("public", "self_referencing_table", "id") === 70)
+    assertCount("public", "self_referencing_table", None, 10)
+    assertSum("public", "self_referencing_table", "id", 70)
   }
 }

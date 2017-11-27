@@ -12,47 +12,47 @@ class SchoolDbTest extends AbstractEndToEndTest {
   )
 
   test("Correct students were included") {
-    assert(countTable("public", "Students") === 27115)
-    assert(sumColumn("public", "Students", "student_id") === 15011156816l)
+    assertCount("public", "Students", None, 27115)
+    assertSum("public", "Students", "student_id", 15011156816l)
   }
 
   test("Correct districts were included") {
-    assert(countTable("public", "districts") === 99)
-    assert(sumColumn("public", "districts", "Id") === 4950)
+    assertCount("public", "districts", None, 99)
+    assertSum("public", "districts", "Id", 4950)
   }
 
   test("Purposely empty tables remained empty") {
-    assert(countTable("public", "empty_table_1") === 0)
-    assert(countTable("public", "empty_table_2") === 0)
-    assert(countTable("public", "empty_table_3") === 0)
-    assert(countTable("public", "empty_table_4") === 0)
-    assert(countTable("public", "empty_table_5") === 0)
+    assertCount("public", "empty_table_1", None, 0)
+    assertCount("public", "empty_table_2", None, 0)
+    assertCount("public", "empty_table_3", None, 0)
+    assertCount("public", "empty_table_4", None, 0)
+    assertCount("public", "empty_table_5", None, 0)
   }
 
   test("Correct homework grades were included") {
-    assert(countTable("public", "homework_grades") === 48076)
-    assert(sumColumn("public", "homework_grades", "id") === 93303124010l)
+    assertCount("public", "homework_grades", None, 48076)
+    assertSum("public", "homework_grades", "id", 93303124010l)
   }
 
   test("Correct school_assignments were included") {
-    assert(countTable("public", "school_assignments") === 20870)
-    assert(sumColumn("public", "school_assignments", "school_id") === 111467366)
-    assert(sumColumn("public", "school_assignments", "student_id") === 10304630895l)
+    assertCount("public", "school_assignments", None, 20870)
+    assertSum("public", "school_assignments", "school_id", 111467366)
+    assertSum("public", "school_assignments", "student_id", 10304630895l)
   }
 
   test("Correct schools were included") {
-    assert(countTable("public", "schools") === 9999)
-    assert(sumColumn("public", "schools", "id") === 49995000)
+    assertCount("public", "schools", None, 9999)
+    assertSum("public", "schools", "id", 49995000)
   }
 
   test("Correct standalone_table records were included") {
-    assert(countTable("public", "standalone_table") === 3)
-    assert(sumColumn("public", "standalone_table", "id") === 6)
+    assertCount("public", "standalone_table", None, 3)
+    assertSum("public", "standalone_table", "id", 6)
   }
 
   test("Correct Audit.events were included") {
-    assert(countTable("Audit", "events") === 268265)
-    assert(sumColumn("Audit", "events", "id") === 445186981712l)
+    assertCount("Audit", "events", None, 268265)
+    assertSum("Audit", "events", "id", 445186981712l)
   }
 
   test("Correct essay_assignments were included") {

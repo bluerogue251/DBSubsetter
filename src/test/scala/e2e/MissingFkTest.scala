@@ -12,10 +12,8 @@ class MissingFkTest extends AbstractEndToEndTest {
   )
 
   test("Correct table_1 records were included") {
-    val table_1_count = countTable("public", "table_1")
-    assert(table_1_count === 1)
-    val table_1_sum = sumColumn("public", "table_1", "id")
-    assert(table_1_sum === 2)
+    assertCount("public", "table_1", None, 1)
+    assertSum("public", "table_1", "id", 2)
   }
 
   test("Correct table_2 records were included") {

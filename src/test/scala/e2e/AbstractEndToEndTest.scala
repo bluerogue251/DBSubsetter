@@ -82,21 +82,29 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
     targetAkkaStreamsConn.close()
   }
 
-  protected def countTable(schema: SchemaName, table: TableName): Long = {
-    val singleThreadedJdbcResult = targetSingleThreadedConn.createStatement().executeQuery(s"""select count(*) from "$schema"."$table"""")
+  protected def assertCount(schema: SchemaName, table: TableName, whereClauseOpt: Option[String], expected: Long): Unit = {
+    val baseSql = s"""select count(*) from "$schema"."$table""""
+    val sql = whereClauseOpt.fold(baseSql) { wc => s"$baseSql where $wc" }
+    val singleThreadedJdbcResult = targetSingleThreadedConn.createStatement().executeQuery(sql)
     singleThreadedJdbcResult.next()
-    singleThreadedJdbcResult.getLong(1)
-    val akkaStreamsJdbcResult = targetAkkaStreamsConn.createStatement().executeQuery(s"""select count(*) from "$schema"."$table"""")
+    val singleThreadedCount = singleThreadedJdbcResult.getLong(1)
+    assert(singleThreadedCount === expected)
+
+    val akkaStreamsJdbcResult = targetAkkaStreamsConn.createStatement().executeQuery(sql)
     akkaStreamsJdbcResult.next()
-    akkaStreamsJdbcResult.getLong(1)
+    val akkaStreamsCount = akkaStreamsJdbcResult.getLong(1)
+    assert(akkaStreamsCount === expected)
   }
 
-  protected def sumColumn(schema: SchemaName, table: TableName, column: ColumnName): Long = {
+  protected def assertSum(schema: SchemaName, table: TableName, column: ColumnName, expected: Long): Unit = {
     val singleThreadedJdbcResult = targetSingleThreadedConn.createStatement().executeQuery(s"""select sum("$column") from "$schema"."$table"""")
     singleThreadedJdbcResult.next()
-    singleThreadedJdbcResult.getLong(1)
+    val singleThreadedSum = singleThreadedJdbcResult.getLong(1)
+    assert(singleThreadedSum === expected)
+
     val akkaStreamsJdbcResult = targetAkkaStreamsConn.createStatement().executeQuery(s"""select sum("$column") from "$schema"."$table"""")
     akkaStreamsJdbcResult.next()
-    akkaStreamsJdbcResult.getLong(1)
+    val akkaStreamsSum = akkaStreamsJdbcResult.getLong(1)
+    assert(akkaStreamsSum === expected)
   }
 }

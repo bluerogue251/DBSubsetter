@@ -10,11 +10,11 @@ class BaseQueriesTest extends AbstractEndToEndTest {
   )
 
   test("Correct base_table records were included") {
-    assert(countTable("public", "base_table") === 10)
-    assert(sumColumn("public", "base_table", "id") === 55)
+    assertCount("public", "base_table", None, 10)
+    assertSum("public", "base_table", "id", 55)
   }
 
   test("Correct child_table records (none) were included") {
-    assert(countTable("public", "child_table") === 0)
+    assertCount("public", "child_table", None, 0)
   }
 }

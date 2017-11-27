@@ -10,8 +10,7 @@ class CircularDepTest extends AbstractEndToEndTest {
   )
 
   test("Correct number of grandparents were included") {
-    val grandparentCount = countTable("public", "grandparents")
-    assert(grandparentCount === 167)
+    assertCount("public", "grandparents", None, 167)
   }
 
   test("All grandparents have 100 parents") {
