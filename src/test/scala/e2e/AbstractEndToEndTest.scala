@@ -49,21 +49,11 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
 
     createOriginDb()
 
-    val parallelismArgs = Array(
-      "--originDbParallelism", "10",
-      "--targetDbParallelism", "10"
-    )
-    val singleThreadedArgs = programArgs ++ parallelismArgs ++ Array(
-      "--originDbConnStr", originConnString,
-      "--targetDbConnStr", targetSingleThreadedConnString,
-      "--singleThreadedDebugMode"
-    )
-    val akkaStreamsArgs = programArgs ++ parallelismArgs ++ Array(
-      "--originDbConnStr", originConnString,
-      "--targetDbConnStr", targetAkkaStreamsConnString,
-    )
-    singleThreadedConfig = CommandLineParser.parser.parse(singleThreadedArgs, Config()).get
-    val akkaStreamsConfig = CommandLineParser.parser.parse(akkaStreamsArgs, Config()).get
+    val sharedArgs = Array("--originDbConnStr", originConnString, "--originDbParallelism", "10", "--targetDbParallelism", "10")
+    val stArgs = programArgs ++ sharedArgs ++ Array("--targetDbConnStr", targetSingleThreadedConnString)
+    val asArgs = programArgs ++ sharedArgs ++ Array("--targetDbConnStr", targetAkkaStreamsConnString)
+    singleThreadedConfig = CommandLineParser.parser.parse(stArgs, Config()).get
+    val akkaStreamsConfig = CommandLineParser.parser.parse(asArgs, Config()).get
 
     originDb = createSlickOriginDbConnection()
     createOriginDbDdl()
