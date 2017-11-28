@@ -54,7 +54,6 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
     super.beforeAll()
 
     createOriginDbDockerContainer()
-    originDb = createSlickOriginDbConnection()
     createOriginDb()
 
     val parallelismArgs = Array(
@@ -73,6 +72,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
     singleThreadedConfig = CommandLineParser.parser.parse(singleThreadedArgs, Config()).get
     val akkaStreamsConfig = CommandLineParser.parser.parse(akkaStreamsArgs, Config()).get
 
+    originDb = createSlickOriginDbConnection()
     createOriginDbDdl()
     insertOriginDbData()
     setupTargetDbs()

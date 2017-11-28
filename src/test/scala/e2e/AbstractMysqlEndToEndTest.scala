@@ -44,17 +44,10 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest {
 
   override def postSubset(): Unit = {}
 
-
   override protected def beforeAll(): Unit = {
     super.beforeAll()
-
-    if (targetSingleThreadedConn.getMetaData.getDatabaseProductName == "MySQL") {
-      targetSingleThreadedConn.createStatement().executeQuery("set session sql_mode = ANSI_QUOTES")
-    }
-
-    if (targetAkkaStreamsConn.getMetaData.getDatabaseProductName == "MySQL") {
-      targetAkkaStreamsConn.createStatement().executeQuery("set session sql_mode = ANSI_QUOTES")
-    }
+    targetSingleThreadedConn.createStatement().executeQuery("set session sql_mode = ANSI_QUOTES")
+    targetAkkaStreamsConn.createStatement().executeQuery("set session sql_mode = ANSI_QUOTES")
   }
 
   private def setupTargetDbDockerContainer(targetType: String, port: Int): Unit = {
