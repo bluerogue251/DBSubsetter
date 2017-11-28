@@ -5,7 +5,7 @@ import e2e.ddl.Tables
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
-class MissingFkTest extends AbstractEndToEndTest {
+class MissingFkTest extends AbstractMysqlEndToEndTest {
   override val dataSetName = "missing_fk"
   override val originPort = 5490
 

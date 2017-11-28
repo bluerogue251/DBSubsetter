@@ -27,8 +27,6 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
 
   def targetAkkaStreamsConnString: String
 
-  def insertData(): Unit
-
   def createOriginDbDockerContainer(): Unit
 
   def createOriginDb(): Unit
@@ -41,9 +39,9 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
 
   var originDb: BasicBackend#DatabaseDef = _
 
-  def setupSingleThreadedTargetDbDockerContainer(): Unit
+  def setupTargetDbs(): Unit
 
-  def setupAkkaStreamsTargetDbDockerContainer(): Unit
+  def postSubset(): Unit
 
   var singleThreadedConfig: Config = _
   var targetSingleThreadedConn: Connection = _
@@ -87,19 +85,11 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
     val futureResult = ApplicationAkkaStreams.run(akkaStreamsConfig, schemaInfo, baseQueries)
     Await.result(futureResult, Duration.Inf)
 
-    //    s"./util/post_subset_target.sh $dataSetName $originPort $targetSingleThreadedPort".!!
-    //    s"./util/post_subset_target.sh $dataSetName $originPort $targetAkkaStreamsPort".!!
+    postSubset()
 
     targetSingleThreadedConn = DriverManager.getConnection(targetSingleThreadedConnString)
-    if (targetSingleThreadedConn.getMetaData.getDatabaseProductName == "MySQL") {
-      targetSingleThreadedConn.createStatement().executeQuery("set session sql_mode = ANSI_QUOTES")
-    }
     targetSingleThreadedConn.setReadOnly(true)
-
     targetAkkaStreamsConn = DriverManager.getConnection(targetSingleThreadedConnString)
-    if (targetAkkaStreamsConn.getMetaData.getDatabaseProductName == "MySQL") {
-      targetAkkaStreamsConn.createStatement().executeQuery("set session sql_mode = ANSI_QUOTES")
-    }
     targetAkkaStreamsConn.setReadOnly(true)
   }
 

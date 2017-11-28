@@ -32,14 +32,29 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest {
     s"mysql --port $originPort --host 0.0.0.0 --user root -e'create database $dataSetName'".!
   }
 
-  def createOriginDbDdl(): Unit = {
+  override def createOriginDbDdl(): Unit = {
     val fut = originDb.run(DBIO.seq(Tables.schema.create))
     Await.result(fut, Duration.Inf)
   }
 
-  def setupTargetDbs(): Unit = {
+  override def setupTargetDbs(): Unit = {
     setupTargetDbDockerContainer("sith", targetSingleThreadedPort)
     setupTargetDbDockerContainer("akst", targetAkkaStreamsPort)
+  }
+
+  override def postSubset(): Unit = {}
+
+
+  override protected def beforeAll(): Unit = {
+    super.beforeAll()
+
+    if (targetSingleThreadedConn.getMetaData.getDatabaseProductName == "MySQL") {
+      targetSingleThreadedConn.createStatement().executeQuery("set session sql_mode = ANSI_QUOTES")
+    }
+
+    if (targetAkkaStreamsConn.getMetaData.getDatabaseProductName == "MySQL") {
+      targetAkkaStreamsConn.createStatement().executeQuery("set session sql_mode = ANSI_QUOTES")
+    }
   }
 
   private def setupTargetDbDockerContainer(targetType: String, port: Int): Unit = {
