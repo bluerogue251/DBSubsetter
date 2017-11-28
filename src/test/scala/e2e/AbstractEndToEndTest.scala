@@ -2,9 +2,8 @@ package e2e
 
 import java.sql.{Connection, DriverManager}
 
-import e2e.ddl.Tables
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
-import slick.jdbc.MySQLProfile.api._
+import slick.basic.BasicBackend
 import trw.dbsubsetter.config.{CommandLineParser, Config}
 import trw.dbsubsetter.db.{ColumnName, SchemaInfoRetrieval, SchemaName, TableName}
 import trw.dbsubsetter.workflow.BaseQueries
@@ -12,33 +11,53 @@ import trw.dbsubsetter.{ApplicationAkkaStreams, ApplicationSingleThreaded}
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
-import scala.sys.process._
 
 abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
   def dataSetName: String
   def originPort: Int
   def programArgs: Array[String]
 
-  def insertData(): Unit = {}
+  def dbVendor: String
+
+  def dockerImage: String
+
+  def originConnString: String
+
+  def targetSingleThreadedConnString: String
+
+  def targetAkkaStreamsConnString: String
+
+  def insertData(): Unit
+
+  def createOriginDbDockerContainer(): Unit
+
+  def createOriginDb(): Unit
+
+  def createSlickOriginDbConnection(): BasicBackend#DatabaseDef
+
+  def createOriginDbDdl(): Unit
+
+  def insertOriginDbData(): Unit
+
+  var originDb: BasicBackend#DatabaseDef = _
+
+  def setupSingleThreadedTargetDbDockerContainer(): Unit
+
+  def setupAkkaStreamsTargetDbDockerContainer(): Unit
 
   var singleThreadedConfig: Config = _
   var targetSingleThreadedConn: Connection = _
   var targetAkkaStreamsConn: Connection = _
 
-  def targetSingleThreadedPort: Int = originPort + 1
-
-  def targetAkkaStreamsPort: Int = originPort + 2
-
-  def originConnString = s"jdbc:mysql://localhost:$originPort/$dataSetName?user=root"
-
-  def targetSingleThreadedConnString = s"jdbc:mysql://0.0.0.0:$targetSingleThreadedPort/$dataSetName?user=root"
-
-  def targetAkkaStreamsConnString = s"jdbc:mysql://0.0.0.0:$targetAkkaStreamsPort/$dataSetName?user=root"
+  lazy val targetSingleThreadedPort: Int = originPort + 1
+  lazy val targetAkkaStreamsPort: Int = originPort + 2
 
   override protected def beforeAll(): Unit = {
     super.beforeAll()
 
-    s"./util/reset_origin_db.sh $dataSetName $originPort".!!
+    createOriginDbDockerContainer()
+    originDb = createSlickOriginDbConnection()
+    createOriginDb()
 
     val parallelismArgs = Array(
       "--originDbParallelism", "10",
@@ -56,13 +75,9 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
     singleThreadedConfig = CommandLineParser.parser.parse(singleThreadedArgs, Config()).get
     val akkaStreamsConfig = CommandLineParser.parser.parse(akkaStreamsArgs, Config()).get
 
-    val db = slick.jdbc.MySQLProfile.backend.Database.forURL(singleThreadedConfig.originDbConnectionString)
-    val fut = db.run(DBIO.seq(Tables.schema.create))
-    Await.result(fut, Duration.Inf)
-    insertData()
-
-    s"./util/reset_target_db.sh $dataSetName st $originPort $targetSingleThreadedPort".!!
-    s"./util/reset_target_db.sh $dataSetName as $originPort $targetAkkaStreamsPort".!!
+    createOriginDbDdl()
+    insertOriginDbData()
+    setupTargetDbs()
 
     // `schemaInfo` and `baseQueries` will be the same regardless of whether we use `singleThreadedConfig` or `akkaStreamsConfig`
     val schemaInfo = SchemaInfoRetrieval.getSchemaInfo(singleThreadedConfig)
@@ -90,6 +105,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
 
   override protected def afterAll(): Unit = {
     super.afterAll()
+    originDb.close()
     targetSingleThreadedConn.close()
     targetAkkaStreamsConn.close()
   }

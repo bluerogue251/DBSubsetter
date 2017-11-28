@@ -94,7 +94,7 @@ class MissingFkTest extends AbstractEndToEndTest {
     assert(resultSet.next() === false)
   }
 
-  override def insertData(): Unit = {
+  override def insertOriginDbData(): Unit = {
     import Tables._
     import slick.jdbc.MySQLProfile.api._
     val db = slick.jdbc.MySQLProfile.backend.Database.forURL(singleThreadedConfig.originDbConnectionString)
