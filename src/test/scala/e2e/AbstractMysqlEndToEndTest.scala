@@ -8,28 +8,25 @@ import scala.concurrent.duration.Duration
 import scala.sys.process._
 
 abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest {
-  override val dbVendor = "MySQL"
-  override val dockerImage = "mysql:8.0"
-  override val originConnString = s"jdbc:mysql://localhost:$originPort/$dataSetName?user=root"
+  def dataSetName: String
 
-  override val targetSingleThreadedConnString = s"jdbc:mysql://0.0.0.0:$targetSingleThreadedPort/$dataSetName?user=root"
+  override lazy val originConnString = s"jdbc:mysql://localhost:$originPort/$dataSetName?user=root"
 
-  override val targetAkkaStreamsConnString = s"jdbc:mysql://0.0.0.0:$targetAkkaStreamsPort/$dataSetName?user=root"
+  override lazy val targetSingleThreadedConnString = s"jdbc:mysql://0.0.0.0:$targetSingleThreadedPort/$dataSetName?user=root"
 
-  override def createOriginDbDockerContainer(): Unit = {
+  override lazy val targetAkkaStreamsConnString = s"jdbc:mysql://0.0.0.0:$targetAkkaStreamsPort/$dataSetName?user=root"
+
+  override def createOriginDb(): Unit = {
     val container_name = s"${dataSetName}_origin_mysql"
     s"docker rm --force --volumes $container_name".!
     s"docker create --name $container_name -p $originPort:3306 --env MYSQL_ALLOW_EMPTY_PASSWORD=true mysql:8.0".!!
     s"docker start $container_name".!!
     Thread.sleep(15000)
+    s"./util/create_mysql_db.sh $dataSetName $originPort".!!
   }
 
   override def createSlickOriginDbConnection() = {
     slick.jdbc.MySQLProfile.backend.Database.forURL(singleThreadedConfig.originDbConnectionString)
-  }
-
-  override def createOriginDb(): Unit = {
-    s"mysql --port $originPort --host 0.0.0.0 --user root -e'create database $dataSetName'".!
   }
 
   override def createOriginDbDdl(): Unit = {
@@ -53,10 +50,10 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest {
   private def setupTargetDbDockerContainer(targetType: String, port: Int): Unit = {
     val containerName = s"${dataSetName}_target_${targetType}_mysql"
     s"docker rm --force --volumes $containerName".!
-    s"docker create --name $containerName --port $port:3306 --env MYSQL_ALLOW_EMPTY_PASSWORD=true mysql:8.0".!!
+    s"docker create --name $containerName -p $port:3306 --env MYSQL_ALLOW_EMPTY_PASSWORD=true mysql:8.0".!!
     s"docker start $containerName".!!
     Thread.sleep(15000)
-    s"mysql --port $port --host 0.0.0.0 --user root -e 'create database $dataSetName".!!
-    s"mysqldump --host 0.0.0.0 --port $originPort --user root --no-data $dataSetName | mysql --host 0.0.0.0 --port $port --user root $dataSetName".!!
+    s"./util/create_mysql_db.sh $dataSetName $port".!!
+    s"./util/sync_mysql_origin_to_target.sh $dataSetName $originPort $port".!!
   }
 }

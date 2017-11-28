@@ -13,21 +13,15 @@ import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
-  def dataSetName: String
   def originPort: Int
+
   def programArgs: Array[String]
-
-  def dbVendor: String
-
-  def dockerImage: String
 
   def originConnString: String
 
   def targetSingleThreadedConnString: String
 
   def targetAkkaStreamsConnString: String
-
-  def createOriginDbDockerContainer(): Unit
 
   def createOriginDb(): Unit
 
@@ -53,7 +47,6 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
   override protected def beforeAll(): Unit = {
     super.beforeAll()
 
-    createOriginDbDockerContainer()
     createOriginDb()
 
     val parallelismArgs = Array(
