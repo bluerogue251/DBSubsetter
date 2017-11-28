@@ -5,41 +5,41 @@ class MissingFkTest extends AbstractEndToEndTest {
   override val originPort = 5490
 
   override val programArgs = Array(
-    "--schemas", "missing_fk_origin",
-    "--baseQuery", "missing_fk_origin.table_1 ::: id = 2 ::: true",
-    "--foreignKey", "missing_fk_origin.table_2(table_1_id) ::: missing_fk_origin.table_1(id)",
-    "--primaryKey", "missing_fk_origin.table_4(table_1_id, table_3_id)"
+    "--schemas", "missing_fk",
+    "--baseQuery", "missing_fk.table_1 ::: id = 2 ::: true",
+    "--foreignKey", "missing_fk.table_2(table_1_id) ::: missing_fk.table_1(id)",
+    "--primaryKey", "missing_fk.table_4(table_1_id, table_3_id)"
   )
 
   test("Correct table_1 records were included") {
-    assertCount("public", "table_1", None, 1)
-    assertSum("public", "table_1", "id", 2)
+    assertCount("missing_fk", "table_1", None, 1)
+    assertSum("missing_fk", "table_1", "id", 2)
   }
 
   test("Correct table_2 records were included") {
     // 1, 2
-    assertCount("public", "table_2", None, 2)
-    assertSum("public", "table_2", "id", 3)
+    assertCount("missing_fk", "table_2", None, 2)
+    assertSum("missing_fk", "table_2", "id", 3)
   }
 
   test("Correct table_3 records were included") {
     // 45, 50
-    assertCount("public", "table_3", None, 2)
-    assertSum("public", "table_3", "id", 95)
+    assertCount("missing_fk", "table_3", None, 2)
+    assertSum("missing_fk", "table_3", "id", 95)
   }
 
   test("Correct table_4 records were included") {
     // 2, 2
-    assertCount("public", "table_4", None, 2)
-    assertSum("public", "table_4", "table_1_id", 4)
+    assertCount("missing_fk", "table_4", None, 2)
+    assertSum("missing_fk", "table_4", "table_1_id", 4)
     // 45, 50
-    assertCount("public", "table_4", None, 2)
-    assertSum("public", "table_4", "table_3_id", 95)
+    assertCount("missing_fk", "table_4", None, 2)
+    assertSum("missing_fk", "table_4", "table_3_id", 95)
   }
 
   test("Correct table_5 records were included") {
-    assertCount("public", "table_5", None, 1)
-    assertSum("public", "table_5", "id", 99)
+    assertCount("missing_fk", "table_5", None, 1)
+    assertSum("missing_fk", "table_5", "id", 99)
   }
 
   test("Correct table_a records were included") {

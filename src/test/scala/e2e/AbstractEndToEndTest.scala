@@ -24,24 +24,19 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
   def targetSingleThreadedPort: Int = originPort + 1
 
   def targetAkkaStreamsPort: Int = originPort + 2
-  def originDbName = s"${dataSetName}_origin"
 
-  def targetDbSingleThreadedName = s"${dataSetName}_target_st"
+  def originConnString = s"jdbc:mysql://localhost:$originPort/$dataSetName?user=root"
 
-  def targetDbAkkaStreamsName = s"${dataSetName}_target_as"
+  def targetSingleThreadedConnString = s"jdbc:mysql://0.0.0.0:$targetSingleThreadedPort/$dataSetName?user=root"
 
-  def originConnString = s"jdbc:mysql://localhost:$originPort/$originDbName?user=root"
-
-  def targetSingleThreadedConnString = s"jdbc:mysql://0.0.0.0:$targetSingleThreadedPort/$targetDbSingleThreadedName?user=root"
-
-  def targetAkkaStreamsConnString = s"jdbc:mysql://0.0.0.0:$targetAkkaStreamsPort/$targetDbAkkaStreamsName?user=root"
+  def targetAkkaStreamsConnString = s"jdbc:mysql://0.0.0.0:$targetAkkaStreamsPort/$dataSetName?user=root"
 
   override protected def beforeAll(): Unit = {
     super.beforeAll()
 
-    //    s"./util/reset_origin_db.sh $dataSetName $originDbName $originPort".!!
-    //    s"./util/reset_target_db.sh $originDbName $originPort $targetDbSingleThreadedName $targetSingleThreadedPort".!!
-    //    s"./util/reset_target_db.sh $originDbName $originPort $targetDbAkkaStreamsName $targetAkkaStreamsPort".!!
+    s"./util/reset_origin_db.sh $dataSetName $originPort".!!
+    s"./util/reset_target_db.sh $dataSetName single_threaded $originPort $targetSingleThreadedPort".!!
+    s"./util/reset_target_db.sh $dataSetName akka_streams $originPort $targetAkkaStreamsPort".!!
 
     val parallelismArgs = Array(
       "--originDbParallelism", "10",
@@ -66,13 +61,19 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
     val futureResult = ApplicationAkkaStreams.run(akkaStreamsConfig, schemaInfo, baseQueries)
     Await.result(futureResult, Duration.Inf)
 
-    s"./util/post_subset_target.sh $originDbName $originPort $targetDbSingleThreadedName $targetSingleThreadedPort".!!
-    s"./util/post_subset_target.sh $originDbName $originPort $targetDbAkkaStreamsName $targetAkkaStreamsPort".!!
+    //    s"./util/post_subset_target.sh $dataSetName $originPort $targetSingleThreadedPort".!!
+    //    s"./util/post_subset_target.sh $dataSetName $originPort $targetAkkaStreamsPort".!!
 
     targetSingleThreadedConn = DriverManager.getConnection(targetSingleThreadedConnString)
+    if (targetSingleThreadedConn.getMetaData.getDatabaseProductName == "MySQL") {
+      targetSingleThreadedConn.createStatement().executeQuery("set session sql_mode = ANSI_QUOTES")
+    }
     targetSingleThreadedConn.setReadOnly(true)
 
     targetAkkaStreamsConn = DriverManager.getConnection(targetSingleThreadedConnString)
+    if (targetAkkaStreamsConn.getMetaData.getDatabaseProductName == "MySQL") {
+      targetAkkaStreamsConn.createStatement().executeQuery("set session sql_mode = ANSI_QUOTES")
+    }
     targetAkkaStreamsConn.setReadOnly(true)
   }
 

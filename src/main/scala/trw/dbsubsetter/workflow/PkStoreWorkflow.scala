@@ -50,6 +50,6 @@ class PkStoreWorkflow(pkOrdinalsByTable: Map[Table, Seq[Int]]) {
   }
 
   def getStorage(t: Table): (mutable.HashSet[AnyRef], mutable.HashSet[AnyRef]) = {
-    pkStore.getOrElse(t, throw new RuntimeException(s"No primary key defined for table ${t.fullyQualifiedName}"))
+    pkStore.getOrElse(t, throw new RuntimeException(s"No primary key defined for table $t"))
   }
 }

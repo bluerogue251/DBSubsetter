@@ -21,14 +21,9 @@ package object db {
                         fksFromTable: Map[Table, Set[ForeignKey]],
                         fksToTable: Map[Table, Set[ForeignKey]])
 
-  case class Table(schema: SchemaName, name: TableName) {
-    val fullyQualifiedName: String = s"`$schema`.`$name`"
-  }
+  case class Table(schema: SchemaName, name: TableName)
 
-  case class Column(table: Table, name: ColumnName, ordinalPosition: Int) {
-    val quotedName: String = s"`$name`"
-    val fullyQualifiedName: String = s"${table.fullyQualifiedName}.$quotedName"
-  }
+  case class Column(table: Table, name: ColumnName, ordinalPosition: Int)
 
   case class ForeignKey(fromCols: Vector[Column], toCols: Vector[Column], pointsToPk: Boolean) {
     val fromTable: Table = fromCols.head.table
