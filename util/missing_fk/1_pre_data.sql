@@ -14,10 +14,14 @@ CREATE TABLE table_3 (
 -- This table's "primary key" is defined by a tuple (table_1_id, table_3_id)
 -- But this primary key is not defined at the DB level. We have to define it as user-supplied config
 CREATE TABLE table_4 (
-  table_1_id INTEGER NOT NULL REFERENCES table_1 (id),
-  table_3_id INTEGER NOT NULL REFERENCES table_3 (id),
-  UNIQUE (table_1_id, table_3_id)
+  table_1_id INTEGER NOT NULL,
+  table_3_id INTEGER NOT NULL,
+  UNIQUE (table_1_id, table_3_id),
+  FOREIGN KEY (table_1_id) REFERENCES table_1 (id),
+  FOREIGN KEY (table_3_id) REFERENCES table_3 (id)
 );
+
+
 
 CREATE TABLE table_5 (
   id                 SERIAL PRIMARY KEY,

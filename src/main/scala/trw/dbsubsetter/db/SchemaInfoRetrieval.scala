@@ -21,8 +21,10 @@ object SchemaInfoRetrieval {
 
     config.schemas.foreach { schema =>
       // Args: catalog, schemaPattern, tableNamePattern, types
-      val tablesJdbcResultSet = if (isMysql) ddl.getTables(schema, null, "%", Array("TABLE"))
-      else ddl.getTables(catalog, schema, "%", Array("TABLE"))
+      val tablesJdbcResultSet = {
+        if (isMysql) ddl.getTables(schema, null, "%", Array("TABLE"))
+        else ddl.getTables(catalog, schema, "%", Array("TABLE"))
+      }
       while (tablesJdbcResultSet.next()) {
         tablesQueryResult += Table(
           schema,
@@ -30,8 +32,10 @@ object SchemaInfoRetrieval {
         )
       }
 
-      val colsJdbcResultSet = if (isMysql) ddl.getColumns(catalog, schema, "%", "%")
-      else ddl.getColumns(schema, null, "%", "%")
+      val colsJdbcResultSet = {
+        if (isMysql) ddl.getColumns(schema, null, "%", "%")
+        else ddl.getColumns(catalog, schema, "%", "%")
+      }
       while (colsJdbcResultSet.next()) {
         val table = colsJdbcResultSet.getString("TABLE_NAME")
         val columnName = colsJdbcResultSet.getString("COLUMN_NAME")
@@ -43,8 +47,10 @@ object SchemaInfoRetrieval {
 
       // Args: catalog, schema, table
       tablesQueryResult.foreach { table =>
-        val pksJdbcResultSet = if (isMysql) ddl.getPrimaryKeys(schema, null, table.name)
-        else ddl.getPrimaryKeys(catalog, schema, table.name)
+        val pksJdbcResultSet = {
+          if (isMysql) ddl.getPrimaryKeys(schema, null, table.name)
+          else ddl.getPrimaryKeys(catalog, schema, table.name)
+        }
         while (pksJdbcResultSet.next()) {
           primaryKeysQueryResult += PrimaryKeyQueryRow(
             schema,
@@ -56,7 +62,10 @@ object SchemaInfoRetrieval {
 
       tablesQueryResult.foreach { table =>
         // Args: catalog, schema, table
-        val foreignKeysJdbcResultSet = ddl.getExportedKeys(catalog, schema, table.name)
+        val foreignKeysJdbcResultSet = {
+          if (isMysql) ddl.getExportedKeys(schema, null, table.name)
+          else ddl.getExportedKeys(catalog, schema, table.name)
+        }
         while (foreignKeysJdbcResultSet.next()) {
           foreignKeysQueryResult += ForeignKeyQueryRow(
             schema,
