@@ -1,6 +1,6 @@
 package e2e
 
-import e2e.ddl.Tables
+import e2e.missingfk.Tables
 import slick.jdbc.MySQLProfile.api._
 
 import scala.concurrent.Await

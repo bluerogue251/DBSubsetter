@@ -1,4 +1,4 @@
-package e2e.ddl
+package e2e.missingfk
 
 object Tables extends {
   val profile = slick.jdbc.MySQLProfile
