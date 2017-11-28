@@ -57,7 +57,8 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
     val akkaStreamsConfig = CommandLineParser.parser.parse(akkaStreamsArgs, Config()).get
 
     val db = slick.jdbc.MySQLProfile.backend.Database.forURL(singleThreadedConfig.originDbConnectionString)
-    db.run(DBIO.seq(Tables.schema.create))
+    val fut = db.run(DBIO.seq(Tables.schema.create))
+    Await.result(fut, Duration.Inf)
     insertData()
 
     s"./util/reset_target_db.sh $dataSetName st $originPort $targetSingleThreadedPort".!!

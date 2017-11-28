@@ -2,6 +2,9 @@ package e2e
 
 import e2e.ddl.Tables
 
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
+
 class MissingFkTest extends AbstractEndToEndTest {
   override val dataSetName = "missing_fk"
   override val originPort = 5490
@@ -96,7 +99,7 @@ class MissingFkTest extends AbstractEndToEndTest {
     import slick.jdbc.MySQLProfile.api._
     val db = slick.jdbc.MySQLProfile.backend.Database.forURL(singleThreadedConfig.originDbConnectionString)
 
-    db.run(
+    val fut = db.run(
       DBIO.seq(
         Table1 ++= Seq(
           Table1Row(1),
@@ -154,5 +157,6 @@ class MissingFkTest extends AbstractEndToEndTest {
         )
       )
     )
+    Await.result(fut, Duration.Inf)
   }
 }
