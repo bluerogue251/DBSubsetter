@@ -10,11 +10,7 @@ import scala.sys.process._
 abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest {
   def dataSetName: String
 
-  override lazy val originConnString = s"jdbc:mysql://localhost:$originPort/$dataSetName?user=root"
-
-  override lazy val targetSingleThreadedConnString = s"jdbc:mysql://0.0.0.0:$targetSingleThreadedPort/$dataSetName?user=root"
-
-  override lazy val targetAkkaStreamsConnString = s"jdbc:mysql://0.0.0.0:$targetAkkaStreamsPort/$dataSetName?user=root"
+  override def makeConnStr(port: Int): String = s"jdbc:mysql://localhost:$port/$dataSetName?user=root"
 
   override def createOriginDb(): Unit = {
     val container_name = s"${dataSetName}_origin_mysql"
@@ -30,7 +26,10 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest {
   }
 
   override def createOriginDbDdl(): Unit = {
-    val fut = originDb.run(DBIO.seq(Tables.schema.create))
+    val tables = new Tables {
+      override val profile = slick.jdbc.MySQLProfile
+    }
+    val fut = originDb.run(DBIO.seq(tables.schema.create))
     Await.result(fut, Duration.Inf)
   }
 

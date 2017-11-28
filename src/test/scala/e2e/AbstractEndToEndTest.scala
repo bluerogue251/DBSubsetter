@@ -15,13 +15,11 @@ import scala.concurrent.duration.Duration
 abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
   def originPort: Int
 
+  def makeConnStr(port: Int): String
+
   def programArgs: Array[String]
 
-  def originConnString: String
-
-  def targetSingleThreadedConnString: String
-
-  def targetAkkaStreamsConnString: String
+  lazy val originConnString: String = makeConnStr(originPort)
 
   def createOriginDb(): Unit
 
@@ -43,6 +41,10 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
 
   lazy val targetSingleThreadedPort: Int = originPort + 1
   lazy val targetAkkaStreamsPort: Int = originPort + 2
+
+  lazy val targetSingleThreadedConnString: String = makeConnStr(targetSingleThreadedPort)
+
+  lazy val targetAkkaStreamsConnString: String = makeConnStr(targetAkkaStreamsPort)
 
   override protected def beforeAll(): Unit = {
     super.beforeAll()

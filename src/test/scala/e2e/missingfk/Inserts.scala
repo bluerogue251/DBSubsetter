@@ -2,12 +2,11 @@ package e2e.missingfk
 
 import slick.jdbc.JdbcProfile
 
-class Inserts(prof: JdbcProfile) {
+abstract class Inserts(prof: JdbcProfile) extends Tables {
 
   import prof.api._
 
   def dbioSeq = {
-    import Tables._
 
     slick.dbio.DBIO.seq(
       Table1 ++= Seq(

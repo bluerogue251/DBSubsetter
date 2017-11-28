@@ -18,7 +18,11 @@ class MysqlTest extends AbstractMysqlEndToEndTest with TestCases {
 
   override def insertOriginDbData(): Unit = {
     val db = slick.jdbc.MySQLProfile.backend.Database.forURL(singleThreadedConfig.originDbConnectionString)
-    val fut = db.run(new Inserts(slick.jdbc.MySQLProfile).dbioSeq)
+    val fut = db.run(
+      new Inserts(slick.jdbc.MySQLProfile) {
+        override val profile = slick.jdbc.MySQLProfile
+      }.dbioSeq
+    )
     Await.result(fut, Duration.Inf)
   }
 }

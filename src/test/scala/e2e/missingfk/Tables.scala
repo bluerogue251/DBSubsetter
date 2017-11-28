@@ -1,8 +1,5 @@
 package e2e.missingfk
 
-object Tables extends {
-  val profile = slick.jdbc.MySQLProfile
-} with Tables
 
 trait Tables {
   val profile: slick.jdbc.JdbcProfile
