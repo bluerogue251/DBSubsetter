@@ -81,14 +81,17 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
   }
 
   protected def assertThat(action: DBIOAction[Option[Int], profile.api.NoStream, Effect.Read], expected: Long): Unit = {
-    assert(Await.result(targetDbSt.run(action), Duration.Inf) === expected)
-    assert(Await.result(targetDbAs.run(action), Duration.Inf) === expected)
+    assert(Await.result(targetDbSt.run(action), Duration.Inf) === Some(expected))
+    assert(Await.result(targetDbAs.run(action), Duration.Inf) === Some(expected))
   }
 
   def createOriginDbDdl(): Unit = {
     import profile.api._
-    val tables = new Tables(profile)
-    val fut = originDb.run(DBIO.seq(tables.schema.create))
+    val p = profile
+    val tables = new Tables {
+      override val profile = p
+    }
+    val fut = originDb.run(DBIO.seq(tables.createSchema))
     Await.result(fut, Duration.Inf)
   }
 

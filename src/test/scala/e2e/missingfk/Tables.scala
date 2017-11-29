@@ -1,13 +1,15 @@
 package e2e.missingfk
 
 
-class Tables(val profile: slick.jdbc.JdbcProfile) {
+trait Tables {
+  val profile: slick.jdbc.JdbcProfile
   import profile.api._
   import slick.model.ForeignKeyAction
 
   lazy val schema: profile.SchemaDescription = Array(Table1.schema, Table2.schema, Table3.schema, Table4.schema, Table5.schema, TableA.schema, TableB.schema, TableC.schema, TableD.schema).reduceLeft(_ ++ _)
 
-  schema.create
+  def createSchema = schema.create
+
   case class Table1Row(id: Int)
 
   class Table1(_tableTag: Tag) extends profile.api.Table[Table1Row](_tableTag, "table_1") {
