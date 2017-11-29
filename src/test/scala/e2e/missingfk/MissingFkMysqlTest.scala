@@ -4,6 +4,11 @@ import e2e.AbstractMysqlEndToEndTest
 
 class MissingFkMysqlTest extends AbstractMysqlEndToEndTest with MissingFkTestCases {
   override val profile = slick.jdbc.MySQLProfile
+
+  import profile.api._
+
+  override val ddl = schema.create
+  override val dml = new MissingFkDML(profile).dbioSeq
   override val dataSetName = "missing_fk"
   override val originPort = 5490
   override val programArgs = Array(

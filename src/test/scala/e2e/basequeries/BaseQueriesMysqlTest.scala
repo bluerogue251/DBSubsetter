@@ -4,6 +4,11 @@ import e2e.AbstractMysqlEndToEndTest
 
 class BaseQueriesMysqlTest extends AbstractMysqlEndToEndTest with BaseQueriesTestCases {
   override val profile = slick.jdbc.MySQLProfile
+
+  import profile.api._
+
+  override val ddl = schema.create
+  override val dml = new BaseQueriesDML(profile).dbioSeq
   override val dataSetName = "base_queries"
   override val originPort = 5510
   override val programArgs = Array(

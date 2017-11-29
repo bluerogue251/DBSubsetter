@@ -1,8 +1,7 @@
 package e2e
 
-import e2e.missingfk.MissingFkDML
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
-import slick.dbio.{DBIOAction, Effect}
+import slick.dbio.{DBIOAction, Effect, NoStream}
 import slick.jdbc.JdbcBackend
 import slick.lifted.{AbstractTable, TableQuery}
 import trw.dbsubsetter.config.{CommandLineParser, Config}
@@ -11,6 +10,7 @@ import trw.dbsubsetter.workflow.BaseQueries
 import trw.dbsubsetter.{ApplicationAkkaStreams, ApplicationSingleThreaded}
 
 import scala.concurrent.Await
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 
 abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
@@ -18,7 +18,10 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
   // The following need to be overridden case-by-case for different database vendors
   //
   val profile: slick.jdbc.JdbcProfile
-  val schema: profile.SchemaDescription
+
+  val ddl: DBIOAction[Unit, NoStream, Effect.Schema]
+
+  val dml: DBIOAction[Unit, NoStream, Effect.Write]
 
   def originPort: Int
 
@@ -56,8 +59,8 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
     val akkaStreamsConfig = CommandLineParser.parser.parse(asArgs, Config()).get
 
     originDb = profile.backend.Database.forURL(singleThreadedConfig.originDbConnectionString)
-    createOriginDbDdl()
-    insertOriginDbData()
+    val fut = originDb.run(ddl).map(_ => originDb.run(dml))
+    Await.result(fut, Duration.Inf)
     setupTargetDbs()
     targetDbSt = profile.backend.Database.forURL(singleThreadedConfig.targetDbConnectionString)
     targetDbAs = profile.backend.Database.forURL(akkaStreamsConfig.targetDbConnectionString)
@@ -89,16 +92,5 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
   protected def assertThat(action: DBIOAction[Option[Int], profile.api.NoStream, Effect.Read], expected: Long): Unit = {
     assert(Await.result(targetDbSt.run(action), Duration.Inf) === Some(expected))
     assert(Await.result(targetDbAs.run(action), Duration.Inf) === Some(expected))
-  }
-
-  def createOriginDbDdl(): Unit = {
-    import profile.api._
-    val fut = originDb.run(DBIO.seq(schema.create))
-    Await.result(fut, Duration.Inf)
-  }
-
-  def insertOriginDbData(): Unit = {
-    val fut = originDb.run(new MissingFkDML(profile).dbioSeq)
-    Await.result(fut, Duration.Inf)
   }
 }
