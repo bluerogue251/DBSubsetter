@@ -29,7 +29,7 @@ abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest {
     s"docker rm --force --volumes $containerName".!
     s"docker create --name $containerName -p $port:5432 postgres:9.6.3".!!
     s"docker start $containerName".!!
-    Thread.sleep(5000)
+    Thread.sleep(10000)
     s"createdb --port $port --host 0.0.0.0 --user postgres $dataSetName".!!
   }
 }

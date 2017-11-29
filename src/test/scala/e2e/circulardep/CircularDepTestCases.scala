@@ -6,7 +6,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 trait CircularDepTestCases extends AbstractEndToEndTest with CircularDepDDL {
-  val dataSetName = "self_referencing"
+  val dataSetName = "circular_dep"
 
   import profile.api._
 

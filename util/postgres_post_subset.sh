@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -eoux pipefail
+set -eou pipefail
 
 data_set_name=$1
 origin_port=$2

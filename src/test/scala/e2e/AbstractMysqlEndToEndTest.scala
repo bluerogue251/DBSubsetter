@@ -7,7 +7,7 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest {
 
   def dataSetName: String
 
-  override def makeConnStr(port: Int): String = s"jdbc:mysql://localhost:$port/$dataSetName?user=root"
+  override def makeConnStr(port: Int): String = s"jdbc:mysql://localhost:$port/$dataSetName?user=root&useSSL=false"
 
   override def createOriginDb(): Unit = {
     setupDockerContainer(s"${dataSetName}_origin_mysql", originPort)
@@ -27,7 +27,7 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest {
     s"docker rm --force --volumes $containerName".!
     s"docker create --name $containerName -p $port:3306 --env MYSQL_ALLOW_EMPTY_PASSWORD=true mysql:8.0".!!
     s"docker start $containerName".!!
-    Thread.sleep(15000)
+    Thread.sleep(20000)
     s"./util/create_mysql_db.sh $dataSetName $port".!!
   }
 }
