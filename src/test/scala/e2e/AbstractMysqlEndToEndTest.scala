@@ -1,10 +1,5 @@
 package e2e
 
-import e2e.missingfk.Tables
-import slick.jdbc.MySQLProfile.api._
-
-import scala.concurrent.Await
-import scala.concurrent.duration.Duration
 import scala.sys.process._
 
 abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest {
@@ -21,30 +16,12 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest {
     s"./util/create_mysql_db.sh $dataSetName $originPort".!!
   }
 
-  override def createSlickOriginDbConnection() = {
-    slick.jdbc.MySQLProfile.backend.Database.forURL(singleThreadedConfig.originDbConnectionString)
-  }
-
-  override def createOriginDbDdl(): Unit = {
-    val tables = new Tables {
-      override val profile = slick.jdbc.MySQLProfile
-    }
-    val fut = originDb.run(DBIO.seq(tables.schema.create))
-    Await.result(fut, Duration.Inf)
-  }
-
   override def setupTargetDbs(): Unit = {
     setupTargetDbDockerContainer("sith", targetSingleThreadedPort)
     setupTargetDbDockerContainer("akst", targetAkkaStreamsPort)
   }
 
   override def postSubset(): Unit = {}
-
-  override protected def beforeAll(): Unit = {
-    super.beforeAll()
-    targetSingleThreadedConn.createStatement().executeQuery("set session sql_mode = ANSI_QUOTES")
-    targetAkkaStreamsConn.createStatement().executeQuery("set session sql_mode = ANSI_QUOTES")
-  }
 
   private def setupTargetDbDockerContainer(targetType: String, port: Int): Unit = {
     val containerName = s"${dataSetName}_target_${targetType}_mysql"

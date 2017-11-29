@@ -1,10 +1,5 @@
 package e2e
 
-import e2e.missingfk.Tables
-import slick.jdbc.PostgresProfile.api._
-
-import scala.concurrent.Await
-import scala.concurrent.duration.Duration
 import scala.sys.process._
 
 abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest {
@@ -19,18 +14,6 @@ abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest {
     s"docker start $container_name".!!
     Thread.sleep(5000)
     s"createdb --port $originPort --host 0.0.0.0 --user postgres $dataSetName".!!
-  }
-
-  override def createSlickOriginDbConnection() = {
-    slick.jdbc.PostgresProfile.backend.Database.forURL(singleThreadedConfig.originDbConnectionString)
-  }
-
-  override def createOriginDbDdl(): Unit = {
-    val tables = new Tables {
-      override val profile = slick.jdbc.PostgresProfile
-    }
-    val fut = originDb.run(DBIO.seq(tables.schema.create))
-    Await.result(fut, Duration.Inf)
   }
 
   override def setupTargetDbs(): Unit = {

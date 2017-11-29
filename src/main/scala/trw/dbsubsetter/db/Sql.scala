@@ -9,7 +9,7 @@ object Sql {
 
     allCombos.map { case (fk, table) =>
       val whereClauseCols = if (table == fk.toTable) fk.toCols else fk.fromCols
-      val whereClause = whereClauseCols.map(col => s"${quote(col)} = ?").mkString(" and ")
+      val whereClause = whereClauseCols.map(col => s"${quoteFullyQualified(col)} = ?").mkString(" and ")
       (fk, table) -> makeQueryString(table, whereClause, sch)
     }.toMap
   }
@@ -26,15 +26,19 @@ object Sql {
   }
 
   def makeQueryString(table: Table, whereClause: WhereClause, sch: SchemaInfo): SqlQuery = {
-    val selectCols = sch.colsByTableOrdered(table).map(quote).mkString(", ")
+    val selectCols = sch.colsByTableOrdered(table).map(quoteFullyQualified).mkString(", ")
     s"""select $selectCols
        | from ${quote(table)}
        | where $whereClause
        | """.stripMargin
   }
 
-  private def quote(col: Column): String = {
+  private def quoteFullyQualified(col: Column): String = {
     s""""${col.table.schema}"."${col.table.name}"."${col.name}""""
+  }
+
+  private def quote(col: Column): String = {
+    s""""${col.name}""""
   }
 
   private def quote(table: Table): String = {
