@@ -2,7 +2,7 @@ package e2e.missingfk
 
 import slick.jdbc.JdbcProfile
 
-class Inserts(val profile: JdbcProfile) extends Tables {
+class MissingFkDML(val profile: JdbcProfile) extends MissingFkDDL {
 
   import profile.api._
 

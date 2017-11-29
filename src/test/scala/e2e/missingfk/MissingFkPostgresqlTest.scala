@@ -2,7 +2,7 @@ package e2e.missingfk
 
 import e2e.AbstractPostgresqlEndToEndTest
 
-class PostgresqlTest extends AbstractPostgresqlEndToEndTest with TestCases {
+class MissingFkPostgresqlTest extends AbstractPostgresqlEndToEndTest with MissingFkTestCases {
   override val profile = slick.jdbc.PostgresProfile
   override val dataSetName = "missing_fk"
   override val originPort = 5493

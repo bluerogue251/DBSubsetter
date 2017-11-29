@@ -2,9 +2,9 @@ package e2e.missingfk
 
 import e2e.AbstractEndToEndTest
 
-trait TestCases extends AbstractEndToEndTest with Tables {
-
+trait MissingFkTestCases extends AbstractEndToEndTest with MissingFkDDL {
   import profile.api._
+
   test("Correct table_1 records were included") {
     assertCount(Table1, 1)
     assertThat(Table1.map(_.id).sum.result, 2)

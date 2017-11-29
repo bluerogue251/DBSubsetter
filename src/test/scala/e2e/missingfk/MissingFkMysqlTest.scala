@@ -2,7 +2,7 @@ package e2e.missingfk
 
 import e2e.AbstractMysqlEndToEndTest
 
-class MysqlTest extends AbstractMysqlEndToEndTest with TestCases {
+class MissingFkMysqlTest extends AbstractMysqlEndToEndTest with MissingFkTestCases {
   override val profile = slick.jdbc.MySQLProfile
   override val dataSetName = "missing_fk"
   override val originPort = 5490

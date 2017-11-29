@@ -1,7 +1,9 @@
-* Try to support MySQL, SQL Server, and Oracle
+* Try to support SQL Server, and Oracle
 * Add retry logic to DB Queries in case of failure, e.g. due to temporary network problem
 * Add option to support Rails "polymorphic associations" / Hibernate "discriminator column STI"
 * Try to find memory/performance bottlenecks by profiling against a huge database
 * Investigate whether optimization is possible via changing AnyRef to Any and then using primitive Ints instead of Integer for PK storage, etc.
 * Consider better support for uncommon data types such as money, enums, arrays of enums, etc
   -- Could the enum case be addressed via type casting in a way that does not cause other bugs or harm performance?
+* Consider whether it is truly necessary to store all the primary keys seen
+  -- Are there certain schema structures where we could skip storing certain PKs because we know we will only ever see a row once?

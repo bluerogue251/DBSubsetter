@@ -1,7 +1,7 @@
 package e2e.missingfk
 
 
-trait Tables {
+trait MissingFkDDL {
   val profile: slick.jdbc.JdbcProfile
   import profile.api._
   import slick.model.ForeignKeyAction

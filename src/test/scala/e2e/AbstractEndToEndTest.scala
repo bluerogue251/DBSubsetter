@@ -1,6 +1,6 @@
 package e2e
 
-import e2e.missingfk.{Inserts, Tables}
+import e2e.missingfk.{MissingFkDDL, MissingFkDML}
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 import slick.dbio.{DBIOAction, Effect}
 import slick.jdbc.JdbcBackend
@@ -93,7 +93,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
   def createOriginDbDdl(): Unit = {
     import profile.api._
     val p = profile
-    val tables = new Tables {
+    val tables = new MissingFkDDL {
       override val profile = p
     }
     val fut = originDb.run(DBIO.seq(tables.createSchema))
@@ -101,7 +101,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
   }
 
   def insertOriginDbData(): Unit = {
-    val fut = originDb.run(new Inserts(profile).dbioSeq)
+    val fut = originDb.run(new MissingFkDML(profile).dbioSeq)
     Await.result(fut, Duration.Inf)
   }
 }
