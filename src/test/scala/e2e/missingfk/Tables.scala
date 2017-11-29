@@ -11,25 +11,19 @@ trait Tables {
   def createSchema = schema.create
 
   case class Table1Row(id: Int)
-
   class Table1(_tableTag: Tag) extends profile.api.Table[Table1Row](_tableTag, "table_1") {
     def * = id <> (Table1Row, Table1Row.unapply)
-
     val id: Rep[Int] = column[Int]("id", O.PrimaryKey)
   }
-
   lazy val Table1 = new TableQuery(tag => new Table1(tag))
 
   case class Table2Row(id: Int, table1Id: Int)
-
   class Table2(_tableTag: Tag) extends profile.api.Table[Table2Row](_tableTag, "table_2") {
     def * = (id, table1Id) <> (Table2Row.tupled, Table2Row.unapply)
-
     val id: Rep[Int] = column[Int]("id", O.PrimaryKey)
     val table1Id: Rep[Int] = column[Int]("table_1_id")
     val index1 = index("table_2_table_1_id_idx", table1Id)
   }
-
   lazy val Table2 = new TableQuery(tag => new Table2(tag))
 
   case class Table3Row(id: Int)

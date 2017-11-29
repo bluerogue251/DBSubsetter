@@ -21,7 +21,7 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest {
     setupTargetDbDockerContainer("akst", targetAkkaStreamsPort)
   }
 
-  override def postSubset(): Unit = {}
+  override def postSubset(): Unit = {} // No-op
 
   private def setupTargetDbDockerContainer(targetType: String, port: Int): Unit = {
     val containerName = s"${dataSetName}_target_${targetType}_mysql"

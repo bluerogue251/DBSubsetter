@@ -14,6 +14,9 @@ import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
+  //
+  // The following need to be overridden case-by-case for different database vendors
+  //
   val profile: slick.jdbc.JdbcProfile
 
   def originPort: Int
@@ -28,10 +31,12 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
 
   def postSubset(): Unit
 
+  //
+  // The following is generic code that works with all database vendors
+  //
   var originDb: JdbcBackend#DatabaseDef = _
   var targetDbSt: JdbcBackend#DatabaseDef = _
   var targetDbAs: JdbcBackend#DatabaseDef = _
-  var singleThreadedConfig: Config = _
   lazy val targetSingleThreadedPort: Int = originPort + 1
   lazy val targetAkkaStreamsPort: Int = originPort + 2
   lazy val targetSingleThreadedConnString: String = makeConnStr(targetSingleThreadedPort)
@@ -46,7 +51,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
     val sharedArgs = Array("--originDbConnStr", originConnString, "--originDbParallelism", "10", "--targetDbParallelism", "10")
     val stArgs = programArgs ++ sharedArgs ++ Array("--targetDbConnStr", targetSingleThreadedConnString)
     val asArgs = programArgs ++ sharedArgs ++ Array("--targetDbConnStr", targetAkkaStreamsConnString)
-    singleThreadedConfig = CommandLineParser.parser.parse(stArgs, Config()).get
+    val singleThreadedConfig = CommandLineParser.parser.parse(stArgs, Config()).get
     val akkaStreamsConfig = CommandLineParser.parser.parse(asArgs, Config()).get
 
     originDb = profile.backend.Database.forURL(singleThreadedConfig.originDbConnectionString)
@@ -96,8 +101,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
   }
 
   def insertOriginDbData(): Unit = {
-    val db = profile.backend.Database.forURL(singleThreadedConfig.originDbConnectionString)
-    val fut = db.run(
+    val fut = originDb.run(
       new Inserts(profile).dbioSeq
     )
     Await.result(fut, Duration.Inf)

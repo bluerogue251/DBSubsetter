@@ -21,7 +21,10 @@ abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest {
     setupTargetDbDockerContainer("akst", targetAkkaStreamsPort)
   }
 
-  override def postSubset(): Unit = {}
+  override def postSubset(): Unit = {
+    s"./util/postgres_post_subset.sh $dataSetName $originPort $targetSingleThreadedPort".!!
+    s"./util/postgres_post_subset.sh $dataSetName $originPort $targetAkkaStreamsPort".!!
+  }
 
   private def setupTargetDbDockerContainer(targetType: String, port: Int): Unit = {
     val containerName = s"${dataSetName}_target_${targetType}_postgres"
