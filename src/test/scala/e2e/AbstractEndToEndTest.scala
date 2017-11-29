@@ -101,9 +101,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
   }
 
   def insertOriginDbData(): Unit = {
-    val fut = originDb.run(
-      new Inserts(profile).dbioSeq
-    )
+    val fut = originDb.run(new Inserts(profile).dbioSeq)
     Await.result(fut, Duration.Inf)
   }
 }

@@ -4,10 +4,8 @@ import e2e.AbstractMysqlEndToEndTest
 
 class MysqlTest extends AbstractMysqlEndToEndTest with TestCases {
   override val profile = slick.jdbc.MySQLProfile
-
   override val dataSetName = "missing_fk"
   override val originPort = 5490
-
   override val programArgs = Array(
     "--schemas", "missing_fk",
     "--baseQuery", "missing_fk.table_1 ::: id = 2 ::: true",

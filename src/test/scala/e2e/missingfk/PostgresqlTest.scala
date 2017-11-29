@@ -6,7 +6,6 @@ class PostgresqlTest extends AbstractPostgresqlEndToEndTest with TestCases {
   override val profile = slick.jdbc.PostgresProfile
   override val dataSetName = "missing_fk"
   override val originPort = 5493
-
   override val programArgs = Array(
     "--schemas", "public",
     "--baseQuery", "public.table_1 ::: id = 2 ::: true",
