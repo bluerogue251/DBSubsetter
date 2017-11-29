@@ -3,6 +3,8 @@ package e2e
 import scala.sys.process._
 
 abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest {
+  override val profile = slick.jdbc.MySQLProfile
+
   def dataSetName: String
 
   override def makeConnStr(port: Int): String = s"jdbc:mysql://localhost:$port/$dataSetName?user=root"

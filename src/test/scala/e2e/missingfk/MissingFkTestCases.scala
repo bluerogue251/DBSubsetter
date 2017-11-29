@@ -5,6 +5,11 @@ import e2e.AbstractEndToEndTest
 trait MissingFkTestCases extends AbstractEndToEndTest with MissingFkDDL {
   import profile.api._
 
+  override val ddl = schema.create
+  override val dml = new MissingFkDML(profile).dbioSeq
+
+  val dataSetName = "missing_fk"
+
   test("Correct table_1 records were included") {
     assertCount(Table1, 1)
     assertThat(Table1.map(_.id).sum.result, 2)
