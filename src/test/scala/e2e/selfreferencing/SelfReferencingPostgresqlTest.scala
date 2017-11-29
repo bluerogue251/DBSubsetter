@@ -3,7 +3,6 @@ package e2e.selfreferencing
 import e2e.AbstractPostgresqlEndToEndTest
 
 class SelfReferencingPostgresqlTest extends AbstractPostgresqlEndToEndTest with SelfReferencingTestCases {
-  override val profile = slick.jdbc.PostgresProfile
   override val originPort = 5523
   override val programArgs = Array(
     "--schemas", "public",

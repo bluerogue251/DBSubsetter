@@ -3,10 +3,7 @@ package e2e.missingfk
 import e2e.AbstractPostgresqlEndToEndTest
 
 class MissingFkPostgresqlTest extends AbstractPostgresqlEndToEndTest with MissingFkTestCases {
-  override val profile = slick.jdbc.PostgresProfile
-
   import profile.api._
-
   override val ddl = schema.create
   override val dml = new MissingFkDML(profile).dbioSeq
   override val dataSetName = "missing_fk"

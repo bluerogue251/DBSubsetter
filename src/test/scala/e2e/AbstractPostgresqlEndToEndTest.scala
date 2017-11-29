@@ -3,6 +3,8 @@ package e2e
 import scala.sys.process._
 
 abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest {
+  override val profile = slick.jdbc.PostgresProfile
+
   def dataSetName: String
 
   override def makeConnStr(p: Int): String = s"jdbc:postgresql://0.0.0.0:$p/$dataSetName?user=postgres"
