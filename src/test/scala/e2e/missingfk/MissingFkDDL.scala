@@ -8,11 +8,9 @@ trait MissingFkDDL {
 
   lazy val schema: profile.SchemaDescription = Array(Table1.schema, Table2.schema, Table3.schema, Table4.schema, Table5.schema, TableA.schema, TableB.schema, TableC.schema, TableD.schema).reduceLeft(_ ++ _)
 
-  def createSchema = schema.create
-
-  //
-  // table_1
-  //
+  /**
+    * table_1
+    */
   case class Table1Row(id: Int)
   class Table1(_tableTag: Tag) extends profile.api.Table[Table1Row](_tableTag, "table_1") {
     def * = id <> (Table1Row, Table1Row.unapply)
@@ -21,9 +19,9 @@ trait MissingFkDDL {
   }
   lazy val Table1 = new TableQuery(tag => new Table1(tag))
 
-  //
-  // table_2
-  //
+  /**
+    * table_2
+    */
   case class Table2Row(id: Int, table1Id: Int)
   class Table2(_tableTag: Tag) extends profile.api.Table[Table2Row](_tableTag, "table_2") {
     def * = (id, table1Id) <> (Table2Row.tupled, Table2Row.unapply)
@@ -35,9 +33,9 @@ trait MissingFkDDL {
   }
   lazy val Table2 = new TableQuery(tag => new Table2(tag))
 
-  //
-  // table_3
-  //
+  /**
+    * table_3
+    */
   case class Table3Row(id: Int)
   class Table3(_tableTag: Tag) extends profile.api.Table[Table3Row](_tableTag, "table_3") {
     def * = id <> (Table3Row, Table3Row.unapply)
@@ -46,9 +44,9 @@ trait MissingFkDDL {
   }
   lazy val Table3 = new TableQuery(tag => new Table3(tag))
 
-  //
-  // table_4
-  //
+  /**
+    * table_4
+    */
   case class Table4Row(table1Id: Int, table3Id: Int)
   class Table4(_tableTag: Tag) extends profile.api.Table[Table4Row](_tableTag, "table_4") {
     def * = (table1Id, table3Id) <> (Table4Row.tupled, Table4Row.unapply)
@@ -62,9 +60,9 @@ trait MissingFkDDL {
   }
   lazy val Table4 = new TableQuery(tag => new Table4(tag))
 
-  //
-  // table_5
-  //
+  /**
+    * table_5
+    */
   case class Table5Row(id: Int, table4Table1Id: Int, table4Table3Id: Int)
   class Table5(_tableTag: Tag) extends profile.api.Table[Table5Row](_tableTag, "table_5") {
     def * = (id, table4Table1Id, table4Table3Id) <> (Table5Row.tupled, Table5Row.unapply)
@@ -76,9 +74,9 @@ trait MissingFkDDL {
   }
   lazy val Table5 = new TableQuery(tag => new Table5(tag))
 
-  //
-  // table_a
-  //
+  /**
+    * table_a
+    */
   case class TableARow(id: Int, pointsToTableName: String, pointsToTableId: Int)
   class TableA(_tableTag: Tag) extends profile.api.Table[TableARow](_tableTag, "table_a") {
     def * = (id, pointsToTableName, pointsToTableId) <> (TableARow.tupled, TableARow.unapply)
@@ -92,9 +90,9 @@ trait MissingFkDDL {
   }
   lazy val TableA = new TableQuery(tag => new TableA(tag))
 
-  //
-  // table_b
-  //
+  /**
+    * table_b
+    */
   case class TableBRow(id: Int)
   class TableB(_tableTag: Tag) extends profile.api.Table[TableBRow](_tableTag, "table_b") {
     def * = id <> (TableBRow, TableBRow.unapply)
@@ -103,9 +101,9 @@ trait MissingFkDDL {
   }
   lazy val TableB = new TableQuery(tag => new TableB(tag))
 
-  //
-  // table_c
-  //
+  /**
+    * table_c
+    */
   case class TableCRow(id: Int)
   class TableC(_tableTag: Tag) extends profile.api.Table[TableCRow](_tableTag, "table_c") {
     def * = id <> (TableCRow, TableCRow.unapply)
@@ -114,9 +112,9 @@ trait MissingFkDDL {
   }
   lazy val TableC = new TableQuery(tag => new TableC(tag))
 
-  //
-  // table_d
-  //
+  /**
+    * table_d
+    */
   case class TableDRow(id: Int)
   class TableD(_tableTag: Tag) extends profile.api.Table[TableDRow](_tableTag, "table_d") {
     def * = id <> (TableDRow, TableDRow.unapply)

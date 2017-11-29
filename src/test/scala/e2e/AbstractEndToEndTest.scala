@@ -1,6 +1,6 @@
 package e2e
 
-import e2e.missingfk.{MissingFkDDL, MissingFkDML}
+import e2e.missingfk.MissingFkDML
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 import slick.dbio.{DBIOAction, Effect}
 import slick.jdbc.JdbcBackend
@@ -18,6 +18,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
   // The following need to be overridden case-by-case for different database vendors
   //
   val profile: slick.jdbc.JdbcProfile
+  val schema: profile.SchemaDescription
 
   def originPort: Int
 
@@ -92,11 +93,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
 
   def createOriginDbDdl(): Unit = {
     import profile.api._
-    val p = profile
-    val tables = new MissingFkDDL {
-      override val profile = p
-    }
-    val fut = originDb.run(DBIO.seq(tables.createSchema))
+    val fut = originDb.run(DBIO.seq(schema.create))
     Await.result(fut, Duration.Inf)
   }
 
