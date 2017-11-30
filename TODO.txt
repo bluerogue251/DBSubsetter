@@ -1,4 +1,3 @@
-* Try to support SQL Server, and Oracle
 * Add retry logic to DB Queries in case of failure, e.g. due to temporary network problem
 * Add option to support Rails "polymorphic associations" / Hibernate "discriminator column STI"
 * Try to find memory/performance bottlenecks by profiling against a huge database
