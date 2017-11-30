@@ -1,3 +1,5 @@
+/*! SET SESSION sql_mode='ANSI'; */
+
 INSERT INTO districts (name, created_at, updated_at)
   SELECT
     'District # ' || seq,

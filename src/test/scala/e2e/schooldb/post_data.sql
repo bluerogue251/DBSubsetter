@@ -1,3 +1,5 @@
+/*! SET SESSION sql_mode='ANSI'; */
+
 ALTER TABLE "Audit".events
   ADD PRIMARY KEY (id);
 
@@ -34,8 +36,6 @@ ALTER TABLE "Audit".events
   ADD FOREIGN KEY (empty_table_4_id) REFERENCES empty_table_4 (id);
 ALTER TABLE "Audit".events
   ADD FOREIGN KEY (empty_table_5_id) REFERENCES empty_table_5 (id);
-
-
 
 
 CREATE INDEX ON homework_grades (student_id);
