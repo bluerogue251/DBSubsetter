@@ -1,7 +1,7 @@
 package e2e
 
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
-import slick.dbio.{DBIOAction, Effect, NoStream}
+import slick.dbio.{DBIOAction, Effect}
 import slick.jdbc.JdbcBackend
 import slick.lifted.{AbstractTable, TableQuery}
 import trw.dbsubsetter.config.{CommandLineParser, Config}
@@ -14,28 +14,28 @@ import scala.concurrent.duration.Duration
 
 abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
   //
-  // The following need to be overridden case-by-case for different database vendors
+  // The following need to be overridden
   //
-  val profile: slick.jdbc.JdbcProfile
+  protected val profile: slick.jdbc.JdbcProfile
 
-  val ddl: DBIOAction[Unit, NoStream, Effect.Schema]
+  protected def originPort: Int
 
-  val dml: DBIOAction[Unit, NoStream, Effect.Write]
+  protected def makeConnStr(port: Int): String
 
-  def originPort: Int
+  protected def programArgs: Array[String]
 
-  def makeConnStr(port: Int): String
+  protected def createOriginDb(): Unit
 
-  def programArgs: Array[String]
+  protected def setupTargetDbs(): Unit
 
-  def createOriginDb(): Unit
+  protected def postSubset(): Unit
 
-  def setupTargetDbs(): Unit
+  protected def setupDDL(): Unit
 
-  def postSubset(): Unit
+  protected def setupDML(): Unit
 
   //
-  // The following is generic code that works with all database vendors
+  // The following is generic enough that it generally does not need to be overridden
   //
   var originDb: JdbcBackend#DatabaseDef = _
   var targetDbSt: JdbcBackend#DatabaseDef = _
@@ -58,10 +58,8 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
     val akkaStreamsConfig = CommandLineParser.parser.parse(asArgs, Config()).get
 
     originDb = profile.backend.Database.forURL(singleThreadedConfig.originDbConnectionString)
-    val ddlFut = originDb.run(ddl)
-    Await.result(ddlFut, Duration.Inf)
-    val dmlFut = originDb.run(dml)
-    Await.result(dmlFut, Duration.Inf)
+    setupDDL()
+    setupDML()
     setupTargetDbs()
     targetDbSt = profile.backend.Database.forURL(singleThreadedConfig.targetDbConnectionString)
     targetDbAs = profile.backend.Database.forURL(akkaStreamsConfig.targetDbConnectionString)

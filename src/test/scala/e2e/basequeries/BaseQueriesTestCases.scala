@@ -1,8 +1,8 @@
 package e2e.basequeries
 
-import e2e.AbstractEndToEndTest
+import e2e.{AbstractEndToEndTest, SlickSetup}
 
-trait BaseQueriesTestCases extends AbstractEndToEndTest with BaseQueriesDDL {
+trait BaseQueriesTestCases extends AbstractEndToEndTest with BaseQueriesDDL with SlickSetup {
   import profile.api._
 
   override val ddl = schema.create

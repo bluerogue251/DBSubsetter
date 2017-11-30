@@ -1,8 +1,8 @@
 package e2e.selfreferencing
 
-import e2e.AbstractEndToEndTest
+import e2e.{AbstractEndToEndTest, SlickSetup}
 
-trait SelfReferencingTestCases extends AbstractEndToEndTest with SelfReferencingDDL {
+trait SelfReferencingTestCases extends AbstractEndToEndTest with SelfReferencingDDL with SlickSetup {
   val dataSetName = "self_referencing"
 
   import profile.api._
