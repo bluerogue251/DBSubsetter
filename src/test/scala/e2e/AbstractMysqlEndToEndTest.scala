@@ -7,7 +7,7 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest {
 
   def dataSetName: String
 
-  override def makeConnStr(port: Int): String = s"jdbc:mysql://localhost:$port/$dataSetName?user=root&useSSL=false"
+  override def makeConnStr(port: Int): String = s"jdbc:mysql://localhost:$port/$dataSetName?user=root&useSSL=false&rewriteBatchedStatements=true"
 
   override def createOriginDb(): Unit = {
     setupDockerContainer(s"${dataSetName}_origin_mysql", originPort)

@@ -10,7 +10,6 @@ import trw.dbsubsetter.workflow.BaseQueries
 import trw.dbsubsetter.{ApplicationAkkaStreams, ApplicationSingleThreaded}
 
 import scala.concurrent.Await
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 
 abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
@@ -59,8 +58,10 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
     val akkaStreamsConfig = CommandLineParser.parser.parse(asArgs, Config()).get
 
     originDb = profile.backend.Database.forURL(singleThreadedConfig.originDbConnectionString)
-    val fut = originDb.run(ddl).map(_ => originDb.run(dml))
-    Await.result(fut, Duration.Inf)
+    val ddlFut = originDb.run(ddl)
+    Await.result(ddlFut, Duration.Inf)
+    val dmlFut = originDb.run(dml)
+    Await.result(dmlFut, Duration.Inf)
     setupTargetDbs()
     targetDbSt = profile.backend.Database.forURL(singleThreadedConfig.targetDbConnectionString)
     targetDbAs = profile.backend.Database.forURL(akkaStreamsConfig.targetDbConnectionString)
