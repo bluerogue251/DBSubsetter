@@ -1,9 +1,3 @@
-CREATE INDEX ON schools (district_id);
-CREATE INDEX ON schools (latest_valedictorian_id_cache);
-CREATE INDEX ON "Students" (current_school_id_cache);
-CREATE INDEX ON school_assignments (school_id);
-CREATE INDEX ON school_assignments (student_id);
-
 ALTER TABLE "Audit".events
   ADD PRIMARY KEY (id);
 ALTER TABLE "Audit".events
@@ -41,7 +35,8 @@ CREATE INDEX ON "Audit".events (empty_table_4_id);
 CREATE INDEX ON "Audit".events (empty_table_5_id);
 
 ALTER TABLE homework_grades
-  ADD PRIMARY KEY (id);
+  ADD FOREIGN KEY (student_id) REFERENCES "Students" (student_id);
+
 CREATE INDEX ON homework_grades (student_id);
 CREATE INDEX ON homework_grades (assignment_type);
 CREATE INDEX ON homework_grades (assignment_id);
