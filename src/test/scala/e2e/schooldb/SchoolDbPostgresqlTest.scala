@@ -14,7 +14,7 @@ class SchoolDbPostgresqlTest extends AbstractPostgresqlEndToEndTest with SchoolD
   )
 
   override def setupDDL(): Unit = {
-    s"psql --host 0.0.0.0 --port $originPort --user postgres $dataSetName --file ./src/test/scala/e2e/schooldb/create_Audit_schema.sql".!!
+    s"psql --host 0.0.0.0 --port $originPort --user postgres $dataSetName --file ./src/test/scala/e2e/schooldb/create_Audit_schema_postgresql.sql".!!
     super.setupDDL()
   }
 

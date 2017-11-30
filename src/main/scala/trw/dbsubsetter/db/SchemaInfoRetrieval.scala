@@ -31,53 +31,55 @@ object SchemaInfoRetrieval {
           tablesJdbcResultSet.getString("TABLE_NAME")
         )
       }
+    }
 
+    tablesQueryResult.foreach { table =>
       val colsJdbcResultSet = {
-        if (isMysql) ddl.getColumns(schema, null, "%", "%")
-        else ddl.getColumns(catalog, schema, "%", "%")
+        if (isMysql) ddl.getColumns(table.schema, null, table.name, "%")
+        else ddl.getColumns(catalog, table.schema, table.name, "%")
       }
       while (colsJdbcResultSet.next()) {
-        val table = colsJdbcResultSet.getString("TABLE_NAME")
         val columnName = colsJdbcResultSet.getString("COLUMN_NAME")
 
-        if (!config.excludeColumns((schema, table)).contains(columnName)) {
-          columnsQueryResult += ColumnQueryRow(schema, table, columnName)
-        }
-      }
-
-      // Args: catalog, schema, table
-      tablesQueryResult.foreach { table =>
-        val pksJdbcResultSet = {
-          if (isMysql) ddl.getPrimaryKeys(schema, null, table.name)
-          else ddl.getPrimaryKeys(catalog, schema, table.name)
-        }
-        while (pksJdbcResultSet.next()) {
-          primaryKeysQueryResult += PrimaryKeyQueryRow(
-            schema,
-            pksJdbcResultSet.getString("TABLE_NAME"),
-            pksJdbcResultSet.getString("COLUMN_NAME")
-          )
-        }
-      }
-
-      tablesQueryResult.foreach { table =>
-        // Args: catalog, schema, table
-        val foreignKeysJdbcResultSet = {
-          if (isMysql) ddl.getExportedKeys(schema, null, table.name)
-          else ddl.getExportedKeys(catalog, schema, table.name)
-        }
-        while (foreignKeysJdbcResultSet.next()) {
-          foreignKeysQueryResult += ForeignKeyQueryRow(
-            if (isMysql) foreignKeysJdbcResultSet.getString("FKTABLE_CAT") else foreignKeysJdbcResultSet.getString("FKTABLE_SCHEM"),
-            foreignKeysJdbcResultSet.getString("FKTABLE_NAME"),
-            foreignKeysJdbcResultSet.getString("FKCOLUMN_NAME"),
-            if (isMysql) foreignKeysJdbcResultSet.getString("PKTABLE_CAT") else foreignKeysJdbcResultSet.getString("PKTABLE_SCHEM"),
-            foreignKeysJdbcResultSet.getString("PKTABLE_NAME"),
-            foreignKeysJdbcResultSet.getString("PKCOLUMN_NAME")
-          )
+        if (!config.excludeColumns((table.schema, table.name)).contains(columnName)) {
+          columnsQueryResult += ColumnQueryRow(table.schema, table.name, columnName)
         }
       }
     }
+
+    // Args: catalog, schema, table
+    tablesQueryResult.foreach { table =>
+      val pksJdbcResultSet = {
+        if (isMysql) ddl.getPrimaryKeys(table.schema, null, table.name)
+        else ddl.getPrimaryKeys(catalog, table.schema, table.name)
+      }
+      while (pksJdbcResultSet.next()) {
+        primaryKeysQueryResult += PrimaryKeyQueryRow(
+          table.schema,
+          table.name,
+          pksJdbcResultSet.getString("COLUMN_NAME")
+        )
+      }
+    }
+
+    tablesQueryResult.foreach { table =>
+      // Args: catalog, schema, table
+      val foreignKeysJdbcResultSet = {
+        if (isMysql) ddl.getExportedKeys(table.schema, null, table.name)
+        else ddl.getExportedKeys(catalog, table.schema, table.name)
+      }
+      while (foreignKeysJdbcResultSet.next()) {
+        foreignKeysQueryResult += ForeignKeyQueryRow(
+          if (isMysql) foreignKeysJdbcResultSet.getString("FKTABLE_CAT") else foreignKeysJdbcResultSet.getString("FKTABLE_SCHEM"),
+          foreignKeysJdbcResultSet.getString("FKTABLE_NAME"),
+          foreignKeysJdbcResultSet.getString("FKCOLUMN_NAME"),
+          if (isMysql) foreignKeysJdbcResultSet.getString("PKTABLE_CAT") else foreignKeysJdbcResultSet.getString("PKTABLE_SCHEM"),
+          foreignKeysJdbcResultSet.getString("PKTABLE_NAME"),
+          foreignKeysJdbcResultSet.getString("PKCOLUMN_NAME")
+        )
+      }
+    }
+
     conn.close()
 
     config.cmdLinePrimaryKeys.foreach { clpk =>

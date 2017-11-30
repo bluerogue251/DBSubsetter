@@ -88,7 +88,7 @@ trait SchoolDbDDL {
   class Events(_tableTag: Tag) extends profile.api.Table[EventsRow](_tableTag, Some("Audit"), "events") {
     def * = (id, eventTypeKey, districtId, schoolId, studentId, schoolAssignmentSchoolId, schoolAssignmentStudentId, emptyTable1Id, emptyTable2Id, emptyTable3Id, emptyTable4Id, emptyTable5Id, createdAt) <> (EventsRow.tupled, EventsRow.unapply)
 
-    val id: Rep[Long] = column[Long]("id", O.AutoInc)
+    val id: Rep[Long] = column[Long]("id", O.AutoInc, O.PrimaryKey)
     val eventTypeKey: Rep[String] = column[String]("event_type_key", O.Length(30, varying = true))
     val districtId: Rep[Option[Int]] = column[Option[Int]]("district_id", O.Default(None))
     val schoolId: Rep[Option[Int]] = column[Option[Int]]("school_id", O.Default(None))
