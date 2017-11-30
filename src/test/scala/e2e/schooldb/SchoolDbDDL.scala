@@ -178,8 +178,10 @@ trait SchoolDbDDL {
     val updatedAt: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("updated_at")
     val latestValedictorianIdCache: Rep[Option[Long]] = column[Option[Long]]("latest_valedictorian_id_cache", O.Default(None))
 
-    lazy val studentsFk = foreignKey("schools_valedictoriean_id_fkey", latestValedictorianIdCache, Students)(r => r.studentId, onUpdate = ForeignKeyAction.NoAction, onDelete = ForeignKeyAction.NoAction)
-    val index2 = index("schools_valedictoriean_id_idx", latestValedictorianIdCache)
+    lazy val districtsFk = foreignKey("schools_district_id_fkey", districtId, Districts)(_.id, onUpdate = ForeignKeyAction.NoAction, onDelete = ForeignKeyAction.NoAction)
+    lazy val studentsFk = foreignKey("schools_valedictorian_id_fkey", latestValedictorianIdCache, Students)(r => r.studentId, onUpdate = ForeignKeyAction.NoAction, onDelete = ForeignKeyAction.NoAction)
+    val index1 = index("schools_district_id_idx", districtId)
+    val index2 = index("schools_valedictorian_id_idx", latestValedictorianIdCache)
   }
 
   lazy val Schools = new TableQuery(tag => new Schools(tag))

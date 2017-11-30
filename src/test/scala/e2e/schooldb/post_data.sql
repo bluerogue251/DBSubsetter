@@ -1,5 +1,18 @@
 ALTER TABLE "Audit".events
   ADD PRIMARY KEY (id);
+
+CREATE INDEX ON "Audit".events (event_type_key);
+CREATE INDEX ON "Audit".events (district_id);
+CREATE INDEX ON "Audit".events (school_id);
+CREATE INDEX ON "Audit".events (student_id);
+CREATE INDEX ON "Audit".events (school_assignment_school_id);
+CREATE INDEX ON "Audit".events (school_assignment_student_id);
+CREATE INDEX ON "Audit".events (empty_table_1_id);
+CREATE INDEX ON "Audit".events (empty_table_2_id);
+CREATE INDEX ON "Audit".events (empty_table_3_id);
+CREATE INDEX ON "Audit".events (empty_table_4_id);
+CREATE INDEX ON "Audit".events (empty_table_5_id);
+
 ALTER TABLE "Audit".events
   ADD FOREIGN KEY (event_type_key) REFERENCES "Audit".event_types (key);
 ALTER TABLE "Audit".events
@@ -22,21 +35,12 @@ ALTER TABLE "Audit".events
 ALTER TABLE "Audit".events
   ADD FOREIGN KEY (empty_table_5_id) REFERENCES empty_table_5 (id);
 
-CREATE INDEX ON "Audit".events (event_type_key);
-CREATE INDEX ON "Audit".events (district_id);
-CREATE INDEX ON "Audit".events (school_id);
-CREATE INDEX ON "Audit".events (student_id);
-CREATE INDEX ON "Audit".events (school_assignment_school_id);
-CREATE INDEX ON "Audit".events (school_assignment_student_id);
-CREATE INDEX ON "Audit".events (empty_table_1_id);
-CREATE INDEX ON "Audit".events (empty_table_2_id);
-CREATE INDEX ON "Audit".events (empty_table_3_id);
-CREATE INDEX ON "Audit".events (empty_table_4_id);
-CREATE INDEX ON "Audit".events (empty_table_5_id);
 
-ALTER TABLE homework_grades
-  ADD FOREIGN KEY (student_id) REFERENCES "Students" (student_id);
+
 
 CREATE INDEX ON homework_grades (student_id);
 CREATE INDEX ON homework_grades (assignment_type);
 CREATE INDEX ON homework_grades (assignment_id);
+ALTER TABLE homework_grades
+  ADD FOREIGN KEY (student_id) REFERENCES "Students" (student_id);
+
