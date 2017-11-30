@@ -65,8 +65,8 @@ object SchemaInfoRetrieval {
     tablesQueryResult.foreach { table =>
       // Args: catalog, schema, table
       val foreignKeysJdbcResultSet = {
-        if (isMysql) ddl.getExportedKeys(table.schema, null, table.name)
-        else ddl.getExportedKeys(catalog, table.schema, table.name)
+        if (isMysql) ddl.getImportedKeys(table.schema, null, table.name)
+        else ddl.getImportedKeys(catalog, table.schema, table.name)
       }
       while (foreignKeysJdbcResultSet.next()) {
         foreignKeysQueryResult += ForeignKeyQueryRow(

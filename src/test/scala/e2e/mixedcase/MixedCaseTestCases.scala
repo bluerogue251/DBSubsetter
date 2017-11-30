@@ -11,13 +11,13 @@ trait MixedCaseTestCases extends AbstractEndToEndTest with MixedCaseDDL with Sli
   override lazy val dml = new MixedCaseDML(profile).dbioSeq
 
   test("Correct table 1 records were included") {
-    assertCount(MixedCaseTable1, 3)
-    assertThat(MixedCaseTable1.map(_.id).sum.result, 6)
+    assertCount(MixedCaseTable1, 1)
+    assertThat(MixedCaseTable1.map(_.id).sum.result, 2)
   }
 
   test("Correct table 2 records were included") {
     assertCount(MixedCaseTable2, 3)
-    assertThat(MixedCaseTable2.map(_.id).sum.result, 16)
-    assertThat(MixedCaseTable2.map(_.mixedCaseTable1Id).sum.result, 9)
+    assertThat(MixedCaseTable2.map(_.id).sum.result, 15)
+    assertThat(MixedCaseTable2.map(_.mixedCaseTable1Id).sum.result, 6)
   }
 }
