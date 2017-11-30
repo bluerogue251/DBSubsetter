@@ -88,7 +88,13 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
     assert(Await.result(targetDbAs.run(tq.size.result), Duration.Inf) === expected)
   }
 
+  // Helper to get around intelliJ warnings, technically it could compile just with the Long version
   protected def assertThat(action: DBIOAction[Option[Int], profile.api.NoStream, Effect.Read], expected: Long): Unit = {
+    assert(Await.result(targetDbSt.run(action), Duration.Inf) === Some(expected))
+    assert(Await.result(targetDbAs.run(action), Duration.Inf) === Some(expected))
+  }
+
+  protected def assertThatLong(action: DBIOAction[Option[Long], profile.api.NoStream, Effect.Read], expected: Long): Unit = {
     assert(Await.result(targetDbSt.run(action), Duration.Inf) === Some(expected))
     assert(Await.result(targetDbAs.run(action), Duration.Inf) === Some(expected))
   }

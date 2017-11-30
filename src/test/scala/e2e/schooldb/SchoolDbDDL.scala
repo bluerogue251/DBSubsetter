@@ -88,7 +88,7 @@ trait SchoolDbDDL {
   class Events(_tableTag: Tag) extends profile.api.Table[EventsRow](_tableTag, Some("Audit"), "events") {
     def * = (id, eventTypeKey, districtId, schoolId, studentId, schoolAssignmentSchoolId, schoolAssignmentStudentId, emptyTable1Id, emptyTable2Id, emptyTable3Id, emptyTable4Id, emptyTable5Id, createdAt) <> (EventsRow.tupled, EventsRow.unapply)
 
-    val id: Rep[Long] = column[Long]("id")
+    val id: Rep[Long] = column[Long]("id", O.AutoInc)
     val eventTypeKey: Rep[String] = column[String]("event_type_key", O.Length(30, varying = true))
     val districtId: Rep[Option[Int]] = column[Option[Int]]("district_id", O.Default(None))
     val schoolId: Rep[Option[Int]] = column[Option[Int]]("school_id", O.Default(None))
@@ -197,7 +197,6 @@ trait SchoolDbDDL {
   lazy val StandaloneTable = new TableQuery(tag => new StandaloneTable(tag))
 
   case class StudentsRow(studentId: Long, name: String, dateOfBirth: Option[java.sql.Date] = None, currentSchoolIdCache: Option[Int] = None, createdAt: java.sql.Timestamp, updatedAt: java.sql.Timestamp)
-
   class Students(_tableTag: Tag) extends profile.api.Table[StudentsRow](_tableTag, "Students") {
     def * = (studentId, name, dateOfBirth, currentSchoolIdCache, createdAt, updatedAt) <> (StudentsRow.tupled, StudentsRow.unapply)
 
@@ -208,7 +207,7 @@ trait SchoolDbDDL {
     val createdAt: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("created_at")
     val updatedAt: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("updated_at")
 
-    lazy val schoolFk = foreignKey("students_current_school_id_cache_fkey", currentSchoolIdCache, Students)(_.currentSchoolIdCache, onUpdate = ForeignKeyAction.NoAction, onDelete = ForeignKeyAction.NoAction)
+    lazy val schoolFk = foreignKey("students_current_school_id_cache_fkey", currentSchoolIdCache, Schools)(_.id, onUpdate = ForeignKeyAction.NoAction, onDelete = ForeignKeyAction.NoAction)
     val index2 = index("students_current_school_id_cache_idx", currentSchoolIdCache)
   }
 

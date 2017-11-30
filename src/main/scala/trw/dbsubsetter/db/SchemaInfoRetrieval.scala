@@ -68,10 +68,10 @@ object SchemaInfoRetrieval {
         }
         while (foreignKeysJdbcResultSet.next()) {
           foreignKeysQueryResult += ForeignKeyQueryRow(
-            schema,
+            if (isMysql) foreignKeysJdbcResultSet.getString("FKTABLE_CAT") else foreignKeysJdbcResultSet.getString("FKTABLE_SCHEM"),
             foreignKeysJdbcResultSet.getString("FKTABLE_NAME"),
             foreignKeysJdbcResultSet.getString("FKCOLUMN_NAME"),
-            schema,
+            if (isMysql) foreignKeysJdbcResultSet.getString("PKTABLE_CAT") else foreignKeysJdbcResultSet.getString("PKTABLE_SCHEM"),
             foreignKeysJdbcResultSet.getString("PKTABLE_NAME"),
             foreignKeysJdbcResultSet.getString("PKCOLUMN_NAME")
           )
