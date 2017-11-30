@@ -61,7 +61,7 @@ UPDATE schools
 SET latest_valedictorian_id_cache = (SELECT student_id
                                      FROM school_assignments
                                      WHERE school_id = schools.id
-                                     ORDER BY school_id ASC
+                                     ORDER BY student_id ASC
                                      LIMIT 1
                                      OFFSET 8)
 WHERE schools.id % 10 != 7; -- leave 1/10th of these null for variety
@@ -156,8 +156,8 @@ INSERT INTO homework_grades (student_id, assignment_type, assignment_id, grade, 
     CASE WHEN seq % 3 = 0
       THEN TRUE
     ELSE FALSE END,
-    now(),
-    now()
+    '2015-11-25 08:19:27.333665',
+    '2017-11-25 09:19:27.333667'
   FROM "Students" s
     CROSS JOIN generate_series(0, 2) AS seq;
 
