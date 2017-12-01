@@ -1,5 +1,7 @@
 package trw.dbsubsetter
 
+import java.sql.Connection
+
 import scala.collection.mutable
 
 package object db {
@@ -30,5 +32,13 @@ package object db {
     val toTable: Table = toCols.head.table
 
     val isSingleCol: Boolean = fromCols.size == 1
+  }
+
+  implicit class VendorAwareJdbcConnection(conn: Connection) {
+    private val vendor: String = conn.getMetaData.getDatabaseProductName
+
+    def isMysql: Boolean = vendor == "MySQL"
+
+    def isMsSqlServer: Boolean = vendor == "Microsoft SQL Server"
   }
 }
