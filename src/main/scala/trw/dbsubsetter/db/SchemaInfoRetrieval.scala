@@ -14,7 +14,7 @@ object SchemaInfoRetrieval {
     val catalog = conn.getCatalog
     val ddl = conn.getMetaData
 
-    val tablesQueryResult = ArrayBuffer.empty[Table]
+    val tablesQueryResult = ArrayBuffer.empty[TableQueryRow]
     val columnsQueryResult = ArrayBuffer.empty[ColumnQueryRow]
     val primaryKeysQueryResult = ArrayBuffer.empty[PrimaryKeyQueryRow]
     val foreignKeysQueryResult = ArrayBuffer.empty[ForeignKeyQueryRow]
@@ -26,7 +26,7 @@ object SchemaInfoRetrieval {
         else ddl.getTables(catalog, schema, "%", Array("TABLE"))
       }
       while (tablesJdbcResultSet.next()) {
-        tablesQueryResult += Table(
+        tablesQueryResult += TableQueryRow(
           schema,
           tablesJdbcResultSet.getString("TABLE_NAME")
         )
@@ -40,9 +40,10 @@ object SchemaInfoRetrieval {
       }
       while (colsJdbcResultSet.next()) {
         val columnName = colsJdbcResultSet.getString("COLUMN_NAME")
+        val isAutoincrement = colsJdbcResultSet.getString("IS_AUTOINCREMENT") == "1"
 
         if (!config.excludeColumns((table.schema, table.name)).contains(columnName)) {
-          columnsQueryResult += ColumnQueryRow(table.schema, table.name, columnName)
+          columnsQueryResult += ColumnQueryRow(table.schema, table.name, columnName, isAutoincrement)
         }
       }
     }
@@ -86,8 +87,9 @@ object SchemaInfoRetrieval {
       clpk.columns.foreach(c => primaryKeysQueryResult += PrimaryKeyQueryRow(clpk.schema, clpk.table, c))
     }
 
-    val tables = tablesQueryResult.toVector
-    val tablesByName = tables.map(t => (t.schema, t.name) -> t).toMap
+    val tablesByName = tablesQueryResult.map { t =>
+      (t.schema, t.name) -> Table(t.schema, t.name, columnsQueryResult.exists(c => c.schema == t.schema && c.table == t.name && c.isAutoincrement))
+    }.toMap
 
     val colsByTableAndName: Map[Table, Map[ColumnName, Column]] = {
       columnsQueryResult
@@ -149,9 +151,13 @@ object SchemaInfoRetrieval {
     )
   }
 
+  private[this] case class TableQueryRow(schema: SchemaName,
+                                         name: TableName)
+
   private[this] case class ColumnQueryRow(schema: SchemaName,
                                           table: TableName,
-                                          name: ColumnName)
+                                          name: ColumnName,
+                                          isAutoincrement: Boolean)
 
   private[this] case class PrimaryKeyQueryRow(schema: SchemaName,
                                               table: TableName,

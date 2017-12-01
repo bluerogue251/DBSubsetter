@@ -6,7 +6,7 @@ import trw.dbsubsetter.workflow._
 
 class PkStoreWorkflowTest extends FunSuite {
   test("PkStore is conscious of fetchChildren for `exists` requests") {
-    val table = Table("public", "users")
+    val table = Table("public", "users", hasAutoincrement = true)
     val map = Map(table -> Seq(0))
     val pkStore = new PkStoreWorkflow(map)
     val fkValue = "fkValue"

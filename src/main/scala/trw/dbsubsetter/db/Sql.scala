@@ -21,7 +21,7 @@ object Sql {
         s"""insert into ${quote(table)}
            |${cols.map(quote).mkString("(", ",", ")")}
            |values ${(1 to cols.size).map(_ => '?').mkString("(", ",", ")")}""".stripMargin
-      val sqlStringAccountingForMsSqlServer = if (isMsSqlServer) {
+      val sqlStringAccountingForMsSqlServer = if (isMsSqlServer && table.hasAutoincrement) {
         s"SET IDENTITY_INSERT [${table.schema}].[${table.name}] ON;\n" + sqlString
       } else {
         sqlString
