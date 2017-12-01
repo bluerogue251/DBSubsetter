@@ -17,8 +17,8 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest {
     setupDockerContainer(s"${dataSetName}_target_sith_mysql", targetSingleThreadedPort)
     setupDockerContainer(s"${dataSetName}_target_akst_mysql", targetAkkaStreamsPort)
 
-    s"./util/sync_mysql_origin_to_target.sh $dataSetName $originPort $targetSingleThreadedPort".!!
-    s"./util/sync_mysql_origin_to_target.sh $dataSetName $originPort $targetAkkaStreamsPort".!!
+    s"./test/util/sync_mysql_origin_to_target.sh $dataSetName $originPort $targetSingleThreadedPort".!!
+    s"./test/util/sync_mysql_origin_to_target.sh $dataSetName $originPort $targetAkkaStreamsPort".!!
   }
 
   override def postSubset(): Unit = {} // No-op
@@ -28,6 +28,6 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest {
     s"docker create --name $containerName -p $port:3306 --env MYSQL_ALLOW_EMPTY_PASSWORD=true mysql:8.0".!!
     s"docker start $containerName".!!
     Thread.sleep(20000)
-    s"./util/create_mysql_db.sh $dataSetName $port".!!
+    s"./test/util/create_mysql_db.sh $dataSetName $port".!!
   }
 }

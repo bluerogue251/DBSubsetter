@@ -1,5 +1,3 @@
-/*! SET SESSION sql_mode='ANSI'; */
-
 CREATE INDEX ON "Audit".events (event_type_key);
 CREATE INDEX ON "Audit".events (district_id);
 CREATE INDEX ON "Audit".events (school_id);
