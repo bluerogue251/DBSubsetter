@@ -17,7 +17,7 @@ abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest {
     s"docker rm --force --volumes $containerName".!
     s"docker create --name $containerName -p $originPort:1433 --env ACCEPT_EULA=Y --env SA_PASSWORD=MsSqlServerLocal1 --env MSSQL_PID=Developer microsoft/mssql-server-linux:2017-CU2".!!
     s"docker start $containerName".!!
-    Thread.sleep(10000)
+    Thread.sleep(15000)
     s"./src/test/util/create_sqlserver_db.sh $containerName $dataSetName".!!
   }
 
