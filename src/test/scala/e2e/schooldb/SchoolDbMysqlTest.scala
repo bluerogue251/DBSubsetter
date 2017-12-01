@@ -12,7 +12,7 @@ class SchoolDbMysqlTest extends FunSuite {
   //  )
 
   //  override def setupDDL(): Unit = {
-  //    s"./test/util/create_mysql_db.sh Audit $originPort".!!
+  //    s"./src/test/util/create_mysql_db.sh Audit $originPort".!!
   //    super.setupDDL()
   //  }
 

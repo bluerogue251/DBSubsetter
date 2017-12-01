@@ -12,27 +12,27 @@ class CrossSchemaMysqlTest extends AbstractMysqlEndToEndTest with CrossSchemaTes
   )
 
   override def setupDDL(): Unit = {
-    s"./test/util/create_mysql_db.sh schema_1 $originPort".!!
-    s"./test/util/create_mysql_db.sh schema_2 $originPort".!!
-    s"./test/util/create_mysql_db.sh schema_3 $originPort".!!
+    s"./src/test/util/create_mysql_db.sh schema_1 $originPort".!!
+    s"./src/test/util/create_mysql_db.sh schema_2 $originPort".!!
+    s"./src/test/util/create_mysql_db.sh schema_3 $originPort".!!
     super.setupDDL()
   }
 
   override def setupTargetDbs(): Unit = {
     super.setupTargetDbs()
 
-    s"./test/util/create_mysql_db.sh schema_1 $targetSingleThreadedPort".!!
-    s"./test/util/create_mysql_db.sh schema_2 $targetSingleThreadedPort".!!
-    s"./test/util/create_mysql_db.sh schema_3 $targetSingleThreadedPort".!!
-    s"./test/util/sync_mysql_origin_to_target.sh schema_1 $originPort $targetSingleThreadedPort".!!
-    s"./test/util/sync_mysql_origin_to_target.sh schema_2 $originPort $targetSingleThreadedPort".!!
-    s"./test/util/sync_mysql_origin_to_target.sh schema_3 $originPort $targetSingleThreadedPort".!!
+    s"./src/test/util/create_mysql_db.sh schema_1 $targetSingleThreadedPort".!!
+    s"./src/test/util/create_mysql_db.sh schema_2 $targetSingleThreadedPort".!!
+    s"./src/test/util/create_mysql_db.sh schema_3 $targetSingleThreadedPort".!!
+    s"./src/test/util/sync_mysql_origin_to_target.sh schema_1 $originPort $targetSingleThreadedPort".!!
+    s"./src/test/util/sync_mysql_origin_to_target.sh schema_2 $originPort $targetSingleThreadedPort".!!
+    s"./src/test/util/sync_mysql_origin_to_target.sh schema_3 $originPort $targetSingleThreadedPort".!!
 
-    s"./test/util/create_mysql_db.sh schema_1 $targetAkkaStreamsPort".!!
-    s"./test/util/create_mysql_db.sh schema_2 $targetAkkaStreamsPort".!!
-    s"./test/util/create_mysql_db.sh schema_3 $targetAkkaStreamsPort".!!
-    s"./test/util/sync_mysql_origin_to_target.sh schema_1 $originPort $targetAkkaStreamsPort".!!
-    s"./test/util/sync_mysql_origin_to_target.sh schema_2 $originPort $targetAkkaStreamsPort".!!
-    s"./test/util/sync_mysql_origin_to_target.sh schema_3 $originPort $targetAkkaStreamsPort".!!
+    s"./src/test/util/create_mysql_db.sh schema_1 $targetAkkaStreamsPort".!!
+    s"./src/test/util/create_mysql_db.sh schema_2 $targetAkkaStreamsPort".!!
+    s"./src/test/util/create_mysql_db.sh schema_3 $targetAkkaStreamsPort".!!
+    s"./src/test/util/sync_mysql_origin_to_target.sh schema_1 $originPort $targetAkkaStreamsPort".!!
+    s"./src/test/util/sync_mysql_origin_to_target.sh schema_2 $originPort $targetAkkaStreamsPort".!!
+    s"./src/test/util/sync_mysql_origin_to_target.sh schema_3 $originPort $targetAkkaStreamsPort".!!
   }
 }
