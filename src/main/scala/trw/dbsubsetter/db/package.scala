@@ -23,7 +23,7 @@ package object db {
                         fksFromTable: Map[Table, Set[ForeignKey]],
                         fksToTable: Map[Table, Set[ForeignKey]])
 
-  case class Table(schema: SchemaName, name: TableName, hasAutoincrement: Boolean)
+  case class Table(schema: SchemaName, name: TableName, hasSqlServerAutoIncrement: Boolean)
 
   case class Column(table: Table, name: ColumnName, ordinalPosition: Int)
 

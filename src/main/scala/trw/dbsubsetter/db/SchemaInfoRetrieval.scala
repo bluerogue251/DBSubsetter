@@ -40,10 +40,10 @@ object SchemaInfoRetrieval {
       }
       while (colsJdbcResultSet.next()) {
         val columnName = colsJdbcResultSet.getString("COLUMN_NAME")
-        val isAutoincrement = colsJdbcResultSet.getString("IS_AUTOINCREMENT") == "1"
+        val isSqlServerAutoIncrement = conn.isMsSqlServer && colsJdbcResultSet.getString("IS_AUTOINCREMENT") == "YES"
 
         if (!config.excludeColumns((table.schema, table.name)).contains(columnName)) {
-          columnsQueryResult += ColumnQueryRow(table.schema, table.name, columnName, isAutoincrement)
+          columnsQueryResult += ColumnQueryRow(table.schema, table.name, columnName, isSqlServerAutoIncrement)
         }
       }
     }
@@ -88,7 +88,7 @@ object SchemaInfoRetrieval {
     }
 
     val tablesByName = tablesQueryResult.map { t =>
-      (t.schema, t.name) -> Table(t.schema, t.name, columnsQueryResult.exists(c => c.schema == t.schema && c.table == t.name && c.isAutoincrement))
+      (t.schema, t.name) -> Table(t.schema, t.name, columnsQueryResult.exists(c => c.schema == t.schema && c.table == t.name && c.isSqlServerAutoincrement))
     }.toMap
 
     val colsByTableAndName: Map[Table, Map[ColumnName, Column]] = {
@@ -157,7 +157,7 @@ object SchemaInfoRetrieval {
   private[this] case class ColumnQueryRow(schema: SchemaName,
                                           table: TableName,
                                           name: ColumnName,
-                                          isAutoincrement: Boolean)
+                                          isSqlServerAutoincrement: Boolean)
 
   private[this] case class PrimaryKeyQueryRow(schema: SchemaName,
                                               table: TableName,

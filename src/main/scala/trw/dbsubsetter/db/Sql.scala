@@ -14,14 +14,14 @@ object Sql {
     }.toMap
   }
 
-  def preparedInsertStatementStrings(sch: SchemaInfo, isMsSqlServer: Boolean): Map[Table, SqlQuery] = {
+  def preparedInsertStatementStrings(sch: SchemaInfo): Map[Table, SqlQuery] = {
     sch.tablesByName.map { case (_, table) =>
       val cols = sch.colsByTableOrdered(table)
       val sqlString =
         s"""insert into ${quote(table)}
            |${cols.map(quote).mkString("(", ",", ")")}
            |values ${(1 to cols.size).map(_ => '?').mkString("(", ",", ")")}""".stripMargin
-      val sqlStringAccountingForMsSqlServer = if (isMsSqlServer && table.hasAutoincrement) {
+      val sqlStringAccountingForMsSqlServer = if (table.hasSqlServerAutoIncrement) {
         s"SET IDENTITY_INSERT [${table.schema}].[${table.name}] ON;\n" + sqlString
       } else {
         sqlString
