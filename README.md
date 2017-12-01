@@ -16,9 +16,9 @@ This is useful for local development and testing or for exporting all the data b
 
 ## Supported Databases
 
-DBSubsetter has been tested against recent versions of PostgreSQL and MySQL.
+DBSubsetter has been tested against recent versions of PostgreSQL, MySQL, and Microsoft SQL Server.
 
-Feel free to open a GitHub ticket if you would like the project to support another database vendor.
+Feel free to open a GitHub ticket if you would like support for a different database vendor.
 
 
 ## Download / Installation / Usage
