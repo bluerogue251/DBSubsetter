@@ -3,9 +3,13 @@ package trw.dbsubsetter.db
 import java.sql.DriverManager
 
 class TargetDbAccess(connStr: String, sch: SchemaInfo) {
-  private val connection = DriverManager.getConnection(connStr)
+  private val conn = DriverManager.getConnection(connStr)
+  if (conn.getMetaData.getDatabaseProductName == "MySQL") {
+    conn.createStatement().executeQuery("set session sql_mode = ANSI_QUOTES")
+    conn.createStatement().executeQuery("set FOREIGN_KEY_CHECKS = 0")
+  }
   private val statements = Sql.preparedInsertStatementStrings(sch).map { case (table, sqlStr) =>
-    table -> connection.prepareStatement(sqlStr)
+    table -> conn.prepareStatement(sqlStr)
   }
 
   def insertRows(table: Table, rows: Vector[Row]): Int = {

@@ -1,63 +1,69 @@
 package e2e
 
-import java.sql.{Connection, DriverManager}
-
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
+import slick.dbio.{DBIOAction, Effect}
+import slick.jdbc.JdbcBackend
+import slick.lifted.{AbstractTable, TableQuery}
 import trw.dbsubsetter.config.{CommandLineParser, Config}
-import trw.dbsubsetter.db.{ColumnName, SchemaInfoRetrieval, SchemaName, TableName}
+import trw.dbsubsetter.db.SchemaInfoRetrieval
 import trw.dbsubsetter.workflow.BaseQueries
 import trw.dbsubsetter.{ApplicationAkkaStreams, ApplicationSingleThreaded}
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
-import scala.sys.process._
-
 
 abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
-  def dataSetName: String
-  def originPort: Int
-  def programArgs: Array[String]
+  //
+  // The following need to be overridden
+  //
+  protected val profile: slick.jdbc.JdbcProfile
 
-  var targetSingleThreadedConn: Connection = _
-  var targetAkkaStreamsConn: Connection = _
+  protected def originPort: Int
 
-  def targetSingleThreadedPort: Int = originPort + 1
+  protected def makeConnStr(port: Int): String
 
-  def targetAkkaStreamsPort: Int = originPort + 2
-  def originDbName = s"${dataSetName}_origin"
+  protected def programArgs: Array[String]
 
-  def targetDbSingleThreadedName = s"${dataSetName}_target_st"
+  protected def createOriginDb(): Unit
 
-  def targetDbAkkaStreamsName = s"${dataSetName}_target_as"
+  protected def setupTargetDbs(): Unit
 
-  def originConnString = s"jdbc:postgresql://localhost:$originPort/$originDbName?user=postgres"
+  protected def postSubset(): Unit
 
-  def targetSingleThreadedConnString = s"jdbc:postgresql://localhost:$targetSingleThreadedPort/$targetDbSingleThreadedName?user=postgres"
+  protected def setupDDL(): Unit
 
-  def targetAkkaStreamsConnString = s"jdbc:postgresql://localhost:$targetAkkaStreamsPort/$targetDbAkkaStreamsName?user=postgres"
+  protected def setupDML(): Unit
+
+  //
+  // The following is generic enough that it generally does not need to be overridden
+  //
+  var originDb: JdbcBackend#DatabaseDef = _
+  var targetDbSt: JdbcBackend#DatabaseDef = _
+  var targetDbAs: JdbcBackend#DatabaseDef = _
+  lazy val targetSingleThreadedPort: Int = originPort + 1
+  lazy val targetAkkaStreamsPort: Int = originPort + 2
+  lazy val targetSingleThreadedConnString: String = makeConnStr(targetSingleThreadedPort)
+  lazy val targetAkkaStreamsConnString: String = makeConnStr(targetAkkaStreamsPort)
 
   override protected def beforeAll(): Unit = {
     super.beforeAll()
 
-    s"./util/reset_origin_db.sh $dataSetName $originDbName $originPort".!!
-    s"./util/reset_target_db.sh $originDbName $originPort $targetDbSingleThreadedName $targetSingleThreadedPort".!!
-    s"./util/reset_target_db.sh $originDbName $originPort $targetDbAkkaStreamsName $targetAkkaStreamsPort".!!
+    createOriginDb()
 
-    val parallelismArgs = Array(
-      "--originDbParallelism", "10",
-      "--targetDbParallelism", "10"
-    )
-    val singleThreadedArgs = programArgs ++ parallelismArgs ++ Array(
-      "--originDbConnStr", originConnString,
-      "--targetDbConnStr", targetSingleThreadedConnString,
-      "--singleThreadedDebugMode"
-    )
-    val akkaStreamsArgs = programArgs ++ parallelismArgs ++ Array(
-      "--originDbConnStr", originConnString,
-      "--targetDbConnStr", targetAkkaStreamsConnString,
-    )
-    val singleThreadedConfig = CommandLineParser.parser.parse(singleThreadedArgs, Config()).get
-    val akkaStreamsConfig = CommandLineParser.parser.parse(akkaStreamsArgs, Config()).get
+    val originConnString = makeConnStr(originPort)
+    val sharedArgs = Array("--originDbConnStr", originConnString, "--originDbParallelism", "10", "--targetDbParallelism", "10")
+    val stArgs = programArgs ++ sharedArgs ++ Array("--targetDbConnStr", targetSingleThreadedConnString)
+    val asArgs = programArgs ++ sharedArgs ++ Array("--targetDbConnStr", targetAkkaStreamsConnString)
+    val singleThreadedConfig = CommandLineParser.parser.parse(stArgs, Config()).get
+    val akkaStreamsConfig = CommandLineParser.parser.parse(asArgs, Config()).get
+
+    originDb = profile.backend.Database.forURL(singleThreadedConfig.originDbConnectionString)
+    setupDDL()
+    setupDML()
+    setupTargetDbs()
+    targetDbSt = profile.backend.Database.forURL(singleThreadedConfig.targetDbConnectionString)
+    targetDbAs = profile.backend.Database.forURL(akkaStreamsConfig.targetDbConnectionString)
+
     // `schemaInfo` and `baseQueries` will be the same regardless of whether we use `singleThreadedConfig` or `akkaStreamsConfig`
     val schemaInfo = SchemaInfoRetrieval.getSchemaInfo(singleThreadedConfig)
     val baseQueries = BaseQueries.get(singleThreadedConfig, schemaInfo)
@@ -66,46 +72,30 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
     val futureResult = ApplicationAkkaStreams.run(akkaStreamsConfig, schemaInfo, baseQueries)
     Await.result(futureResult, Duration.Inf)
 
-    s"./util/post_subset_target.sh $originDbName $originPort $targetDbSingleThreadedName $targetSingleThreadedPort".!!
-    s"./util/post_subset_target.sh $originDbName $originPort $targetDbAkkaStreamsName $targetAkkaStreamsPort".!!
-
-    targetSingleThreadedConn = DriverManager.getConnection(targetSingleThreadedConnString)
-    targetSingleThreadedConn.setReadOnly(true)
-
-    targetAkkaStreamsConn = DriverManager.getConnection(targetSingleThreadedConnString)
-    targetAkkaStreamsConn.setReadOnly(true)
+    postSubset()
   }
 
   override protected def afterAll(): Unit = {
     super.afterAll()
-    targetSingleThreadedConn.close()
-    targetAkkaStreamsConn.close()
+    originDb.close()
+    targetDbSt.close()
+    targetDbAs.close()
   }
 
-  protected def assertCount(schema: SchemaName, table: TableName, whereClauseOpt: Option[String], expected: Long): Unit = {
-    val baseSql = s"""select count(*) from "$schema"."$table""""
-    val sql = whereClauseOpt.fold(baseSql) { wc => s"$baseSql where $wc" }
-
-    val singleThreadedJdbcResult = targetSingleThreadedConn.createStatement().executeQuery(sql)
-    singleThreadedJdbcResult.next()
-    val singleThreadedCount = singleThreadedJdbcResult.getLong(1)
-    assert(singleThreadedCount === expected)
-
-    val akkaStreamsJdbcResult = targetAkkaStreamsConn.createStatement().executeQuery(sql)
-    akkaStreamsJdbcResult.next()
-    val akkaStreamsCount = akkaStreamsJdbcResult.getLong(1)
-    assert(akkaStreamsCount === expected)
+  protected def assertCount[T <: AbstractTable[_]](tq: TableQuery[T], expected: Long): Unit = {
+    import profile.api._
+    assert(Await.result(targetDbSt.run(tq.size.result), Duration.Inf) === expected)
+    assert(Await.result(targetDbAs.run(tq.size.result), Duration.Inf) === expected)
   }
 
-  protected def assertSum(schema: SchemaName, table: TableName, column: ColumnName, expected: Long): Unit = {
-    val singleThreadedJdbcResult = targetSingleThreadedConn.createStatement().executeQuery(s"""select sum("$column") from "$schema"."$table"""")
-    singleThreadedJdbcResult.next()
-    val singleThreadedSum = singleThreadedJdbcResult.getLong(1)
-    assert(singleThreadedSum === expected)
+  // Helper to get around intelliJ warnings, technically it could compile just with the Long version
+  protected def assertThat(action: DBIOAction[Option[Int], profile.api.NoStream, Effect.Read], expected: Long): Unit = {
+    assert(Await.result(targetDbSt.run(action), Duration.Inf) === Some(expected))
+    assert(Await.result(targetDbAs.run(action), Duration.Inf) === Some(expected))
+  }
 
-    val akkaStreamsJdbcResult = targetAkkaStreamsConn.createStatement().executeQuery(s"""select sum("$column") from "$schema"."$table"""")
-    akkaStreamsJdbcResult.next()
-    val akkaStreamsSum = akkaStreamsJdbcResult.getLong(1)
-    assert(akkaStreamsSum === expected)
+  protected def assertThatLong(action: DBIOAction[Option[Long], profile.api.NoStream, Effect.Read], expected: Long): Unit = {
+    assert(Await.result(targetDbSt.run(action), Duration.Inf) === Some(expected))
+    assert(Await.result(targetDbAs.run(action), Duration.Inf) === Some(expected))
   }
 }

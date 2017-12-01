@@ -5,10 +5,11 @@ import java.sql.{DriverManager, ResultSet}
 import scala.collection.mutable.ArrayBuffer
 
 class OriginDbAccess(connStr: String, sch: SchemaInfo) {
-  private val originConn = DriverManager.getConnection(connStr)
-  originConn.setReadOnly(true)
+  private val conn = DriverManager.getConnection(connStr)
+  if (conn.getMetaData.getDatabaseProductName == "MySQL") conn.createStatement().executeQuery("set session sql_mode = ANSI_QUOTES")
+  conn.setReadOnly(true)
   private val statements = Sql.preparedQueryStatementStrings(sch).map { case ((fk, table), sqlStr) =>
-    (fk, table) -> originConn.prepareStatement(sqlStr)
+    (fk, table) -> conn.prepareStatement(sqlStr)
   }
 
   def getRowsFromTemplate(fk: ForeignKey, table: Table, fkValue: AnyRef): Vector[Row] = {
@@ -26,7 +27,7 @@ class OriginDbAccess(connStr: String, sch: SchemaInfo) {
   }
 
   def getRows(query: SqlQuery, table: Table): Vector[Row] = {
-    val jdbcResult = originConn.createStatement().executeQuery(query)
+    val jdbcResult = conn.createStatement().executeQuery(query)
     jdbcResultToRows(jdbcResult, table)
   }
 

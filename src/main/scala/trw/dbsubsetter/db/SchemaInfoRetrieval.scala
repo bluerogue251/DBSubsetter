@@ -10,6 +10,8 @@ object SchemaInfoRetrieval {
   def getSchemaInfo(config: Config): SchemaInfo = {
     val conn = DriverManager.getConnection(config.originDbConnectionString)
     conn.setReadOnly(true)
+    val isMysql = conn.getMetaData.getDatabaseProductName == "MySQL"
+    val catalog = conn.getCatalog
     val ddl = conn.getMetaData
 
     val tablesQueryResult = ArrayBuffer.empty[Table]
@@ -19,52 +21,70 @@ object SchemaInfoRetrieval {
 
     config.schemas.foreach { schema =>
       // Args: catalog, schemaPattern, tableNamePattern, types
-      val tablesJdbcResultSet = ddl.getTables(null, schema, "%", Array("TABLE"))
+      val tablesJdbcResultSet = {
+        if (isMysql) ddl.getTables(schema, null, "%", Array("TABLE"))
+        else ddl.getTables(catalog, schema, "%", Array("TABLE"))
+      }
       while (tablesJdbcResultSet.next()) {
         tablesQueryResult += Table(
-          tablesJdbcResultSet.getString("TABLE_SCHEM"),
+          schema,
           tablesJdbcResultSet.getString("TABLE_NAME")
         )
       }
+    }
 
-      val columnsJdbcResultSet = ddl.getColumns(null, schema, null, null)
-      while (columnsJdbcResultSet.next()) {
-        val schema = columnsJdbcResultSet.getString("TABLE_SCHEM")
-        val table = columnsJdbcResultSet.getString("TABLE_NAME")
-        val columnName = columnsJdbcResultSet.getString("COLUMN_NAME")
+    tablesQueryResult.foreach { table =>
+      val colsJdbcResultSet = {
+        if (isMysql) ddl.getColumns(table.schema, null, table.name, "%")
+        else ddl.getColumns(catalog, table.schema, table.name, "%")
+      }
+      while (colsJdbcResultSet.next()) {
+        val columnName = colsJdbcResultSet.getString("COLUMN_NAME")
 
-        if (!config.excludeColumns((schema, table)).contains(columnName)) {
-          columnsQueryResult += ColumnQueryRow(schema, table, columnName)
+        if (!config.excludeColumns((table.schema, table.name)).contains(columnName)) {
+          columnsQueryResult += ColumnQueryRow(table.schema, table.name, columnName)
         }
       }
+    }
 
-      // Args: catalog, schema, table
-      val primaryKeysJdbcResultSet = ddl.getPrimaryKeys(null, schema, null)
-      while (primaryKeysJdbcResultSet.next()) {
+    // Args: catalog, schema, table
+    tablesQueryResult.foreach { table =>
+      val pksJdbcResultSet = {
+        if (isMysql) ddl.getPrimaryKeys(table.schema, null, table.name)
+        else ddl.getPrimaryKeys(catalog, table.schema, table.name)
+      }
+      while (pksJdbcResultSet.next()) {
         primaryKeysQueryResult += PrimaryKeyQueryRow(
-          primaryKeysJdbcResultSet.getString("TABLE_SCHEM"),
-          primaryKeysJdbcResultSet.getString("TABLE_NAME"),
-          primaryKeysJdbcResultSet.getString("COLUMN_NAME")
+          table.schema,
+          table.name,
+          pksJdbcResultSet.getString("COLUMN_NAME")
         )
       }
-      config.cmdLinePrimaryKeys.foreach { clpk =>
-        clpk.columns.foreach(c => primaryKeysQueryResult += PrimaryKeyQueryRow(clpk.schema, clpk.table, c))
-      }
+    }
 
+    tablesQueryResult.foreach { table =>
       // Args: catalog, schema, table
-      val foreignKeysJdbcResultSet = ddl.getExportedKeys(null, schema, null)
+      val foreignKeysJdbcResultSet = {
+        if (isMysql) ddl.getImportedKeys(table.schema, null, table.name)
+        else ddl.getImportedKeys(catalog, table.schema, table.name)
+      }
       while (foreignKeysJdbcResultSet.next()) {
         foreignKeysQueryResult += ForeignKeyQueryRow(
-          foreignKeysJdbcResultSet.getString("FKTABLE_SCHEM"),
+          if (isMysql) foreignKeysJdbcResultSet.getString("FKTABLE_CAT") else foreignKeysJdbcResultSet.getString("FKTABLE_SCHEM"),
           foreignKeysJdbcResultSet.getString("FKTABLE_NAME"),
           foreignKeysJdbcResultSet.getString("FKCOLUMN_NAME"),
-          foreignKeysJdbcResultSet.getString("PKTABLE_SCHEM"),
+          if (isMysql) foreignKeysJdbcResultSet.getString("PKTABLE_CAT") else foreignKeysJdbcResultSet.getString("PKTABLE_SCHEM"),
           foreignKeysJdbcResultSet.getString("PKTABLE_NAME"),
           foreignKeysJdbcResultSet.getString("PKCOLUMN_NAME")
         )
       }
     }
+
     conn.close()
+
+    config.cmdLinePrimaryKeys.foreach { clpk =>
+      clpk.columns.foreach(c => primaryKeysQueryResult += PrimaryKeyQueryRow(clpk.schema, clpk.table, c))
+    }
 
     val tables = tablesQueryResult.toVector
     val tablesByName = tables.map(t => (t.schema, t.name) -> t).toMap
@@ -145,5 +165,3 @@ object SchemaInfoRetrieval {
                                               toColumn: ColumnName)
 
 }
-
-

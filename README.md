@@ -2,12 +2,12 @@
 
 DBSubsetter is a tool for taking a logically consistent subset of a relational database.
 
-Starting with a set of rows from a particular table, it respects foreign key constraints by recursively fetching the "parents" and (optionally) the "children" of those rows.
+Starting with a base condition specifying a set of rows from one or more tables, it respects foreign key constraints by recursively fetching the "parents" and (optionally) the "children" of those rows.
 
 This is useful for local development and testing or for exporting all the data belonging to a particular set of users or customers for debugging and sharing.
 
 
-## Design principles
+## Project Goals
 
 * High performance: optimized to run as fast as possible and to take full advantage of multi-core machines.
 * Determinism: identical inputs should yield identical outputs. Random subsets are possible, but only if purposely configured.
@@ -16,10 +16,12 @@ This is useful for local development and testing or for exporting all the data b
 
 ## Supported Databases
 
-DBSubsetter has only been tested against recent versions of PostgreSQL. Support for MySQL, Oracle, and SQL Server is coming soon.
+DBSubsetter has been tested against recent versions of PostgreSQL and MySQL.
+
+Feel free to open a GitHub ticket if you would like the project to support another database vendor.
 
 
-## Download / installation / usage
+## Download / Installation / Usage
   
 Load the empty table structure from your "origin" database into your "target". No foreign keys or indices should be in the "target" db yet:
 
@@ -75,13 +77,18 @@ The only condition for contributing to this project is to follow our [code of co
 
 ## Related projects and resources
 
-DBSubsetter was inspired by and borrowed ideas from many of the following projects:
+DBSubsetter was inspired by and borrowed ideas from:
 
 * [Jailer](http://jailer.sourceforge.net/home.htm)
 * [rdbms-subsetter](https://github.com/18F/rdbms-subsetter)
+
+Here are some other similar or related resources:
+
 * [DataBee](https://www.databee.com/)
 * [pg_sample](https://github.com/mla/pg_sample)
 * [This stack overflow question](https://stackoverflow.com/questions/3980379/how-to-export-consistent-subset-of-database)
+* [DATPROF](http://www.datprof.com/products/datprof-subset/)
+* [db_subsetter](https://github.com/lostapathy/db_subsetter)
 
 
 ## License
