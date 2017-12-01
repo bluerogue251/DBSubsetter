@@ -24,9 +24,10 @@ abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest {
   override def setupTargetDbs(): Unit = {
     s"./src/test/util/sync_sqlserver_origin_to_target.sh $containerName $dataSetName $targetSingleThreadedDbName".!!
     s"./src/test/util/sync_sqlserver_origin_to_target.sh $containerName $dataSetName $targetAkkaStreamsDbName".!!
-    s"./src/test/util/make_sqlserver_read_write.sh $containerName $targetSingleThreadedDbName".!!
-    s"./src/test/util/make_sqlserver_read_write.sh $containerName $targetAkkaStreamsDbName".!!
   }
 
-  override def postSubset(): Unit = {} // No-op
+  override def postSubset(): Unit = {
+    s"./src/test/util/sqlserver_post_subset.sh $containerName $targetSingleThreadedDbName".!!
+    s"./src/test/util/sqlserver_post_subset.sh $containerName $targetAkkaStreamsDbName".!!
+  }
 }
