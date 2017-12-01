@@ -1,7 +1,6 @@
-* Add retry logic to DB Queries in case of failure, e.g. due to temporary network problem
-* Try to support SQL Server
 * Improve README instructions
 * Improve and test command line parsing with better error messages
+* Add retry logic to DB Queries in case of failure, e.g. due to temporary network problem
 * Add option to support Rails "polymorphic associations" / Hibernate "discriminator column STI"
 * Try to find memory/performance bottlenecks by profiling against a huge database
 * Investigate whether optimization is possible via changing AnyRef to Any and then using primitive Ints instead of Integer for PK storage, etc.
