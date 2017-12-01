@@ -8,7 +8,8 @@ class AutoIncrementingPkDML(val profile: JdbcProfile) extends AutoIncrementingPk
 
   def dbioSeq = {
     slick.dbio.DBIO.seq(
-      AutoincrementingPkTable ++= (1 to 20).map(i => AutoincrementingPkTableRow(i, i.toString))
+      AutoincrementingPkTable ++= (1 to 20).map(i => AutoincrementingPkTableRow(i, i.toString)),
+      OtherAutoincrementingPkTable ++= (1 to 20).map(i => OtherAutoincrementingPkTableRow(i, i.toString))
     )
   }
 }
