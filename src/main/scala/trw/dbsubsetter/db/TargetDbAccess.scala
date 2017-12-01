@@ -7,6 +7,8 @@ class TargetDbAccess(connStr: String, sch: SchemaInfo) {
   if (conn.getMetaData.getDatabaseProductName == "MySQL") {
     conn.createStatement().executeQuery("set session sql_mode = ANSI_QUOTES")
     conn.createStatement().executeQuery("set FOREIGN_KEY_CHECKS = 0")
+  } else if (conn.getMetaData.getDatabaseProductName == "Microsoft SQL Server") {
+    conn.createStatement().execute("SET QUOTED_IDENTIFIER ON")
   }
   private val statements = Sql.preparedInsertStatementStrings(sch).map { case (table, sqlStr) =>
     table -> conn.prepareStatement(sqlStr)

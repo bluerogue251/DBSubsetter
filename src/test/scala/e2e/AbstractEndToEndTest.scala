@@ -20,7 +20,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
 
   protected def originPort: Int
 
-  protected def makeConnStr(port: Int): String
+  protected def makeConnStr(port: Int, dbName: String): String
 
   protected def programArgs: Array[String]
 
@@ -34,23 +34,29 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
 
   protected def setupDML(): Unit
 
+  protected def dataSetName: String
+
+
   //
-  // The following is generic enough that it generally does not need to be overridden
+  // The following is generic enough that it usually does not need to be overridden
   //
+  lazy val originDbName: String = dataSetName
+  lazy val targetSingleThreadedDbName: String = originDbName
+  lazy val targetAkkaStreamsDbName: String = originDbName
   var originDb: JdbcBackend#DatabaseDef = _
   var targetDbSt: JdbcBackend#DatabaseDef = _
   var targetDbAs: JdbcBackend#DatabaseDef = _
   lazy val targetSingleThreadedPort: Int = originPort + 1
   lazy val targetAkkaStreamsPort: Int = originPort + 2
-  lazy val targetSingleThreadedConnString: String = makeConnStr(targetSingleThreadedPort)
-  lazy val targetAkkaStreamsConnString: String = makeConnStr(targetAkkaStreamsPort)
+  lazy val targetSingleThreadedConnString: String = makeConnStr(targetSingleThreadedPort, targetSingleThreadedDbName)
+  lazy val targetAkkaStreamsConnString: String = makeConnStr(targetAkkaStreamsPort, targetAkkaStreamsDbName)
 
   override protected def beforeAll(): Unit = {
     super.beforeAll()
 
     createOriginDb()
 
-    val originConnString = makeConnStr(originPort)
+    val originConnString = makeConnStr(originPort, originDbName)
     val sharedArgs = Array("--originDbConnStr", originConnString, "--originDbParallelism", "10", "--targetDbParallelism", "10")
     val stArgs = programArgs ++ sharedArgs ++ Array("--targetDbConnStr", targetSingleThreadedConnString)
     val asArgs = programArgs ++ sharedArgs ++ Array("--targetDbConnStr", targetAkkaStreamsConnString)
