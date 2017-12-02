@@ -2,7 +2,7 @@
 
 Load the empty table structure from your "origin" database into your "target".
 
-Foreign keys and indices should be excluded from this step. They will be added to the "target" db in a later step, after subsetting has finished. This makes inserts into your target database significantly faster for large datasets. Temporarily avoiding foreign keys also greatly simplifies DBSubsetter's logic for inserting data
+Foreign keys and indices should be excluded from this step. They will be added to the "target" db in a later step, after subsetting has finished. This makes inserts into your target database significantly faster for large datasets. Temporarily avoiding foreign keys also greatly simplifies DBSubsetter's logic for inserting data.
 
 ```sh
 # Dump out an empty schema from your "origin" database into a file called `pre-data-dump.sql`
@@ -14,4 +14,7 @@ $ psql --host target_host --port 5432 --user target_user --dbname target_db_name
 
 For some users, especially those on AWS RDS or without superuser access, `pg_dumpall` may error out on Postgres versions < 10. See [here](http://www.thatguyfromdelhi.com/2016/12/custom-pgdumpall-now-works-with-aws.html) for details.
 Substituting `pg_dump` instead of `pg_dumpall` is one possible workaround for this. However, `pg_dump` ignores roles, permissions, and other "global objects" in Postgres,
-so any porting over of roles and permissions to the target database must be done manually.
+so any porting over of roles and permissions to the "target" database must be done manually.
+
+### ??? Mention configuration settings such as wal_size, etc. to make inserts into the target database faster
+### Mention that they may want to check all tables in the origin database to ensure that proper indices are on all foreign key columns as this can greatly speed up subsetting.
