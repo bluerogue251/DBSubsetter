@@ -9,9 +9,11 @@ This is useful for local development and testing or for exporting all the data b
 
 ## Project Goals
 
-* High performance: optimized to run as fast as possible and to take full advantage of multi-core machines.
-* Determinism: identical inputs should yield identical outputs. Random subsets are possible, but only if purposely configured.
-* Do one thing well: a tiny codebase with a small and focused set of features.
+*High performance*: optimized to take full advantage of parallelism and multi-core machines for fast runtimes.
+
+*Deterministic*: identical inputs should yield identical outputs. Random subsets are possible, but only if purposely configured.
+
+*Do one thing well*: a tiny codebase with a highly focused set of features.
 
 
 ## Supported Databases
