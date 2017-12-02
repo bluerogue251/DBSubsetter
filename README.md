@@ -22,43 +22,33 @@ Feel free to open a GitHub ticket if you would like support for a different data
 
 
 ## Download / Installation / Usage
-  
-Load the empty table structure from your "origin" database into your "target". No foreign keys or indices should be in the "target" db yet:
+
+1. Load an empty schema from your "origin" database into your "target". See vendor-specific instructions for [Postgres](docs/pre_subset_postgres.md), [MySQL](docs/pre_subset_mysql.md), and [Microsoft SQL Server](docs/pre_subset_ms_sql_server.md).
+ 
+2. Download and run the JAR of the [latest release of DBSubsetter](https://github.com/bluerogue251/DBSubsetter/releases/latest):
 
 ```sh
-$ pg_dump --host origin_host --port 5432 --user origin_user --dbname origin_db_name --section pre-data --file pre-data-dump.sql
-
-$ psql --host target_host --port 5432 --user target_user --dbname target_db_name --file pre-data-dump.sql
-```
-
-
-Download and run the [latest release](https://github.com/not-there-yet) on the command line:
-
-```
-$ java -jar /path/to/DBSubsetter.jar \
-    --schemas "public" \
-    --originDbConnStr "jdbc:postgresql://<originHost>:<originPort>/<originDbName>?user=<originDbUser>&password=<originDbPassword>" \
-    --targetDbConnStr "jdbc:postgresql://<targetHost>:<targetPort>/<targetDbName>?user=<targetDbUser>&password=<targetDbPassword>" \
-    --baseQuery "public.users ::: id % 100 = 0 ::: true" \
-    --originDbParallelism 10 \
-    --targetDbParallelism 10
-```
-
-For explanations of all available options and examples of complex configurations with multiple schemas, multiple base queries, specifying missing foreign or primary keys, ignoring certain columns, etc., run:
-
-```
+# Download the DBSubsetter JAR
+$ curl https://github.com/bluerogue251/DBSubsetter/releases/latest > /path/to/DBSubsetter.jar
+ 
+ 
+# Show explanations and examples of all available options, including how to configure:
+# multiple schemas, multiple base queries, missing foreign or primary keys, 
+# columns to ignore, proper syntax for vendor-specific JDBC connection strings, etc.
 $ java -jar /path/to/DBSubsetter.jar --help
+
+
+# Once you are comfortable with the syntax and options, run DBSubsetter for real
+$ java -jar /path/to/DBSubsetter.jar \
+    --schemas "your_schema" \
+    --originDbConnStr "jdbc:<driverName>://<originConnectionString>" \
+    --targetDbConnStr "jdbc:<driverName>://<targetConnectionString>" \
+    --baseQuery "your_schema.users ::: id % 100 = 0 ::: true" \
+    --originDbParallelism 8 \
+    --targetDbParallelism 8
 ```
 
-Once DBSubetter has completed, add in foreign key constraints, indices, etc to your target database:
-
-```sh
-$ pg_dump --host origin_host --port 5432 --user origin_user --dbname origin_db_name --section post-data --format custom --file post-data-dump.pgdump
-
-$ pg_restore --host target_host --port 5432 --user target_user --dbname target_db_name --jobs 10 post-data-dump.pgdump
-
-# Remember to also reset primary key sequence values.
-```
+3. After DBSubsetter exits, do any vendor-specific last steps. See instructions for [Postgres](docs/post_subset_postgres.md), [MySQL](docs/post_subset_mysql.md), and [Microsoft SQL Sever](docs/post_subset_ms_sql_server.md).
 
 
 ## Resource consumption
@@ -89,6 +79,8 @@ Here are some other similar or related resources:
 * [This stack overflow question](https://stackoverflow.com/questions/3980379/how-to-export-consistent-subset-of-database)
 * [DATPROF](http://www.datprof.com/products/datprof-subset/)
 * [db_subsetter](https://github.com/lostapathy/db_subsetter)
+* [abridger](https://github.com/freewilll/abridger)
+* [postgres-subset](https://github.com/BeautifulDestinations/postgres-subset)
 
 
 ## License
