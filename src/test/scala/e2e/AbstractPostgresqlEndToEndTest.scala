@@ -7,7 +7,7 @@ abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest {
 
   def dataSetName: String
 
-  override def makeConnStr(p: Int): String = s"jdbc:postgresql://0.0.0.0:$p/$dataSetName?user=postgres"
+  override def makeConnStr(p: Int, dbName: String): String = s"jdbc:postgresql://0.0.0.0:$p/$dataSetName?user=postgres"
 
   override def createOriginDb(): Unit = {
     setupDockerContainer(s"${dataSetName}_origin_postgres", originPort)

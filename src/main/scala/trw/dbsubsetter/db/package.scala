@@ -1,5 +1,7 @@
 package trw.dbsubsetter
 
+import java.sql.Connection
+
 import scala.collection.mutable
 
 package object db {
@@ -21,7 +23,7 @@ package object db {
                         fksFromTable: Map[Table, Set[ForeignKey]],
                         fksToTable: Map[Table, Set[ForeignKey]])
 
-  case class Table(schema: SchemaName, name: TableName)
+  case class Table(schema: SchemaName, name: TableName, hasSqlServerAutoIncrement: Boolean)
 
   case class Column(table: Table, name: ColumnName, ordinalPosition: Int)
 
@@ -30,5 +32,13 @@ package object db {
     val toTable: Table = toCols.head.table
 
     val isSingleCol: Boolean = fromCols.size == 1
+  }
+
+  implicit class VendorAwareJdbcConnection(conn: Connection) {
+    private val vendor: String = conn.getMetaData.getDatabaseProductName
+
+    def isMysql: Boolean = vendor == "MySQL"
+
+    def isMsSqlServer: Boolean = vendor == "Microsoft SQL Server"
   }
 }
