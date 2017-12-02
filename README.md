@@ -27,7 +27,7 @@ Feel free to open a GitHub ticket if you would like support for a different data
 
 1. Load an empty schema from your "origin" database into your "target". See vendor-specific instructions for [Postgres](docs/pre_subset_postgres.md), [MySQL](docs/pre_subset_mysql.md), and [Microsoft SQL Server](docs/pre_subset_ms_sql_server.md).
  
-2. Download and run the JAR of the [latest release of DBSubsetter](https://github.com/bluerogue251/DBSubsetter/releases/latest):
+2. Download and run the [latest release of DBSubsetter](https://github.com/bluerogue251/DBSubsetter/releases/latest) using Java 8:
 
 ```sh
 # Download the DBSubsetter JAR
