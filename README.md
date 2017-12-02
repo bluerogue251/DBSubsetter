@@ -31,12 +31,10 @@ Feel free to open a GitHub ticket if you would like support for a different data
 # Download the DBSubsetter JAR
 $ curl https://github.com/bluerogue251/DBSubsetter/releases/latest > /path/to/DBSubsetter.jar
  
- 
 # Show explanations and examples of all available options, including how to configure:
 # multiple schemas, multiple base queries, missing foreign or primary keys, 
 # columns to ignore, proper syntax for vendor-specific JDBC connection strings, etc.
 $ java -jar /path/to/DBSubsetter.jar --help
-
 
 # Once you are comfortable with the syntax and options, run DBSubsetter for real
 $ java -jar /path/to/DBSubsetter.jar \
