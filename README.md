@@ -9,11 +9,11 @@ This is useful for local development and testing or for exporting all the data b
 
 ## Project Goals
 
-_High performance_: optimized to take advantage of parallelism for fast runtimes on large datasets.
+_High performance_: Optimized to take advantage of parallelism for fast runtimes on large datasets.
 
-_Deterministic_: identical inputs yield identical outputs. Random subsets are possible, but only if purposely configured.
+_Deterministic_: Identical inputs yield identical outputs. Random subsets are possible, but only if purposely configured.
 
-_Do one thing well_: a tiny codebase with a highly focused and well-tested set of features.
+_Do one thing well_: A tiny codebase with a highly focused and well-tested set of features.
 
 
 ## Supported Databases
