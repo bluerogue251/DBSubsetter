@@ -9,7 +9,7 @@ This is useful for local development and testing or for exporting all the data b
 
 ## Project Goals
 
-_High performance_: optimized to take advantage of parallelism and multi-core machines for fast runtimes.
+_High performance_: optimized to take advantage of parallelism for fast runtimes on large datasets.
 
 _Deterministic_: identical inputs yield identical outputs. Random subsets are possible, but only if purposely configured.
 
