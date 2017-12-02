@@ -1,17 +1,14 @@
-## PostgreSQL Pre-Subset Instructions
+## Pre-Subset Instructions: PostgreSQL
 
 Load the empty table structure from your "origin" database into your "target".
 
-Foreign keys and indices should be excluded from this step. There two reasons for this:
-
-1) It makes inserts into your target database significantly faster for large datasets
-2) Temporarily avoiding foreign keys greatly simplifies DBSubsetter's logic for inserting data
-
-The foreign keys and indices will be added to the "target" db in a later step, after subsetting has finished.
+Foreign keys and indices should be excluded from this step. They will be added to the "target" db in a later step, after subsetting has finished. This makes inserts into your target database significantly faster for large datasets. Temporarily avoiding foreign keys also greatly simplifies DBSubsetter's logic for inserting data
 
 ```sh
+# Dump out an empty schema from your "origin" database into a file called `pre-data-dump.sql`
 $ pg_dumpall --host origin_host --port 5432 --user origin_user --dbname origin_db_name --section pre-data --file pre-data-dump.sql
 
+# Load the contents of the `pre-data-dump.sql` file into your "target" database
 $ psql --host target_host --port 5432 --user target_user --dbname target_db_name --file pre-data-dump.sql
 ```
 

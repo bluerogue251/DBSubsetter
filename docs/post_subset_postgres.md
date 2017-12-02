@@ -1,4 +1,4 @@
-## PostgreSQL Post-Subset Instructions
+## Post-Subset Instructions: PostgreSQL
 
 Add all foreign key constraints, indices, etc. to your "target" database. This corrects for the things we purposely left out of the "pre-subsetting" step.
 
