@@ -13,7 +13,7 @@ _High performance_: optimized to take advantage of parallelism and multi-core ma
 
 _Deterministic_: identical inputs should yield identical outputs. Random subsets are possible, but only if purposely configured.
 
-_Do one thing well_: a tiny codebase with a highly focused, well-tested set of features.
+_Do one thing well_: a tiny codebase with a highly focused and well-tested set of features.
 
 
 ## Supported Databases
