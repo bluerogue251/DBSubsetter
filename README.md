@@ -46,7 +46,7 @@ $ java -jar /path/to/DBSubsetter.jar \
     --targetDbParallelism 8
 ```
 
-3. After DBSubsetter exits, do some last steps and cleanup. See vendor-specific instructions for [Postgres](docs/post_subset_postgres.md), [MySQL](docs/post_subset_mysql.md), and [Microsoft SQL Sever](docs/post_subset_ms_sql_server.md).
+3. After DBSubsetter exits, do any last steps as necessary. See vendor-specific instructions for [Postgres](docs/post_subset_postgres.md), [MySQL](docs/post_subset_mysql.md), and [Microsoft SQL Sever](docs/post_subset_ms_sql_server.md).
 
 
 ## Resource consumption
