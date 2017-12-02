@@ -11,7 +11,7 @@ This is useful for local development and testing or for exporting all the data b
 
 _High performance_: optimized to take advantage of parallelism and multi-core machines for fast runtimes.
 
-_Deterministic_: identical inputs should yield identical outputs. Random subsets are possible, but only if purposely configured.
+_Deterministic_: identical inputs yield identical outputs. Random subsets are possible, but only if purposely configured.
 
 _Do one thing well_: a tiny codebase with a highly focused and well-tested set of features.
 
