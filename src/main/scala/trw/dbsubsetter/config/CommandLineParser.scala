@@ -125,9 +125,9 @@ object CommandLineParser {
         }
       }
       .text(
-        """Exclude data from a list of columns when subsetting
+        """Exclude data from these columns when subsetting
           |                           Intended for columns that are not part of any primary or foreign keys
-          |                           Useful as a workaround when DBSubsetter does not support a vendor-specific data type
+          |                           Useful among other things as a workaround if DBSubsetter does not support a vendor-specific data type
           |                           Can be specified multiple times
           |""".stripMargin)
 
@@ -135,8 +135,8 @@ object CommandLineParser {
       .action((_, c) => c.copy(isSingleThreadedDebugMode = true))
       .text(
         """Run DBSubsetter in debug mode (NOT recommended)
-          |                           Uses a simple single-threaded setup, avoids akka-streams and parallel computations
-          |                           Ignores `originDbParallelism` and `targetDbParallelism` settings and uses just 1 connection to each database
+          |                           Uses a simplified architecture which avoids akka-streams and parallel computations
+          |                           Ignores `--originDbParallelism` and `--targetDbParallelism` and uses one connection per database
           |                           Subsetting may be significantly slower
           |                           The resulting subset should be exactly the same as in regular mode
           |""".stripMargin)
