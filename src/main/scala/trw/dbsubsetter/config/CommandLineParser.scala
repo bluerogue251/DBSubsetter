@@ -145,30 +145,44 @@ object CommandLineParser {
       """
         |Examples:
         |
-        |   # With simple configuration:
-        |   java -jar /path/to/DBSubsetter.jar \
-        |     --schemas public \
-        |     --originDbConnStr "jdbc:postgresql://localhost:5450/origin_db_name?user=yourUser&password=yourPassword" \
-        |     --targetDbConnStr "jdbc:postgresql://localhost:5451/target_db_name?user=yourUser&password=yourPassword" \
-        |     --baseQuery "public.users ::: id % 100 = 0 ::: includeChildren" \
-        |     --originDbParallelism 10 \
-        |     --targetDbParallelism 10
+        |   # Simple configuration:
+        |      java -jar /path/to/DBSubsetter.jar \
+        |        --schemas public \
+        |        --originDbConnStr "jdbc:postgresql://localhost:5450/origin_db_name?user=yourUser&password=yourPassword" \
+        |        --targetDbConnStr "jdbc:postgresql://localhost:5451/target_db_name?user=yourUser&password=yourPassword" \
+        |        --baseQuery "public.users ::: id % 100 = 0 ::: includeChildren" \
+        |        --originDbParallelism 10 \
+        |        --targetDbParallelism 10
         |
         |
-        |   # With multiple starting conditions (a.k.a. multiple "base queries"):
-        |   java -jar /path/to/DBSubsetter.jar \
-        |     --schemas "public, audit, finance" \
-        |     --originDbConnStr "jdbc:postgresql://localhost:5450/origin_db_name?user=yourUser&password=yourPassword" \
-        |     --targetDbConnStr "jdbc:postgresql://localhost:5451/target_db_name?user=yourUser&password=yourPassword" \
-        |     --baseQuery "public.students ::: student_id in (select v.student_id from valedictorians as v where v.year = 2017) ::: includeChildren", \
-        |     --baseQuery "public.users ::: random() < 0.001 ::: includeChildren", \
-        |     --baseQuery "finance.transactions ::: created_at < '2017-12-25' ::: excludeChildren" \
-        |     --originDbParallelism 15 \
-        |     --targetDbParallelism 20
+        |   # Multiple starting conditions (a.k.a. multiple "base queries"):
+        |      java -jar /path/to/DBSubsetter.jar \
+        |        --schemas "public, audit, finance" \
+        |        --originDbConnStr "jdbc:postgresql://localhost:5450/origin_db_name?user=yourUser&password=yourPassword" \
+        |        --targetDbConnStr "jdbc:postgresql://localhost:5451/target_db_name?user=yourUser&password=yourPassword" \
+        |        --baseQuery "public.students ::: student_id in (select v.student_id from valedictorians as v where v.year = 2017) ::: includeChildren", \
+        |        --baseQuery "public.users ::: random() < 0.001 ::: includeChildren", \
+        |        --baseQuery "finance.transactions ::: created_at < '2017-12-25' ::: excludeChildren" \
+        |        --originDbParallelism 15 \
+        |        --targetDbParallelism 20        |
+        |
+        |
+        |   # Specifying missing foreign and primary keys at the command line (keys can have one or more columns):
+        |      java -jar /path/to/DBSubsetter.jar \
+        |        --schemas AdventureWorksSchema,HistorySchema \
+        |        --originDbConnStr "jdbc:sqlserver://db-1.example.com:1433;databaseName=myCorpDb;user=sa;password=saPassword" \
+        |        --targetDbConnStr "jdbc:sqlserver://db-2.example.com:1433;databaseName=myCorpDb;user=sa;password=saPassword" \
+        |        --baseQuery "AdventureWorksSchema.users ::: id in (3, 4, 5, 6, 7) ::: excludeChildren", \
+        |        --foreignKey "AdventureWorksSchema.users(departmentId) ::: AdventureWorksSchema.departments(Id))" \
+        |        --foreignKey "HistorySchema.EventLogTable(userId, employeeType) ::: AdventureWorksSchema.users(Id, employeeType))" \
+        |        --primaryKey "HistorySchema.EventLogTable(Id)" \
+        |        --primaryKey "AdventureWorksSchema.UsersRolesJoinTable(UserId, RoleId)" \
+        |        --originDbParallelism 1 \
+        |        --targetDbParallelism 1
         |
         |Notes:
         |
-        |  * Arguments containing whitespace must be enclosed in quotes:
+        |   # Arguments containing whitespace must be enclosed in quotes:
         |      (OK)    --schemas public,audit,finance
         |      (OK)    --schemas "public, audit, finance"
         |      (OK)    --schemas 'public, audit, finance'
@@ -176,7 +190,7 @@ object CommandLineParser {
         |      (ERROR) --schemas public, audit, finance
         |      (ERROR) --schemas "public", "audit", "finance"
         |
-        |  * Arguments containing a quotation mark must either alternate single and double quotes or use backslash escaping:
+        |   # Arguments containing a quotation mark must either alternate single and double quotes or use backslash escaping:
         |      (OK)    --baseQuery 'primary_schools."Districts" ::: "Districts"."Id" in (2, 78, 945) ::: includeChildren'
         |      (OK)    --baseQuery "primary_schools.\"Districts\" ::: \"Districts\".\"Id\" in (2, 78, 945) ::: includeChildren"
         |      (ERROR) --baseQuery "primary_schools."Districts" ::: "Districts"."Id" in (2, 78, 945) ::: includeChildren"
