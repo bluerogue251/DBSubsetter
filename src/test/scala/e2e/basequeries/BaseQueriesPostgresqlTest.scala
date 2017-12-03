@@ -6,6 +6,6 @@ class BaseQueriesPostgresqlTest extends AbstractPostgresqlEndToEndTest with Base
   override val originPort = 5513
   override val programArgs = Array(
     "--schemas", "public",
-    "--baseQuery", "public.base_table ::: true ::: false"
+    "--baseQuery", "public.base_table ::: true ::: excludeChildren"
   )
 }

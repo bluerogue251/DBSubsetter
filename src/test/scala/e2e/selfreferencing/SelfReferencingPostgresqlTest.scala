@@ -6,6 +6,6 @@ class SelfReferencingPostgresqlTest extends AbstractPostgresqlEndToEndTest with 
   override val originPort = 5523
   override val programArgs = Array(
     "--schemas", "public",
-    "--baseQuery", "public.self_referencing_table ::: id in (1, 3, 13, 14, 15) ::: true"
+    "--baseQuery", "public.self_referencing_table ::: id in (1, 3, 13, 14, 15) ::: includeChildren"
   )
 }
