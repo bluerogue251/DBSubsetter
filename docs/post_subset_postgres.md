@@ -8,7 +8,7 @@ If you previously ran `ALTER TABLE <your_table> SET UNLOGGED;` on any tables in 
 
 This corrects your "target" database for the foreign keys and indices  that we purposely left out of the `pre-data-dump.sql` file during the pre-subsetting step.
 ```bash
-# Dump out just constraints and indices (no tables nor data) from your "origin" database into a file called `post-data-dump.pg_dump`
+# Dump out just constraint and index definitions from your "origin" database into a file called `post-data-dump.pg_dump`
 $ pg_dump --host <originHost> --port <originPort> --user <originUser> --dbname <originDb> --section post-data --format custom --file post-data-dump.pgdump
 
 # Load `post-data-dump.pgdump` into your "target" database
