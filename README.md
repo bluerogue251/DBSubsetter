@@ -43,7 +43,7 @@ $ java -jar /path/to/DBSubsetter.jar \
     --schemas "your_schema" \
     --originDbConnStr "jdbc:<driverName>://<originConnectionString>" \
     --targetDbConnStr "jdbc:<driverName>://<targetConnectionString>" \
-    --baseQuery "your_schema.users ::: id % 100 = 0 ::: true" \
+    --baseQuery "your_schema.users ::: id % 100 = 0 ::: includeChildren" \
     --originDbParallelism 8 \
     --targetDbParallelism 8
 ```

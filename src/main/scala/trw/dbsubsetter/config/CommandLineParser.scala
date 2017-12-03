@@ -18,7 +18,7 @@ object CommandLineParser {
     opt[String]("originDbConnStr")
       .valueName("<jdbc connection string>")
       .required()
-      .action((cs, c) => c.copy(originDbConnectionString = cs))
+      .action((cs, c) => c.copy(originDbConnectionString = cs.trim))
       .text(
         """JDBC connection string to the full-size origin db, for example:
           |                           MySQL:       jdbc:mysql://<originHost>:<originPort>/<originDb>?user=<originUser>&password=<originPassword>&rewriteBatchedStatements=true
@@ -27,11 +27,11 @@ object CommandLineParser {
           |""".stripMargin)
 
     opt[String]("targetDbConnStr")
-      .valueName("jdbc connection string>")
+      .valueName("<jdbc connection string>")
       .required()
-      .action((cs, c) => c.copy(targetDbConnectionString = cs))
+      .action((cs, c) => c.copy(targetDbConnectionString = cs.trim))
       .text(
-        """JDBC connection string to the smaller target db db, for example:
+        """JDBC connection string to the smaller target db, for example:
           |                           MySQL:       jdbc:mysql://<targetHost>:<targetPort>/<targetDb>?user=<targetUser>&password=<targetPassword>&rewriteBatchedStatements=true
           |                           PostgreSQL:  jdbc:postgresql://<targetHost>:<targetPort>/<targetDb>?user=<targetUser>&password=<targetPassword>
           |                           SQL Server:  jdbc:sqlserver://<targetHost>:<targetPort>;databaseName=<targetDb>;user=<targetUser>;password=<targetPassword>
@@ -40,25 +40,40 @@ object CommandLineParser {
     opt[String]("baseQuery")
       .required()
       .maxOccurs(Int.MaxValue)
-      .valueName("<schema>.<table> ::: <whereClause> ::: <fetchChildren (true/false)>")
+      .valueName("<schema>.<table> ::: <whereClause> ::: <includeChildren|excludeChildren>")
       .action { case (bq, c) =>
-        val r = """^\s*(.+)\.(.+)\s+:::\s+(.+)\s+:::\s+(true|false)\s*$""".r
+        val r = """^\s*(.+)\.(.+)\s+:::\s+(.+)\s+:::\s+(includeChildren|excludeChildren)\s*$""".r
         bq match {
           case r(schema, table, whereClause, fetchChildren) =>
-            val fc = fetchChildren == "true"
+            val fc = fetchChildren == "includeChildren"
             c.copy(baseQueries = ((schema.trim, table.trim), whereClause.trim, fc) :: c.baseQueries)
           case _ => throw new RuntimeException()
         }
       }
       .text(
-        """Starting table, where-clause, and fetchChildren to kick off subsetting
-          |                           About fetchChildren:
-          |                              It works recursively. So the children of the children will also be fetched, and so on
-          |                              `true` is recommended for most common use cases
-          |                              `false` works in edge cases such as including a whole table: --baseQuery public.invoice_types ::: true ::: false
-          |                              That example includes the entire invoice_types table but would *not* fetch any of its children
+        """Starting table, where-clause, and includeChildren/excludeChildren to kick off subsetting
+          |                           includeChildren is recommended for most use cases
+          |                              It continues downwards recursively, meaning children of the children are also fetched, etc
+          |                              It does *not* continue upwards, meaning children of *parents* will *not* be fetched
+          |                              Not continuing upwards is important for keeping the resulting dataset small
+          |                           excludeChildren is mostly for edge cases such as ensuring an entire table is kept:
+          |                              --baseQuery "public.invoice_types ::: true ::: excludeChildren"
+          |                              would includes the entire invoice_types table but would not fetch any of its children.
+          |                              This is often useful for tables containing static "domain data".
           |                           Can be specified multiple times
           |""".stripMargin)
+
+    opt[Int]("originDbParallelism")
+      .valueName("<int>")
+      .required()
+      .action((dbp, c) => c.copy(originDbParallelism = dbp))
+      .text("Number of concurrent connections to the full-size origin DB\n")
+
+    opt[Int]("targetDbParallelism")
+      .valueName("<int>")
+      .required()
+      .action((dbp, c) => c.copy(targetDbParallelism = dbp))
+      .text("Number of concurrent connections to the smaller target DB\n")
 
     opt[String]("foreignKey")
       .maxOccurs(Int.MaxValue)
@@ -74,8 +89,7 @@ object CommandLineParser {
         }
       }
       .text(
-        """Foreign keys to enforce during subsetting even though they are not defined in the database
-          |                           Optionally specify a "where clause" to additionally restrict the defined foreign key as needed
+        """Foreign key to respect during subsetting even though it is not defined in the database
           |                           Can be specified multiple times
           |""".stripMargin)
 
@@ -92,7 +106,7 @@ object CommandLineParser {
         }
       }
       .text(
-        """Primary key to recognize during subsetting when it is not defined in the database
+        """Primary key to recognize during subsetting even though it is not defined in the database
           |                           Can be specified multiple times
           |""".stripMargin)
 
@@ -111,32 +125,20 @@ object CommandLineParser {
         }
       }
       .text(
-        """Exclude a list of columns from the resulting subsetted data
-          |                           Intended only for columns that are not part of any primary keys or foreign keys
-          |                           Useful as a workaround if DBSubsetter does not support a vendor-specific data type
+        """Exclude data from a list of columns when subsetting
+          |                           Intended for columns that are not part of any primary or foreign keys
+          |                           Useful as a workaround when DBSubsetter does not support a vendor-specific data type
           |                           Can be specified multiple times
           |""".stripMargin)
-
-    opt[Int]("originDbParallelism")
-      .valueName("<int>")
-      .required()
-      .action((dbp, c) => c.copy(originDbParallelism = dbp))
-      .text("Maximum number of simultaneous open connections to the full-size origin DB\n")
-
-    opt[Int]("targetDbParallelism")
-      .valueName("<int>")
-      .required()
-      .action((dbp, c) => c.copy(targetDbParallelism = dbp))
-      .text("Maximum number of simultaneous open connections to the smaller target DB\n")
 
     opt[Unit]("singleThreadedDebugMode")
       .action((_, c) => c.copy(isSingleThreadedDebugMode = true))
       .text(
         """Run DBSubsetter in debug mode (NOT recommended)
-          |                               Uses a simple single-threaded setup, avoids akka-streams and parallel computations
-          |                               Ignores `originDbParallelism` and `targetDbParallelism` settings and uses just 1 connection to each
-          |                               Subsetting may be significantly slower
-          |                               The resulting subset should be exactly the same as in regular mode
+          |                           Uses a simple single-threaded setup, avoids akka-streams and parallel computations
+          |                           Ignores `originDbParallelism` and `targetDbParallelism` settings and uses just 1 connection to each database
+          |                           Subsetting may be significantly slower
+          |                           The resulting subset should be exactly the same as in regular mode
           |""".stripMargin)
 
     private val usageExamples =
@@ -145,25 +147,40 @@ object CommandLineParser {
         |
         |   # With simple configuration:
         |   java -jar /path/to/DBSubsetter.jar \
-        |     --schemas "public" \
+        |     --schemas public \
         |     --originDbConnStr "jdbc:postgresql://localhost:5450/origin_db_name?user=yourUser&password=yourPassword" \
         |     --targetDbConnStr "jdbc:postgresql://localhost:5451/target_db_name?user=yourUser&password=yourPassword" \
-        |     --baseQuery "public.users ::: id % 100 = 0 ::: true" \
+        |     --baseQuery "public.users ::: id % 100 = 0 ::: includeChildren" \
         |     --originDbParallelism 10 \
         |     --targetDbParallelism 10
         |
         |
         |   # With multiple starting conditions (a.k.a. multiple "base queries"):
         |   java -jar /path/to/DBSubsetter.jar \
-        |     --schemas "public","audit","finance" \
+        |     --schemas "public, audit, finance" \
         |     --originDbConnStr "jdbc:postgresql://localhost:5450/origin_db_name?user=yourUser&password=yourPassword" \
         |     --targetDbConnStr "jdbc:postgresql://localhost:5451/target_db_name?user=yourUser&password=yourPassword" \
-        |     --baseQuery "public.students ::: student_id in (select v.student_id from valedictorians as v where v.year = 2017) ::: true", \
-        |     --baseQuery "public.users ::: random() < 0.001 :::", \
-        |     --baseQuery "finance.transactions ::: created_at < '2017-12-25' ::: false" \
+        |     --baseQuery "public.students ::: student_id in (select v.student_id from valedictorians as v where v.year = 2017) ::: includeChildren", \
+        |     --baseQuery "public.users ::: random() < 0.001 ::: includeChildren", \
+        |     --baseQuery "finance.transactions ::: created_at < '2017-12-25' ::: excludeChildren" \
         |     --originDbParallelism 15 \
         |     --targetDbParallelism 20
-      """.stripMargin
+        |
+        |Notes:
+        |
+        |  * Arguments containing whitespace must be enclosed in quotes:
+        |      (OK)    --schemas public,audit,finance
+        |      (OK)    --schemas "public, audit, finance"
+        |      (OK)    --schemas 'public, audit, finance'
+        |      (OK)    --schemas "public","audit","finance"
+        |      (ERROR) --schemas public, audit, finance
+        |      (ERROR) --schemas "public", "audit", "finance"
+        |
+        |  * Arguments containing a quotation mark must either alternate single and double quotes or use backslash escaping:
+        |      (OK)    --baseQuery 'primary_schools."Districts" ::: "Districts"."Id" in (2, 78, 945) ::: includeChildren'
+        |      (OK)    --baseQuery "primary_schools.\"Districts\" ::: \"Districts\".\"Id\" in (2, 78, 945) ::: includeChildren"
+        |      (ERROR) --baseQuery "primary_schools."Districts" ::: "Districts"."Id" in (2, 78, 945) ::: includeChildren"
+        |""".stripMargin
     note(usageExamples)
   }
 }
