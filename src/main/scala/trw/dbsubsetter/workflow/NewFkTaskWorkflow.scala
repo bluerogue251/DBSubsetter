@@ -19,8 +19,10 @@ object NewFkTaskWorkflow {
     // already fetched, then we know that we don't need to go fetch that particular parent row again
     //
     // `distinct` and `viaTableOpt` only apply for calculating parent tasks, not child tasks.
-    // Both of these seem necessary for avoiding always needing to store PKs for all parents of base queries
-    sch.fksFromTable(table).filterNot(fk => viaTableOpt.contains(fk.toTable)).toVector.flatMap { fk =>
+    // Both of these seem necessary for avoiding always needing to store PKs for all parents
+    val allFks = sch.fksFromTable(table)
+    val useFks = viaTableOpt.fold(allFks)(viaTable => allFks.filterNot(fk => fk.toTable == viaTable))
+    useFks.toVector.flatMap { fk =>
       val distinctFkValues = getForeignKeyValues(fk, fk.fromCols, rows).distinct
       distinctFkValues.map(fkValue => FkTask(fk.toTable, fk, fkValue, fetchChildren = false))
     }

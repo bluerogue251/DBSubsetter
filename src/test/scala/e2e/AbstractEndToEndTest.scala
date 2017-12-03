@@ -74,9 +74,18 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
     val schemaInfo = SchemaInfoRetrieval.getSchemaInfo(singleThreadedConfig)
     val baseQueries = BaseQueries.get(singleThreadedConfig, schemaInfo)
 
+    val startSt = System.nanoTime()
     ApplicationSingleThreaded.run(singleThreadedConfig, schemaInfo, baseQueries)
+    val endSt = System.nanoTime()
+    val tookMillis = (endSt - startSt) / 1000000
+    println(s"Single Threaded Took $tookMillis milliseconds")
+
+    val startAs = System.nanoTime()
     val futureResult = ApplicationAkkaStreams.run(akkaStreamsConfig, schemaInfo, baseQueries)
     Await.result(futureResult, Duration.Inf)
+    val endAs = System.nanoTime()
+    val tookMillisAs = (endAs - startAs) / 1000000
+    println(s"Akka Streams Took $tookMillisAs milliseconds")
 
     postSubset()
   }
