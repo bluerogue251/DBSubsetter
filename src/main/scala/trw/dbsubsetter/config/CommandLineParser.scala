@@ -164,7 +164,7 @@ object CommandLineParser {
         |        --baseQuery "public.users ::: random() < 0.001 ::: includeChildren", \
         |        --baseQuery "finance.transactions ::: created_at < '2017-12-25' ::: excludeChildren" \
         |        --originDbParallelism 15 \
-        |        --targetDbParallelism 20        |
+        |        --targetDbParallelism 20
         |
         |
         |   # Specifying missing foreign and primary keys at the command line (keys can have one or more columns):
@@ -179,6 +179,10 @@ object CommandLineParser {
         |        --primaryKey "AdventureWorksSchema.UsersRolesJoinTable(UserId, RoleId)" \
         |        --originDbParallelism 1 \
         |        --targetDbParallelism 1
+        |
+        |
+        |   # Ensuring that DBSubsetter can use up to 12 gigabytes of memory:
+        |      java -Xmx12G -jar /path/to/DBSubsetter.jar [...]
         |
         |Notes:
         |
