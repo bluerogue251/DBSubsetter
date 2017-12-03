@@ -6,7 +6,7 @@ If you previously ran `ALTER TABLE <your_table> SET UNLOGGED;` on any tables in 
 
 ### Reinstate constraints and indices
 
-This corrects your "target" database for the things we purposely left out of the `pre-data-dump.sql` file during the "pre-subsetting" step.
+This corrects your "target" database for the foreign keys and indices  that we purposely left out of the `pre-data-dump.sql` file during the "pre-subsetting" step.
 
 ```bash
 $ pg_dump --host <originHost> --port <originPort> --user <originUser> --dbname <originDb> --section post-data --format custom --file post-data-dump.pgdump
