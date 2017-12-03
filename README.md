@@ -29,7 +29,7 @@ Feel free to open a GitHub ticket if you would like support for a different data
  
 2. Download the [latest release of DBSubsetter](https://github.com/bluerogue251/DBSubsetter/releases/latest) and run it with Java 8:
 
-```sh
+```bash
 # Download the DBSubsetter JAR
 $ curl https://github.com/bluerogue251/DBSubsetter/releases/latest > /path/to/DBSubsetter.jar
  
