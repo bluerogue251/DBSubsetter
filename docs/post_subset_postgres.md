@@ -6,7 +6,7 @@ If you previously ran `ALTER TABLE <your_table> SET UNLOGGED;` on any tables in 
 
 ### Reinstate constraints and indices
 
-This corrects your "target" database for the foreign keys and indices  that we purposely left out of the `pre-data-dump.sql` file during the "pre-subsetting" step. Note the `--jobs` option being passed to `pg_restore` as the setting you choose for this can significantly affect how long this command takes to run.
+This corrects your "target" database for the foreign keys and indices  that we purposely left out of the `pre-data-dump.sql` file during the "pre-subsetting" step. Note the `--jobs` option being passed to `pg_restore`, because this can significantly affect performance.
 
 ```bash
 $ pg_dump --host <originHost> --port <originPort> --user <originUser> --dbname <originDb> --section post-data --format custom --file post-data-dump.pgdump
