@@ -14,9 +14,9 @@ class PkStoreWorkflowTest extends FunSuite {
     val rows = Vector(row)
 
     // Add the PK to the pkStore, noting that we have NOT yet fetched children
-    val pkAddRequest1 = OriginDbResult(table, rows, fetchChildren = false)
+    val pkAddRequest1 = OriginDbResult(table, rows, None, fetchChildren = false)
     val pkAddResult1 = pkStore.add(pkAddRequest1)
-    assert(pkAddResult1 === PksAdded(table, rows, Vector.empty))
+    assert(pkAddResult1 === PksAdded(table, rows, Vector.empty, None))
 
     // Query whether the PK is in the pkStore given that we are only interested in parent records
     // The empty list result tells us that the PK exists already
@@ -35,9 +35,9 @@ class PkStoreWorkflowTest extends FunSuite {
     // The fact that it was already in the PK store for having its parents fetched means that
     // It will only appear in the collection of rows still needing children processing
     // It will not appear in the collection of rows needing parents (and therefore will not be added duplicate to the target db either)
-    val pkAddRequest2 = OriginDbResult(table, rows, fetchChildren = true)
+    val pkAddRequest2 = OriginDbResult(table, rows, None, fetchChildren = true)
     val pkAddResult2 = pkStore.add(pkAddRequest2)
-    assert(pkAddResult2 === PksAdded(table, Vector.empty, rows))
+    assert(pkAddResult2 === PksAdded(table, Vector.empty, rows, None))
 
     // Now we query again and since we've already fetched children, we should never get anything back from the queries
     val pkQueryResult3 = pkStore.exists(pkQueryRequest1)
