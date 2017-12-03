@@ -181,8 +181,8 @@ object CommandLineParser {
         |        --targetDbParallelism 1
         |
         |
-        |   # Ensuring that DBSubsetter can use up to 12 gigabytes of memory:
-        |      java -Xmx12G -jar /path/to/DBSubsetter.jar [...]
+        |   # Allowing DBSubsetter to use up to 8 gigabytes of memory:
+        |      java -Xmx8G -jar /path/to/DBSubsetter.jar [...]
         |
         |Notes:
         |
