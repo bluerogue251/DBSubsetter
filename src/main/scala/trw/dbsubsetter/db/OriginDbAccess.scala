@@ -7,7 +7,7 @@ import scala.collection.mutable.ArrayBuffer
 class OriginDbAccess(connStr: String, sch: SchemaInfo) {
   private val conn = DriverManager.getConnection(connStr)
   if (conn.isMysql) {
-    conn.createStatement().execute("set session sql_mode = ANSI_QUOTES")
+    conn.createStatement().execute("SET SESSION SQL_MODE = ANSI_QUOTES")
   }
   conn.setReadOnly(true)
   private val statements = Sql.preparedQueryStatementStrings(sch).map { case ((fk, table), sqlStr) =>
