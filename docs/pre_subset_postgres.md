@@ -16,7 +16,7 @@ $ pg_dump --host <originHost> --port <originPort> --user <originUser> --dbname <
 $ psql --host <targetHost> --port <targetPort> --user <targetUser> --dbname <targetDb> --file pre-data-dump.sql
 ```
 
-Foreign keys and indices are purposely excluded from this step. They will be added to the "target" db in a later step, after subsetting has finished. This makes inserts into your target database significantly faster for large datasets. Temporarily avoiding foreign keys also greatly simplifies DBSubsetter's logic for inserting data.
+Foreign keys and indices are purposely excluded from this step. They will be added to the "target" database in a later step, after subsetting has finished. This makes inserts into your target database significantly faster for large datasets. Temporarily avoiding foreign keys also greatly simplifies DBSubsetter's logic for inserting data.
 
 For users without superuser access to the "origin" database (for example, those using Amazon RDS), `pg_dumpall` may error out on Postgres versions < 10 when trying to dump out the roles. See [here](http://www.thatguyfromdelhi.com/2016/12/custom-pgdumpall-now-works-with-aws.html) for details.
 In this case, either the porting over of roles to the "target" database must be done manually, or `pg_dump` can be run with the `--no-privileges` and `--no-owner` options when dumping out `pre-data-dump.sql` so that missing roles are ignored. Be careful, because in the latter case, your "target" database
@@ -27,4 +27,4 @@ The above commands have been tested against `pg_dump` and `pg_dumpall` version 9
 
 ### Optimize your "target" database for fast inserts (optional)
 
-Consider running `ALTER TABLE <your_table> SET UNLOGGED;` on the "target" database for any tables you expect to be of significant size in your "target" database. See the [docs](https://www.postgresql.org/docs/9.6/static/sql-createtable.html#SQL-CREATETABLE-UNLOGGED)
+Consider running `ALTER TABLE <your_table> SET UNLOGGED;` on the "target" database for any tables you expect to be of significant size in your "target" database. See the relevant [Postgres docs](https://www.postgresql.org/docs/9.6/static/sql-createtable.html#SQL-CREATETABLE-UNLOGGED) for more information.

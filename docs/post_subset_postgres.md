@@ -11,7 +11,7 @@ $ pg_restore --host <targetHost> --port <targetPort> --user <targetUser> --dbnam
 
 ### Fix primary key sequences
 
-Now that your "target" db has data in it, reset your primary key sequence values using [these instructions](https://wiki.postgresql.org/wiki/Fixing_Sequences)
+Now that your "target" database has data in it, reset your primary key sequence values using [these instructions](https://wiki.postgresql.org/wiki/Fixing_Sequences)
 
 ### Reinstate table logging
 
