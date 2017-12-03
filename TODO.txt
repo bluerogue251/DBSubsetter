@@ -1,8 +1,6 @@
-* Improve README instructions for different DB vendors / resetting sequence values/roles in Postgres, etc.
 * Improve and test command line parsing with better error messages
 * Add retry logic to DB Queries in case of failure, e.g. due to temporary network problem
 * Search for memory/performance bottlenecks by profiling against a huge database
-* Consider whether it is truly necessary to store all the primary keys seen
-  -- Are there certain schema structures where we could skip storing certain PKs because we know we will only ever see a row once?
+* Consider if for certain schemas we can skip storing certain tables' PKs because we know we will only ever see a row once?
 * Investigate whether optimization is possible via changing AnyRef to Any and then using primitive Ints instead of Integer for PK storage, etc.
-* Speed up test suite by consolidating long setup or origin databases to a one-time task rather than an every-time task
+* Investigate whether optimization is possible via using a TreeSet instead of a HashSet for PK Storage

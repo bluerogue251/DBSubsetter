@@ -5,8 +5,8 @@ import java.sql.DriverManager
 class TargetDbAccess(connStr: String, sch: SchemaInfo) {
   private val conn = DriverManager.getConnection(connStr)
   if (conn.isMysql) {
-    conn.createStatement().execute("set session sql_mode = ANSI_QUOTES")
-    conn.createStatement().execute("set FOREIGN_KEY_CHECKS = 0")
+    conn.createStatement().execute("SET SESSION SQL_MODE = ANSI_QUOTES")
+    conn.createStatement().execute("SET SESSION FOREIGN_KEY_CHECKS = 0")
   }
   private val statements = Sql.preparedInsertStatementStrings(sch).map { case (table, sqlStr) =>
     table -> conn.prepareStatement(sqlStr)

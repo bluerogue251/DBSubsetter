@@ -16,16 +16,26 @@ object CommandLineParser {
       .text("Names of the schemas to include when subsetting\n")
 
     opt[String]("originDbConnStr")
-      .valueName("jdbc:<driverName>://<host>:<port>/<db_name>?user=<username>&password=<password>")
+      .valueName("<jdbc connection string>")
       .required()
       .action((cs, c) => c.copy(originDbConnectionString = cs))
-      .text("JDBC connection string to the full-size origin db\n")
+      .text(
+        """JDBC connection string to the full-size origin db, for example:
+          |                           MySQL:       jdbc:mysql://<originHost>:<originPort>/<originDb>?user=<originUser>&password=<originPassword>&rewriteBatchedStatements=true
+          |                           PostgreSQL:  jdbc:postgresql://<originHost>:<originPort>/<originDb>?user=<originUser>&password=<originPassword>
+          |                           SQL Server:  jdbc:sqlserver://<originHost>:<originPort>;databaseName=<originDb>;user=<originUser>;password=<originPassword>
+          |""".stripMargin)
 
     opt[String]("targetDbConnStr")
-      .valueName("jdbc:<driverName>://<host>:<port>/<db_name>?user=<username>&password=<password>")
+      .valueName("jdbc connection string>")
       .required()
       .action((cs, c) => c.copy(targetDbConnectionString = cs))
-      .text("JDBC connection string to the smaller target db db\n")
+      .text(
+        """JDBC connection string to the smaller target db db, for example:
+          |                           MySQL:       jdbc:mysql://<targetHost>:<targetPort>/<targetDb>?user=<targetUser>&password=<targetPassword>&rewriteBatchedStatements=true
+          |                           PostgreSQL:  jdbc:postgresql://<targetHost>:<targetPort>/<targetDb>?user=<targetUser>&password=<targetPassword>
+          |                           SQL Server:  jdbc:sqlserver://<targetHost>:<targetPort>;databaseName=<targetDb>;user=<targetUser>;password=<targetPassword>
+          |""".stripMargin)
 
     opt[String]("baseQuery")
       .required()
