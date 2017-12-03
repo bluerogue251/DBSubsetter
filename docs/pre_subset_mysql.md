@@ -1,6 +1,6 @@
 ## Pre-Subset Instructions: MySQL
 
-### Load the empty table structure from your "origin" database into your "target":
+### Load the empty table structure from your "origin" database into your "target"
 
 ```bash
 # Dump out just the schema (no data) from your "origin" database(s) into a file called `pre-data-dump.sql`

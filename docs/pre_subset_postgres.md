@@ -1,6 +1,6 @@
 ## Pre-Subset Instructions: PostgreSQL
 
-### Load the empty table structure from your "origin" database into your "target":
+### Load the empty table structure from your "origin" database into your "target"
 
 ```bash
 # Dump out all postgres roles into a file called `roles.sql`
