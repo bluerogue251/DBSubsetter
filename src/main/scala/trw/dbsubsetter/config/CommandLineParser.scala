@@ -132,7 +132,7 @@ object CommandLineParser {
     opt[Unit]("singleThreadedDebugMode")
       .action((_, c) => c.copy(isSingleThreadedDebugMode = true))
       .text(
-        """ (NOT Recommended) Run DBSubsetter in debug mode
+        """Run DBSubsetter in debug mode (NOT recommended)
           |                               Uses a simple single-threaded setup, avoids akka-streams and parallel computations
           |                               Ignores `originDbParallelism` and `targetDbParallelism` settings and uses just 1 connection to each
           |                               Subsetting may be significantly slower
