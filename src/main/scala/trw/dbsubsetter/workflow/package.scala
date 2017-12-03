@@ -10,13 +10,13 @@ package object workflow {
 
   case class SqlStrQuery(table: Table, sql: SqlQuery, fetchChildren: Boolean) extends OriginDbRequest
 
-  case class OriginDbResult(table: Table, rows: Vector[Row], fetchChildren: Boolean)
+  case class OriginDbResult(table: Table, rows: Vector[Row], viaTableOpt: Option[Table], fetchChildren: Boolean)
 
   case class TargetDbInsertResult(table: Table, numRowsInserted: Long)
 
   sealed trait PkResult
 
-  case class PksAdded(table: Table, rowsNeedingParentTasks: Vector[Row], rowsNeedingChildTasks: Vector[Row]) extends PkResult
+  case class PksAdded(table: Table, rowsNeedingParentTasks: Vector[Row], rowsNeedingChildTasks: Vector[Row], viaTableOpt: Option[Table]) extends PkResult
 
   case object DuplicateTask extends PkResult
 }

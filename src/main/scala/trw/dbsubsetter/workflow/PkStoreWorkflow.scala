@@ -28,7 +28,7 @@ class PkStoreWorkflow(pkOrdinalsByTable: Map[Table, Seq[Int]]) {
   }
 
   def add(req: OriginDbResult): PksAdded = {
-    val OriginDbResult(table, rows, fetchChildren) = req
+    val OriginDbResult(table, rows, viaTableOpt, fetchChildren) = req
     val (parentStore, childStore) = getStorage(table)
 
     val pkOrdinals = pkOrdinalsByTable(table)
@@ -39,13 +39,13 @@ class PkStoreWorkflow(pkOrdinalsByTable: Map[Table, Seq[Int]]) {
     if (fetchChildren) {
       val childrenNotYetFetched = rows.filter(row => childStore.add(getPkValue(row)))
       val parentsNotYetFetched = childrenNotYetFetched.filterNot(row => parentStore.remove(getPkValue(row)))
-      PksAdded(table, parentsNotYetFetched, childrenNotYetFetched)
+      PksAdded(table, parentsNotYetFetched, childrenNotYetFetched, viaTableOpt)
     } else {
       val newRows = rows.filter { row =>
         val pkValue = getPkValue(row)
         !childStore.contains(pkValue) && parentStore.add(pkValue)
       }
-      PksAdded(table, newRows, Vector.empty)
+      PksAdded(table, newRows, Vector.empty, viaTableOpt)
     }
   }
 

@@ -1,6 +1,6 @@
 * Improve and test command line parsing with better error messages
-* Add retry logic to DB Queries in case of failure, e.g. due to temporary network problem
-* Search for memory/performance bottlenecks by profiling against a huge database
 * Consider if for certain schemas we can skip storing certain tables' PKs because we know we will only ever see a row once?
+* Search for memory/performance bottlenecks by profiling against a huge database
 * Investigate whether optimization is possible via changing AnyRef to Any and then using primitive Ints instead of Integer for PK storage, etc.
 * Investigate whether optimization is possible via using a TreeSet instead of a HashSet for PK Storage
+* Add retry logic to DB Queries in case of failure, e.g. due to temporary network problem
