@@ -26,4 +26,4 @@ The above commands have been tested against `pg_dump` and `pg_dumpall` version 9
 
 ### Optimize your "target" database for fast inserts (optional)
 
-Consider running `ALTER TABLE <your_table> SET UNLOGGED;` on the "target" database for any tables you expect to be of significant size in your "target" database. See the relevant [Postgres docs](https://www.postgresql.org/docs/9.6/static/sql-createtable.html#SQL-CREATETABLE-UNLOGGED) for more information.
+Consider running `ALTER TABLE <your_table> SET UNLOGGED;` on the "target" database for any tables you expect to be of significant size in your "target" database. See the relevant [docs](https://www.postgresql.org/docs/9.6/static/sql-createtable.html#SQL-CREATETABLE-UNLOGGED) for more information.
