@@ -40,7 +40,7 @@ $ java -jar /path/to/DBSubsetter.jar --help
 
 # Once you are comfortable with the syntax and options, run DBSubsetter for real
 $ java -jar /path/to/DBSubsetter.jar \
-    --schemas "your_schema" \
+    --schemas schema_1,schema_2 \
     --originDbConnStr "jdbc:<driverName>://<originConnectionString>" \
     --targetDbConnStr "jdbc:<driverName>://<targetConnectionString>" \
     --baseQuery "your_schema.users ::: id % 100 = 0 ::: includeChildren" \
