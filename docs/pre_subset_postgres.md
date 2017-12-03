@@ -19,8 +19,7 @@ $ psql --host <targetHost> --port <targetPort> --user <targetUser> --dbname <tar
 Foreign keys and indices are purposely excluded from this step. They will be added to the "target" database in a later step, after subsetting has finished. This makes inserts into your target database significantly faster for large datasets. Temporarily avoiding foreign keys also greatly simplifies DBSubsetter's logic for inserting data.
 
 For users without superuser access to the "origin" database (for example, those using Amazon RDS), `pg_dumpall` may error out on Postgres versions < 10 when trying to dump out the roles. See [here](http://www.thatguyfromdelhi.com/2016/12/custom-pgdumpall-now-works-with-aws.html) for details.
-In this case, either the porting over of roles to the "target" database must be done manually, or `pg_dump` can be run with the `--no-privileges` and `--no-owner` options when dumping out `pre-data-dump.sql` so that missing roles are ignored. Be careful, because in the latter case, your "target" database
-may end up with different user privilege logic than your "origin" database.
+In this case, either the porting over of roles to the "target" database must be done manually, or `pg_dump` can be run with the `--no-privileges` and `--no-owner` options when dumping out `pre-data-dump.sql` so that missing roles are ignored.
 
 The above commands have been tested against `pg_dump` and `pg_dumpall` version 9.6.6. Commands might be slightly different if you are using a different version of these tools. See the [pg_dump docs](https://www.postgresql.org/docs/current/static/app-pg-dumpall.html) and the [pg_dumpall_docs](https://www.postgresql.org/docs/current/static/app-pg-dumpall.html) for more information about them.
 
