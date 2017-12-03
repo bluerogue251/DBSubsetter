@@ -14,8 +14,6 @@ object Application extends App {
   CommandLineParser.parser.parse(args, Config()) match {
     case None => System.exit(1)
     case Some(config) =>
-      println(config)
-      System.exit(0)
       val schemaInfo = SchemaInfoRetrieval.getSchemaInfo(config)
       val baseQueries = BaseQueries.get(config, schemaInfo)
 
