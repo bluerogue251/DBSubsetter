@@ -31,7 +31,7 @@ Feel free to open a GitHub ticket if you would like support for a different data
 
 ```bash
 # Download the DBSubsetter.jar file
-$ curl https://github.com/bluerogue251/DBSubsetter/releases/download/v1.0.0-beta.1/DBSubsetter.jar > /path/to/DBSubsetter.jar
+$ wget https://github.com/bluerogue251/DBSubsetter/releases/download/v1.0.0-beta.1/DBSubsetter.jar --output-file /path/to/DBSubsetter.jar
  
 # Show explanations and examples of all available options, including how to configure:
 # multiple schemas, multiple base queries, missing foreign or primary keys, 
