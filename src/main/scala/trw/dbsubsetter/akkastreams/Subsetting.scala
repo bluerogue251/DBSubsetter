@@ -5,7 +5,7 @@ import akka.actor.ActorRef
 import akka.pattern.ask
 import akka.stream.scaladsl.GraphDSL.Implicits._
 import akka.stream.scaladsl.{Balance, Broadcast, Flow, GraphDSL, Merge, Source}
-import akka.stream.{OverflowStrategy, SourceShape}
+import akka.stream.{Attributes, OverflowStrategy, SourceShape}
 import akka.util.Timeout
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.SchemaInfo
@@ -45,12 +45,12 @@ object Subsetting {
     // DB Results ~> PkStoreAdd ~> NewTasks
     //                          ~> TargetDbInserts
     mergeOriginDbResults ~>
-      Flow[OriginDbResult].mapAsync(500)(dbResult => (pkStore ? dbResult).mapTo[PksAdded]) ~>
+      Flow[OriginDbResult].mapAsync(500)(dbResult => (pkStore ? dbResult).mapTo[PksAdded]).addAttributes(Attributes.name("originDbResult")) ~>
       broadcastPksAdded
 
     broadcastPksAdded ~>
       mergeNewTaskRequests ~>
-      NewTasks.flow(schemaInfo, baseQueries.size) ~>
+      NewTasks.flow(schemaInfo, baseQueries.size).addAttributes(Attributes.name("newTasksFlow")) ~>
       broadcastFkTasks
 
     broadcastPksAdded ~>
