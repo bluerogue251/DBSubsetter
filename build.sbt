@@ -15,12 +15,3 @@ libraryDependencies ++= Seq(
   "com.typesafe.slick" %% "slick-hikaricp" % "3.2.1" % "test",
   "org.slf4j" % "slf4j-nop" % "1.6.4" % "test"
 )
-
-// Enable the Lightbend Telemetry (Cinnamon) sbt plugin
-lazy val app = project in file(".") enablePlugins (Cinnamon)
-
-// Add the Cinnamon Agent for run
-cinnamon in run := true
-
-libraryDependencies += Cinnamon.library.cinnamonAkka
-libraryDependencies += Cinnamon.library.cinnamonDatadog
