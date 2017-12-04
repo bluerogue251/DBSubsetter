@@ -37,32 +37,6 @@ object CommandLineParser {
           |                           SQL Server:  jdbc:sqlserver://<targetHost>:<targetPort>;databaseName=<targetDb>;user=<targetUser>;password=<targetPassword>
           |""".stripMargin)
 
-    opt[String]("baseQuery")
-      .required()
-      .maxOccurs(Int.MaxValue)
-      .valueName("<schema>.<table> ::: <whereClause> ::: <includeChildren|excludeChildren>")
-      .action { case (bq, c) =>
-        val r = """^\s*(.+)\.(.+)\s+:::\s+(.+)\s+:::\s+(includeChildren|excludeChildren)\s*$""".r
-        bq match {
-          case r(schema, table, whereClause, fetchChildren) =>
-            val fc = fetchChildren == "includeChildren"
-            c.copy(baseQueries = ((schema.trim, table.trim), whereClause.trim, fc) :: c.baseQueries)
-          case _ => throw new RuntimeException()
-        }
-      }
-      .text(
-        """Starting table, where-clause, and includeChildren/excludeChildren to kick off subsetting
-          |                           includeChildren is recommended for most use cases
-          |                              It continues downwards recursively, meaning children of the children are also fetched, etc
-          |                              It does *not* continue upwards, meaning children of *parents* will *not* be fetched
-          |                              Not continuing upwards is important for keeping the resulting dataset small
-          |                           excludeChildren is mostly for edge cases such as ensuring an entire table is kept:
-          |                              --baseQuery "public.invoice_types ::: true ::: excludeChildren"
-          |                              would includes the entire invoice_types table but would not fetch any of its children.
-          |                              This is often useful for tables containing static "domain data".
-          |                           Can be specified multiple times
-          |""".stripMargin)
-
     opt[Int]("originDbParallelism")
       .valueName("<int>")
       .required()
