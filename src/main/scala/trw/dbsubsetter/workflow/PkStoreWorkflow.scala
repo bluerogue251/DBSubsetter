@@ -36,16 +36,23 @@ class PkStoreWorkflow(pkOrdinalsByTable: Map[Table, Seq[Int]]) {
     val isSingleColPk = pkOrdinals.size == 1
     val getPkValue: Row => AnyRef = if (isSingleColPk) row => row(pkOrdinal) else row => pkOrdinals.map(row)
 
-    if (fetchChildren) {
-      val childrenNotYetFetched = rows.filter(row => childStore.add(getPkValue(row)))
-      val parentsNotYetFetched = childrenNotYetFetched.filterNot(row => parentStore.remove(getPkValue(row)))
-      PksAdded(table, parentsNotYetFetched, childrenNotYetFetched, viaTableOpt)
-    } else {
-      val newRows = rows.filter { row =>
-        val pkValue = getPkValue(row)
-        !childStore.contains(pkValue) && parentStore.add(pkValue)
+    if (table.storePks) {
+      if (fetchChildren) {
+        val childrenNotYetFetched = rows.filter(row => childStore.add(getPkValue(row)))
+        val parentsNotYetFetched = childrenNotYetFetched.filterNot(row => parentStore.remove(getPkValue(row)))
+        PksAdded(table, parentsNotYetFetched, childrenNotYetFetched, viaTableOpt)
+      } else {
+        val newRows = rows.filter { row =>
+          val pkValue = getPkValue(row)
+          !childStore.contains(pkValue) && parentStore.add(pkValue)
+        }
+        PksAdded(table, newRows, Vector.empty, viaTableOpt)
       }
-      PksAdded(table, newRows, Vector.empty, viaTableOpt)
+    } else {
+      if (fetchChildren)
+        PksAdded(table, rows, rows, viaTableOpt)
+      else
+        PksAdded(table, rows, Vector.empty, viaTableOpt)
     }
   }
 

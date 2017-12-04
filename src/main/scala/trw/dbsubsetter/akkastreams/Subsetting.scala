@@ -61,11 +61,11 @@ object Subsetting {
     // FkTasks ~> canBePrechecked ~> PkStoreQuery ~> OriginDbRequest
     //                                            ~> DuplicateTask
     broadcastFkTasks ~>
-      Flow[FkTask].filterNot(FkTaskPreCheck.canPrecheck) ~>
+      Flow[FkTask].filterNot(FkTaskPreCheck.needsPrecheck) ~>
       mergeOriginDbRequests
 
     broadcastFkTasks ~>
-      Flow[FkTask].filter(FkTaskPreCheck.canPrecheck) ~>
+      Flow[FkTask].filter(FkTaskPreCheck.needsPrecheck) ~>
       Flow[FkTask].mapAsync(500)(req => (pkStore ? req).mapTo[PkResult]) ~>
       broadcastPkExistResult
 

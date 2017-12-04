@@ -88,7 +88,8 @@ object SchemaInfoRetrieval {
     }
 
     val tablesByName = tablesQueryResult.map { t =>
-      (t.schema, t.name) -> Table(t.schema, t.name, columnsQueryResult.exists(c => c.schema == t.schema && c.table == t.name && c.isSqlServerAutoincrement))
+      val hasSqlServerAutoincrement = columnsQueryResult.exists(c => c.schema == t.schema && c.table == t.name && c.isSqlServerAutoincrement)
+      (t.schema, t.name) -> Table(t.schema, t.name, hasSqlServerAutoincrement, storePks = true)
     }.toMap
 
     val colsByTableAndName: Map[Table, Map[ColumnName, Column]] = {
