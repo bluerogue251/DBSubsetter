@@ -6,6 +6,6 @@ class MixedCasePostgresqlTest extends AbstractPostgresqlEndToEndTest with MixedC
   override val originPort = 5533
   override val programArgs = Array(
     "--schemas", "public",
-    "--baseQuery", "public.mixed_CASE_table_1 ::: \"ID\" = 2 ::: true"
+    "--baseQuery", "public.mixed_CASE_table_1 ::: \"ID\" = 2 ::: includeChildren"
   )
 }

@@ -1,4 +1,3 @@
-* Improve and test command line parsing with better error messages
 * Consider if for certain schemas we can skip storing certain tables' PKs because we know we will only ever see a row once?
 * Search for memory/performance bottlenecks by profiling against a huge database
 * Investigate whether optimization is possible via changing AnyRef to Any and then using primitive Ints instead of Integer for PK storage, etc.

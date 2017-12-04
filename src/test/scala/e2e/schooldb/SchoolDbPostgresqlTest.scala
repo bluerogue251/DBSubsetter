@@ -8,8 +8,8 @@ class SchoolDbPostgresqlTest extends AbstractPostgresqlEndToEndTest with SchoolD
   override val originPort = 5453
   override val programArgs = Array(
     "--schemas", "public,Audit",
-    "--baseQuery", "public.Students ::: student_id % 100 = 0 ::: true",
-    "--baseQuery", "public.standalone_table ::: id < 4 ::: true",
+    "--baseQuery", "public.Students ::: student_id % 100 = 0 ::: includeChildren",
+    "--baseQuery", "public.standalone_table ::: id < 4 ::: includeChildren",
     "--excludeColumns", "public.schools(mascot)"
   )
 

@@ -33,17 +33,17 @@ Feel free to open a GitHub ticket if you would like support for a different data
 # Download the DBSubsetter.jar file
 $ wget https://github.com/bluerogue251/DBSubsetter/releases/download/v1.0.0-beta.1/DBSubsetter.jar --output-document /path/to/DBSubsetter.jar
  
-# Show explanations and examples of all available options, including how to configure:
-# multiple schemas, multiple base queries, missing foreign or primary keys, 
-# columns to ignore, proper syntax for vendor-specific JDBC connection strings, etc.
+# Show explanation and examples of how to configure multiple schemas, 
+# multiple base queries, missing foreign or primary keys, columns to exclude,
+# vendor-specific JDBC connection strings, etc.
 $ java -jar /path/to/DBSubsetter.jar --help
 
 # Once you are comfortable with the syntax and options, run DBSubsetter for real
 $ java -jar /path/to/DBSubsetter.jar \
-    --schemas "your_schema" \
+    --schemas schema_1,schema_2 \
     --originDbConnStr "jdbc:<driverName>://<originConnectionString>" \
     --targetDbConnStr "jdbc:<driverName>://<targetConnectionString>" \
-    --baseQuery "your_schema.users ::: id % 100 = 0 ::: true" \
+    --baseQuery "your_schema.users ::: id % 100 = 0 ::: includeChildren" \
     --originDbParallelism 8 \
     --targetDbParallelism 8
 ```
