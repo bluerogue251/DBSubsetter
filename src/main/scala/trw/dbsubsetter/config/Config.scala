@@ -5,7 +5,7 @@ import trw.dbsubsetter.db.{ColumnName, SchemaName, TableName, WhereClause}
 case class Config(schemas: Seq[String] = Seq.empty,
                   originDbConnectionString: String = "",
                   targetDbConnectionString: String = "",
-                  baseQueries: List[((SchemaName, TableName), WhereClause, Boolean)] = List((("public", "Students"), "student_id % 40 = 0", true)),
+                  baseQueries: List[((SchemaName, TableName), WhereClause, Boolean)] = List((("public", "Students"), "current_school_id_cache % 40 = 0", true)),
                   cmdLineForeignKeys: List[CmdLineForeignKey] = List.empty,
                   cmdLinePrimaryKeys: List[CmdLinePrimaryKey] = List.empty,
                   excludeColumns: Map[(SchemaName, TableName), Set[ColumnName]] = Map.empty.withDefaultValue(Set.empty),
