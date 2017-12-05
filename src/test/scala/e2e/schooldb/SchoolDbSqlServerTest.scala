@@ -1,10 +1,20 @@
 package e2e.schooldb
 
-import org.scalatest.FunSuite
+import e2e.AbstractSqlServerEndToEndTest
 
-class SchoolDbSqlServerTest extends FunSuite {
-  // Pending until I rewrite the DML in vendor-agnostic slick
-  test("SqlServer SchoolDB Test") {
-    pending
+import scala.sys.process._
+
+class SchoolDbSqlServerTest extends AbstractSqlServerEndToEndTest with SchoolDbTestCases {
+  override val originPort = 5456
+  override val programArgs = Array(
+    "--schemas", "dbo,Audit",
+    "--baseQuery", "dbo.Students ::: student_id % 100 = 0 ::: includeChildren",
+    "--baseQuery", "dbo.standalone_table ::: id < 4 ::: includeChildren",
+    "--excludeColumns", "dbo.schools(mascot)"
+  )
+
+  override def setupDDL(): Unit = {
+    s"./src/test/scala/e2e/crossschema/create_schemas_sqlserver.sh $containerName $dataSetName".!!
+    super.setupDDL()
   }
 }

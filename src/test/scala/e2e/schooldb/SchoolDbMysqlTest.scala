@@ -1,11 +1,20 @@
 package e2e.schooldb
 
-import org.scalatest.FunSuite
+import e2e.AbstractMysqlEndToEndTest
 
-class SchoolDbMysqlTest extends FunSuite {
-  // Pending until I rewrite the DML in vendor-agnostic slick
-  // Also pending until I write a workaround to MySQL bug with wrong case of foreign key column
-  test("MySQL SchoolDB Test") {
-    pending
+import scala.sys.process._
+
+class SchoolDbMysqlTest extends AbstractMysqlEndToEndTest with SchoolDbTestCases {
+  override val originPort = 5450
+  override val programArgs = Array(
+    "--schemas", "school_db,Audit",
+    "--baseQuery", "school_db.Students ::: student_id % 100 = 0 ::: includeChildren",
+    "--baseQuery", "school_db.standalone_table ::: id < 4 ::: includeChildren",
+    "--excludeColumns", "school_db.schools(mascot)"
+  )
+
+  override def setupDDL(): Unit = {
+    s"./src/test/util/create_mysql_db.sh Audit $originPort".!!
+    super.setupDDL()
   }
 }

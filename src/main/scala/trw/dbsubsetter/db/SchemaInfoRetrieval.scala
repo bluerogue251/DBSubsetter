@@ -143,7 +143,7 @@ object SchemaInfoRetrieval {
               colsByTableAndName(toTable)(pfk.toColumn)
             } catch {
               case _: NoSuchElementException if isMysql => mysqlWorkaround(toTable)(pfk.toColumn)
-              case e => throw e
+              case e: Throwable => throw e
             }
           }.toVector
 
