@@ -2,4 +2,3 @@
 * Search for memory/performance bottlenecks by profiling against a huge database
 * Investigate whether optimization is possible via changing AnyRef to Any and then using primitive Ints instead of Integer for PK storage, etc.
 * Investigate whether optimization is possible via using a TreeSet instead of a HashSet for PK Storage
-* Add retry logic to DB Queries in case of failure, e.g. due to temporary network problem
