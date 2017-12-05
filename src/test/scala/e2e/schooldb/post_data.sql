@@ -31,11 +31,3 @@ ALTER TABLE "Audit".events
   ADD FOREIGN KEY (empty_table_4_id) REFERENCES empty_table_4 (id);
 ALTER TABLE "Audit".events
   ADD FOREIGN KEY (empty_table_5_id) REFERENCES empty_table_5 (id);
-
-
-CREATE INDEX ON homework_grades (student_id);
-CREATE INDEX ON homework_grades (assignment_type);
-CREATE INDEX ON homework_grades (assignment_id);
-ALTER TABLE homework_grades
-  ADD FOREIGN KEY (student_id) REFERENCES "Students" (student_id);
-

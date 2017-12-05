@@ -14,7 +14,7 @@ class SchoolDbSqlServerTest extends AbstractSqlServerEndToEndTest with SchoolDbT
   )
 
   override def setupDDL(): Unit = {
-    s"./src/test/scala/e2e/crossschema/create_schemas_sqlserver.sh $containerName $dataSetName".!!
+    s"./src/test/scala/e2e/crossschema/create_schemas_sqlserver.sh $containerName $dataSetName [Audit]".!!
     super.setupDDL()
   }
 }

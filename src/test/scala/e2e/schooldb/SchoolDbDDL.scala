@@ -128,6 +128,11 @@ trait SchoolDbDDL {
     val autograded: Rep[Option[Boolean]] = column[Option[Boolean]]("autograded", O.Default(None))
     val createdAt: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("created_at")
     val updatedAt: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("updated_at")
+
+    lazy val studentsFk = foreignKey("student_id", studentId, Students)(_.studentId, onUpdate = ForeignKeyAction.NoAction, onDelete = ForeignKeyAction.NoAction)
+    val index1 = index("homework_grades_student_id_idx", studentId)
+    val index2 = index("homework_grades_assignment_type_idx", assignmentType)
+    val index3 = index("homework_grades_assignment_id_idx", assignmentId)
   }
 
   lazy val HomeworkGrades = new TableQuery(tag => new HomeworkGrades(tag))

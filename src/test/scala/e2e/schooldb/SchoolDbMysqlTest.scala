@@ -14,7 +14,7 @@ class SchoolDbMysqlTest extends AbstractMysqlEndToEndTest with SchoolDbTestCases
   )
 
   override def setupDDL(): Unit = {
-    s"./src/test/util/create_mysql_db.sh Audit $originPort".!!
+    s"./src/test/util/create_mysql_db.sh `Audit` $originPort".!!
     super.setupDDL()
   }
 }
