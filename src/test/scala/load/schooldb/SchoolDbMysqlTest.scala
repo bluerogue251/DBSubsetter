@@ -4,7 +4,7 @@ import e2e.AbstractMysqlEndToEndTest
 
 import scala.sys.process._
 
-class SchoolDbMysqlTest extends AbstractMysqlEndToEndTest with SchoolDbTestCases {
+class SchoolDbMysqlTest extends AbstractMysqlEndToEndTest with SchoolDbTestCases with LoadTest {
   override val originPort = 5450
   override val programArgs = Array(
     "--schemas", "school_db,Audit",
@@ -17,4 +17,8 @@ class SchoolDbMysqlTest extends AbstractMysqlEndToEndTest with SchoolDbTestCases
     s"./src/test/util/create_mysql_db.sh `Audit` $originPort".!!
     super.setupDDL()
   }
+
+  override val singleThreadedRuntimeThreshold: Long = 130000
+
+  override val akkaStreamsRuntimeThreshold: Long = 22000
 }
