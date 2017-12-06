@@ -1,1 +1,2 @@
+* Use Partition instead of Broadcast+Filter
 * Consider if for certain schemas we can skip storing certain tables' PKs because we know we will only ever see a row once?

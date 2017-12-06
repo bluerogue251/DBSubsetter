@@ -58,22 +58,6 @@ class SchoolDBDML(val profile: JdbcProfile) extends SchoolDbDDL {
           Timestamp.valueOf("1895-10-24 11:19:27.999999")
         )
       },
-      //
-      //    -- Populate latest valedictorian cache
-      //    UPDATE schools
-      //      SET latest_valedictorian_id_cache = (SELECT student_id
-      //      FROM school_assignments
-      //      WHERE school_id = schools.id
-      //      ORDER BY student_id ASC
-      //      LIMIT 1
-      //      OFFSET 8)
-      //    WHERE schools.id % 10 != 7; -- leave 1/10th of these null for variety
-      EventTypes ++= Seq(
-        EventTypesRow("enrollment"),
-        EventTypesRow("standardized_testing"),
-        EventTypesRow("graduation"),
-        EventTypesRow("student_class_attendance")
-      ),
       StandaloneTable ++= Seq(
         StandaloneTableRow(1, Some("Note # 1"), Some(Date.valueOf("1990-01-01"))),
         StandaloneTableRow(2, Some("Note # 2"), Some(Date.valueOf("1991-01-01"))),
@@ -110,10 +94,27 @@ class SchoolDBDML(val profile: JdbcProfile) extends SchoolDbDDL {
           Timestamp.valueOf("2015-11-25 08:19:27.333665"),
           Timestamp.valueOf("2017-11-25 09:19:27.333667")
         )
+      },
+      EventTypes ++= Seq(
+        EventTypesRow("enrollment"),
+        EventTypesRow("standardized_testing"),
+        EventTypesRow("graduation"),
+        EventTypesRow("student_class_attendance")
+      ),
+      Events ++= (0 to 1000000).map { i =>
+        EventsRow(
+          i,
+          "enrollment"
+        )
       }
     )
   }
 }
+
+//
+//(0 to 1000).filterNot(_ % 10 == 7).map { i =>
+//Schools.filter(_.id === i).map(_.latestValedictorianIdCache).update(Some(i * 1000))
+//},
 
 //
 //    -- Insert some enrollment events
