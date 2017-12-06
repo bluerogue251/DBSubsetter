@@ -4,7 +4,7 @@ import e2e.AbstractPostgresqlEndToEndTest
 
 import scala.sys.process._
 
-class SchoolDbPostgresqlTest extends AbstractPostgresqlEndToEndTest with SchoolDbTestCases {
+class SchoolDbPostgresqlTest extends AbstractPostgresqlEndToEndTest with SchoolDbTestCases with LoadTest {
   override val originPort = 5453
   override val programArgs = Array(
     "--schemas", "public,Audit",
@@ -14,7 +14,11 @@ class SchoolDbPostgresqlTest extends AbstractPostgresqlEndToEndTest with SchoolD
   )
 
   override def setupDDL(): Unit = {
-    s"psql --host 0.0.0.0 --port $originPort --user postgres $dataSetName --file ./src/test/scala/e2e/schooldb/create_Audit_schema_postgresql.sql".!!
+    s"psql --host 0.0.0.0 --port $originPort --user postgres $dataSetName --file ./src/test/scala/load/schooldb/create_Audit_schema_postgresql.sql".!!
     super.setupDDL()
   }
+
+  override val singleThreadedRuntimeThreshold: Long = 130000
+
+  override val akkaStreamsRuntimeThreshold: Long = 22000
 }

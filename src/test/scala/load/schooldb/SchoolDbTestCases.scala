@@ -23,6 +23,8 @@ trait SchoolDbTestCases extends AbstractEndToEndTest with SchoolDbDDL with Slick
     Await.result(dmlFut4, Duration.Inf)
     val dmlFut5 = originDb.run(customDml.eventsInsert3)
     Await.result(dmlFut5, Duration.Inf)
+    val dmlFut6 = originDb.run(customDml.latestValedictorianCacheUpdates)
+    Await.result(dmlFut6, Duration.Inf)
   }
 
   val dataSetName = "school_db"
