@@ -1,4 +1,4 @@
-package e2e.schooldb
+package load.schooldb
 
 trait SchoolDbDDL {
   val profile: slick.jdbc.JdbcProfile

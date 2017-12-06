@@ -1,4 +1,4 @@
-package e2e.schooldb
+package load.schooldb
 
 import java.sql.{Date, Timestamp}
 
@@ -188,7 +188,7 @@ class SchoolDBDML(val profile: JdbcProfile) extends SchoolDbDDL {
 
   def latestValedictorianCacheUpdates = {
     val updates = (1 to numSchools).filterNot(_ % 10 == 7).map { i =>
-      Schools.filter(_.id === i).map(_.latestValedictorianIdCache).update(Some(i * (numStudents / numSchools)))
+      Schools.filter(_.id === i).map(_.latestValedictorianIdCache).update(Some((i * (numStudents / numSchools)) + (i % 101)))
     }
     DBIO.seq(updates: _*)
   }

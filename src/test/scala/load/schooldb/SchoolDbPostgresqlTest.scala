@@ -1,4 +1,4 @@
-package e2e.schooldb
+package load.schooldb
 
 import e2e.AbstractPostgresqlEndToEndTest
 
