@@ -164,16 +164,17 @@ class SchoolDBDML(val profile: JdbcProfile) extends SchoolDbDDL {
   }
 
   def eventsInsert3 = {
+    val factor = 4
     val seq = Seq(
-      Events ++= (1 to numStudents * 3).filterNot(i => ((i + 2) / 3) % noSchool == 0).map { i =>
+      Events ++= (1 to numStudents * factor).filterNot(i => ((i + 2) / factor) % noSchool == 0).map { i =>
         EventsRow(
           i + 2000000,
           "student_class_attendance",
-          Some((((i + 2) / 3) % (numDistricts - 1)) + 1),
-          Some((((i + 2) / 3) % (numSchools - 1)) + 1),
-          Some((i + 2) / 3),
-          Some((((i + 2) / 3) % (numSchools - 1)) + 1),
-          Some((i + 2) / 3),
+          Some((((i + 2) / factor) % (numDistricts - 1)) + 1),
+          Some((((i + 2) / factor) % (numSchools - 1)) + 1),
+          Some((i + 2) / factor),
+          Some((((i + 2) / factor) % (numSchools - 1)) + 1),
+          Some((i + 2) / factor),
           None,
           None,
           None,
@@ -187,7 +188,7 @@ class SchoolDBDML(val profile: JdbcProfile) extends SchoolDbDDL {
   }
 
   def latestValedictorianCacheUpdates = {
-    val updates = (1 to numSchools).filterNot(_ % 10 == 7).map { i =>
+    val updates = (1 until numSchools).filterNot(_ % 10 == 7).map { i =>
       Schools.filter(_.id === i).map(_.latestValedictorianIdCache).update(Some((i * (numStudents / numSchools)) + (i % 101)))
     }
     DBIO.seq(updates: _*)
