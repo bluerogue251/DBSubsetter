@@ -12,6 +12,7 @@ class SchoolDbSqlServerTest extends AbstractSqlServerEndToEndTest with SchoolDbT
     "--baseQuery", "dbo.standalone_table ::: id < 4 ::: includeChildren",
     "--excludeColumns", "dbo.schools(mascot)"
   )
+  override val mainSchema: String = "dbo"
 
   override def setupDDL(): Unit = {
     s"./src/test/scala/e2e/crossschema/create_schemas_sqlserver.sh $containerName $dataSetName [Audit]".!!

@@ -59,8 +59,8 @@ class SchoolDBDML(val profile: JdbcProfile) extends SchoolDbDDL {
           i,
           Date.valueOf("1900-01-01"),
           None,
-          Timestamp.valueOf("1890-10-24 11:19:27.054177"),
-          Timestamp.valueOf("1895-10-24 11:19:27.999999")
+          Timestamp.valueOf("2018-11-20 11:19:27.054171"),
+          Timestamp.valueOf("2001-09-24 11:19:27.999999")
         )
       },
       StandaloneTable ++= Seq(
@@ -70,10 +70,10 @@ class SchoolDBDML(val profile: JdbcProfile) extends SchoolDbDDL {
         StandaloneTableRow(4, Some("Note # 4"), Some(Date.valueOf("1993-01-01")))
       ),
       MultipleChoiceAssignments ++= Seq(
-        MultipleChoiceAssignmentsRow(1, "Biology 1 Midterm - Take Home", Timestamp.valueOf("1950-01-01 00:00:00.000000")),
-        MultipleChoiceAssignmentsRow(2, "Biology 1 Final - Take Home", Timestamp.valueOf("1950-01-02 00:00:00.000000")),
-        MultipleChoiceAssignmentsRow(3, "Biology 2 Midterm - Take Home", Timestamp.valueOf("1950-01-03 00:00:00.000000")),
-        MultipleChoiceAssignmentsRow(4, "Biology 2 Final Exam - Take Home", Timestamp.valueOf("1950-01-04 00:00:00.000000"))
+        MultipleChoiceAssignmentsRow(1, "Biology 1 Midterm - Take Home", Timestamp.valueOf("1975-01-01 00:00:00.000000")),
+        MultipleChoiceAssignmentsRow(2, "Biology 1 Final - Take Home", Timestamp.valueOf("1975-01-02 00:00:00.000000")),
+        MultipleChoiceAssignmentsRow(3, "Biology 2 Midterm - Take Home", Timestamp.valueOf("1975-01-03 00:00:00.000000")),
+        MultipleChoiceAssignmentsRow(4, "Biology 2 Final Exam - Take Home", Timestamp.valueOf("1975-01-04 00:00:00.000000"))
       ),
       WorksheetAssignments ++= Seq(
         WorksheetAssignmentsRow(1, "Chemistry 1 Midterm - Take Home"),

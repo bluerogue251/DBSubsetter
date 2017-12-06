@@ -18,7 +18,7 @@ class SchoolDbMysqlTest extends AbstractMysqlEndToEndTest with SchoolDbTestCases
     super.setupDDL()
   }
 
-  override val singleThreadedRuntimeThreshold: Long = 130000
+  override val singleThreadedRuntimeThreshold: Long = 200000
 
-  override val akkaStreamsRuntimeThreshold: Long = 22000
+  override val akkaStreamsRuntimeThreshold: Long = 29000
 }

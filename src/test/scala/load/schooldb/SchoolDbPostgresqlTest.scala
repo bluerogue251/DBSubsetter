@@ -12,6 +12,8 @@ class SchoolDbPostgresqlTest extends AbstractPostgresqlEndToEndTest with SchoolD
     "--baseQuery", "public.standalone_table ::: id < 4 ::: includeChildren",
     "--excludeColumns", "public.schools(mascot)"
   )
+  override val mainSchema: String = "public"
+
 
   override def createOriginDb(): Unit = {
     s"docker start school_db_origin_postgres".!

@@ -3,13 +3,15 @@ package load.schooldb
 trait SchoolDbDDL {
   val profile: slick.jdbc.JdbcProfile
 
+  def mainSchema: String = "school_db"
+
   import profile.api._
 
   lazy val schema: profile.SchemaDescription = Array(Districts.schema, EmptyTable1.schema, EmptyTable2.schema, EmptyTable3.schema, EmptyTable4.schema, EmptyTable5.schema, EssayAssignments.schema, Events.schema, EventTypes.schema, HomeworkGrades.schema, MultipleChoiceAssignments.schema, SchoolAssignments.schema, Schools.schema, StandaloneTable.schema, Students.schema, WorksheetAssignments.schema).reduceLeft(_ ++ _)
 
   case class DistrictsRow(id: Int, name: String, createdAt: java.sql.Timestamp, updatedAt: java.sql.Timestamp)
 
-  class Districts(_tableTag: Tag) extends profile.api.Table[DistrictsRow](_tableTag, "districts") {
+  class Districts(_tableTag: Tag) extends profile.api.Table[DistrictsRow](_tableTag, Some(mainSchema), "districts") {
     def * = (id, name, createdAt, updatedAt) <> (DistrictsRow.tupled, DistrictsRow.unapply)
 
     val id: Rep[Int] = column[Int]("Id", O.AutoInc, O.PrimaryKey)
@@ -23,7 +25,7 @@ trait SchoolDbDDL {
 
   case class EmptyTable1Row(id: Int)
 
-  class EmptyTable1(_tableTag: Tag) extends profile.api.Table[EmptyTable1Row](_tableTag, "empty_table_1") {
+  class EmptyTable1(_tableTag: Tag) extends profile.api.Table[EmptyTable1Row](_tableTag, Some(mainSchema), "empty_table_1") {
     def * = id <> (EmptyTable1Row, EmptyTable1Row.unapply)
 
     val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
@@ -34,7 +36,7 @@ trait SchoolDbDDL {
 
   case class EmptyTable2Row(id: Int)
 
-  class EmptyTable2(_tableTag: Tag) extends profile.api.Table[EmptyTable2Row](_tableTag, "empty_table_2") {
+  class EmptyTable2(_tableTag: Tag) extends profile.api.Table[EmptyTable2Row](_tableTag, Some(mainSchema), "empty_table_2") {
     def * = id <> (EmptyTable2Row, EmptyTable2Row.unapply)
 
     val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
@@ -44,7 +46,7 @@ trait SchoolDbDDL {
 
   case class EmptyTable3Row(id: Int)
 
-  class EmptyTable3(_tableTag: Tag) extends profile.api.Table[EmptyTable3Row](_tableTag, "empty_table_3") {
+  class EmptyTable3(_tableTag: Tag) extends profile.api.Table[EmptyTable3Row](_tableTag, Some(mainSchema), "empty_table_3") {
     def * = id <> (EmptyTable3Row, EmptyTable3Row.unapply)
 
     val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
@@ -54,7 +56,7 @@ trait SchoolDbDDL {
 
   case class EmptyTable4Row(id: Int)
 
-  class EmptyTable4(_tableTag: Tag) extends profile.api.Table[EmptyTable4Row](_tableTag, "empty_table_4") {
+  class EmptyTable4(_tableTag: Tag) extends profile.api.Table[EmptyTable4Row](_tableTag, Some(mainSchema), "empty_table_4") {
     def * = id <> (EmptyTable4Row, EmptyTable4Row.unapply)
 
     val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
@@ -64,7 +66,7 @@ trait SchoolDbDDL {
 
   case class EmptyTable5Row(id: Int)
 
-  class EmptyTable5(_tableTag: Tag) extends profile.api.Table[EmptyTable5Row](_tableTag, "empty_table_5") {
+  class EmptyTable5(_tableTag: Tag) extends profile.api.Table[EmptyTable5Row](_tableTag, Some(mainSchema), "empty_table_5") {
     def * = id <> (EmptyTable5Row, EmptyTable5Row.unapply)
 
     val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
@@ -74,7 +76,7 @@ trait SchoolDbDDL {
 
   case class EssayAssignmentsRow(id: Int, name: String)
 
-  class EssayAssignments(_tableTag: Tag) extends profile.api.Table[EssayAssignmentsRow](_tableTag, "essay_assignments") {
+  class EssayAssignments(_tableTag: Tag) extends profile.api.Table[EssayAssignmentsRow](_tableTag, Some(mainSchema), "essay_assignments") {
     def * = (id, name) <> (EssayAssignmentsRow.tupled, EssayAssignmentsRow.unapply)
 
     val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
@@ -140,12 +142,12 @@ trait SchoolDbDDL {
 
   case class HomeworkGradesRow(id: Long, studentId: Long, assignmentType: String, assignmentId: Int, grade: Option[scala.math.BigDecimal] = None, autograded: Option[Boolean] = None, createdAt: java.sql.Timestamp, updatedAt: java.sql.Timestamp)
 
-  class HomeworkGrades(_tableTag: Tag) extends profile.api.Table[HomeworkGradesRow](_tableTag, "homework_grades") {
+  class HomeworkGrades(_tableTag: Tag) extends profile.api.Table[HomeworkGradesRow](_tableTag, Some(mainSchema), "homework_grades") {
     def * = (id, studentId, assignmentType, assignmentId, grade, autograded, createdAt, updatedAt) <> (HomeworkGradesRow.tupled, HomeworkGradesRow.unapply)
 
     val id: Rep[Long] = column[Long]("id", O.AutoInc, O.PrimaryKey)
     val studentId: Rep[Long] = column[Long]("student_id")
-    val assignmentType: Rep[String] = column[String]("assignment_type")
+    val assignmentType: Rep[String] = column[String]("assignment_type", O.Length(255, varying = true))
     val assignmentId: Rep[Int] = column[Int]("assignment_id")
     val grade: Rep[Option[scala.math.BigDecimal]] = column[Option[scala.math.BigDecimal]]("grade", O.Default(None))
     val autograded: Rep[Option[Boolean]] = column[Option[Boolean]]("autograded", O.Default(None))
@@ -162,7 +164,7 @@ trait SchoolDbDDL {
 
   case class MultipleChoiceAssignmentsRow(id: Int, assignmentName: String, createdAt: java.sql.Timestamp)
 
-  class MultipleChoiceAssignments(_tableTag: Tag) extends profile.api.Table[MultipleChoiceAssignmentsRow](_tableTag, "multiple_choice_assignments") {
+  class MultipleChoiceAssignments(_tableTag: Tag) extends profile.api.Table[MultipleChoiceAssignmentsRow](_tableTag, Some(mainSchema), "multiple_choice_assignments") {
     def * = (id, assignmentName, createdAt) <> (MultipleChoiceAssignmentsRow.tupled, MultipleChoiceAssignmentsRow.unapply)
 
     val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
@@ -174,7 +176,7 @@ trait SchoolDbDDL {
 
   case class SchoolAssignmentsRow(schoolId: Int, studentId: Long, assignmentStart: java.sql.Date, assignmentEnd: Option[java.sql.Date] = None, createdAt: java.sql.Timestamp, updatedAt: java.sql.Timestamp)
 
-  class SchoolAssignments(_tableTag: Tag) extends profile.api.Table[SchoolAssignmentsRow](_tableTag, "school_assignments") {
+  class SchoolAssignments(_tableTag: Tag) extends profile.api.Table[SchoolAssignmentsRow](_tableTag, Some(mainSchema), "school_assignments") {
     def * = (schoolId, studentId, assignmentStart, assignmentEnd, createdAt, updatedAt) <> (SchoolAssignmentsRow.tupled, SchoolAssignmentsRow.unapply)
 
     val schoolId: Rep[Int] = column[Int]("school_id")
@@ -195,7 +197,7 @@ trait SchoolDbDDL {
 
   case class SchoolsRow(districtId: Int, name: String, mascot: Option[String] = None, id: Int, createdAt: java.sql.Timestamp, updatedAt: java.sql.Timestamp, latestValedictorianIdCache: Option[Long] = None)
 
-  class Schools(_tableTag: Tag) extends profile.api.Table[SchoolsRow](_tableTag, "schools") {
+  class Schools(_tableTag: Tag) extends profile.api.Table[SchoolsRow](_tableTag, Some(mainSchema), "schools") {
     def * = (districtId, name, mascot, id, createdAt, updatedAt, latestValedictorianIdCache) <> (SchoolsRow.tupled, SchoolsRow.unapply)
 
     val districtId: Rep[Int] = column[Int]("district_id")
@@ -216,7 +218,7 @@ trait SchoolDbDDL {
 
   case class StandaloneTableRow(id: Long, note: Option[String] = None, createdOn: Option[java.sql.Date] = None)
 
-  class StandaloneTable(_tableTag: Tag) extends profile.api.Table[StandaloneTableRow](_tableTag, "standalone_table") {
+  class StandaloneTable(_tableTag: Tag) extends profile.api.Table[StandaloneTableRow](_tableTag, Some(mainSchema), "standalone_table") {
     def * = (id, note, createdOn) <> (StandaloneTableRow.tupled, StandaloneTableRow.unapply)
 
     val id: Rep[Long] = column[Long]("id", O.AutoInc, O.PrimaryKey)
@@ -227,7 +229,8 @@ trait SchoolDbDDL {
   lazy val StandaloneTable = new TableQuery(tag => new StandaloneTable(tag))
 
   case class StudentsRow(studentId: Long, name: String, dateOfBirth: Option[java.sql.Date] = None, currentSchoolIdCache: Option[Int] = None, createdAt: java.sql.Timestamp, updatedAt: java.sql.Timestamp)
-  class Students(_tableTag: Tag) extends profile.api.Table[StudentsRow](_tableTag, "Students") {
+
+  class Students(_tableTag: Tag) extends profile.api.Table[StudentsRow](_tableTag, Some(mainSchema), "Students") {
     def * = (studentId, name, dateOfBirth, currentSchoolIdCache, createdAt, updatedAt) <> (StudentsRow.tupled, StudentsRow.unapply)
 
     val studentId: Rep[Long] = column[Long]("student_id", O.AutoInc, O.PrimaryKey)
@@ -245,7 +248,7 @@ trait SchoolDbDDL {
 
   case class WorksheetAssignmentsRow(id: Int, worksheetAssignmentName: String)
 
-  class WorksheetAssignments(_tableTag: Tag) extends profile.api.Table[WorksheetAssignmentsRow](_tableTag, "worksheet_assignments") {
+  class WorksheetAssignments(_tableTag: Tag) extends profile.api.Table[WorksheetAssignmentsRow](_tableTag, Some(mainSchema), "worksheet_assignments") {
     def * = (id, worksheetAssignmentName) <> (WorksheetAssignmentsRow.tupled, WorksheetAssignmentsRow.unapply)
 
     val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
