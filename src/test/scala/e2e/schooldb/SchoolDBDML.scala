@@ -107,7 +107,7 @@ class SchoolDBDML(val profile: JdbcProfile) extends SchoolDbDDL {
         )
       }
     )
-    DBIO.seq()
+    DBIO.seq(seq: _*)
   }
 
   def eventInserts1 = {
