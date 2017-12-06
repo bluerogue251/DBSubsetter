@@ -1,13 +1,29 @@
 package e2e.schooldb
 
-import e2e.{AbstractEndToEndTest, SlickSetup}
+import e2e.{AbstractEndToEndTest, SlickSetupDDL}
 
-trait SchoolDbTestCases extends AbstractEndToEndTest with SchoolDbDDL with SlickSetup {
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
+
+trait SchoolDbTestCases extends AbstractEndToEndTest with SchoolDbDDL with SlickSetupDDL {
 
   import profile.api._
 
   override val ddl = schema.create
-  override val dml = new SchoolDBDML(profile).dbioSeq
+
+  override def setupDML(): Unit = {
+    val customDml = new SchoolDBDML(profile)
+    val dmlFut1 = originDb.run(customDml.initialInserts)
+    Await.result(dmlFut1, Duration.Inf)
+    val dmlFut2 = originDb.run(customDml.homeworkGradeInserts)
+    Await.result(dmlFut2, Duration.Inf)
+    val dmlFut3 = originDb.run(customDml.eventInserts1)
+    Await.result(dmlFut3, Duration.Inf)
+    val dmlFut4 = originDb.run(customDml.eventsInsert2)
+    Await.result(dmlFut4, Duration.Inf)
+    val dmlFut5 = originDb.run(customDml.eventsInsert3)
+    Await.result(dmlFut5, Duration.Inf)
+  }
 
   val dataSetName = "school_db"
 
