@@ -1,4 +1,5 @@
 * Use Partition instead of Broadcast+Filter
 * Remove from docs the "unlogged" table suggestion for Postgres
+* Document reasonable starting values for originDbParallelism and targetDbParallelism
 * Test foreign key pointing to a non-primary key
 * Consider if for certain schemas we can skip storing certain tables' PKs because we know we will only ever see a row once?
