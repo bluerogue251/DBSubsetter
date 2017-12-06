@@ -93,11 +93,12 @@ class SchoolDBDML(val profile: JdbcProfile) extends SchoolDbDDL {
   }
 
   def homeworkGradeInserts = {
+    val factor = 3
     val seq = Seq(
-      HomeworkGrades ++= (1 to (numStudents * 2)).map { i =>
+      HomeworkGrades ++= (1 to (numStudents * factor)).map { i =>
         HomeworkGradesRow(
           i,
-          (i + 1) / 2,
+          (i + factor - 1) / factor,
           if (i % 3 == 0) "worksheet" else if (i % 5 == 0) "essay" else "multiple choice", // Pick an assignment id from 1 to 4
           (i % 4) + 1, // Pick an assignment id from 1 to 4,
           Some((i % 100) + ((i % 50).toDouble / (i % 50 + 50).toDouble)),
