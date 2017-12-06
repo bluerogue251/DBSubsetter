@@ -58,7 +58,7 @@ Memory usage will be proportional to the size of all the primary keys in the tar
 
 ## Contributing
 
-Contributions of all kinds are welcome here!
+Contributions of all kinds are welcome!
 
 Whether it is to fix a typo, improve the documentation, report or fix a bug, add a new feature, or whatever else you have in mind, feel free to open an issue or a pull request on the project [GitHub page](https://github.com/bluerogue251/DBSubsetter).
 

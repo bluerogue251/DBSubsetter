@@ -9,8 +9,10 @@ class SchoolDBDML(val profile: JdbcProfile) extends SchoolDbDDL {
   import profile.api._
 
   def dbioSeq = {
-    slick.dbio.DBIO.seq(
-      Districts ++= (0 to 100).map { i =>
+    val numStudents = 1000000
+
+    val inserts = Seq(
+      Districts ++= (1 to 100).map { i =>
         DistrictsRow(
           i,
           s"District # $i",
@@ -18,7 +20,7 @@ class SchoolDBDML(val profile: JdbcProfile) extends SchoolDbDDL {
           Timestamp.valueOf("2018-12-15 14:19:25.954172")
         )
       },
-      Schools ++= (0 to 1000).map { i =>
+      Schools ++= (1 to 1000).map { i =>
         SchoolsRow(
           i % 99 + 1,
           s"School # $i",
@@ -28,19 +30,19 @@ class SchoolDBDML(val profile: JdbcProfile) extends SchoolDbDDL {
           Timestamp.valueOf("2015-10-29 11:14:22.275870")
         )
       },
-      Students ++= (0 to 1000000).map { i =>
+      Students ++= (1 to numStudents).map { i =>
         StudentsRow(
           i,
           s"Student # $i",
           Some(Date.valueOf("1950-01-01")),
-          if (i % 5 == 0) Some((i % 9999) + 1) else None,
+          if (i % 5 == 0) Some((i % 999) + 1) else None,
           Timestamp.valueOf("1999-10-22 11:12:22.354179"),
           Timestamp.valueOf("2001-10-23 08:09:21.435177")
         )
       },
-      SchoolAssignments ++= (0 to 1000000).filterNot(i => i % 10 == 0 || i % 5 == 0).map { i =>
+      SchoolAssignments ++= (1 to numStudents).filterNot(i => i % 10 == 0 || i % 5 == 0).map { i =>
         SchoolAssignmentsRow(
-          (i % 9999) + 1,
+          (i % 999) + 1,
           i,
           Date.valueOf("1900-01-01"),
           Some(Date.valueOf("1904-01-01")),
@@ -48,9 +50,9 @@ class SchoolDBDML(val profile: JdbcProfile) extends SchoolDbDDL {
           Timestamp.valueOf("2019-12-15 14:19:25.954171")
         )
       },
-      SchoolAssignments ++= (0 to 1000000).filter(_ % 5 == 0).map { i =>
+      SchoolAssignments ++= (1 to numStudents).filter(_ % 5 == 0).map { i =>
         SchoolAssignmentsRow(
-          (i % 9999) + 1,
+          (i % 999) + 1,
           i,
           Date.valueOf("1900-01-01"),
           None,
@@ -83,10 +85,10 @@ class SchoolDBDML(val profile: JdbcProfile) extends SchoolDbDDL {
         EssayAssignmentsRow(4, "Journalism Final"),
         EssayAssignmentsRow(5, "Biographical Writing Assignment")
       ),
-      HomeworkGrades ++= (0 to 2000000).map { i =>
+      HomeworkGrades ++= (1 to (numStudents * 2)).map { i =>
         HomeworkGradesRow(
           i,
-          i / 1000000,
+          (i + 1 / 2) / numStudents,
           if (i % 3 == 0) "worksheet" else if (i % 5 == 0) "essay" else "multiple choice", // Pick an assignment id from 1 to 4
           (i % 4) + 1, // Pick an assignment id from 1 to 4,
           Some((i % 100) + ((i % 50).toDouble / (i % 50 + 50).toDouble)),
@@ -101,68 +103,66 @@ class SchoolDBDML(val profile: JdbcProfile) extends SchoolDbDDL {
         EventTypesRow("graduation"),
         EventTypesRow("student_class_attendance")
       ),
-      Events ++= (0 to 1000000).map { i =>
+      Events ++= (1 to numStudents).map { i =>
         EventsRow(
           i,
-          "enrollment"
+          "enrollment",
+          Some(i % 99999 + 1),
+          Some(i % 9999 + 1),
+          Some(i),
+          Some(i % 9999 + 1),
+          Some(i),
+          None,
+          None,
+          None,
+          None,
+          None,
+          Timestamp.valueOf("2005-10-24 11:19:27.888888")
+        )
+      },
+      Events ++= (1 to 10000).map { i =>
+        EventsRow(
+          i + 1000000,
+          "standardized_testing",
+          Some(i % 99 + 1),
+          Some(i),
+          None,
+          None,
+          None,
+          None,
+          None,
+          None,
+          None,
+          None,
+          Timestamp.valueOf("2010-10-25 11:19:27.333666")
+        )
+      },
+      Events ++= (1 to numStudents * 3).map { i =>
+        EventsRow(
+          i + 2000000,
+          "student_class_attendance",
+          Some((i / 3) / 10000),
+          Some((i / 3) / 100000),
+          Some(i / 3),
+          Some((i / 3) / 100000),
+          Some(i / 3),
+          None,
+          None,
+          None,
+          None,
+          None,
+          Timestamp.valueOf("1999-10-25 11:19:27.888999")
         )
       }
     )
+
+    val updates = (1 to 1000).filterNot(_ % 10 == 7).map { i =>
+      Schools.filter(_.id === i).map(_.latestValedictorianIdCache).update(Some(i * 1000))
+    }
+
+    val all = inserts ++ updates
+    DBIO.seq(all: _*)
   }
 }
 
-//
-//(0 to 1000).filterNot(_ % 10 == 7).map { i =>
-//Schools.filter(_.id === i).map(_.latestValedictorianIdCache).update(Some(i * 1000))
-//},
-
-//
-//    -- Insert some enrollment events
-//    INSERT INTO "Audit".events (event_type_key, district_id, school_id, student_id, school_assignment_school_id, school_assignment_student_id, created_at)
-//    SELECT
-//    'enrollment',
-//    sc.district_id,
-//    sc.id,
-//    sa.student_id,
-//    sa.school_id,
-//    sa.student_id,
-//    '2005-10-24 11:19:27.888888'
-//    FROM school_assignments sa
-//    INNER JOIN schools sc ON sa.school_id = sc.id;
-//
-//    -- Insert some enrollment events
-//    INSERT INTO "Audit".events (event_type_key, district_id, school_id, created_at)
-//    SELECT
-//    'standardized_testing',
-//    sc.district_id,
-//    sc.id,
-//    '2010-10-25 11:19:27.333666'
-//    FROM schools sc;
-//
-//    -- Insert some graduation events
-//    INSERT INTO "Audit".events (event_type_key, district_id, school_id, student_id, created_at)
-//    SELECT
-//    'graduation',
-//    sc.district_id,
-//    sc.id,
-//    sa.student_id,
-//    sa.assignment_end
-//    FROM school_assignments sa
-//    INNER JOIN schools sc ON sa.school_id = sc.id
-//    WHERE sa.assignment_end IS NOT NULL;
-//
-//    -- Insert a large number of events representing "the fact that a student attended a particular class on a particular day"
-//    -- This is meant to be an example of a 1 to n relationship with a very high cardinality
-//      INSERT INTO "Audit".events (event_type_key, district_id, school_id, student_id, school_assignment_school_id, school_assignment_student_id, created_at)
-//    SELECT
-//    'student_class_attendance',
-//    sc.district_id,
-//    sc.id,
-//    sa.student_id,
-//    sa.school_id,
-//    sa.student_id,
-//    '1999-10-25 11:19:27.888999'
-//    FROM school_assignments sa
-//    INNER JOIN schools sc ON sa.school_id = sc.id
-//    CROSS JOIN generate_series(0, 3) AS seq; -- (0, 2000) would generate ~ 200 GB of data once indices are created
 
