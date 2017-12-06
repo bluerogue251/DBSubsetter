@@ -8,11 +8,13 @@ class SchoolDBDML(val profile: JdbcProfile) extends SchoolDbDDL {
 
   import profile.api._
 
+  private val numDistricts = 100
+  private val numSchools = 10000
   private val numStudents = 1000000
 
   def initialInserts = {
     val seq = Seq(
-      Districts ++= (1 to 100).map { i =>
+      Districts ++= (1 to numDistricts).map { i =>
         DistrictsRow(
           i,
           s"District # $i",
@@ -20,9 +22,9 @@ class SchoolDBDML(val profile: JdbcProfile) extends SchoolDbDDL {
           Timestamp.valueOf("2018-12-15 14:19:25.954172")
         )
       },
-      Schools ++= (1 to 1000).map { i =>
+      Schools ++= (1 to numSchools).map { i =>
         SchoolsRow(
-          i % 99 + 1,
+          i % (numDistricts - 1) + 1,
           s"School # $i",
           Some(s"Mascot# $i"),
           i,
@@ -35,14 +37,14 @@ class SchoolDBDML(val profile: JdbcProfile) extends SchoolDbDDL {
           i,
           s"Student # $i",
           Some(Date.valueOf("1950-01-01")),
-          if (i % 5 == 0) Some((i % 999) + 1) else None,
+          if (i % 5 == 0) Some((i % (numSchools - 1)) + 1) else None,
           Timestamp.valueOf("1999-10-22 11:12:22.354179"),
           Timestamp.valueOf("2001-10-23 08:09:21.435177")
         )
       },
       SchoolAssignments ++= (1 to numStudents).filterNot(i => i % 10 == 0 || i % 5 == 0).map { i =>
         SchoolAssignmentsRow(
-          (i % 999) + 1,
+          (i % (numSchools - 1)) + 1,
           i,
           Date.valueOf("1900-01-01"),
           Some(Date.valueOf("1904-01-01")),
@@ -52,7 +54,7 @@ class SchoolDBDML(val profile: JdbcProfile) extends SchoolDbDDL {
       },
       SchoolAssignments ++= (1 to numStudents).filter(_ % 5 == 0).map { i =>
         SchoolAssignmentsRow(
-          (i % 999) + 1,
+          (i % (numSchools - 1)) + 1,
           i,
           Date.valueOf("1900-01-01"),
           None,
@@ -119,8 +121,8 @@ class SchoolDBDML(val profile: JdbcProfile) extends SchoolDbDDL {
         EventsRow(
           i,
           "enrollment",
-          Some(i % 99 + 1),
-          Some(i % 999 + 1),
+          Some(i % (numDistricts - 1) + 1),
+          Some(i % (numSchools - 1) + 1),
           Some(i),
           Some(i % 999 + 1),
           Some(i),
@@ -138,12 +140,12 @@ class SchoolDBDML(val profile: JdbcProfile) extends SchoolDbDDL {
 
   def eventsInsert2 = {
     val seq = Seq(
-      Events ++= (1 to 10000).map { i =>
+      Events ++= (1 to numSchools).map { i =>
         EventsRow(
           i + 1000000,
           "standardized_testing",
-          Some(i % 99 + 1),
-          Some((i + 9) / 10),
+          Some(i % (numDistricts - 1) + 1),
+          Some((i - 1 + (numSchools / numDistricts)) / (numSchools / numDistricts)),
           None,
           None,
           None,
@@ -165,10 +167,10 @@ class SchoolDBDML(val profile: JdbcProfile) extends SchoolDbDDL {
         EventsRow(
           i + 2000000,
           "student_class_attendance",
-          Some((((i + 2) / 3) % 99) + 1),
-          Some((((i + 2) / 3) % 999) + 1),
+          Some((((i + 2) / 3) % (numDistricts - 1)) + 1),
+          Some((((i + 2) / 3) % (numSchools - 1)) + 1),
           Some((i + 2) / 3),
-          Some((((i + 2) / 3) % 999) + 1),
+          Some((((i + 2) / 3) % (numSchools - 1)) + 1),
           Some((i + 2) / 3),
           None,
           None,
@@ -183,8 +185,8 @@ class SchoolDBDML(val profile: JdbcProfile) extends SchoolDbDDL {
   }
 
   def latestValedictorianCacheUpdates = {
-    val updates = (1 to 1000).filterNot(_ % 10 == 7).map { i =>
-      Schools.filter(_.id === i).map(_.latestValedictorianIdCache).update(Some(i * 1000))
+    val updates = (1 to numSchools).filterNot(_ % 10 == 7).map { i =>
+      Schools.filter(_.id === i).map(_.latestValedictorianIdCache).update(Some(i * (numStudents / numSchools)))
     }
     DBIO.seq(updates: _*)
   }
