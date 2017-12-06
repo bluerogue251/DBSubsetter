@@ -30,8 +30,8 @@ trait SchoolDbTestCases extends AbstractEndToEndTest with SchoolDbDDL with Slick
   val dataSetName = "school_db"
 
   test("Correct students were included") {
-    assertCount(Students, 27115)
-    assertThatLong(Students.map(_.studentId).sum.result, 15011156816l)
+    assertCount(Students, 35758)
+    assertThatLong(Students.map(_.studentId).sum.result, 17880448387l)
   }
 
   test("Correct districts were included") {
@@ -48,14 +48,14 @@ trait SchoolDbTestCases extends AbstractEndToEndTest with SchoolDbDDL with Slick
   }
 
   test("Correct homework grades were included") {
-    assertCount(HomeworkGrades, 36057)
-    assertThatLong(HomeworkGrades.map(_.id).sum.result, 51948824979l)
+    assertCount(HomeworkGrades, 40146)
+    assertThatLong(HomeworkGrades.map(_.id).sum.result, 60264681654l)
   }
 
   test("Correct school_assignments were included") {
-    assertCount(SchoolAssignments, 20870)
-    assertThat(SchoolAssignments.map(_.schoolId).sum.result, 111467366)
-    assertThatLong(SchoolAssignments.map(_.studentId).sum.result, 10304630895l)
+    assertCount(SchoolAssignments, 26297)
+    assertThat(SchoolAssignments.map(_.schoolId).sum.result, 131875362l)
+    assertThatLong(SchoolAssignments.map(_.studentId).sum.result, 13150077112l)
   }
 
   test("Correct schools were included") {
@@ -69,8 +69,8 @@ trait SchoolDbTestCases extends AbstractEndToEndTest with SchoolDbDDL with Slick
   }
 
   test("Correct Audit.events were included") {
-    assertCount(Events, 122175)
-    assertThatLong(Events.map(_.id).sum.result, 86209965622l)
+    assertCount(Events, 131584)
+    assertThatLong(Events.map(_.id).sum.result, 314228470029l)
   }
 
   test("Correct essay_assignments were included") {

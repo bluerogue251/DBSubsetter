@@ -17,6 +17,6 @@ trait LoadTest extends FunSuite {
   }
 
   test("Akka Streams runtime did not significantly increase") {
-    assert(singleThreadedRuntimeMillis < akkaStreamsRuntimeThreshold)
+    assert(akkStreamsRuntimeMillis < akkaStreamsRuntimeThreshold)
   }
 }
