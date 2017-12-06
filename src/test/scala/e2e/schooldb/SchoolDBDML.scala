@@ -11,6 +11,7 @@ class SchoolDBDML(val profile: JdbcProfile) extends SchoolDbDDL {
   private val numDistricts = 100
   private val numSchools = 10000
   private val numStudents = 1000000
+  private val noSchool = 21
 
   def initialInserts = {
     val seq = Seq(
@@ -42,7 +43,7 @@ class SchoolDBDML(val profile: JdbcProfile) extends SchoolDbDDL {
           Timestamp.valueOf("2001-10-23 08:09:21.435177")
         )
       },
-      SchoolAssignments ++= (1 to numStudents).filterNot(i => i % 10 == 0 || i % 5 == 0).map { i =>
+      SchoolAssignments ++= (1 to numStudents).filterNot(_ % noSchool == 0).filterNot(_ % 5 == 0).map { i =>
         SchoolAssignmentsRow(
           (i % (numSchools - 1)) + 1,
           i,
@@ -52,7 +53,7 @@ class SchoolDBDML(val profile: JdbcProfile) extends SchoolDbDDL {
           Timestamp.valueOf("2019-12-15 14:19:25.954171")
         )
       },
-      SchoolAssignments ++= (1 to numStudents).filter(_ % 5 == 0).map { i =>
+      SchoolAssignments ++= (1 to numStudents).filterNot(_ % noSchool == 0).filter(_ % 5 == 0).map { i =>
         SchoolAssignmentsRow(
           (i % (numSchools - 1)) + 1,
           i,
@@ -106,7 +107,7 @@ class SchoolDBDML(val profile: JdbcProfile) extends SchoolDbDDL {
         )
       }
     )
-    DBIO.seq(seq: _ *)
+    DBIO.seq()
   }
 
   def eventInserts1 = {
@@ -117,14 +118,14 @@ class SchoolDBDML(val profile: JdbcProfile) extends SchoolDbDDL {
         EventTypesRow("graduation"),
         EventTypesRow("student_class_attendance")
       ),
-      Events ++= (1 to numStudents).map { i =>
+      Events ++= (1 to numStudents).filterNot(_ % noSchool == 0).map { i =>
         EventsRow(
           i,
           "enrollment",
-          Some(i % (numDistricts - 1) + 1),
-          Some(i % (numSchools - 1) + 1),
+          Some((i % (numDistricts - 1)) + 1),
+          Some((i % (numSchools - 1)) + 1),
           Some(i),
-          Some(i % 999 + 1),
+          Some((i % (numSchools - 1)) + 1),
           Some(i),
           None,
           None,
@@ -163,7 +164,7 @@ class SchoolDBDML(val profile: JdbcProfile) extends SchoolDbDDL {
 
   def eventsInsert3 = {
     val seq = Seq(
-      Events ++= (1 to numStudents * 3).map { i =>
+      Events ++= (1 to numStudents * 3).filterNot(i => ((i + 2) / 3) % noSchool == 0).map { i =>
         EventsRow(
           i + 2000000,
           "student_class_attendance",
