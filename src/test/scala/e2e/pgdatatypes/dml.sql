@@ -92,3 +92,6 @@ VALUES
   (1, '2d19bf31-7f45-4e31-90ef-c81410f2876f'),
   (3000000000, '9bd7b1f8-7175-42d6-8ac9-3b16c67d3686'),
   (4000000001, NULL);
+
+INSERT INTO citext_table (notes)
+VALUES ('AbcEfgHij');
