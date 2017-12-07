@@ -12,7 +12,9 @@ class CrossSchemaSqlServerTest extends AbstractSqlServerEndToEndTest with CrossS
   )
 
   override def setupDDL(): Unit = {
-    s"./src/test/scala/e2e/crossschema/create_schemas_sqlserver.sh $containerName $dataSetName".!!
+    s"./src/test/util/create_schema_sqlserver.sh $containerName $dataSetName schema_1".!!
+    s"./src/test/util/create_schema_sqlserver.sh $containerName $dataSetName schema_2".!!
+    s"./src/test/util/create_schema_sqlserver.sh $containerName $dataSetName schema_3".!!
     super.setupDDL()
   }
 }

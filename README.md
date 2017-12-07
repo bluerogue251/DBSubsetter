@@ -48,7 +48,7 @@ $ java -jar /path/to/DBSubsetter.jar \
     --targetDbParallelism 8
 ```
 
-3. After DBSubsetter exits, do any last steps as necessary. See vendor-specific instructions for [Postgres](docs/post_subset_postgres.md), [MySQL](docs/post_subset_mysql.md), and [Microsoft SQL Sever](docs/post_subset_ms_sql_server.md).
+3. After DBSubsetter exits, do any last steps as necessary. See vendor-specific instructions for [Postgres](docs/post_subset_postgres.md), [MySQL](docs/post_subset_mysql.md), and [Microsoft SQL Server](docs/post_subset_ms_sql_server.md).
 
 
 ## Resource consumption
@@ -58,7 +58,7 @@ Memory usage will be proportional to the size of all the primary keys in the tar
 
 ## Contributing
 
-Contributions of all kinds are welcome here!
+Contributions of all kinds are welcome!
 
 Whether it is to fix a typo, improve the documentation, report or fix a bug, add a new feature, or whatever else you have in mind, feel free to open an issue or a pull request on the project [GitHub page](https://github.com/bluerogue251/DBSubsetter).
 
@@ -74,11 +74,11 @@ DBSubsetter was inspired by and borrowed ideas from:
 
 Here are some other similar or related resources:
 
+* [db_subsetter](https://github.com/lostapathy/db_subsetter)
 * [DataBee](https://www.databee.com/)
 * [pg_sample](https://github.com/mla/pg_sample)
 * [This stack overflow question](https://stackoverflow.com/questions/3980379/how-to-export-consistent-subset-of-database)
 * [DATPROF](http://www.datprof.com/products/datprof-subset/)
-* [db_subsetter](https://github.com/lostapathy/db_subsetter)
 * [abridger](https://github.com/freewilll/abridger)
 * [postgres-subset](https://github.com/BeautifulDestinations/postgres-subset)
 
