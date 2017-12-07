@@ -94,8 +94,8 @@ class SchoolDBDML(val profile: JdbcProfile) extends SchoolDbDDL {
 
   def homeworkGradeInserts = {
     val factor = 3
-    val seq = Seq(
-      HomeworkGrades ++= (1 to (numStudents * factor)).map { i =>
+    val seq = (1 to (numStudents * factor)).grouped(5000).toVector.map { xs =>
+      HomeworkGrades ++= xs.map { i =>
         HomeworkGradesRow(
           i,
           (i + factor - 1) / factor,
@@ -107,7 +107,7 @@ class SchoolDBDML(val profile: JdbcProfile) extends SchoolDbDDL {
           Timestamp.valueOf("2017-11-25 09:19:27.333667")
         )
       }
-    )
+    }
     DBIO.seq(seq: _*)
   }
 
@@ -165,8 +165,8 @@ class SchoolDBDML(val profile: JdbcProfile) extends SchoolDbDDL {
 
   def eventsInsert3 = {
     val factor = 4
-    val seq = Seq(
-      Events ++= (1 to numStudents * factor).filterNot(i => ((i + 2) / factor) % noSchool == 0).map { i =>
+    val seq = (1 to numStudents * factor).filterNot(i => ((i + 2) / factor) % noSchool == 0).grouped(5000).toVector.map { xs =>
+      Events ++= xs.map { i =>
         EventsRow(
           i + 2000000,
           "student_class_attendance",
@@ -183,7 +183,7 @@ class SchoolDBDML(val profile: JdbcProfile) extends SchoolDbDDL {
           Timestamp.valueOf("1999-10-25 11:19:27.888999")
         )
       }
-    )
+    }
     DBIO.seq(seq: _*)
   }
 

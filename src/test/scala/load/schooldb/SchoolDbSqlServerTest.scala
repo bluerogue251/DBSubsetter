@@ -13,13 +13,19 @@ class SchoolDbSqlServerTest extends AbstractSqlServerEndToEndTest with SchoolDbT
     "--excludeColumns", "school_db.schools(mascot)"
   )
 
-  override def setupDDL(): Unit = {
-    s"./src/test/util/create_schema_sqlserver.sh $containerName $dataSetName school_db".!!
-    s"./src/test/util/create_schema_sqlserver.sh $containerName $dataSetName Audit".!!
-    super.setupDDL()
+  override def createOriginDb(): Unit = {
+    s"docker start school_db_sqlserver".!
   }
 
-  override val singleThreadedRuntimeThreshold: Long = 130000
+  override def setupDDL(): Unit = {
+    //    s"./src/test/util/create_schema_sqlserver.sh $containerName $dataSetName school_db".!!
+    //    s"./src/test/util/create_schema_sqlserver.sh $containerName $dataSetName Audit".!!
+    //    super.setupDDL()
+  }
 
-  override val akkaStreamsRuntimeThreshold: Long = 22000
+  override def setupDML(): Unit = {}
+
+  override val singleThreadedRuntimeThreshold: Long = 90000
+
+  override val akkaStreamsRuntimeThreshold: Long = 25000
 }

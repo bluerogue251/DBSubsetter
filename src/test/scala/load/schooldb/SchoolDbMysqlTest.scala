@@ -13,12 +13,8 @@ class SchoolDbMysqlTest extends AbstractMysqlEndToEndTest with SchoolDbTestCases
     "--excludeColumns", "school_db.schools(mascot)"
   )
 
-  override def setupTargetDbs(): Unit = {
-    super.setupTargetDbs()
-    s"./src/test/util/create_mysql_db.sh Audit $targetSingleThreadedPort".!!
-    s"./src/test/util/sync_mysql_origin_to_target.sh Audit $originPort $targetSingleThreadedPort".!!
-    s"./src/test/util/create_mysql_db.sh Audit $targetAkkaStreamsPort".!!
-    s"./src/test/util/sync_mysql_origin_to_target.sh Audit $originPort $targetAkkaStreamsPort".!!
+  override def createOriginDb(): Unit = {
+    s"docker start school_db_origin_mysql".!
   }
 
   override def setupDDL(): Unit = {
@@ -28,8 +24,12 @@ class SchoolDbMysqlTest extends AbstractMysqlEndToEndTest with SchoolDbTestCases
 
   override def setupDML(): Unit = {}
 
-  override def createOriginDb(): Unit = {
-    s"docker start school_db_origin_mysql".!
+  override def setupTargetDbs(): Unit = {
+    super.setupTargetDbs()
+    s"./src/test/util/create_mysql_db.sh Audit $targetSingleThreadedPort".!!
+    s"./src/test/util/sync_mysql_origin_to_target.sh Audit $originPort $targetSingleThreadedPort".!!
+    s"./src/test/util/create_mysql_db.sh Audit $targetAkkaStreamsPort".!!
+    s"./src/test/util/sync_mysql_origin_to_target.sh Audit $originPort $targetAkkaStreamsPort".!!
   }
 
   override val singleThreadedRuntimeThreshold: Long = 1100000
