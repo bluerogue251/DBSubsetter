@@ -25,7 +25,7 @@ object ApplicationSingleThreaded {
       }
       taskOpt.foreach { task =>
         val dbResult = originDbWorkflow.process(task)
-        val pksAdded = pkWorkflow.add(dbResult)
+        val pksAdded = if (dbResult.table.storePks) pkWorkflow.add(dbResult) else SkipPkStore.process(dbResult)
         targetDbWorkflow.process(pksAdded)
         val newTasks = NewFkTaskWorkflow.process(pksAdded, schemaInfo)
         queue.enqueue(newTasks: _*)

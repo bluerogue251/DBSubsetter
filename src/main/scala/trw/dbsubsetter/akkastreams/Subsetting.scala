@@ -44,14 +44,15 @@ object Subsetting {
       balanceTargetDb ~> TargetDb.insert(config, schemaInfo).async ~> mergeTargetDbResults
     }
 
-    // Origin DB Results ~> PkStoreAdd ~> NewTasks
-    //                          ~> TargetDbInserts
+    // Origin DB Results ~> PkStoreAdd   ~>  |merge| ~> NewTasks
+    //                   ~> DoNotStorePk ~>  |merge| ~> TargetDbInserts
+    //
+    //
     mergeOriginDbResults ~> partitionOriginDbResults
 
-    partitionOriginDbResults.out(0) ~> Flow[OriginDbResult].map { odr =>
-      val childRows = if (odr.fetchChildren) odr.rows else Vector.empty
-      PksAdded(odr.table, odr.rows, childRows, odr.viaTableOpt)
-    } ~> mergePksAdded
+    partitionOriginDbResults.out(0) ~>
+      Flow[OriginDbResult].map(SkipPkStore.process) ~>
+      mergePksAdded
 
     partitionOriginDbResults.out(1) ~>
       Flow[OriginDbResult].mapAsync(500)(dbResult => (pkStore ? dbResult).mapTo[PksAdded]) ~>
