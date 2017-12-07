@@ -3,7 +3,7 @@ package load.schooldb
 trait SchoolDbDDL {
   val profile: slick.jdbc.JdbcProfile
 
-  def mainSchema: String = "school_db"
+  val mainSchema: String = "school_db"
 
   import profile.api._
 

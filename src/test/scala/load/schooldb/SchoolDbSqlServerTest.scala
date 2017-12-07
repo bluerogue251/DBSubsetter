@@ -7,15 +7,15 @@ import scala.sys.process._
 class SchoolDbSqlServerTest extends AbstractSqlServerEndToEndTest with SchoolDbTestCases with LoadTest {
   override val originPort = 5456
   override val programArgs = Array(
-    "--schemas", "dbo,Audit",
-    "--baseQuery", "dbo.Students ::: student_id % 100 = 0 ::: includeChildren",
-    "--baseQuery", "dbo.standalone_table ::: id < 4 ::: includeChildren",
-    "--excludeColumns", "dbo.schools(mascot)"
+    "--schemas", "school_db,Audit",
+    "--baseQuery", "school_db.Students ::: student_id % 100 = 0 ::: includeChildren",
+    "--baseQuery", "school_db.standalone_table ::: id < 4 ::: includeChildren",
+    "--excludeColumns", "school_db.schools(mascot)"
   )
-  override val mainSchema: String = "dbo"
 
   override def setupDDL(): Unit = {
-    s"./src/test/scala/e2e/crossschema/create_schemas_sqlserver.sh $containerName $dataSetName [Audit]".!!
+    s"./src/test/util/create_schema_sqlserver.sh $containerName $dataSetName school_db".!!
+    s"./src/test/util/create_schema_sqlserver.sh $containerName $dataSetName Audit".!!
     super.setupDDL()
   }
 

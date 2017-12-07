@@ -7,12 +7,11 @@ import scala.sys.process._
 class SchoolDbPostgresqlTest extends AbstractPostgresqlEndToEndTest with SchoolDbTestCases with LoadTest {
   override val originPort = 5453
   override val programArgs = Array(
-    "--schemas", "public,Audit",
-    "--baseQuery", "public.Students ::: student_id % 100 = 0 ::: includeChildren",
-    "--baseQuery", "public.standalone_table ::: id < 4 ::: includeChildren",
-    "--excludeColumns", "public.schools(mascot)"
+    "--schemas", "school_db,Audit",
+    "--baseQuery", "school_db.Students ::: student_id % 100 = 0 ::: includeChildren",
+    "--baseQuery", "school_db.standalone_table ::: id < 4 ::: includeChildren",
+    "--excludeColumns", "school_db.schools(mascot)"
   )
-  override val mainSchema: String = "public"
 
 
   override def createOriginDb(): Unit = {
@@ -22,8 +21,8 @@ class SchoolDbPostgresqlTest extends AbstractPostgresqlEndToEndTest with SchoolD
   override def setupDML(): Unit = {}
 
   override def setupDDL(): Unit = {
-    //    s"psql --host 0.0.0.0 --port $originPort --user postgres $dataSetName --file ./src/test/scala/load/schooldb/create_Audit_schema_postgresql.sql".!!
-    //    super.setupDDL()
+    s"psql --host 0.0.0.0 --port $originPort --user postgres $dataSetName --file ./src/test/scala/load/schooldb/create_schemas_postgresql.sql".!!
+    super.setupDDL()
   }
 
   override val singleThreadedRuntimeThreshold: Long = 220000
