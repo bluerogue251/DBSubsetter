@@ -44,10 +44,8 @@ object Subsetting {
       balanceTargetDb ~> TargetDb.insert(config, schemaInfo).async ~> mergeTargetDbResults
     }
 
-    // Origin DB Results ~> PkStoreAdd   ~>  |merge| ~> NewTasks
-    //                   ~> DoNotStorePk ~>  |merge| ~> TargetDbInserts
-    //
-    //
+    // Origin DB Results ~> PkStoreAdd  ~> |merge| ~> NewTasks
+    //                   ~> SkipPkStore ~> |merge| ~> TargetDbInserts
     mergeOriginDbResults ~> partitionOriginDbResults
 
     partitionOriginDbResults.out(0) ~>
