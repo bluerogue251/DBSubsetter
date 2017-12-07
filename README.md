@@ -31,7 +31,7 @@ Feel free to open a GitHub ticket if you would like support for a different data
 
 ```bash
 # Download the DBSubsetter.jar file
-$ wget https://github.com/bluerogue251/DBSubsetter/releases/download/v1.0.0-beta.1/DBSubsetter.jar --output-document /path/to/DBSubsetter.jar
+$ wget https://github.com/bluerogue251/DBSubsetter/releases/download/v1.0.0-beta.2/DBSubsetter.jar --output-document /path/to/DBSubsetter.jar
  
 # Show explanation and examples of how to configure multiple schemas, 
 # multiple base queries, missing foreign or primary keys, columns to exclude,
@@ -58,7 +58,7 @@ Memory usage will be proportional to the size of all the primary keys in the tar
 
 ## Contributing
 
-Contributions of all kinds are welcome here!
+Contributions of all kinds are welcome!
 
 Whether it is to fix a typo, improve the documentation, report or fix a bug, add a new feature, or whatever else you have in mind, feel free to open an issue or a pull request on the project [GitHub page](https://github.com/bluerogue251/DBSubsetter).
 
@@ -74,11 +74,10 @@ DBSubsetter was inspired by and borrowed ideas from:
 
 Here are some other similar or related resources:
 
+* [db_subsetter](https://github.com/lostapathy/db_subsetter)
 * [DataBee](https://www.databee.com/)
 * [pg_sample](https://github.com/mla/pg_sample)
-* [This stack overflow question](https://stackoverflow.com/questions/3980379/how-to-export-consistent-subset-of-database)
 * [DATPROF](http://www.datprof.com/products/datprof-subset/)
-* [db_subsetter](https://github.com/lostapathy/db_subsetter)
 * [abridger](https://github.com/freewilll/abridger)
 * [postgres-subset](https://github.com/BeautifulDestinations/postgres-subset)
 

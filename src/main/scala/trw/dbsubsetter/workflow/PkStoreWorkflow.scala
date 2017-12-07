@@ -12,6 +12,12 @@ class PkStoreWorkflow(pkOrdinalsByTable: Map[Table, Seq[Int]]) {
   // IF a PK is on the parent side, then only its parents have been fetched
   // There is no such thing as having fetched a row's children but not having fetched its parents
   // If a PK is in there at all, then at any given time, it is either in the parent set or child set, never both at once.
+  //
+  // Optimization may be possible by changing AnyRef to Any, and/or changing HashSet to TreeSet
+  // Using `Any` would in theory allow us to use primitive Ints instead of Integer for PK storage, etc.
+  // TreeSet in theory might provide more stable runtime of operations, so that we never encounter one big
+  // time when we need to double the size of the HashSet, etc.
+  // Both potential optimizations would need testing: it's not clear how much if any good they would do
   private val pkStore: Map[Table, (mutable.HashSet[AnyRef], mutable.HashSet[AnyRef])] = tables.map { t =>
     t -> (mutable.HashSet.empty[AnyRef], mutable.HashSet.empty[AnyRef])
   }.toMap

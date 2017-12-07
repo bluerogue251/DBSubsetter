@@ -103,3 +103,9 @@ CREATE TABLE uuid_child_table (
   id            BIGSERIAL PRIMARY KEY,
   uuid_table_id UUID NULL REFERENCES uuid_table (id)
 );
+
+CREATE EXTENSION citext;
+CREATE TABLE citext_table (
+  id    SERIAL PRIMARY KEY,
+  notes CITEXT NULL
+);

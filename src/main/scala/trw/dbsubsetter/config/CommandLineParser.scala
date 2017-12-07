@@ -5,7 +5,7 @@ import trw.dbsubsetter.db.{ColumnName, SchemaName, TableName}
 
 object CommandLineParser {
   val parser: OptionParser[Config] = new OptionParser[Config]("DBSubsetter") {
-    head("DBSubsetter", "v1.0.0-beta.1")
+    head("DBSubsetter", "v1.0.0-beta.2")
     help("help").text("Prints this usage text\n")
     version("version").text("Prints the application version\n")
 
@@ -67,13 +67,19 @@ object CommandLineParser {
       .valueName("<int>")
       .required()
       .action((dbp, c) => c.copy(originDbParallelism = dbp))
-      .text("Number of concurrent connections to the full-size origin DB\n")
+      .text(
+        """Number of concurrent connections to the full-size origin DB
+          |                           A good starting value is the number of CPU cores on your origin database machine
+        """.stripMargin)
 
     opt[Int]("targetDbParallelism")
       .valueName("<int>")
       .required()
       .action((dbp, c) => c.copy(targetDbParallelism = dbp))
-      .text("Number of concurrent connections to the smaller target DB\n")
+      .text(
+        """Number of concurrent connections to the smaller target DB
+          |                           A good starting value is the number of CPU cores on your target database machine
+        """.stripMargin)
 
     opt[String]("foreignKey")
       .maxOccurs(Int.MaxValue)

@@ -50,6 +50,8 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
   lazy val targetAkkaStreamsPort: Int = originPort + 2
   lazy val targetSingleThreadedConnString: String = makeConnStr(targetSingleThreadedPort, targetSingleThreadedDbName)
   lazy val targetAkkaStreamsConnString: String = makeConnStr(targetAkkaStreamsPort, targetAkkaStreamsDbName)
+  var singleThreadedRuntimeMillis: Long = 0
+  var akkStreamsRuntimeMillis: Long = 0
 
   override protected def beforeAll(): Unit = {
     super.beforeAll()
@@ -74,18 +76,16 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
     val schemaInfo = SchemaInfoRetrieval.getSchemaInfo(singleThreadedConfig)
     val baseQueries = BaseQueries.get(singleThreadedConfig, schemaInfo)
 
-    val startSt = System.nanoTime()
+    val startSingleThreaded = System.nanoTime()
     ApplicationSingleThreaded.run(singleThreadedConfig, schemaInfo, baseQueries)
-    val endSt = System.nanoTime()
-    val tookMillis = (endSt - startSt) / 1000000
-    println(s"Single Threaded Took $tookMillis milliseconds")
+    singleThreadedRuntimeMillis = (System.nanoTime() - startSingleThreaded) / 1000000
+    println(s"Single Threaded Took $singleThreadedRuntimeMillis milliseconds")
 
-    val startAs = System.nanoTime()
+    val startAkkaStreams = System.nanoTime()
     val futureResult = ApplicationAkkaStreams.run(akkaStreamsConfig, schemaInfo, baseQueries)
     Await.result(futureResult, Duration.Inf)
-    val endAs = System.nanoTime()
-    val tookMillisAs = (endAs - startAs) / 1000000
-    println(s"Akka Streams Took $tookMillisAs milliseconds")
+    akkStreamsRuntimeMillis = (System.nanoTime() - startAkkaStreams) / 1000000
+    println(s"Akka Streams Took $akkStreamsRuntimeMillis milliseconds")
 
     postSubset()
   }

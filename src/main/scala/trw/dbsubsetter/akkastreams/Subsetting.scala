@@ -4,7 +4,7 @@ import akka.NotUsed
 import akka.actor.ActorRef
 import akka.pattern.ask
 import akka.stream.scaladsl.GraphDSL.Implicits._
-import akka.stream.scaladsl.{Balance, Broadcast, Flow, GraphDSL, Merge, Source}
+import akka.stream.scaladsl.{Balance, Broadcast, Flow, GraphDSL, Merge, Partition, Source}
 import akka.stream.{OverflowStrategy, SourceShape}
 import akka.util.Timeout
 import trw.dbsubsetter.config.Config
@@ -21,7 +21,7 @@ object Subsetting {
     val mergeOriginDbRequests = b.add(Merge[OriginDbRequest](3))
     val balanceOriginDb = b.add(Balance[OriginDbRequest](config.originDbParallelism, waitForAllDownstreams = true))
     val mergeOriginDbResults = b.add(Merge[OriginDbResult](config.originDbParallelism))
-    val broadcastFkTasks = b.add(Broadcast[FkTask](2))
+    val partitionFkTasks = b.add(Partition[FkTask](2, t => if (FkTaskPreCheck.canPrecheck(t)) 1 else 0))
     val broadcastPkExistResult = b.add(Broadcast[PkResult](2))
     val broadcastPksAdded = b.add(Broadcast[PksAdded](2))
     val mergeNewTaskRequests = b.add(Merge[PkResult](2))
@@ -51,7 +51,7 @@ object Subsetting {
     broadcastPksAdded ~>
       mergeNewTaskRequests ~>
       NewTasks.flow(schemaInfo, baseQueries.size) ~>
-      broadcastFkTasks
+      partitionFkTasks
 
     broadcastPksAdded ~>
       Flow[PksAdded].buffer(Int.MaxValue, OverflowStrategy.backpressure) ~>
@@ -60,12 +60,9 @@ object Subsetting {
     // FkTasks ~> cannotBePrechecked       ~>        OriginDbRequest
     // FkTasks ~> canBePrechecked ~> PkStoreQuery ~> OriginDbRequest
     //                                            ~> DuplicateTask
-    broadcastFkTasks ~>
-      Flow[FkTask].filterNot(FkTaskPreCheck.needsPrecheck) ~>
-      mergeOriginDbRequests
+    partitionFkTasks.out(0) ~> mergeOriginDbRequests
 
-    broadcastFkTasks ~>
-      Flow[FkTask].filter(FkTaskPreCheck.needsPrecheck) ~>
+    partitionFkTasks.out(1) ~>
       Flow[FkTask].mapAsync(500)(req => (pkStore ? req).mapTo[PkResult]) ~>
       broadcastPkExistResult
 
