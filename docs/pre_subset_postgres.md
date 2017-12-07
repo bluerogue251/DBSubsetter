@@ -22,8 +22,3 @@ For users without superuser access to the "origin" database (for example, those 
 In this case, either the porting over of roles to the "target" database must be done manually, or `pg_dump` can be run with the `--no-privileges` and `--no-owner` options when dumping out `pre-data-dump.sql` so that missing roles are ignored.
 
 These instructions have been tested against `pg_dump` and `pg_dumpall` version 9.6.6. Commands might be slightly different if you are using a different version of these tools. See the [pg_dump docs](https://www.postgresql.org/docs/current/static/app-pgdump.html) and the [pg_dumpall docs](https://www.postgresql.org/docs/current/static/app-pg-dumpall.html) for more information.
-
-
-### Optimize your "target" database for fast inserts (optional)
-
-Consider running `ALTER TABLE <your_table> SET UNLOGGED;` on the "target" database for any tables you expect to be of significant size in your "target" database. See the relevant [docs](https://www.postgresql.org/docs/9.6/static/sql-createtable.html#SQL-CREATETABLE-UNLOGGED) for more information.
