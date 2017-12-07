@@ -20,7 +20,7 @@ object ApplicationSingleThreaded {
     // Run task queue until empty
     while (queue.nonEmpty) {
       val taskOpt: List[OriginDbRequest] = queue.dequeue() match {
-        case t: FkTask if FkTaskPreCheck.needsPrecheck(t) => List(pkWorkflow.exists(t)).collect { case t: FkTask => t }
+        case t: FkTask if FkTaskPreCheck.shouldPrecheck(t) => List(pkWorkflow.exists(t)).collect { case t: FkTask => t }
         case t => List(t)
       }
       taskOpt.foreach { task =>

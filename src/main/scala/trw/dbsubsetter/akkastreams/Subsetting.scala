@@ -21,8 +21,10 @@ object Subsetting {
     val mergeOriginDbRequests = b.add(Merge[OriginDbRequest](3))
     val balanceOriginDb = b.add(Balance[OriginDbRequest](config.originDbParallelism, waitForAllDownstreams = true))
     val mergeOriginDbResults = b.add(Merge[OriginDbResult](config.originDbParallelism))
-    val partitionFkTasks = b.add(Partition[FkTask](2, t => if (FkTaskPreCheck.canPrecheck(t)) 1 else 0))
+    val partitionOriginDbResults = b.add(Partition[OriginDbResult](2, res => if (res.table.storePks) 1 else 0))
+    val partitionFkTasks = b.add(Partition[FkTask](2, t => if (FkTaskPreCheck.shouldPrecheck(t)) 1 else 0))
     val broadcastPkExistResult = b.add(Broadcast[PkResult](2))
+    val mergePksAdded = b.add(Merge[PksAdded](2))
     val broadcastPksAdded = b.add(Broadcast[PksAdded](2))
     val mergeNewTaskRequests = b.add(Merge[PkResult](2))
     val balanceTargetDb = b.add(Balance[PksAdded](config.targetDbParallelism, waitForAllDownstreams = true))
@@ -42,11 +44,20 @@ object Subsetting {
       balanceTargetDb ~> TargetDb.insert(config, schemaInfo).async ~> mergeTargetDbResults
     }
 
-    // DB Results ~> PkStoreAdd ~> NewTasks
+    // Origin DB Results ~> PkStoreAdd ~> NewTasks
     //                          ~> TargetDbInserts
-    mergeOriginDbResults ~>
+    mergeOriginDbResults ~> partitionOriginDbResults
+
+    partitionOriginDbResults.out(0) ~> Flow[OriginDbResult].map { odr =>
+      val childRows = if (odr.fetchChildren) odr.rows else Vector.empty
+      PksAdded(odr.table, odr.rows, childRows, odr.viaTableOpt)
+    } ~> mergePksAdded
+
+    partitionOriginDbResults.out(1) ~>
       Flow[OriginDbResult].mapAsync(500)(dbResult => (pkStore ? dbResult).mapTo[PksAdded]) ~>
-      broadcastPksAdded
+      mergePksAdded
+
+    mergePksAdded ~> broadcastPksAdded
 
     broadcastPksAdded ~>
       mergeNewTaskRequests ~>
