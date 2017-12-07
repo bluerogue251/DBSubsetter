@@ -18,7 +18,7 @@ class PkStoreWorkflow(pkOrdinalsByTable: Map[Table, Seq[Int]]) {
   // TreeSet in theory might provide more stable runtime of operations, so that we never encounter one big
   // time when we need to double the size of the HashSet, etc.
   // Both potential optimizations would need testing: it's not clear how much if any good they would do
-  private val pkStore: Map[Table, (mutable.HashSet[AnyRef], mutable.HashSet[AnyRef])] = tables.map { t =>
+  private val pkStore: Map[Table, (mutable.HashSet[AnyRef], mutable.HashSet[AnyRef])] = tables.filter(_.storePks).map { t =>
     t -> (mutable.HashSet.empty[AnyRef], mutable.HashSet.empty[AnyRef])
   }.toMap
 

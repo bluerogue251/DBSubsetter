@@ -56,7 +56,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
   override protected def beforeAll(): Unit = {
     super.beforeAll()
 
-    //    createOriginDb()
+    createOriginDb()
 
     val originConnString = makeConnStr(originPort, originDbName)
     val sharedArgs = Array("--originDbConnStr", originConnString, "--originDbParallelism", "10", "--targetDbParallelism", "10")
@@ -66,8 +66,8 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
     val akkaStreamsConfig = CommandLineParser.parser.parse(asArgs, Config()).get
 
     originDb = profile.backend.Database.forURL(singleThreadedConfig.originDbConnectionString)
-    //    setupDDL()
-    //    setupDML()
+    setupDDL()
+    setupDML()
     setupTargetDbs()
     targetDbSt = profile.backend.Database.forURL(singleThreadedConfig.targetDbConnectionString)
     targetDbAs = profile.backend.Database.forURL(akkaStreamsConfig.targetDbConnectionString)
