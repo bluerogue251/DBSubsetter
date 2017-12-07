@@ -1,2 +1,3 @@
-* Test foreign key pointing to a non-primary key
+* Test UUID data types in MySQL and SQL Server
+* Test citext data type in Postgres
 * Consider if for certain schemas we can skip storing certain tables' PKs because we know we will only ever see a row once?
