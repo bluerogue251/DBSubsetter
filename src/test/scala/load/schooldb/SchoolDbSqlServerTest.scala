@@ -25,7 +25,7 @@ class SchoolDbSqlServerTest extends AbstractSqlServerEndToEndTest with SchoolDbT
 
   override def setupDML(): Unit = {}
 
-  override val singleThreadedRuntimeThreshold: Long = 90000
+  override val singleThreadedRuntimeThreshold: Long = 110000
 
   override val akkaStreamsRuntimeThreshold: Long = 25000
 }

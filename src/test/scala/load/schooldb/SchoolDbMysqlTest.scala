@@ -32,7 +32,7 @@ class SchoolDbMysqlTest extends AbstractMysqlEndToEndTest with SchoolDbTestCases
     s"./src/test/util/sync_mysql_origin_to_target.sh Audit $originPort $targetAkkaStreamsPort".!!
   }
 
-  override val singleThreadedRuntimeThreshold: Long = 1100000
+  override val singleThreadedRuntimeThreshold: Long = 1150000
 
-  override val akkaStreamsRuntimeThreshold: Long = 130000
+  override val akkaStreamsRuntimeThreshold: Long = 120000
 }
