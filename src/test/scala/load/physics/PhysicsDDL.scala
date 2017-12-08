@@ -45,27 +45,28 @@ trait PhysicsDDL {
 
   lazy val Scientists = new TableQuery(tag => new Scientists(tag))
 
-  case class ExperimentMetadataRow(id: Int, metadata: String, scientistId: Option[Int], createdAt: java.sql.Timestamp)
+  case class ExperimentMetadataRow(id: Int, metadata: String, scientistId: Int, createdAt: java.sql.Timestamp)
 
   class ExperimentMetadata(_tableTag: Tag) extends profile.api.Table[ExperimentMetadataRow](_tableTag, "experiment_metadata") {
     def * = (id, metadata, scientistId, createdAt) <> (ExperimentMetadataRow.tupled, ExperimentMetadataRow.unapply)
 
     val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
     val metadata: Rep[String] = column[String]("metadata")
-    val scientistId: Rep[Option[Int]] = column[Option[[Int]]("scientist_id")
+    val scientistId: Rep[Int] = column[Int]("scientist_id")
     val createdAt: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("created_at")
   }
 
   lazy val ExperimentMetadata = new TableQuery(tag => new ExperimentMetadata(tag))
 
-  case class ExperimentPlan(id: Int, planDescription: String, scientistId: Int, createdAt: java.sql.Timestamp)
+  case class ExperimentPlan(id: Int, planDescription: String, scientistId: Int, metadataId: Int, createdAt: java.sql.Timestamp)
 
   class ExperimentPlans(_tableTag: Tag) extends profile.api.Table[ExperimentPlan](_tableTag, "experiment_plans") {
-    def * = (id, planDescription, scientistId, createdAt) <> (ExperimentPlan.tupled, ExperimentPlan.unapply)
+    def * = (id, planDescription, scientistId, metadataId, createdAt) <> (ExperimentPlan.tupled, ExperimentPlan.unapply)
 
     val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
     val planDescription: Rep[String] = column[String]("planDescription")
     val scientistId: Rep[Int] = column[Int]("scientist_id")
+    val metadataId: Rep[Int] = column[Int]("metadata_id")
     val createdAt: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("created_at")
   }
 

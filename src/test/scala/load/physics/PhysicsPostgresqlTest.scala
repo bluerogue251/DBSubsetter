@@ -3,29 +3,23 @@ package load.physics
 import e2e.AbstractPostgresqlEndToEndTest
 import load.LoadTest
 
-import scala.sys.process._
-
 class PhysicsPostgresqlTest extends AbstractPostgresqlEndToEndTest with PhysicsTestCases with LoadTest {
-  override val originPort = 5453
+  override val originPort = 5573
   override val programArgs = Array(
-    "--schemas", "school_db,Audit",
-    "--baseQuery", "school_db.Students ::: student_id % 100 = 0 ::: includeChildren",
-    "--baseQuery", "school_db.standalone_table ::: id < 4 ::: includeChildren",
-    "--excludeColumns", "school_db.schools(mascot)"
+    "--schemas", "public",
+    "--baseQuery", "public.scientists ::: id % 2 = 0 ::: includeChildren",
+    "--baseQuery", "public.experiment_plans ::: id % 19 = 0 ::: includeChildren"
   )
 
-  override def createOriginDb(): Unit = {
-    s"docker start school_db_origin_postgres".!
-  }
+  //  override def createOriginDb(): Unit = s"docker start school_db_origin_mysql".!
 
-  override def setupDML(): Unit = {}
+  //  override def setupDDL(): Unit = {}
 
-  override def setupDDL(): Unit = {
-    //    s"psql --host 0.0.0.0 --port $originPort --user postgres $dataSetName --file ./src/test/scala/load/Physics/create_schemas_postgresql.sql".!!
-    //    super.setupDDL()
-  }
+  //  override def setupDML(): Unit = {}
 
-  override val singleThreadedRuntimeThreshold: Long = 210000
+  //  override def setupTargetDbs(): Unit = {}
 
-  override val akkaStreamsRuntimeThreshold: Long = 24000
+  override val singleThreadedRuntimeThreshold: Long = 2
+
+  override val akkaStreamsRuntimeThreshold: Long = 2
 }
