@@ -21,47 +21,47 @@ trait PhysicsTestCases extends AbstractEndToEndTest with PhysicsDDL with SlickSe
 
   test("Correct research_institutions were included") {
     assertCount(ResearchInstitutions, 9)
-    assertThat(ResearchInstitutions.map(_.id).sum.result, 1)
+    assertThat(ResearchInstitutions.map(_.id).sum.result, 45)
   }
 
-  test("Correct research_groupss were included") {
+  test("Correct research_groups were included") {
     assertCount(ResearchGroups, 29)
-    assertThat(ResearchGroups.map(_.id).sum.result, 1)
+    assertThat(ResearchGroups.map(_.id).sum.result, 435)
   }
 
   test("Correct scientists were included") {
     assertCount(Scientists, 50)
-    assertThat(Scientists.map(_.id).sum.result, 1)
+    assertThat(Scientists.map(_.id).sum.result, 2550)
   }
 
   test("Correct experiment_metadata rows were included") {
     assertCount(ExperimentMetadata, 5)
-    assertThat(ExperimentMetadata.map(_.id).sum.result, 1)
+    assertThat(ExperimentMetadata.map(_.id).sum.result, 25)
   }
 
   test("Correct experiment_plans were included") {
     assertCount(ExperimentPlans, 5)
-    assertThat(ExperimentPlans.map(_.id).sum.result, 1)
+    assertThat(ExperimentPlans.map(_.id).sum.result, 25)
   }
 
   test("Correct experiments were included") {
     assertCount(Experiments, 111)
-    assertThat(Experiments.map(_.id).sum.result, 1)
+    assertThat(Experiments.map(_.id).sum.result, 11233)
   }
 
   test("Correct particle_domain rows were included") {
-    assertCount(ParticleDomain, 1)
-    assertThat(ParticleDomain.map(_.id).sum.result, 1)
+    assertCount(ParticleDomain, 1000000)
+    assertThat(ParticleDomain.map(_.id).sum.result, 1000000)
   }
 
   test("Correct quantum_domain rows were included") {
     assertCount(QuantumDomain, 1)
-    assertThat(QuantumDomain.map(_.id).sum.result, 1)
+    assertThat(QuantumDomain.map(_.id).sum.result, 1000000)
   }
 
   test("Correct gravitational_wave_domain rows were included") {
-    assertCount(GravitationalWaveDomain, 1)
-    assertThat(GravitationalWaveDomain.map(_.id).sum.result, 1)
+    assertCount(GravitationalWaveDomain, 1000000)
+    assertThat(GravitationalWaveDomain.map(_.id).sum.result, 1000000)
   }
 
   test("Correct particle_collider_data rows were included") {
