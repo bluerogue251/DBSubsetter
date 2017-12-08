@@ -1,2 +1,4 @@
 * Test UUID data types in MySQL and SQL Server
 * IN-PROGRESS Consider if for certain schemas we can skip storing certain tables' PKs because we know we will only ever see a row once?
+* Optimize case where a unique index means we might _not_ have to store PKs for a table
+* Optimize case where we know we are fetching _all_ PKs for a table so we can skip their FK tasks and their PKs
