@@ -1,4 +1,4 @@
-package load.schooldb
+package load
 
 import org.scalatest.FunSuite
 
