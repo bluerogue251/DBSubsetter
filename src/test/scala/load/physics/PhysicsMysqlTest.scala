@@ -14,13 +14,13 @@ class PhysicsMysqlTest extends AbstractMysqlEndToEndTest with PhysicsTestCases w
     "--baseQuery", "physics.gravitational_wave_domain ::: true ::: excludeChildren"
   )
 
-  //  override def createOriginDb(): Unit = s"docker start school_db_origin_mysql".!
-
-  //  override def setupDDL(): Unit = {}
-
-  //  override def setupDML(): Unit = {}
-
-  //  override def setupTargetDbs(): Unit = {}
+  //    override def createOriginDb(): Unit = s"docker start physics_origin_mysql".!
+  //
+  //    override def setupDDL(): Unit = {}
+  //
+  //    override def setupDML(): Unit = {}
+  //
+  //    override def setupTargetDbs(): Unit = {}
 
   override val singleThreadedRuntimeThreshold: Long = 2
 

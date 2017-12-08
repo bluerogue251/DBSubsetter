@@ -14,7 +14,7 @@ class PhysicsSqlServerTest extends AbstractSqlServerEndToEndTest with PhysicsTes
     "--baseQuery", "dbo.gravitational_wave_domain ::: true ::: excludeChildren"
   )
 
-  //  override def createOriginDb(): Unit = s"docker start school_db_origin_mysql".!
+  //  override def createOriginDb(): Unit = s"docker start physics_sqlserver".!
 
   //  override def setupDDL(): Unit = {}
 
