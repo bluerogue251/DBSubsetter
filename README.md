@@ -9,7 +9,7 @@ This is useful for local development and testing or for exporting all the data b
 
 ## Project Goals
 
-_High performance_: Optimized to take advantage of parallelism for fast runtimes on large datasets.
+_High performance_: Optimized for fast runtimes on large datasets.
 
 _Deterministic_: Identical inputs yield identical outputs. Random subsets are possible, but only if purposely configured.
 
@@ -53,7 +53,7 @@ $ java -jar /path/to/DBSubsetter.jar \
 
 ## Resource consumption
 
-Memory usage in the worst case is proportional to the size of all the primary keys in the small target database. However, depending on your schema structure, in practice DBSubsetter often uses just a small fraction of that amount. To see which tables will need to have their primary keys stored, run DBSubsetter with the `--printPkStoreTables` option.
+Memory usage in the worst case is proportional to the size of all the primary keys in the small "target" database. However, depending on your schema structure, in practice DBSubsetter often uses just a small fraction of that amount. To see which tables will need to have their primary keys stored, run DBSubsetter with the `--printPkStoreTables` option.
 
 Temporary spikes above this amount can sometimes occur when copying rows between databases.
 
