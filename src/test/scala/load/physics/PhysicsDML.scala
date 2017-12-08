@@ -68,6 +68,42 @@ class PhysicsDML(val profile: JdbcProfile) extends PhysicsDDL {
 
     DBIO.seq(seq: _*)
   }
+
+  def particleDomainInserts = {
+    (1 to 1000000).grouped(10000).toVector.map { xs =>
+      ParticleDomain ++= xs.map { i =>
+        ParticleDomainRow(
+          i,
+          s"Particle Domain Row # $i",
+          Timestamp.valueOf("1982-12-15 14:19:25.954171")
+        )
+      }
+    }
+  }
+
+  def quantumDomainInserts = {
+    (1 to 1000000).grouped(10000).toVector.map { xs =>
+      QuantumDomain ++= xs.map { i =>
+        QuantumDomainRow(
+          i,
+          s"Quantum Domain Row # $i",
+          Timestamp.valueOf("1983-07-26 18:19:25.253169")
+        )
+      }
+    }
+  }
+
+  def gravitationalWaveDomainInserts = {
+    (1 to 1000000).grouped(10000).toVector.map { xs =>
+      GravitationalWaveDomain ++= xs.map { i =>
+        GravitationalWaveDomainRow(
+          i,
+          s"Gravitational Wave Domain Row # $i",
+          Timestamp.valueOf("2001-12-29 23:59:59.182131")
+        )
+      }
+    }
+  }
 }
 
 

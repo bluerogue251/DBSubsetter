@@ -8,7 +8,10 @@ class PhysicsSqlServerTest extends AbstractSqlServerEndToEndTest with PhysicsTes
   override val programArgs = Array(
     "--schemas", "dbo",
     "--baseQuery", "dbo.scientists ::: id % 2 = 0 ::: includeChildren",
-    "--baseQuery", "dbo.experiment_plans ::: id % 19 = 0 ::: includeChildren"
+    "--baseQuery", "dbo.experiment_plans ::: id % 19 = 0 ::: includeChildren",
+    "--baseQuery", "dbo.particle_domain ::: true ::: excludeChildren",
+    "--baseQuery", "dbo.quantum_domain ::: true ::: excludeChildren",
+    "--baseQuery", "dbo.gravitational_wave_domain ::: true ::: excludeChildren"
   )
 
   //  override def createOriginDb(): Unit = s"docker start school_db_origin_mysql".!

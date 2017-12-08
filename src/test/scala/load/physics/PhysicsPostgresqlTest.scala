@@ -8,7 +8,10 @@ class PhysicsPostgresqlTest extends AbstractPostgresqlEndToEndTest with PhysicsT
   override val programArgs = Array(
     "--schemas", "public",
     "--baseQuery", "public.scientists ::: id % 2 = 0 ::: includeChildren",
-    "--baseQuery", "public.experiment_plans ::: id % 19 = 0 ::: includeChildren"
+    "--baseQuery", "public.experiment_plans ::: id % 19 = 0 ::: includeChildren",
+    "--baseQuery", "public.particle_domain ::: true ::: excludeChildren",
+    "--baseQuery", "public.quantum_domain ::: true ::: excludeChildren",
+    "--baseQuery", "public.gravitational_wave_domain ::: true ::: excludeChildren"
   )
 
   //  override def createOriginDb(): Unit = s"docker start school_db_origin_mysql".!

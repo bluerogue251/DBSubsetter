@@ -8,7 +8,10 @@ class PhysicsMysqlTest extends AbstractMysqlEndToEndTest with PhysicsTestCases w
   override val programArgs = Array(
     "--schemas", "physics",
     "--baseQuery", "physics.scientists ::: id % 2 = 0 ::: includeChildren",
-    "--baseQuery", "physics.experiment_plans ::: id % 19 = 0 ::: includeChildren"
+    "--baseQuery", "physics.experiment_plans ::: id % 19 = 0 ::: includeChildren",
+    "--baseQuery", "physics.particle_domain ::: true ::: excludeChildren",
+    "--baseQuery", "physics.quantum_domain ::: true ::: excludeChildren",
+    "--baseQuery", "physics.gravitational_wave_domain ::: true ::: excludeChildren"
   )
 
   //  override def createOriginDb(): Unit = s"docker start school_db_origin_mysql".!
