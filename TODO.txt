@@ -3,3 +3,4 @@
 * Optimize case where a unique index means we might _not_ have to store PKs for a table
 * Optimize case where we know we are fetching _all_ PKs for a table so we can skip their FK tasks and their PKs
 * Make a YouTube tutorial
+* Make DBSubsetter available as a Maven/Ivy/SBT, etc library, for example by using package cloud

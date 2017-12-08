@@ -22,9 +22,7 @@ class PhysicsPostgresqlTest extends AbstractPostgresqlEndToEndTest with PhysicsT
 
   override def setupDML(): Unit = {}
 
-  override def setupTargetDbs(): Unit = {}
-
-  override val singleThreadedRuntimeThreshold: Long = 2
+  override val singleThreadedRuntimeThreshold: Long = 400000
 
   override val akkaStreamsRuntimeThreshold: Long = 2
 }

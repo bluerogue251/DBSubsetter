@@ -71,14 +71,17 @@ object SchemaInfoRetrieval {
         else ddl.getImportedKeys(catalog, table.schema, table.name)
       }
       while (foreignKeysJdbcResultSet.next()) {
-        foreignKeysQueryResult += ForeignKeyQueryRow(
-          if (isMysql) foreignKeysJdbcResultSet.getString("FKTABLE_CAT") else foreignKeysJdbcResultSet.getString("FKTABLE_SCHEM"),
-          foreignKeysJdbcResultSet.getString("FKTABLE_NAME"),
-          foreignKeysJdbcResultSet.getString("FKCOLUMN_NAME"),
-          if (isMysql) foreignKeysJdbcResultSet.getString("PKTABLE_CAT") else foreignKeysJdbcResultSet.getString("PKTABLE_SCHEM"),
-          foreignKeysJdbcResultSet.getString("PKTABLE_NAME"),
-          foreignKeysJdbcResultSet.getString("PKCOLUMN_NAME")
-        )
+        val toTable = foreignKeysJdbcResultSet.getString("PKTABLE_NAME")
+        if (true) { // (!Set("particle_domain", "quantum_domain", "gravitational_wave_domain").contains(toTable)) {
+          foreignKeysQueryResult += ForeignKeyQueryRow(
+            if (isMysql) foreignKeysJdbcResultSet.getString("FKTABLE_CAT") else foreignKeysJdbcResultSet.getString("FKTABLE_SCHEM"),
+            foreignKeysJdbcResultSet.getString("FKTABLE_NAME"),
+            foreignKeysJdbcResultSet.getString("FKCOLUMN_NAME"),
+            if (isMysql) foreignKeysJdbcResultSet.getString("PKTABLE_CAT") else foreignKeysJdbcResultSet.getString("PKTABLE_SCHEM"),
+            toTable,
+            foreignKeysJdbcResultSet.getString("PKCOLUMN_NAME")
+          )
+        }
       }
     }
 
@@ -90,7 +93,7 @@ object SchemaInfoRetrieval {
 
     val tablesByName = tablesQueryResult.map { t =>
       val hasSqlServerAutoincrement = columnsQueryResult.exists(c => c.schema == t.schema && c.table == t.name && c.isSqlServerAutoincrement)
-      val storePks = true
+      val storePks = true // !Set("particle_collider_data", "quantum_data", "gravitational_wave_data", "particle_domain", "quantum_domain", "gravitational_wave_domain").contains(t.name)
       (t.schema, t.name) -> Table(t.schema, t.name, hasSqlServerAutoincrement, storePks)
     }.toMap
 
