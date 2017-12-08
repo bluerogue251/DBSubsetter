@@ -53,9 +53,9 @@ $ java -jar /path/to/DBSubsetter.jar \
 
 ## Resource consumption
 
-In the worst case, memory usage is proportional to the size of all the primary keys in the smaller, "target" database. However, depending on your schema structure, DBSubsetter can often optimize memory usage to just a small fraction of that amount. For a list of tables which will need to have their primary keys stored, run DBSubsetter with the `--printPkStoreTables` option.
+In the worst case, memory usage is proportional to the size of all the primary keys in the small target database. However, depending on your schema structure, DBSubsetter often optimizes memory usage to just a small fraction of that amount. To see which tables will need to have their primary keys stored, run DBSubsetter with the `--printPkStoreTables` option.
 
-Temporary spikes above this amount can also sometimes occur when copying row data from the "origin" to the "target" database.
+Temporary spikes above this amount can also sometimes occur when copying row data between databases.
 
 
 ## Contributing
