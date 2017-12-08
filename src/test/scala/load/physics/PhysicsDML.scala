@@ -104,6 +104,63 @@ class PhysicsDML(val profile: JdbcProfile) extends PhysicsDDL {
       }
     }
   }
+
+  def particleColliderDataInserts = {
+    val factor = 25000
+    (1 to (numExperiments * factor)).grouped(5000).toVector.map { xs =>
+      ParticleColliderData ++= xs.map { i =>
+        ParticleColliderDataRow(
+          i,
+          (((i + (factor - 1)) / factor) % (numExperiments - 1)) + 1,
+          (i % (1000000 - 1)) + 1,
+          i,
+          (i * 2) * 1.378d,
+          (i * 3) * 1.378d,
+          (i * 4) * 1.378d,
+          (i * 5) * 1.378d,
+          i * 6,
+          i * 7,
+          i * 8,
+          s"Particle Collider Data # $i (1)",
+          s"More Particle Collider Data # $i (2)",
+          s"Even Particle Collider Data # $i (3)",
+          Timestamp.valueOf("2001-12-29 23:59:59.182131")
+        )
+      }
+    }
+  }
+
+  def quantumDataInserts = {
+    val factor = 30000
+    (1 to (numExperiments * factor)).grouped(5000).toVector.map { xs =>
+      QuantumData ++= xs.map { i =>
+        QuantumDataRow(
+          i,
+          (((i + (factor - 1)) / factor) % (numExperiments - 1)) + 1,
+          (i % (1000000 - 1)) + 1,
+          s"Quantum Data # $i (1)",
+          s"More Quantum Data # $i (2)",
+          s"Even More Quantum Data # $i (3)",
+          Timestamp.valueOf("2001-12-29 23:59:59.182131")
+        )
+      }
+    }
+  }
+
+  def gravitationalWaveDataInserts = {
+    val factor = 20000
+    (1 to (numExperiments * factor)).grouped(5000).toVector.map { xs =>
+      GravitationalWaveData ++= xs.map { i =>
+        GravitationalWaveDataRow(
+          i,
+          (((i + (factor - 1)) / factor) % (numExperiments - 1)) + 1,
+          (i % (1000000 - 1)) + 1,
+          s"Quantum Data # $i (1)",
+          Timestamp.valueOf("2001-12-29 23:59:59.182131")
+        )
+      }
+    }
+  }
 }
 
 

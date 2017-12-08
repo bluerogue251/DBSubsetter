@@ -21,6 +21,12 @@ trait PhysicsTestCases extends AbstractEndToEndTest with PhysicsDDL with SlickSe
     Await.result(fut3, Duration.Inf)
     val fut4 = originDb.run(DBIO.seq(customDml.gravitationalWaveDomainInserts: _*))
     Await.result(fut4, Duration.Inf)
+    val fut5 = originDb.run(DBIO.seq(customDml.particleColliderDataInserts: _*))
+    Await.result(fut5, Duration.Inf)
+    val fut6 = originDb.run(DBIO.seq(customDml.quantumDataInserts: _*))
+    Await.result(fut6, Duration.Inf)
+    val fut7 = originDb.run(DBIO.seq(customDml.gravitationalWaveDataInserts: _*))
+    Await.result(fut7, Duration.Inf)
   }
 
   val dataSetName = "physics"
