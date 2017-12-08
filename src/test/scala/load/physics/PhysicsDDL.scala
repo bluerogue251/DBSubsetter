@@ -41,6 +41,9 @@ trait PhysicsDDL {
     val name: Rep[String] = column[String]("name")
     val researchInstitutionId: Rep[Int] = column[Int]("research_institution_id")
     val createdAt: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("created_at")
+
+    lazy val fk1 = foreignKey("research_groups_research_institution_id_fkey", researchInstitutionId, ResearchInstitutions)(_.id)
+    val idx1 = index("research_groups_research_institution_id_idx", researchInstitutionId)
   }
 
   lazy val ResearchGroups = new TableQuery(tag => new ResearchGroups(tag))
@@ -54,6 +57,9 @@ trait PhysicsDDL {
     val name: Rep[String] = column[String]("name")
     val researchGroupId: Rep[Option[Int]] = column[Option[Int]]("research_group_id")
     val createdAt: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("created_at")
+
+    lazy val fk1 = foreignKey("scientists_research_group_id_fkey", researchGroupId, ResearchGroups)(_.id)
+    val idx1 = index("scientists_research_group_id_idx", researchGroupId)
   }
 
   lazy val Scientists = new TableQuery(tag => new Scientists(tag))
@@ -67,6 +73,9 @@ trait PhysicsDDL {
     val metadata: Rep[String] = column[String]("metadata")
     val scientistId: Rep[Int] = column[Int]("scientist_id")
     val createdAt: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("created_at")
+
+    lazy val fk1 = foreignKey("experiment_metadata_scientist_id_fkey", scientistId, Scientists)(_.id)
+    val idx1 = index("experiment_metadata_scientist_id_idx", scientistId)
   }
 
   lazy val ExperimentMetadata = new TableQuery(tag => new ExperimentMetadata(tag))
@@ -81,6 +90,9 @@ trait PhysicsDDL {
     val scientistId: Rep[Int] = column[Int]("scientist_id")
     val metadataId: Rep[Int] = column[Int]("metadata_id")
     val createdAt: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("created_at")
+
+    lazy val fk1 = foreignKey("experiment_plans_scientist_id_fkey", scientistId, Scientists)(_.id)
+    val idx1 = index("experiment_plans_scientist_id_idx", scientistId)
   }
 
   lazy val ExperimentPlans = new TableQuery(tag => new ExperimentPlans(tag))
@@ -88,12 +100,15 @@ trait PhysicsDDL {
   case class Experiment(id: Int, notes: String, experimentPlanId: Int, createdAt: java.sql.Timestamp)
 
   class Experiments(_tableTag: Tag) extends profile.api.Table[Experiment](_tableTag, "experiments") {
-    def * = (id, notes, experimentId, createdAt) <> (Experiment.tupled, Experiment.unapply)
+    def * = (id, notes, experimentPlanId, createdAt) <> (Experiment.tupled, Experiment.unapply)
 
     val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
     val notes: Rep[String] = column[String]("notes")
-    val experimentId: Rep[Int] = column[Int]("experiment_id")
+    val experimentPlanId: Rep[Int] = column[Int]("experiment_plan_id")
     val createdAt: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("created_at")
+
+    lazy val fk1 = foreignKey("experiments_experiment_plan_id_fkey", experimentPlanId, ExperimentPlans)(_.id)
+    val idx1 = index("experiments_experiment_plan_id_idx", experimentPlanId)
   }
 
   lazy val Experiments = new TableQuery(tag => new Experiments(tag))
@@ -154,6 +169,11 @@ trait PhysicsDDL {
     val data10: Rep[String] = column[String]("data_10")
     val data11: Rep[String] = column[String]("data_11")
     val createdAt: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("created_at")
+
+    lazy val fk1 = foreignKey("particle_collider_data_experiment_id_fkey", experimentId, Experiments)(_.id)
+    lazy val fk2 = foreignKey("particle_collider_data_particle_domain_id_fkey", particleDomainId, ParticleDomain)(_.id)
+    val idx1 = index("particle_collider_data_experiment_id_idx", experimentId)
+    val idx2 = index("particle_collider_data_particle_domain_id_idx", particleDomainId)
   }
 
   lazy val ParticleColliderData = new TableQuery(tag => new ParticleColliderData(tag))
@@ -170,6 +190,11 @@ trait PhysicsDDL {
     val data2: Rep[String] = column[String]("data_2")
     val data3: Rep[String] = column[String]("data_3")
     val createdAt: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("created_at")
+
+    lazy val fk1 = foreignKey("quantum_data_experiment_id_fkey", experimentId, Experiments)(_.id)
+    lazy val fk2 = foreignKey("quantum_data_quantum_domain_id_fkey", quantumDomainId, QuantumDomain)(_.id)
+    val idx1 = index("quantum_data_experiment_id_idx", experimentId)
+    val idx2 = index("quantum_data_quantum_domain_id_idx", quantumDomainId)
   }
 
   lazy val QuantumData = new TableQuery(tag => new QuantumData(tag))
@@ -177,13 +202,18 @@ trait PhysicsDDL {
   case class GravitationalWaveDataRow(id: Long, experimentId: Int, gravitationalWaveDomainId: Int, data: String, createdAt: java.sql.Timestamp)
 
   class GravitationalWaveData(_tableTag: Tag) extends profile.api.Table[GravitationalWaveDataRow](_tableTag, "gravitational_wave_data") {
-    def * = (id, experimentId, quantumDomainId, data, createdAt) <> (GravitationalWaveDataRow.tupled, GravitationalWaveDataRow.unapply)
+    def * = (id, experimentId, gravitationalWaveDomainId, data, createdAt) <> (GravitationalWaveDataRow.tupled, GravitationalWaveDataRow.unapply)
 
     val id: Rep[Long] = column[Long]("id", O.AutoInc, O.PrimaryKey)
     val experimentId: Rep[Int] = column[Int]("experiment_id")
-    val quantumDomainId: Rep[Int] = column[Int]("quantum_domain_data_id")
+    val gravitationalWaveDomainId: Rep[Int] = column[Int]("quantum_domain_data_id")
     val data: Rep[String] = column[String]("data")
     val createdAt: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("created_at")
+
+    lazy val fk1 = foreignKey("gravitational_wave_data_experiment_id_fkey", experimentId, Experiments)(_.id)
+    lazy val fk2 = foreignKey("gravitational_wave_data_gravitational_wave_domain_id_fkey", gravitationalWaveDomainId, GravitationalWaveDomain)(_.id)
+    val idx1 = index("gravitional_wave_data_experiment_id_idx", experimentId)
+    val idx2 = index("gravitational_wave_data_gravitational_wave_domain_id_idx", gravitationalWaveDomainId)
   }
 
   lazy val GravitationalWaveData = new TableQuery(tag => new GravitationalWaveData(tag))

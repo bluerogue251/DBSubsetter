@@ -20,32 +20,32 @@ trait PhysicsTestCases extends AbstractEndToEndTest with PhysicsDDL with SlickSe
   val dataSetName = "physics"
 
   test("Correct research_institutions were included") {
-    assertCount(ResearchInstitutions, 1)
+    assertCount(ResearchInstitutions, 9)
     assertThat(ResearchInstitutions.map(_.id).sum.result, 1)
   }
 
   test("Correct research_groupss were included") {
-    assertCount(ResearchGroups, 1)
+    assertCount(ResearchGroups, 29)
     assertThat(ResearchGroups.map(_.id).sum.result, 1)
   }
 
   test("Correct scientists were included") {
-    assertCount(Scientists, 1)
+    assertCount(Scientists, 50)
     assertThat(Scientists.map(_.id).sum.result, 1)
   }
 
   test("Correct experiment_metadata rows were included") {
-    assertCount(ExperimentMetadata, 1)
+    assertCount(ExperimentMetadata, 5)
     assertThat(ExperimentMetadata.map(_.id).sum.result, 1)
   }
 
   test("Correct experiment_plans were included") {
-    assertCount(ExperimentPlans, 1)
+    assertCount(ExperimentPlans, 5)
     assertThat(ExperimentPlans.map(_.id).sum.result, 1)
   }
 
   test("Correct experiments were included") {
-    assertCount(Experiments, 1)
+    assertCount(Experiments, 111)
     assertThat(Experiments.map(_.id).sum.result, 1)
   }
 
