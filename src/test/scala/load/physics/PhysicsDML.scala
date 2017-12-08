@@ -8,11 +8,11 @@ class PhysicsDML(val profile: JdbcProfile) extends PhysicsDDL {
 
   import profile.api._
 
-  private val numResearchInstitutions = 100
-  private val numResearchGroups = 500
-  private val numScientists = 1000
-  private val numExperimentTypes = 50
-  private val numExperiments = 300
+  private val numResearchInstitutions = 10
+  private val numResearchGroups = 30
+  private val numScientists = 100
+  private val numExperimentTypes = 10
+  private val numExperiments = 200
 
   def initialInserts = {
     val seq = Seq(

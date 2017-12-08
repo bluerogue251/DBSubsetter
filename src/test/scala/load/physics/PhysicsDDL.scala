@@ -5,7 +5,20 @@ trait PhysicsDDL {
 
   import profile.api._
 
-  lazy val schema: profile.SchemaDescription = Array(ResearchInstitutions.schema).reduceLeft(_ ++ _)
+  lazy val schema: profile.SchemaDescription = Array(
+    ResearchInstitutions.schema,
+    ResearchGroups.schema,
+    Scientists.schema,
+    ExperimentMetadata.schema,
+    ExperimentPlans.schema,
+    Experiments.schema,
+    ParticleDomain.schema,
+    QuantumDomain.schema,
+    GravitationalWaveDomain.schema,
+    ParticleColliderData.schema,
+    QuantumData.schema,
+    GravitationalWaveData.schema
+  ).reduceLeft(_ ++ _)
 
   case class ResearchInstitution(id: Int, name: String, createdAt: java.sql.Timestamp)
 
@@ -39,7 +52,7 @@ trait PhysicsDDL {
 
     val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
     val name: Rep[String] = column[String]("name")
-    val researchGroupId: Rep[Option[Int]] = column[Option[[Int]]("research_group_id")
+    val researchGroupId: Rep[Option[Int]] = column[Option[Int]]("research_group_id")
     val createdAt: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("created_at")
   }
 
