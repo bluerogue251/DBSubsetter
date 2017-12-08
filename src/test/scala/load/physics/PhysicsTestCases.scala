@@ -57,22 +57,22 @@ trait PhysicsTestCases extends AbstractEndToEndTest with PhysicsDDL with SlickSe
 
   test("Correct particle_domain rows were included") {
     assertCount(ParticleDomain, 1000000)
-    assertThat(ParticleDomain.map(_.id).sum.result, 1000000)
+    assertThatLong(ParticleDomain.map(_.id).sum.result, 500000500000l)
   }
 
   test("Correct quantum_domain rows were included") {
-    assertCount(QuantumDomain, 1)
-    assertThat(QuantumDomain.map(_.id).sum.result, 1000000)
+    assertCount(QuantumDomain, 1000000)
+    assertThatLong(QuantumDomain.map(_.id).sum.result, 500000500000l)
   }
 
   test("Correct gravitational_wave_domain rows were included") {
     assertCount(GravitationalWaveDomain, 1000000)
-    assertThat(GravitationalWaveDomain.map(_.id).sum.result, 1000000)
+    assertThatLong(GravitationalWaveDomain.map(_.id).sum.result, 500000500000l)
   }
 
   test("Correct particle_collider_data rows were included") {
     assertCount(ParticleColliderData, 1)
-    assertThatLong(ParticleColliderData.map(_.id).sum.result, 1)
+    assertThatLong(ParticleColliderData.map(_.id).sum.result, 500000500000l)
   }
 
   test("Correct quantum_data rows were included") {

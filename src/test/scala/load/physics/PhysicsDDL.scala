@@ -113,50 +113,50 @@ trait PhysicsDDL {
 
   lazy val Experiments = new TableQuery(tag => new Experiments(tag))
 
-  case class ParticleDomainRow(id: Int, domainData: String, createdAt: java.sql.Timestamp)
+  case class ParticleDomainRow(id: Long, domainData: String, createdAt: java.sql.Timestamp)
 
   class ParticleDomain(_tableTag: Tag) extends profile.api.Table[ParticleDomainRow](_tableTag, "particle_domain") {
     def * = (id, domainData, createdAt) <> (ParticleDomainRow.tupled, ParticleDomainRow.unapply)
 
-    val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
+    val id: Rep[Long] = column[Long]("id", O.AutoInc, O.PrimaryKey)
     val domainData: Rep[String] = column[String]("data")
     val createdAt: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("created_at")
   }
 
   lazy val ParticleDomain = new TableQuery(tag => new ParticleDomain(tag))
 
-  case class QuantumDomainRow(id: Int, domainData: String, createdAt: java.sql.Timestamp)
+  case class QuantumDomainRow(id: Long, domainData: String, createdAt: java.sql.Timestamp)
 
   class QuantumDomain(_tableTag: Tag) extends profile.api.Table[QuantumDomainRow](_tableTag, "quantum_domain") {
     def * = (id, domainData, createdAt) <> (QuantumDomainRow.tupled, QuantumDomainRow.unapply)
 
-    val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
+    val id: Rep[Long] = column[Long]("id", O.AutoInc, O.PrimaryKey)
     val domainData: Rep[String] = column[String]("data")
     val createdAt: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("created_at")
   }
 
   lazy val QuantumDomain = new TableQuery(tag => new QuantumDomain(tag))
 
-  case class GravitationalWaveDomainRow(id: Int, domainData: String, createdAt: java.sql.Timestamp)
+  case class GravitationalWaveDomainRow(id: Long, domainData: String, createdAt: java.sql.Timestamp)
 
   class GravitationalWaveDomain(_tableTag: Tag) extends profile.api.Table[GravitationalWaveDomainRow](_tableTag, "gravitational_wave_domain") {
     def * = (id, domainData, createdAt) <> (GravitationalWaveDomainRow.tupled, GravitationalWaveDomainRow.unapply)
 
-    val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
+    val id: Rep[Long] = column[Long]("id", O.AutoInc, O.PrimaryKey)
     val domainData: Rep[String] = column[String]("data")
     val createdAt: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("created_at")
   }
 
   lazy val GravitationalWaveDomain = new TableQuery(tag => new GravitationalWaveDomain(tag))
 
-  case class ParticleColliderDataRow(id: Long, experimentId: Int, particleDomainId: Int, data1: Double, data2: Double, data3: Double, data4: Double, data5: Double, data6: Long, data7: Long, data8: Long, data9: String, data10: String, data11: String, createdAt: java.sql.Timestamp)
+  case class ParticleColliderDataRow(id: Long, experimentId: Int, particleDomainId: Long, data1: Double, data2: Double, data3: Double, data4: Double, data5: Double, data6: Long, data7: Long, data8: Long, data9: String, data10: String, data11: String, createdAt: java.sql.Timestamp)
 
   class ParticleColliderData(_tableTag: Tag) extends profile.api.Table[ParticleColliderDataRow](_tableTag, "particle_collider_data") {
     def * = (id, experimentId, particleDomainId, data1, data2, data3, data4, data5, data6, data7, data8, data9, data10, data11, createdAt) <> (ParticleColliderDataRow.tupled, ParticleColliderDataRow.unapply)
 
     val id: Rep[Long] = column[Long]("id", O.AutoInc, O.PrimaryKey)
     val experimentId: Rep[Int] = column[Int]("experiment_id")
-    val particleDomainId: Rep[Int] = column[Int]("particle_domain_data_id")
+    val particleDomainId: Rep[Long] = column[Long]("particle_domain_data_id")
     val data1: Rep[Double] = column[Double]("data_1")
     val data2: Rep[Double] = column[Double]("data_2")
     val data3: Rep[Double] = column[Double]("data_3")
@@ -178,14 +178,14 @@ trait PhysicsDDL {
 
   lazy val ParticleColliderData = new TableQuery(tag => new ParticleColliderData(tag))
 
-  case class QuantumDataRow(id: Long, experimentId: Int, quantumDomainId: Int, data1: String, data2: String, data3: String, createdAt: java.sql.Timestamp)
+  case class QuantumDataRow(id: Long, experimentId: Int, quantumDomainId: Long, data1: String, data2: String, data3: String, createdAt: java.sql.Timestamp)
 
   class QuantumData(_tableTag: Tag) extends profile.api.Table[QuantumDataRow](_tableTag, "quantum_data") {
     def * = (id, experimentId, quantumDomainId, data1, data2, data3, createdAt) <> (QuantumDataRow.tupled, QuantumDataRow.unapply)
 
     val id: Rep[Long] = column[Long]("id", O.AutoInc, O.PrimaryKey)
     val experimentId: Rep[Int] = column[Int]("experiment_id")
-    val quantumDomainId: Rep[Int] = column[Int]("quantum_domain_data_id")
+    val quantumDomainId: Rep[Long] = column[Long]("quantum_domain_data_id")
     val data1: Rep[String] = column[String]("data_1")
     val data2: Rep[String] = column[String]("data_2")
     val data3: Rep[String] = column[String]("data_3")
@@ -199,14 +199,14 @@ trait PhysicsDDL {
 
   lazy val QuantumData = new TableQuery(tag => new QuantumData(tag))
 
-  case class GravitationalWaveDataRow(id: Long, experimentId: Int, gravitationalWaveDomainId: Int, data: String, createdAt: java.sql.Timestamp)
+  case class GravitationalWaveDataRow(id: Long, experimentId: Int, gravitationalWaveDomainId: Long, data: String, createdAt: java.sql.Timestamp)
 
   class GravitationalWaveData(_tableTag: Tag) extends profile.api.Table[GravitationalWaveDataRow](_tableTag, "gravitational_wave_data") {
     def * = (id, experimentId, gravitationalWaveDomainId, data, createdAt) <> (GravitationalWaveDataRow.tupled, GravitationalWaveDataRow.unapply)
 
     val id: Rep[Long] = column[Long]("id", O.AutoInc, O.PrimaryKey)
     val experimentId: Rep[Int] = column[Int]("experiment_id")
-    val gravitationalWaveDomainId: Rep[Int] = column[Int]("quantum_domain_data_id")
+    val gravitationalWaveDomainId: Rep[Long] = column[Long]("quantum_domain_data_id")
     val data: Rep[String] = column[String]("data")
     val createdAt: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("created_at")
 
