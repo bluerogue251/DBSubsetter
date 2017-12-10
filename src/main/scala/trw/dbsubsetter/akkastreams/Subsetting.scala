@@ -53,7 +53,7 @@ object Subsetting {
       mergePksAdded
 
     partitionOriginDbResults.out(1) ~>
-      Flow[OriginDbResult].mapAsync(500)(dbResult => (pkStore ? dbResult).mapTo[PksAdded]) ~>
+      Flow[OriginDbResult].mapAsyncUnordered(10)(dbResult => (pkStore ? dbResult).mapTo[PksAdded]) ~>
       mergePksAdded
 
     mergePksAdded ~> broadcastPksAdded
@@ -72,7 +72,7 @@ object Subsetting {
     partitionFkTasks.out(0) ~> mergeOriginDbRequests
 
     partitionFkTasks.out(1) ~>
-      Flow[FkTask].mapAsync(500)(req => (pkStore ? req).mapTo[PkResult]) ~>
+      Flow[FkTask].mapAsyncUnordered(10)(req => (pkStore ? req).mapTo[PkResult]) ~>
       broadcastPkExistResult
 
     broadcastPkExistResult ~>
