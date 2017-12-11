@@ -19,8 +19,8 @@ class PkStoreWorkflow(pkOrdinalsByTable: Map[Table, Seq[Int]]) {
   // TreeSet in theory might provide more stable runtime of operations, so that we never encounter one big
   // time when we need to double the size of the HashSet, etc.
   // Both potential optimizations would need testing: it's not clear how much if any good they would do
-  private val pkStore: Map[Table, (KeySet[java.lang.Long], KeySet[java.lang.Long])] = tables.map { t =>
-    t -> (offHeapStorage.hashSet(s"$t-Children", Serializer.LONG).create(), offHeapStorage.hashSet(s"$t-Parents", Serializer.LONG).create())
+  private val pkStore: Map[Table, (KeySet[Array[Byte]], KeySet[Array[Byte]])] = tables.map { t =>
+    t -> (offHeapStorage.hashSet(s"$t-Children", Serializer.BYTE_ARRAY).create(), offHeapStorage.hashSet(s"$t-Parents", Serializer.BYTE_ARRAY).create())
   }.toMap
 
   def exists(req: FkTask): PkResult = {

@@ -19,6 +19,7 @@ libraryDependencies ++= Seq(
   // Off-heap data structures
   "org.mapdb" % "mapdb" % "3.0.5",
 
+
   // For testing only
   "org.scalatest" %% "scalatest" % "3.0.4" % "test",
   "com.typesafe.slick" %% "slick" % "3.2.1" % "test",
