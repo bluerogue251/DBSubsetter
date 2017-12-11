@@ -8,7 +8,7 @@ libraryDependencies ++= Seq(
   // Command line parser
   "com.github.scopt" %% "scopt" % "3.7.0",
 
-  // Stream processing engine
+  // Akka stream processing
   "com.typesafe.akka" %% "akka-stream" % "2.5.6",
 
   // JDBC Drivers
@@ -17,8 +17,7 @@ libraryDependencies ++= Seq(
   "com.microsoft.sqlserver" % "mssql-jdbc" % "6.2.1.jre8",
 
   // Off-heap data structures
-  "org.mapdb" % "mapdb" % "3.0.5",
-
+  "net.openhft" % "chronicle-queue" % "4.6.57",
 
   // For testing only
   "org.scalatest" %% "scalatest" % "3.0.4" % "test",
