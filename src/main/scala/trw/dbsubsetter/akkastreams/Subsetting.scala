@@ -4,7 +4,7 @@ import akka.NotUsed
 import akka.actor.ActorRef
 import akka.pattern.ask
 import akka.stream.scaladsl.GraphDSL.Implicits._
-import akka.stream.scaladsl.{Balance, Broadcast, Flow, GraphDSL, Merge, Partition, Source}
+import akka.stream.scaladsl.{Balance, Broadcast, Flow, GraphDSL, Merge, Partition, Sink, Source}
 import akka.stream.{OverflowStrategy, SourceShape}
 import akka.util.Timeout
 import trw.dbsubsetter.config.Config
@@ -51,7 +51,8 @@ object Subsetting {
     broadcastPksAdded ~>
       mergeNewTaskRequests ~>
       NewTasks.flow(schemaInfo, baseQueries.size) ~>
-      partitionFkTasks
+      Sink.ignore
+    //  We need to feed into partitionFkTasks by reading the queue!!!! AAAHHHHH!!!!!
 
     broadcastPksAdded ~>
       Flow[PksAdded].buffer(Int.MaxValue, OverflowStrategy.backpressure) ~>
