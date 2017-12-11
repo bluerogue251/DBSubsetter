@@ -1,11 +1,12 @@
 package trw.dbsubsetter.workflow
 
+import org.mapdb.HTreeMap.KeySet
+import org.mapdb.{DBMaker, Serializer}
 import trw.dbsubsetter.db.{Row, Table}
-
-import scala.collection.mutable
 
 
 class PkStoreWorkflow(pkOrdinalsByTable: Map[Table, Seq[Int]]) {
+  private val offHeapStorage = DBMaker.memoryDirectDB().make()
   private val tables = pkOrdinalsByTable.keys
   // Left side of the tuple is for parents, right side of the tuple is for children
   // If a PK is on the children side, then both its children AND its parents have been fetched.
@@ -18,8 +19,8 @@ class PkStoreWorkflow(pkOrdinalsByTable: Map[Table, Seq[Int]]) {
   // TreeSet in theory might provide more stable runtime of operations, so that we never encounter one big
   // time when we need to double the size of the HashSet, etc.
   // Both potential optimizations would need testing: it's not clear how much if any good they would do
-  private val pkStore: Map[Table, (mutable.HashSet[AnyRef], mutable.HashSet[AnyRef])] = tables.map { t =>
-    t -> (mutable.HashSet.empty[AnyRef], mutable.HashSet.empty[AnyRef])
+  private val pkStore: Map[Table, (KeySet[java.lang.Long], KeySet[java.lang.Long])] = tables.map { t =>
+    t -> (offHeapStorage.hashSet(s"$t-Children", Serializer.LONG).create(), offHeapStorage.hashSet(s"$t-Parents", Serializer.LONG).create())
   }.toMap
 
   def exists(req: FkTask): PkResult = {
@@ -39,23 +40,23 @@ class PkStoreWorkflow(pkOrdinalsByTable: Map[Table, Seq[Int]]) {
 
     val pkOrdinals = pkOrdinalsByTable(table)
     val pkOrdinal = pkOrdinals.head
-    val isSingleColPk = pkOrdinals.size == 1
+    val isSingleColPk = pkOrdinals.lengthCompare(1) == 0
     val getPkValue: Row => AnyRef = if (isSingleColPk) row => row(pkOrdinal) else row => pkOrdinals.map(row)
 
     if (fetchChildren) {
-      val childrenNotYetFetched = rows.filter(row => childStore.add(getPkValue(row)))
-      val parentsNotYetFetched = childrenNotYetFetched.filterNot(row => parentStore.remove(getPkValue(row)))
+      val childrenNotYetFetched = rows.filter(row => childStore.add(getPkValue(row).asInstanceOf[java.lang.Long]))
+      val parentsNotYetFetched = childrenNotYetFetched.filterNot(row => parentStore.remove(getPkValue(row).asInstanceOf[java.lang.Long]))
       PksAdded(table, parentsNotYetFetched, childrenNotYetFetched, viaTableOpt)
     } else {
       val newRows = rows.filter { row =>
         val pkValue = getPkValue(row)
-        !childStore.contains(pkValue) && parentStore.add(pkValue)
+        !childStore.contains(pkValue.asInstanceOf[java.lang.Long]) && parentStore.add(pkValue.asInstanceOf[java.lang.Long])
       }
       PksAdded(table, newRows, Vector.empty, viaTableOpt)
     }
   }
 
-  def getStorage(t: Table): (mutable.HashSet[AnyRef], mutable.HashSet[AnyRef]) = {
+  def getStorage(t: Table): (KeySet[java.lang.Long], KeySet[java.lang.Long]) = {
     pkStore.getOrElse(t, throw new RuntimeException(s"No primary key defined for table $t"))
   }
 }
