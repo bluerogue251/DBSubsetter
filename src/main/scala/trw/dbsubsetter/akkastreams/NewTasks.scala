@@ -27,7 +27,7 @@ object NewTasks {
               // So that we only have to get i and writer once per batch instead of every single time
               val i = sch.fksOrdered.indexOf(task.fk)
               val writer = if (task.fetchChildren) childFkWriters(i) else parentFkWriters(i)
-              appender.writeDocument(writer.writeHandler(false, task.fetchChildren, task.fkValue))
+              appender.writeDocument(writer.writeHandler(task.fetchChildren, task.fkValue))
             }
           case DuplicateTask =>
             unfinishedTaskCount -= 1
