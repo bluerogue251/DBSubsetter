@@ -1,6 +1,6 @@
 package trw.dbsubsetter.db
 
-import java.sql.DriverManager
+import java.sql.{DriverManager, JDBCType}
 import java.util.NoSuchElementException
 
 import trw.dbsubsetter.config.Config
@@ -41,10 +41,11 @@ object SchemaInfoRetrieval {
       }
       while (colsJdbcResultSet.next()) {
         val columnName = colsJdbcResultSet.getString("COLUMN_NAME")
+        val jdbcType = JDBCType.valueOf(colsJdbcResultSet.getInt("SQL_DATA_TYPE"))
         val isSqlServerAutoIncrement = conn.isMsSqlServer && colsJdbcResultSet.getString("IS_AUTOINCREMENT") == "YES"
 
         if (!config.excludeColumns((table.schema, table.name)).contains(columnName)) {
-          columnsQueryResult += ColumnQueryRow(table.schema, table.name, columnName, isSqlServerAutoIncrement)
+          columnsQueryResult += ColumnQueryRow(table.schema, table.name, columnName, jdbcType, isSqlServerAutoIncrement)
         }
       }
     }
@@ -96,7 +97,7 @@ object SchemaInfoRetrieval {
       columnsQueryResult
         .groupBy(c => tablesByName(c.schema, c.table))
         .map { case (table, partialColumns) =>
-          table -> partialColumns.zipWithIndex.map { case (pc, i) => pc.name -> Column(table, pc.name, i) }.toMap
+          table -> partialColumns.zipWithIndex.map { case (pc, i) => pc.name -> Column(table, pc.name, i, pc.jdbcType) }.toMap
         }
     }
     val colByTableOrdered: Map[Table, Vector[Column]] = {
@@ -180,6 +181,7 @@ object SchemaInfoRetrieval {
   private[this] case class ColumnQueryRow(schema: SchemaName,
                                           table: TableName,
                                           name: ColumnName,
+                                          jdbcType: JDBCType,
                                           isSqlServerAutoincrement: Boolean)
 
   private[this] case class PrimaryKeyQueryRow(schema: SchemaName,

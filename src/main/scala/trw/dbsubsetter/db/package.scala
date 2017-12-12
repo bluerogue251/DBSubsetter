@@ -1,6 +1,6 @@
 package trw.dbsubsetter
 
-import java.sql.Connection
+import java.sql.{Connection, JDBCType}
 
 import scala.collection.mutable
 
@@ -25,7 +25,7 @@ package object db {
 
   case class Table(schema: SchemaName, name: TableName, hasSqlServerAutoIncrement: Boolean)
 
-  case class Column(table: Table, name: ColumnName, ordinalPosition: Int)
+  case class Column(table: Table, name: ColumnName, ordinalPosition: Int, jdbcType: JDBCType)
 
   case class ForeignKey(fromCols: Vector[Column], toCols: Vector[Column], pointsToPk: Boolean) {
     val fromTable: Table = fromCols.head.table

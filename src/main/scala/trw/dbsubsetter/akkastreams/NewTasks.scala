@@ -15,15 +15,21 @@ object NewTasks {
           case pka: PksAdded =>
             val newTasks = NewFkTaskWorkflow.process(pka, sch)
             unfinishedTaskCount += (newTasks.size - 1)
-            List((unfinishedTaskCount, newTasks))
-            ???
+            newTasks.foreach { task =>
+              ???
+            }
           case DuplicateTask =>
             unfinishedTaskCount -= 1
-            List((unfinishedTaskCount, Vector.empty))
-            ???
           case other =>
             throw new RuntimeException(s"Cannot handle $other")
         }
+
+        if (unfinishedTaskCount == 0) {
+          // Write to the queue that we are finished
+          ???
+        }
+
+        Nil
       }
     }
   }
