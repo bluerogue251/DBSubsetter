@@ -22,12 +22,11 @@ object NewTasks {
           case pka: PksAdded =>
             val newTasks = NewFkTaskWorkflow.process(pka, sch)
             unfinishedTaskCount += (newTasks.size - 1)
-            newTasks.foreach { task =>
-              // TODO Optimize by storing index in FK itself. Also, maybe batch same (FK, fetchChildren) together
-              // So that we only have to get i and writer once per batch instead of every single time
-              val i = sch.fksOrdered.indexOf(task.fk)
-              val writer = if (task.fetchChildren) childFkWriters(i) else parentFkWriters(i)
-              appender.writeDocument(writer.writeHandler(task.fetchChildren, task.fkValue))
+            newTasks.foreach { case ((fk, fetchChildren), tasks) =>
+              val writer = if (fetchChildren) childFkWriters(fk.i) else parentFkWriters(fk.i)
+              tasks.foreach { task =>
+                appender.writeDocument(writer.writeHandler(fetchChildren, task.fkValue))
+              }
             }
           case DuplicateTask =>
             unfinishedTaskCount -= 1

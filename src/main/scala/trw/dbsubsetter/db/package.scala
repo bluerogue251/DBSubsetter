@@ -22,7 +22,7 @@ package object db {
 
   case class Column(table: Table, name: ColumnName, ordinalPosition: Int, jdbcType: JDBCType)
 
-  case class ForeignKey(fromCols: Vector[Column], toCols: Vector[Column], pointsToPk: Boolean) {
+  case class ForeignKey(fromCols: Vector[Column], toCols: Vector[Column], pointsToPk: Boolean, i: Short) {
     val fromTable: Table = fromCols.head.table
     val toTable: Table = toCols.head.table
 

@@ -28,7 +28,9 @@ object ApplicationSingleThreaded {
         val pksAdded = pkWorkflow.add(dbResult)
         targetDbWorkflow.process(pksAdded)
         val newTasks = NewFkTaskWorkflow.process(pksAdded, schemaInfo)
-        queue.enqueue(newTasks: _*)
+        newTasks.values.foreach { tasks =>
+          queue.enqueue(tasks: _*)
+        }
       }
     }
   }

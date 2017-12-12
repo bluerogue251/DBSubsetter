@@ -43,7 +43,9 @@ class NewTaskSource(sch: SchemaInfo, queue: ChronicleQueue) extends GraphStage[S
           push[FkTask](out, FkTask(table, fk, fkValue, fetchChildren))
         }
       }
-      if (!elementWasPresent) scheduleOnce("pollChronicleQueue", Duration(10, MILLISECONDS))
+      if (!elementWasPresent) {
+        scheduleOnce("poll", Duration(5, MILLISECONDS))
+      }
     }
   }
 }

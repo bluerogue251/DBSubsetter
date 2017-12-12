@@ -120,8 +120,8 @@ object SchemaInfoRetrieval {
       }
       val allPartialFKs = userSuppliedPartialFks ++ foreignKeysQueryResult
 
-      allPartialFKs.groupBy(fkm => (fkm.fromSchema, fkm.fromTable, fkm.toSchema, fkm.toTable))
-        .map { case ((fromSchemaName, fromTableName, toSchemaName, toTableName), partialForeignKeys) =>
+      val allFksUnordered = allPartialFKs.groupBy(fkm => (fkm.fromSchema, fkm.fromTable, fkm.toSchema, fkm.toTable))
+        .zipWithIndex.map { case (((fromSchemaName, fromTableName, toSchemaName, toTableName), partialForeignKeys), i) =>
           val fromTable = tablesByName(fromSchemaName, fromTableName)
           val fromCols = partialForeignKeys.map { pfk => colsByTableAndName(fromTable)(pfk.fromColumn) }.toVector
           val toTable = tablesByName(toSchemaName, toTableName)
@@ -153,8 +153,10 @@ object SchemaInfoRetrieval {
             pkOpt.fold(false)(pkColOrdinals => pkColOrdinals == toCols.map(_.ordinalPosition))
           }
 
-          ForeignKey(fromCols, toCols, pointsToPk)
-        }.toArray
+        ForeignKey(fromCols, toCols, pointsToPk, 0)
+      }
+
+      allFksUnordered.toArray.sorted.zipWithIndex.map { case (fk, idx) => fk.copy(i = idx.toShort) }
     }
 
     val fksFromTable: Map[Table, Vector[ForeignKey]] = {
