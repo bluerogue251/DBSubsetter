@@ -2,17 +2,12 @@ package trw.dbsubsetter
 
 import java.sql.{Connection, JDBCType}
 
-import scala.collection.mutable
-
 package object db {
   type SchemaName = String
   type TableName = String
   type ColumnName = String
-  type FullyQualifiedTableName = String
-  type JoinClause = String
   type WhereClause = String
-  type PrimaryKeyStore = Map[Table, mutable.HashSet[Vector[AnyRef]]]
-  type Row = Array[AnyRef]
+  type Row = Array[Any]
   type SqlQuery = String
   type SqlTemplates = Map[(ForeignKey, Table), SqlQuery]
 

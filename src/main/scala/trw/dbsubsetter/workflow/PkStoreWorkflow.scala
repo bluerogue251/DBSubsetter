@@ -40,7 +40,7 @@ class PkStoreWorkflow(pkOrdinalsByTable: Map[Table, Seq[Int]]) {
     val pkOrdinals = pkOrdinalsByTable(table)
     val pkOrdinal = pkOrdinals.head
     val isSingleColPk = pkOrdinals.lengthCompare(1) == 0
-    val getPkValue: Row => AnyRef = if (isSingleColPk) row => row(pkOrdinal) else row => pkOrdinals.map(row)
+    val getPkValue: Row => Any = if (isSingleColPk) row => row(pkOrdinal) else row => pkOrdinals.map(row)
 
     if (fetchChildren) {
       val childrenNotYetFetched = rows.filter(row => childStore.add(getPkValue(row)))

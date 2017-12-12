@@ -35,13 +35,8 @@ object NewFkTaskWorkflow {
     }
   }
 
-  private def getForeignKeyValues(fk: ForeignKey, cols: Vector[Column], rows: Vector[Row]): Vector[AnyRef] = {
-    val ordinalPositions = cols.map(_.ordinalPosition)
-    if (fk.isSingleCol) {
-      val ordinalPosition = ordinalPositions.head
-      rows.map(row => row(ordinalPosition))
-    } else {
-      rows.map(row => ordinalPositions.map(row))
-    }
+  private def getForeignKeyValues(fk: ForeignKey, cols: Vector[Column], rows: Vector[Row]): Vector[Array[Any]] = {
+    val ordinalPositions = cols.map(_.ordinalPosition).toArray
+    rows.map(row => ordinalPositions.map(row))
   }
 }
