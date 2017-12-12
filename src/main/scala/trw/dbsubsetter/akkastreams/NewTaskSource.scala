@@ -24,6 +24,7 @@ class NewTaskSource(sch: SchemaInfo, queue: ChronicleQueue) extends GraphStage[S
           val in = r.getValueIn
           val isComplete = in.bool()
           if (isComplete) {
+            queue.close()
             completeStage()
           } else {
             val fetchChildren = in.bool()

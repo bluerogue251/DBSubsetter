@@ -41,7 +41,7 @@ object SchemaInfoRetrieval {
       }
       while (colsJdbcResultSet.next()) {
         val columnName = colsJdbcResultSet.getString("COLUMN_NAME")
-        val jdbcType = JDBCType.valueOf(colsJdbcResultSet.getInt("SQL_DATA_TYPE"))
+        val jdbcType = JDBCType.valueOf(colsJdbcResultSet.getInt("DATA_TYPE"))
         val isSqlServerAutoIncrement = conn.isMsSqlServer && colsJdbcResultSet.getString("IS_AUTOINCREMENT") == "YES"
 
         if (!config.excludeColumns((table.schema, table.name)).contains(columnName)) {
