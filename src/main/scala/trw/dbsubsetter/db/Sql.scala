@@ -3,7 +3,7 @@ package trw.dbsubsetter.db
 object Sql {
   def preparedQueryStatementStrings(sch: SchemaInfo): SqlTemplates = {
     val allCombos = for {
-      fk <- sch.foreignKeysOrdered
+      fk <- sch.fksOrdered
       table <- Set(fk.fromTable, fk.toTable)
     } yield (fk, table)
 
@@ -15,7 +15,7 @@ object Sql {
   }
 
   def preparedInsertStatementStrings(sch: SchemaInfo): Map[Table, SqlQuery] = {
-    sch.tablesOrdered.map { table =>
+    sch.tablesByName.map { case (_, table) =>
       val cols = sch.colsByTableOrdered(table)
       val sqlString =
         s"""insert into ${quote(table)}
@@ -27,7 +27,7 @@ object Sql {
         sqlString
       }
       table -> sqlStringAccountingForMsSqlServer
-    }.toMap
+    }
   }
 
   def makeQueryString(table: Table, whereClause: WhereClause, sch: SchemaInfo): SqlQuery = {

@@ -7,6 +7,7 @@ import akka.stream.scaladsl.GraphDSL.Implicits._
 import akka.stream.scaladsl.{Balance, Broadcast, Flow, GraphDSL, Merge, Partition, Sink, Source}
 import akka.stream.{OverflowStrategy, SourceShape}
 import akka.util.Timeout
+import net.openhft.chronicle.queue.ChronicleQueue
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.SchemaInfo
 import trw.dbsubsetter.workflow._
@@ -15,7 +16,7 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 object Subsetting {
-  def source(config: Config, schemaInfo: SchemaInfo, baseQueries: List[SqlStrQuery], pkStore: ActorRef)(implicit ec: ExecutionContext): Source[TargetDbInsertResult, NotUsed] = Source.fromGraph(GraphDSL.create() { implicit b =>
+  def source(config: Config, schemaInfo: SchemaInfo, baseQueries: List[SqlStrQuery], pkStore: ActorRef, queue: ChronicleQueue)(implicit ec: ExecutionContext): Source[TargetDbInsertResult, NotUsed] = Source.fromGraph(GraphDSL.create() { implicit b =>
     // Infrastructure: Timeouts, Merges, and Broadcasts
     implicit val askTimeout: Timeout = Timeout(48.hours)
     val mergeOriginDbRequests = b.add(Merge[OriginDbRequest](3))
@@ -50,7 +51,7 @@ object Subsetting {
 
     broadcastPksAdded ~>
       mergeNewTaskRequests ~>
-      NewTasks.flow(schemaInfo, baseQueries.size) ~>
+      NewTasks.flow(schemaInfo, baseQueries.size, queue) ~>
       Sink.ignore
     //  We need to feed into partitionFkTasks by reading the queue!!!! AAAHHHHH!!!!!
 

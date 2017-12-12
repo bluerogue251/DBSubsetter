@@ -23,6 +23,7 @@ class TaskQueueReader {
             case JDBCType.INTEGER => in.int32()
             case JDBCType.BIGINT => in.int64()
             case JDBCType.VARCHAR | JDBCType.CHAR | JDBCType.LONGVARCHAR | JDBCType.NCHAR => in.text()
+            case other => throw new RuntimeException(s"JDBC Type not yet supported for foreign key column: $other. Please open a GitHub issue for this.")
           }
         }
         current = (false, fetchChildren, tmp)

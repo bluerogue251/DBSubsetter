@@ -4,9 +4,8 @@ import java.sql.JDBCType
 
 import net.openhft.chronicle.wire.{WireOut, WriteMarshallable}
 
-class TaskQueueWriter {
-
-  private def getWriteHandler(typeList: List[JDBCType]): (Boolean, Boolean, Array[Any]) => WriteMarshallable = {
+class TaskQueueWriter(typeList: Seq[JDBCType]) {
+  val writeHandler: (Boolean, Boolean, Array[Any]) => WriteMarshallable = {
     (isCompleted, fetchChildren, fkValues) => {
       wireOut => {
         if (isCompleted) {
@@ -19,6 +18,7 @@ class TaskQueueWriter {
               case JDBCType.INTEGER => wo.getValueOut.int32(fkValues(i).asInstanceOf[Int])
               case JDBCType.BIGINT => wo.getValueOut.int64(fkValues(i).asInstanceOf[Long])
               case JDBCType.VARCHAR | JDBCType.CHAR | JDBCType.LONGVARCHAR | JDBCType.NCHAR => wo.getValueOut.text(fkValues(i).asInstanceOf[String])
+              case other => throw new RuntimeException(s"JDBC Type not yet supported for foreign key column: $other. Please open a GitHub issue for this.")
             }
           }
         }

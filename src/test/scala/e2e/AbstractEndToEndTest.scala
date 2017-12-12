@@ -1,5 +1,6 @@
 package e2e
 
+import net.openhft.chronicle.queue.impl.single.SingleChronicleQueueBuilder
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 import slick.dbio.{DBIOAction, Effect}
 import slick.jdbc.JdbcBackend
@@ -83,7 +84,8 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
 
     val startAkkaStreams = System.nanoTime()
     println("StartedProcessing")
-    val futureResult = ApplicationAkkaStreams.run(akkaStreamsConfig, schemaInfo, baseQueries)
+    val queue = SingleChronicleQueueBuilder.binary("/home/teddy/DBSubsetter-ChronicleTest").build()
+    val futureResult = ApplicationAkkaStreams.run(akkaStreamsConfig, schemaInfo, baseQueries, queue)
     Await.result(futureResult, Duration.Inf)
     println("FinishedProcessing")
     akkStreamsRuntimeMillis = (System.nanoTime() - startAkkaStreams) / 1000000
