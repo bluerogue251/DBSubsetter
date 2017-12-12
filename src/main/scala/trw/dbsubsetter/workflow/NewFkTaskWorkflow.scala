@@ -22,14 +22,14 @@ object NewFkTaskWorkflow {
     // Both of these seem necessary for avoiding always needing to store PKs for all parents
     val allFks = sch.fksFromTable(table)
     val useFks = viaTableOpt.fold(allFks)(viaTable => allFks.filterNot(fk => fk.toTable == viaTable))
-    useFks.toVector.flatMap { fk =>
+    useFks.flatMap { fk =>
       val distinctFkValues = getForeignKeyValues(fk, fk.fromCols, rows).distinct
       distinctFkValues.map(fkValue => FkTask(fk.toTable, fk, fkValue, fetchChildren = false))
     }
   }
 
   private def calcChildTasks(sch: SchemaInfo, table: Table, rows: Vector[Row]): Vector[FkTask] = {
-    sch.fksToTable(table).toVector.flatMap { fk =>
+    sch.fksToTable(table).flatMap { fk =>
       val fkValues = getForeignKeyValues(fk, fk.toCols, rows)
       fkValues.map(fkValue => FkTask(fk.fromTable, fk, fkValue, fetchChildren = true))
     }

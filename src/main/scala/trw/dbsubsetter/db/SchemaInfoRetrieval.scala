@@ -112,7 +112,7 @@ object SchemaInfoRetrieval {
         }
     }
 
-    val foreignKeys: Set[ForeignKey] = {
+    val foreignKeysOrdered: Array[ForeignKey] = {
       val userSuppliedPartialFks: Seq[ForeignKeyQueryRow] = config.cmdLineForeignKeys.flatMap { cfk =>
         cfk.fromColumns.zip(cfk.toColumns).map { case (fromCol, toCol) =>
           ForeignKeyQueryRow(cfk.fromSchema, cfk.fromTable, fromCol, cfk.toSchema, cfk.toTable, toCol)
@@ -154,22 +154,22 @@ object SchemaInfoRetrieval {
           }
 
           ForeignKey(fromCols, toCols, pointsToPk)
-        }.toSet
+        }.toArray
     }
 
-    val fksFromTable: Map[Table, Set[ForeignKey]] = {
-      foreignKeys.groupBy(_.fromTable).withDefaultValue(Set.empty)
+    val fksFromTable: Map[Table, Vector[ForeignKey]] = {
+      foreignKeysOrdered.toVector.groupBy(_.fromTable).withDefaultValue(Vector.empty)
     }
 
-    val fksToTable: Map[Table, Set[ForeignKey]] = {
-      foreignKeys.groupBy(_.toTable).withDefaultValue(Set.empty)
+    val fksToTable: Map[Table, Vector[ForeignKey]] = {
+      foreignKeysOrdered.toVector.groupBy(_.toTable).withDefaultValue(Vector.empty)
     }
 
     SchemaInfo(
       tablesByName,
       colByTableOrdered,
       pkColumnOrdinalsByTable,
-      foreignKeys,
+      foreignKeysOrdered,
       fksFromTable,
       fksToTable
     )
