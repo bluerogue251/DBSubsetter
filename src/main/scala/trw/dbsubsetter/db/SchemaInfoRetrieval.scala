@@ -93,6 +93,8 @@ object SchemaInfoRetrieval {
       (t.schema, t.name) -> Table(t.schema, t.name, columnsQueryResult.exists(c => c.schema == t.schema && c.table == t.name && c.isSqlServerAutoincrement))
     }.toMap
 
+    val tablesOrdered = tablesByName.map { case (_, v) => v }.toArray
+
     val colsByTableAndName: Map[Table, Map[ColumnName, Column]] = {
       columnsQueryResult
         .groupBy(c => tablesByName(c.schema, c.table))
@@ -167,6 +169,7 @@ object SchemaInfoRetrieval {
 
     SchemaInfo(
       tablesByName,
+      tablesOrdered,
       colByTableOrdered,
       pkColumnOrdinalsByTable,
       foreignKeysOrdered,

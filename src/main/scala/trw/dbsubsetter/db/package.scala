@@ -12,6 +12,7 @@ package object db {
   type SqlTemplates = Map[(ForeignKey, Table), SqlQuery]
 
   case class SchemaInfo(tablesByName: Map[(SchemaName, TableName), Table],
+                        tablesOrdered: Array[Table],
                         colsByTableOrdered: Map[Table, Vector[Column]],
                         pkOrdinalsByTable: Map[Table, Vector[Int]],
                         foreignKeysOrdered: Array[ForeignKey],

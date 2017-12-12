@@ -21,7 +21,7 @@ object NewTasks {
           case DuplicateTask =>
             unfinishedTaskCount -= 1
           case other =>
-            throw new RuntimeException(s"Cannot handle $other")
+            throw new RuntimeException(s"Cannot handle $other") // TODO: Make this a compile time error
         }
 
         if (unfinishedTaskCount == 0) {

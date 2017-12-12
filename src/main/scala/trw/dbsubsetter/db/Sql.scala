@@ -15,7 +15,7 @@ object Sql {
   }
 
   def preparedInsertStatementStrings(sch: SchemaInfo): Map[Table, SqlQuery] = {
-    sch.tablesByName.map { case (_, table) =>
+    sch.tablesOrdered.map { table =>
       val cols = sch.colsByTableOrdered(table)
       val sqlString =
         s"""insert into ${quote(table)}
@@ -27,7 +27,7 @@ object Sql {
         sqlString
       }
       table -> sqlStringAccountingForMsSqlServer
-    }
+    }.toMap
   }
 
   def makeQueryString(table: Table, whereClause: WhereClause, sch: SchemaInfo): SqlQuery = {
