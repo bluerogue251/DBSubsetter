@@ -30,7 +30,8 @@ object Subsetting {
     val mergeTargetDbResults = b.add(Merge[TargetDbInsertResult](config.targetDbParallelism))
 
     // Start everything off
-    Source(baseQueries) ~> mergeOriginDbRequests
+    Source(baseQueries) ~>
+      mergeOriginDbRequests
 
     // Process Origin DB Queries in Parallel
     mergeOriginDbRequests.out ~> balanceOriginDb
@@ -53,7 +54,6 @@ object Subsetting {
       mergeNewTaskRequests ~>
       NewTasks.flow(schemaInfo, baseQueries.size, queue) ~>
       Sink.ignore
-    //  We need to feed into partitionFkTasks by reading the queue!!!! AAAHHHHH!!!!!
 
     broadcastPksAdded ~>
       Flow[PksAdded].buffer(Int.MaxValue, OverflowStrategy.backpressure) ~>
@@ -62,7 +62,11 @@ object Subsetting {
     // FkTasks ~> cannotBePrechecked       ~>        OriginDbRequest
     // FkTasks ~> canBePrechecked ~> PkStoreQuery ~> OriginDbRequest
     //                                            ~> DuplicateTask
-    partitionFkTasks.out(0) ~> mergeOriginDbRequests
+    Source.fromGraph(new NewTaskSource(schemaInfo, queue)) ~>
+      partitionFkTasks.in
+
+    partitionFkTasks.out(0) ~>
+      mergeOriginDbRequests
 
     partitionFkTasks.out(1) ~>
       Flow[FkTask].mapAsync(500)(req => (pkStore ? req).mapTo[PkResult]) ~>
