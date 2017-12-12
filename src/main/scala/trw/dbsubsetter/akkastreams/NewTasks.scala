@@ -10,8 +10,8 @@ object NewTasks {
   def flow(sch: SchemaInfo, numBaseQueries: Int, queue: ChronicleQueue): Flow[PkResult, Unit, NotUsed] = {
     Flow[PkResult].statefulMapConcat[Unit] { () =>
       // Queue writing utils
-      val parentFkWriters = sch.fksOrdered.map(fk => new TaskQueueWriter(fk.toCols.map(_.jdbcType)))
-      val childFkWriters = sch.fksOrdered.map(fk => new TaskQueueWriter(fk.fromCols.map(_.jdbcType)))
+      val parentFkWriters = sch.fksOrdered.zipWithIndex.map { case (fk, i) => new TaskQueueWriter(i.toShort, fk.toCols.map(_.jdbcType)) }
+      val childFkWriters = sch.fksOrdered.zipWithIndex.map { case (fk, i) => new TaskQueueWriter(i.toShort, fk.fromCols.map(_.jdbcType)) }
       val appender = queue.acquireAppender()
 
       // Stateful counter
