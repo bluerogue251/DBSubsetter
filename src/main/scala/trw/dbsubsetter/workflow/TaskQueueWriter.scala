@@ -15,7 +15,7 @@ class TaskQueueWriter(fkOrdinal: Short, typeList: Seq[JDBCType]) {
     }
   }
 
-  private val handlerFunc: (ValueOut, Array[Any]) => Unit = {
+  private val handlerFunc: (ValueOut, Any) => Unit = {
     val funcs: Array[(ValueOut, Any) => WireOut] = typeList.map {
       case JDBCType.TINYINT | JDBCType.SMALLINT => (out: ValueOut, fkVal: Any) => out.int16(fkVal.asInstanceOf[Short])
       case JDBCType.INTEGER => (out: ValueOut, fkVal: Any) => out.int32(fkVal.asInstanceOf[Int])
@@ -27,9 +27,9 @@ class TaskQueueWriter(fkOrdinal: Short, typeList: Seq[JDBCType]) {
     val headFunc: (ValueOut, Any) => WireOut = funcs.head
 
     if (typeList.lengthCompare(1) == 0) {
-      (out, fkValue) => headFunc(out, fkValue.head)
+      (out, fkValue) => headFunc(out, fkValue)
     } else {
-      (out, fkValues) => fkValues.zip(funcs).foreach { case (v, f) => f(out, v) }
+      (out, fkValues) => fkValues.asInstanceOf[Array[Any]].zip(funcs).foreach { case (v, f) => f(out, v) }
     }
   }
 }

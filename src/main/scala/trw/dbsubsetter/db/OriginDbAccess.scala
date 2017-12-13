@@ -14,10 +14,14 @@ class OriginDbAccess(connStr: String, sch: SchemaInfo) {
     (fk, table) -> conn.prepareStatement(sqlStr)
   }
 
-  def getRowsFromTemplate(fk: ForeignKey, table: Table, fkValue: Array[Any]): Vector[Row] = {
+  def getRowsFromTemplate(fk: ForeignKey, table: Table, fkValue: Any): Vector[Row] = {
     val stmt = statements(fk, table)
     stmt.clearParameters()
-    fkValue.zipWithIndex.foreach { case (value, i) => stmt.setObject(i + 1, value) }
+    if (fk.isSingleCol) {
+      stmt.setObject(1, fkValue)
+    } else {
+      fkValue.asInstanceOf[Array[Any]].zipWithIndex.foreach { case (value, i) => stmt.setObject(i + 1, value) }
+    }
     val jdbcResult = stmt.executeQuery()
     jdbcResultToRows(jdbcResult, table)
   }

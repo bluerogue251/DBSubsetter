@@ -5,9 +5,9 @@ import java.sql.JDBCType
 import net.openhft.chronicle.wire.ValueIn
 
 class TaskQueueReader(typeList: Array[JDBCType]) {
-  def read(in: ValueIn): Array[Any] = handlerFunc(in)
+  def read(in: ValueIn): Any = handlerFunc(in)
 
-  private val handlerFunc: ValueIn => Array[Any] = {
+  private val handlerFunc: ValueIn => Any = {
     val funcs: Array[ValueIn => Any] = typeList.map {
       case JDBCType.TINYINT | JDBCType.SMALLINT => (in: ValueIn) => in.int16()
       case JDBCType.INTEGER => (in: ValueIn) => in.int32()
@@ -19,7 +19,7 @@ class TaskQueueReader(typeList: Array[JDBCType]) {
     val headFunc: ValueIn => Any = funcs.head
 
     if (typeList.lengthCompare(1) == 0) {
-      (in: ValueIn) => Array[Any](headFunc(in))
+      (in: ValueIn) => headFunc(in)
     } else {
       (in: ValueIn) => funcs.map(f => f(in))
     }
