@@ -27,5 +27,5 @@ class SchoolDbPostgresqlTest extends AbstractPostgresqlEndToEndTest with SchoolD
 
   override val singleThreadedRuntimeThreshold: Long = 210000
 
-  override val akkaStreamsRuntimeThreshold: Long = 24000
+  override val akkaStreamsRuntimeThreshold: Long = 25000
 }
