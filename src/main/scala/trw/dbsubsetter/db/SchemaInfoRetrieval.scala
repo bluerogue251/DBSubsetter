@@ -156,7 +156,7 @@ object SchemaInfoRetrieval {
         ForeignKey(fromCols, toCols, pointsToPk, 0)
       }
 
-      allFksUnordered.toArray.sorted.zipWithIndex.map { case (fk, idx) => fk.copy(i = idx.toShort) }
+      allFksUnordered.toArray.zipWithIndex.map { case (fk, idx) => fk.copy(i = idx.toShort) }
     }
 
     val fksFromTable: Map[Table, Vector[ForeignKey]] = {
