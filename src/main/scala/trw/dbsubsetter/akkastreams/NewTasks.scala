@@ -22,10 +22,10 @@ object NewTasks {
           case pka: PksAdded =>
             val newTasks = NewFkTaskWorkflow.process(pka, sch)
             unfinishedTaskCount += (newTasks.size - 1)
-            newTasks.foreach { case ((fk, fetchChildren), tasks) =>
+            newTasks.foreach { case ((fk, fetchChildren), fkValues) =>
               val writer = if (fetchChildren) childFkWriters(fk.i) else parentFkWriters(fk.i)
-              tasks.foreach { task =>
-                appender.writeDocument(writer.writeHandler(fetchChildren, task.fkValue))
+              fkValues.foreach { fkValue =>
+                appender.writeDocument(writer.writeHandler(fetchChildren, fkValue))
               }
             }
           case DuplicateTask =>
