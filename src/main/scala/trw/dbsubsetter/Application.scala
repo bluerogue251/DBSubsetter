@@ -1,5 +1,6 @@
 package trw.dbsubsetter
 
+import net.openhft.chronicle.queue.RollCycles
 import net.openhft.chronicle.queue.impl.single.SingleChronicleQueueBuilder
 import trw.dbsubsetter.config.{CommandLineParser, Config}
 import trw.dbsubsetter.db.SchemaInfoRetrieval
@@ -22,7 +23,7 @@ object Application extends App {
         ApplicationSingleThreaded.run(config, schemaInfo, baseQueries)
         Util.printRuntime(startingTime)
       } else {
-        val queue = SingleChronicleQueueBuilder.binary("/home/teddy/DBSubsetter-Chronicle").build()
+        val queue = SingleChronicleQueueBuilder.binary("/home/teddy/DBSubsetter-Chronicle").rollCycle(RollCycles.MINUTELY).build()
         val futureResult = ApplicationAkkaStreams.run(config, schemaInfo, baseQueries, queue)
         futureResult.onComplete {
           case Success(_) =>
