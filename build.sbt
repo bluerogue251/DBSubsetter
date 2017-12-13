@@ -9,7 +9,7 @@ libraryDependencies ++= Seq(
   "com.github.scopt" %% "scopt" % "3.7.0",
 
   // Akka stream processing
-  "com.typesafe.akka" %% "akka-stream" % "2.5.6",
+  "com.typesafe.akka" %% "akka-stream" % "2.5.8",
 
   // JDBC Drivers
   "org.postgresql" % "postgresql" % "42.1.4",

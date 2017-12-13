@@ -21,8 +21,9 @@ object NewTasks {
         pkResult match {
           case pka: PksAdded =>
             val newTasks = NewFkTaskWorkflow.process(pka, sch)
-            unfinishedTaskCount += (newTasks.size - 1)
+            unfinishedTaskCount -= 1
             newTasks.foreach { case ((fk, fetchChildren), fkValues) =>
+              unfinishedTaskCount += fkValues.size
               val writer = if (fetchChildren) childFkWriters(fk.i) else parentFkWriters(fk.i)
               fkValues.foreach { fkValue =>
                 appender.writeDocument(writer.writeHandler(fetchChildren, fkValue))
