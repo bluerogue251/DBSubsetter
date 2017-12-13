@@ -5,7 +5,7 @@ import java.sql.JDBCType
 import net.openhft.chronicle.wire.{ValueOut, WireOut, WriteMarshallable}
 
 class TaskQueueWriter(fkOrdinal: Short, typeList: Seq[JDBCType]) {
-  def writeHandler(fetchChildren: Boolean, fkValue: Array[Any]): WriteMarshallable = {
+  def writeHandler(fetchChildren: Boolean, fkValue: Any): WriteMarshallable = {
     wireOut => {
       val out = wireOut.getValueOut
       out.bool(false) // completed = false
