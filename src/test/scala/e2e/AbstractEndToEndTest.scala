@@ -84,7 +84,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
 
     val startAkkaStreams = System.nanoTime()
     println("StartedProcessing")
-    val queue = SingleChronicleQueueBuilder.binary("/home/teddy/DBSubsetter-ChronicleTest").build()
+    val queue = SingleChronicleQueueBuilder.binary("/home/teddy/chronicle").build()
     val futureResult = ApplicationAkkaStreams.run(akkaStreamsConfig, schemaInfo, baseQueries, queue)
     Await.result(futureResult, Duration.Inf)
     println("FinishedProcessing")
