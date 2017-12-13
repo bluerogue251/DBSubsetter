@@ -5,14 +5,23 @@ import java.sql.JDBCType
 import net.openhft.chronicle.wire.ValueIn
 
 class TaskQueueReader(typeList: Array[JDBCType]) {
-  // TODO it seems like we recalculate / retype-check way more than we should need to here?
-  def read(in: ValueIn): Array[Any] = {
-    typeList.map {
-      case JDBCType.TINYINT | JDBCType.SMALLINT => in.int16()
-      case JDBCType.INTEGER => in.int32()
-      case JDBCType.BIGINT => in.int64()
-      case JDBCType.VARCHAR | JDBCType.CHAR | JDBCType.LONGVARCHAR | JDBCType.NCHAR => in.text()
-      case other => throw new RuntimeException(s"JDBC Type not yet supported for foreign key column: $other. Please open a GitHub issue for this.")
+  def read(in: ValueIn): Array[Any] = handlerFunc(in)
+
+  private val funcs: Array[ValueIn => Any] = typeList.map {
+    case JDBCType.TINYINT | JDBCType.SMALLINT => (in: ValueIn) => in.int16()
+    case JDBCType.INTEGER => (in: ValueIn) => in.int32()
+    case JDBCType.BIGINT => (in: ValueIn) => in.int64()
+    case JDBCType.VARCHAR | JDBCType.CHAR | JDBCType.LONGVARCHAR | JDBCType.NCHAR => (in: ValueIn) => in.text()
+    case other => throw new RuntimeException(s"JDBC Type not yet supported for foreign key column: $other. Please open a GitHub issue for this.")
+  }
+
+  private val headFunc: ValueIn => Any = funcs.head
+
+  private val handlerFunc: ValueIn => Array[Any] = {
+    if (typeList.lengthCompare(1) == 0) {
+      (in: ValueIn) => Array[Any](headFunc(in))
+    } else {
+      (in: ValueIn) => funcs.map(f => f(in))
     }
   }
 }
