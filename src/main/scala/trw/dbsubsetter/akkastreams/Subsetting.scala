@@ -52,7 +52,7 @@ object Subsetting {
 
     broadcastPksAdded ~>
       mergeNewTaskRequests ~>
-      NewTasks.flow(schemaInfo, baseQueries.size, queue) ~>
+      NewTasks.flow(schemaInfo, baseQueries.size, queue).async ~>
       Sink.ignore
 
     broadcastPksAdded ~>
@@ -62,7 +62,7 @@ object Subsetting {
     // FkTasks ~> cannotBePrechecked       ~>        OriginDbRequest
     // FkTasks ~> canBePrechecked ~> PkStoreQuery ~> OriginDbRequest
     //                                            ~> DuplicateTask
-    Source.fromGraph(new NewTaskSource(schemaInfo, queue)) ~>
+    Source.fromGraph(new NewTaskSource(schemaInfo, queue)).async ~>
       partitionFkTasks.in
 
     partitionFkTasks.out(0) ~>
