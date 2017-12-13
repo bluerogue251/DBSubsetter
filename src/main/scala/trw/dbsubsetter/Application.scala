@@ -1,5 +1,7 @@
 package trw.dbsubsetter
 
+import java.nio.file.Files
+
 import net.openhft.chronicle.queue.RollCycles
 import net.openhft.chronicle.queue.impl.single.SingleChronicleQueueBuilder
 import trw.dbsubsetter.config.{CommandLineParser, Config}
@@ -23,7 +25,8 @@ object Application extends App {
         ApplicationSingleThreaded.run(config, schemaInfo, baseQueries)
         Util.printRuntime(startingTime)
       } else {
-        val queue = SingleChronicleQueueBuilder.binary("/home/teddy/DBSubsetter-Chronicle").rollCycle(RollCycles.MINUTELY).build()
+        val chronicleQueueStorageDir = Files.createTempDirectory("DBSubsetter-")
+        val queue = SingleChronicleQueueBuilder.binary(chronicleQueueStorageDir).rollCycle(RollCycles.MINUTELY).build()
         val futureResult = ApplicationAkkaStreams.run(config, schemaInfo, baseQueries, queue)
         futureResult.onComplete {
           case Success(_) =>
