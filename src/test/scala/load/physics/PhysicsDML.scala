@@ -16,9 +16,9 @@ class PhysicsDML(val profile: JdbcProfile) extends PhysicsDDL {
   val numParticleColliderData = numExperiments * 25000
   val numQuantumData = numExperiments * 30000
   val numGravitationalWaveData = numExperiments * 20000
-  val particleColliderNotesFactor = 5
-  val quantumNotesFactor = 15
-  val gravitationalWaveNotesFactor = 9
+  val particleColliderNotesFactor = 13
+  val quantumNotesFactor = 11
+  val gravitationalWaveNotesFactor = 15
 
   def initialInserts = {
     val seq = Seq(

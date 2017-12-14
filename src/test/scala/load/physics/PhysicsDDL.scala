@@ -239,4 +239,20 @@ trait PhysicsDDL {
   }
 
   lazy val DatumNotes = new TableQuery(tag => new DatumNotes(tag))
+
+  case class DatumNoteResponse(id: Long, responseToDatumNoteId: Long, response: String, createdAt: java.sql.Timestamp)
+
+  class DatumNoteResponses(_tableTag: Tag) extends Table[DatumNoteResponse](_tableTag, "datum_note_responses") {
+    def * = (id, responseToDatumNoteId, response, createdAt) <> (DatumNoteResponse.tupled, DatumNoteResponse.unapply)
+
+    val id: Rep[Long] = column[Long]("id", O.AutoInc, O.PrimaryKey)
+    val responseToDatumNoteId: Rep[Long] = column[Long]("response_to_datum_note_id")
+    val response: Rep[String] = column[String]("response")
+    val createdAt: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("created_at")
+
+    lazy val fk1 = foreignKey("datum_note_responses_response_to_datum_note_id_fkey", responseToDatumNoteId, DatumNotes)(_.id)
+    val idx1 = index("datum_note_responses_response_to_datum_note_id_idx", responseToDatumNoteId)
+  }
+
+  lazy val DatumNoteResponses = new TableQuery(tag => new DatumNoteResponses(tag))
 }

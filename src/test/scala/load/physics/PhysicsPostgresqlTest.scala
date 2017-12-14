@@ -17,7 +17,7 @@ class PhysicsPostgresqlTest extends AbstractPostgresqlEndToEndTest with PhysicsT
 
   override def setupDDL(): Unit = {}
 
-  override def setupDML(): Unit = {}
+  //  override def setupDML(): Unit = {}
 
   override val singleThreadedRuntimeThreshold: Long = 400000
 

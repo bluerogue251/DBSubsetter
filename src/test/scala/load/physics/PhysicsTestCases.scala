@@ -2,8 +2,8 @@ package load.physics
 
 import e2e.{AbstractEndToEndTest, SlickSetupDDL}
 
-import scala.concurrent.Await
 import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 
 trait PhysicsTestCases extends AbstractEndToEndTest with PhysicsDDL with SlickSetupDDL {
 
@@ -13,35 +13,50 @@ trait PhysicsTestCases extends AbstractEndToEndTest with PhysicsDDL with SlickSe
 
   override def setupDML(): Unit = {
     val customDml = new PhysicsDML(profile)
-    val dmlFut1 = originDb.run(customDml.initialInserts)
-    Await.result(dmlFut1, Duration.Inf)
-    val fut2 = originDb.run(DBIO.seq(customDml.particleDomainInserts: _*))
-    Await.result(fut2, Duration.Inf)
-    val fut3 = originDb.run(DBIO.seq(customDml.quantumDomainInserts: _*))
-    Await.result(fut3, Duration.Inf)
-    val fut4 = originDb.run(DBIO.seq(customDml.gravitationalWaveDomainInserts: _*))
-    Await.result(fut4, Duration.Inf)
-    val fut5 = originDb.run(DBIO.seq(customDml.particleColliderDataInserts: _*))
-    Await.result(fut5, Duration.Inf)
-    val fut6 = originDb.run(DBIO.seq(customDml.quantumDataInserts: _*))
-    Await.result(fut6, Duration.Inf)
-    val fut7 = originDb.run(DBIO.seq(customDml.gravitationalWaveDataInserts: _*))
-    Await.result(fut7, Duration.Inf)
+    //    val dmlFut1 = originDb.run(customDml.initialInserts)
+    //    Await.result(dmlFut1, Duration.Inf)
+    //    val fut2 = originDb.run(DBIO.seq(customDml.particleDomainInserts: _*))
+    //    Await.result(fut2, Duration.Inf)
+    //    val fut3 = originDb.run(DBIO.seq(customDml.quantumDomainInserts: _*))
+    //    Await.result(fut3, Duration.Inf)
+    //    val fut4 = originDb.run(DBIO.seq(customDml.gravitationalWaveDomainInserts: _*))
+    //    Await.result(fut4, Duration.Inf)
+    //    val fut5 = originDb.run(DBIO.seq(customDml.particleColliderDataInserts: _*))
+    //    Await.result(fut5, Duration.Inf)
+    //    val fut6 = originDb.run(DBIO.seq(customDml.quantumDataInserts: _*))
+    //    Await.result(fut6, Duration.Inf)
+    //    val fut7 = originDb.run(DBIO.seq(customDml.gravitationalWaveDataInserts: _*))
+    //    Await.result(fut7, Duration.Inf)
 
-    (1 to customDml.numParticleColliderData by 2074).foreach { i =>
-      val f = originDb.run(DBIO.seq(customDml.particleColliderNotesInserts(i)))
-      Await.result(f, Duration.Inf)
+    import scala.concurrent.ExecutionContext.Implicits.global
+
+    val pcFut = Future {
+      (1 to customDml.numParticleColliderData by 50).foreach { i =>
+        val inserts = (i to i + 49).map(i => customDml.particleColliderNotesInserts(i))
+        val f = originDb.run(DBIO.seq(inserts: _*))
+        Await.result(f, Duration.Inf)
+      }
     }
 
-    (1 to customDml.numQuantumData by 1210).foreach { i =>
-      val f = originDb.run(DBIO.seq(customDml.quantumNotesInserts(i)))
-      Await.result(f, Duration.Inf)
+    val qdFut = Future {
+      (1 to customDml.numQuantumData by 50).foreach { i =>
+        val inserts = (i to i + 49).map(i => customDml.quantumNotesInserts(i))
+        val f = originDb.run(DBIO.seq(inserts: _*))
+        Await.result(f, Duration.Inf)
+      }
     }
 
-    (1 to customDml.numGravitationalWaveData by 501).foreach { i =>
-      val f = originDb.run(DBIO.seq(customDml.gravitationWaveNotesInserts(i)))
-      Await.result(f, Duration.Inf)
+    val gwFut = Future {
+      (1 to customDml.numGravitationalWaveData by 50).foreach { i =>
+        val inserts = (i to i + 49).map(i => customDml.gravitationWaveNotesInserts(i))
+        val f = originDb.run(DBIO.seq(inserts: _*))
+        Await.result(f, Duration.Inf)
+      }
     }
+
+    Await.result(pcFut, Duration.Inf)
+    Await.result(qdFut, Duration.Inf)
+    Await.result(gwFut, Duration.Inf)
   }
 
   val dataSetName = "physics"
