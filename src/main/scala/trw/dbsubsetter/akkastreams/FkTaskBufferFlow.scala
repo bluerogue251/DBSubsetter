@@ -11,12 +11,11 @@ import trw.dbsubsetter.workflow._
 
 // Adapted from https://github.com/torodb/akka-chronicle-queue
 class FkTaskBufferFlow(sch: SchemaInfo) extends GraphStage[FlowShape[Map[(ForeignKey, Boolean), Vector[Any]], FkTask]] {
-  private val in = Inlet.create[Map[(ForeignKey, Boolean), Vector[Any]]]("FkTaskBufferFlow.in")
-  private val out = Outlet.create[FkTask]("FkTaskBufferFlow.out")
+  val in: Inlet[Map[(ForeignKey, Boolean), Vector[Any]]] = Inlet.create[Map[(ForeignKey, Boolean), Vector[Any]]]("FkTaskBufferFlow.in")
+  val out: Outlet[FkTask] = Outlet.create[FkTask]("FkTaskBufferFlow.out")
   override val shape: FlowShape[Map[(ForeignKey, Boolean), Vector[Any]], FkTask] = FlowShape.of(in, out)
 
   override def createLogic(inheritedAttributes: Attributes): GraphStageLogic = new GraphStageLogic(shape) {
-    // Chronicle Queue Utils
     private val storageDir = Files.createTempDirectory("DBSubsetter-")
     private val queue = SingleChronicleQueueBuilder.binary(storageDir).rollCycle(RollCycles.MINUTELY).build()
     private val appender = queue.acquireAppender()
