@@ -1,9 +1,5 @@
 package e2e
 
-import java.nio.file.Files
-
-import net.openhft.chronicle.queue.RollCycles
-import net.openhft.chronicle.queue.impl.single.SingleChronicleQueueBuilder
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 import slick.dbio.{DBIOAction, Effect}
 import slick.jdbc.JdbcBackend
@@ -85,11 +81,9 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
     //    singleThreadedRuntimeMillis = (System.nanoTime() - startSingleThreaded) / 1000000
     //    println(s"Single Threaded Took $singleThreadedRuntimeMillis milliseconds")
 
-    val chronicleQueueStorageDir = Files.createTempDirectory("DBSubsetter-")
-    val queue = SingleChronicleQueueBuilder.binary(chronicleQueueStorageDir).rollCycle(RollCycles.MINUTELY).build()
     println("StartedProcessing")
     val startAkkaStreams = System.nanoTime()
-    val futureResult = ApplicationAkkaStreams.run(akkaStreamsConfig, schemaInfo, baseQueries, queue)
+    val futureResult = ApplicationAkkaStreams.run(akkaStreamsConfig, schemaInfo, baseQueries)
     Await.result(futureResult, Duration.Inf)
     println("FinishedProcessing")
     akkStreamsRuntimeMillis = (System.nanoTime() - startAkkaStreams) / 1000000

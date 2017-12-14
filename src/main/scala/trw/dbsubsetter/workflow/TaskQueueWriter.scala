@@ -8,7 +8,6 @@ class TaskQueueWriter(fkOrdinal: Short, typeList: Seq[JDBCType]) {
   def writeHandler(fetchChildren: Boolean, fkValue: Any): WriteMarshallable = {
     wireOut => {
       val out = wireOut.getValueOut
-      out.bool(false) // completed = false
       out.bool(fetchChildren)
       out.int16(fkOrdinal)
       handlerFunc(out, fkValue)

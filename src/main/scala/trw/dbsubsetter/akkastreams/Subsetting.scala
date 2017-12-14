@@ -4,10 +4,9 @@ import akka.NotUsed
 import akka.actor.ActorRef
 import akka.pattern.ask
 import akka.stream.scaladsl.GraphDSL.Implicits._
-import akka.stream.scaladsl.{Balance, Broadcast, Flow, GraphDSL, Merge, Partition, Sink, Source}
+import akka.stream.scaladsl.{Balance, Broadcast, Flow, GraphDSL, Merge, Partition, Source}
 import akka.stream.{OverflowStrategy, SourceShape}
 import akka.util.Timeout
-import net.openhft.chronicle.queue.ChronicleQueue
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.SchemaInfo
 import trw.dbsubsetter.workflow._
@@ -16,7 +15,7 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 object Subsetting {
-  def source(config: Config, schemaInfo: SchemaInfo, baseQueries: List[SqlStrQuery], pkStore: ActorRef, queue: ChronicleQueue)(implicit ec: ExecutionContext): Source[TargetDbInsertResult, NotUsed] = Source.fromGraph(GraphDSL.create() { implicit b =>
+  def source(config: Config, schemaInfo: SchemaInfo, baseQueries: List[SqlStrQuery], pkStore: ActorRef)(implicit ec: ExecutionContext): Source[TargetDbInsertResult, NotUsed] = Source.fromGraph(GraphDSL.create() { implicit b =>
     // Infrastructure: Timeouts, Merges, and Broadcasts
     implicit val askTimeout: Timeout = Timeout(48.hours)
     val mergeOriginDbRequests = b.add(Merge[OriginDbRequest](3))
@@ -28,6 +27,7 @@ object Subsetting {
     val mergeNewTaskRequests = b.add(Merge[PkResult](2))
     val balanceTargetDb = b.add(Balance[PksAdded](config.targetDbParallelism, waitForAllDownstreams = true))
     val mergeTargetDbResults = b.add(Merge[TargetDbInsertResult](config.targetDbParallelism))
+    val fkTaskBufferFlow = new FkTaskBufferFlow(schemaInfo).async
 
     // Start everything off
     Source(baseQueries) ~>
@@ -52,18 +52,19 @@ object Subsetting {
 
     broadcastPksAdded ~>
       mergeNewTaskRequests ~>
-      NewTasks.flow(schemaInfo, baseQueries.size, queue).async ~>
-      Sink.ignore
+      NewTasks.flow(schemaInfo) ~>
+      OutstandingTaskCounter.counter(baseQueries.size) ~>
+      fkTaskBufferFlow
 
     broadcastPksAdded ~>
-      Flow[PksAdded].buffer(20, OverflowStrategy.backpressure) ~> // TODO convert buffer to chronicle-queue?
+      Flow[PksAdded].buffer(Int.MaxValue, OverflowStrategy.backpressure) ~> // TODO convert buffer to chronicle-queue?
       balanceTargetDb
 
     // FkTasks ~> cannotBePrechecked       ~>        OriginDbRequest
     // FkTasks ~> canBePrechecked ~> PkStoreQuery ~> OriginDbRequest
     //                                            ~> DuplicateTask
-    Source.fromGraph(new NewTaskSource(schemaInfo, queue)).async ~>
-      partitionFkTasks.in
+    fkTaskBufferFlow ~>
+      partitionFkTasks
 
     partitionFkTasks.out(0) ~>
       mergeOriginDbRequests
