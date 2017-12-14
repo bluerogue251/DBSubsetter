@@ -1,2 +1,21 @@
+* Separate stages: newTasks, statefulCounter, takeWhile, chronicle-queue
+* Option to --excludeTable
+* Make Physics DB bigger and compare performance with non-chronicle-queue version
+* Drop target DB docker containers after test
+* convert chronicle sink/source into a Flow
+
+* Manual option to --skipPkStore
+* Configurable pre-target-db-insert buffer size
 * Test UUID data types in MySQL and SQL Server
-* Consider if for certain schemas we can skip storing certain tables' PKs because we know we will only ever see a row once?
+
+* RELEASE v1.0.0
+
+* Try 1 chronicle-queue flow *per Fk* without wasting too much compute time checking nearly-always-empty queues
+* Report SQL Server docker bug
+* Report MySQL Foreign Key "to" column captitalization bug
+
+Nice-to-Haves for later
+* Automatic `--skipPkStore` option
+* ChronicalMap for PKs
+* ChronicalQueue for pre-target-db-insert buffer instead of in-memory Akka Streams Flow.buffer
+* Performant `--fullTable` option

@@ -1,25 +1,9 @@
 package load.physics
 
-import e2e.AbstractSqlServerEndToEndTest
-import load.LoadTest
+import org.scalatest.FunSuite
 
-class PhysicsSqlServerTest extends AbstractSqlServerEndToEndTest with PhysicsTestCases with LoadTest {
-  override val originPort = 5576
-  override val programArgs = Array(
-    "--schemas", "dbo",
-    "--baseQuery", "dbo.scientists ::: id % 2 = 0 ::: includeChildren",
-    "--baseQuery", "dbo.experiment_plans ::: id % 19 = 0 ::: includeChildren"
-  )
-
-  //  override def createOriginDb(): Unit = s"docker start physics_sqlserver".!
-
-  //  override def setupDDL(): Unit = {}
-
-  //  override def setupDML(): Unit = {}
-
-  //  override def setupTargetDbs(): Unit = {}
-
-  override val singleThreadedRuntimeThreshold: Long = 2
-
-  override val akkaStreamsRuntimeThreshold: Long = 2
+class PhysicsSqlServerTest extends FunSuite {
+  test("Physics SQL Server Test") {
+    pending
+  }
 }

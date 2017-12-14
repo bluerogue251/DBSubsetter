@@ -13,6 +13,12 @@ class PhysicsDML(val profile: JdbcProfile) extends PhysicsDDL {
   private val numScientists = 100
   private val numExperimentTypes = 10
   private val numExperiments = 200
+  val numParticleColliderData = numExperiments * 25000
+  val numQuantumData = numExperiments * 30000
+  val numGravitationalWaveData = numExperiments * 20000
+  val particleColliderNotesFactor = 5
+  val quantumNotesFactor = 2
+  val gravitationalWaveNotesFactor = 9
 
   def initialInserts = {
     val seq = Seq(
@@ -159,6 +165,54 @@ class PhysicsDML(val profile: JdbcProfile) extends PhysicsDDL {
           Timestamp.valueOf("2001-12-29 23:59:59.182131")
         )
       }
+    }
+  }
+
+  def particleColliderNotesInserts(parentId: Long) = {
+    val factor = particleColliderNotesFactor
+    DatumNotes ++= (1 to factor).map { i =>
+      val pk = i + ((parentId - 1) * factor)
+      DatumNote(
+        pk,
+        Some((pk % (numParticleColliderData - 1)) + 1),
+        None,
+        None,
+        s"$pk This $pk is $pk a $pk particle $pk collider $pk datum $pk note $pk: ${pk.toString * 1000}",
+        Timestamp.valueOf("2010-12-31 14:32:59.283134")
+      )
+    }
+  }
+
+  def quantumNotesInserts(parentId: Long) = {
+    val factor = quantumNotesFactor
+    val startingPk = numParticleColliderData * particleColliderNotesFactor + 1
+    DatumNotes ++= (1 to factor).map { i =>
+      val pk = startingPk + i + ((parentId - 1) * factor)
+      DatumNote(
+        pk,
+        None,
+        Some((pk % (numQuantumData - 1)) + 1),
+        None,
+        s"$pk This $pk is $pk a $pk quantum $pk datum $pk note $pk: ${pk.toString * 500}",
+        Timestamp.valueOf("2011-06-31 14:18:23.783834")
+      )
+    }
+
+  }
+
+  def gravitationWaveNotesInserts(parentId: Long) = {
+    val factor = gravitationalWaveNotesFactor
+    val startingPk = (numParticleColliderData * particleColliderNotesFactor) + (numQuantumData * quantumNotesFactor) + 1
+    DatumNotes ++= (1 to factor).map { i =>
+      val pk = startingPk + i + ((parentId - 1) * factor)
+      DatumNote(
+        pk,
+        None,
+        None,
+        Some((pk % (numGravitationalWaveData - 1)) + 1),
+        s"$pk This $pk is $pk a $pk gravitational $pk wave $pk datum $pk note $pk: ${pk.toString * 200}",
+        Timestamp.valueOf("1987-02-01 00:00:01.723434")
+      )
     }
   }
 }

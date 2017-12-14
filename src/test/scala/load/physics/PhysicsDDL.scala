@@ -22,7 +22,7 @@ trait PhysicsDDL {
 
   case class ResearchInstitution(id: Int, name: String, createdAt: java.sql.Timestamp)
 
-  class ResearchInstitutions(_tableTag: Tag) extends profile.api.Table[ResearchInstitution](_tableTag, "research_institutions") {
+  class ResearchInstitutions(_tableTag: Tag) extends Table[ResearchInstitution](_tableTag, "research_institutions") {
     def * = (id, name, createdAt) <> (ResearchInstitution.tupled, ResearchInstitution.unapply)
 
     val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
@@ -34,7 +34,7 @@ trait PhysicsDDL {
 
   case class ResearchGroup(id: Int, name: String, researchInstitutionId: Int, createdAt: java.sql.Timestamp)
 
-  class ResearchGroups(_tableTag: Tag) extends profile.api.Table[ResearchGroup](_tableTag, "research_groups") {
+  class ResearchGroups(_tableTag: Tag) extends Table[ResearchGroup](_tableTag, "research_groups") {
     def * = (id, name, researchInstitutionId, createdAt) <> (ResearchGroup.tupled, ResearchGroup.unapply)
 
     val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
@@ -50,7 +50,7 @@ trait PhysicsDDL {
 
   case class Scientist(id: Int, name: String, researchGroupId: Option[Int], createdAt: java.sql.Timestamp)
 
-  class Scientists(_tableTag: Tag) extends profile.api.Table[Scientist](_tableTag, "scientists") {
+  class Scientists(_tableTag: Tag) extends Table[Scientist](_tableTag, "scientists") {
     def * = (id, name, researchGroupId, createdAt) <> (Scientist.tupled, Scientist.unapply)
 
     val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
@@ -66,7 +66,7 @@ trait PhysicsDDL {
 
   case class ExperimentMetadataRow(id: Int, metadata: String, scientistId: Int, createdAt: java.sql.Timestamp)
 
-  class ExperimentMetadata(_tableTag: Tag) extends profile.api.Table[ExperimentMetadataRow](_tableTag, "experiment_metadata") {
+  class ExperimentMetadata(_tableTag: Tag) extends Table[ExperimentMetadataRow](_tableTag, "experiment_metadata") {
     def * = (id, metadata, scientistId, createdAt) <> (ExperimentMetadataRow.tupled, ExperimentMetadataRow.unapply)
 
     val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
@@ -82,7 +82,7 @@ trait PhysicsDDL {
 
   case class ExperimentPlan(id: Int, planDescription: String, scientistId: Int, metadataId: Int, createdAt: java.sql.Timestamp)
 
-  class ExperimentPlans(_tableTag: Tag) extends profile.api.Table[ExperimentPlan](_tableTag, "experiment_plans") {
+  class ExperimentPlans(_tableTag: Tag) extends Table[ExperimentPlan](_tableTag, "experiment_plans") {
     def * = (id, planDescription, scientistId, metadataId, createdAt) <> (ExperimentPlan.tupled, ExperimentPlan.unapply)
 
     val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
@@ -99,7 +99,7 @@ trait PhysicsDDL {
 
   case class Experiment(id: Int, notes: String, experimentPlanId: Int, createdAt: java.sql.Timestamp)
 
-  class Experiments(_tableTag: Tag) extends profile.api.Table[Experiment](_tableTag, "experiments") {
+  class Experiments(_tableTag: Tag) extends Table[Experiment](_tableTag, "experiments") {
     def * = (id, notes, experimentPlanId, createdAt) <> (Experiment.tupled, Experiment.unapply)
 
     val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
@@ -115,7 +115,7 @@ trait PhysicsDDL {
 
   case class ParticleDomainRow(id: Long, domainData: String, createdAt: java.sql.Timestamp)
 
-  class ParticleDomain(_tableTag: Tag) extends profile.api.Table[ParticleDomainRow](_tableTag, "particle_domain") {
+  class ParticleDomain(_tableTag: Tag) extends Table[ParticleDomainRow](_tableTag, "particle_domain") {
     def * = (id, domainData, createdAt) <> (ParticleDomainRow.tupled, ParticleDomainRow.unapply)
 
     val id: Rep[Long] = column[Long]("id", O.AutoInc, O.PrimaryKey)
@@ -127,7 +127,7 @@ trait PhysicsDDL {
 
   case class QuantumDomainRow(id: Long, domainData: String, createdAt: java.sql.Timestamp)
 
-  class QuantumDomain(_tableTag: Tag) extends profile.api.Table[QuantumDomainRow](_tableTag, "quantum_domain") {
+  class QuantumDomain(_tableTag: Tag) extends Table[QuantumDomainRow](_tableTag, "quantum_domain") {
     def * = (id, domainData, createdAt) <> (QuantumDomainRow.tupled, QuantumDomainRow.unapply)
 
     val id: Rep[Long] = column[Long]("id", O.AutoInc, O.PrimaryKey)
@@ -139,7 +139,7 @@ trait PhysicsDDL {
 
   case class GravitationalWaveDomainRow(id: Long, domainData: String, createdAt: java.sql.Timestamp)
 
-  class GravitationalWaveDomain(_tableTag: Tag) extends profile.api.Table[GravitationalWaveDomainRow](_tableTag, "gravitational_wave_domain") {
+  class GravitationalWaveDomain(_tableTag: Tag) extends Table[GravitationalWaveDomainRow](_tableTag, "gravitational_wave_domain") {
     def * = (id, domainData, createdAt) <> (GravitationalWaveDomainRow.tupled, GravitationalWaveDomainRow.unapply)
 
     val id: Rep[Long] = column[Long]("id", O.AutoInc, O.PrimaryKey)
@@ -151,7 +151,7 @@ trait PhysicsDDL {
 
   case class ParticleColliderDataRow(id: Long, experimentId: Int, particleDomainId: Long, data1: Double, data2: Double, data3: Double, data4: Double, data5: Double, data6: Long, data7: Long, data8: Long, data9: String, data10: String, data11: String, createdAt: java.sql.Timestamp)
 
-  class ParticleColliderData(_tableTag: Tag) extends profile.api.Table[ParticleColliderDataRow](_tableTag, "particle_collider_data") {
+  class ParticleColliderData(_tableTag: Tag) extends Table[ParticleColliderDataRow](_tableTag, "particle_collider_data") {
     def * = (id, experimentId, particleDomainId, data1, data2, data3, data4, data5, data6, data7, data8, data9, data10, data11, createdAt) <> (ParticleColliderDataRow.tupled, ParticleColliderDataRow.unapply)
 
     val id: Rep[Long] = column[Long]("id", O.AutoInc, O.PrimaryKey)
@@ -180,7 +180,7 @@ trait PhysicsDDL {
 
   case class QuantumDataRow(id: Long, experimentId: Int, quantumDomainId: Long, data1: String, data2: String, data3: String, createdAt: java.sql.Timestamp)
 
-  class QuantumData(_tableTag: Tag) extends profile.api.Table[QuantumDataRow](_tableTag, "quantum_data") {
+  class QuantumData(_tableTag: Tag) extends Table[QuantumDataRow](_tableTag, "quantum_data") {
     def * = (id, experimentId, quantumDomainId, data1, data2, data3, createdAt) <> (QuantumDataRow.tupled, QuantumDataRow.unapply)
 
     val id: Rep[Long] = column[Long]("id", O.AutoInc, O.PrimaryKey)
@@ -201,7 +201,7 @@ trait PhysicsDDL {
 
   case class GravitationalWaveDataRow(id: Long, experimentId: Int, gravitationalWaveDomainId: Long, data: String, createdAt: java.sql.Timestamp)
 
-  class GravitationalWaveData(_tableTag: Tag) extends profile.api.Table[GravitationalWaveDataRow](_tableTag, "gravitational_wave_data") {
+  class GravitationalWaveData(_tableTag: Tag) extends Table[GravitationalWaveDataRow](_tableTag, "gravitational_wave_data") {
     def * = (id, experimentId, gravitationalWaveDomainId, data, createdAt) <> (GravitationalWaveDataRow.tupled, GravitationalWaveDataRow.unapply)
 
     val id: Rep[Long] = column[Long]("id", O.AutoInc, O.PrimaryKey)
@@ -217,4 +217,26 @@ trait PhysicsDDL {
   }
 
   lazy val GravitationalWaveData = new TableQuery(tag => new GravitationalWaveData(tag))
+
+  case class DatumNote(id: Long, particleColliderDatumId: Option[Long], quantumDatumId: Option[Long], gravitationalWaveDatumId: Option[Long], note: String, createdAt: java.sql.Timestamp)
+
+  class DatumNotes(_tableTag: Tag) extends Table[DatumNote](_tableTag, "datum_notes") {
+    def * = (id, particleColliderDatumId, quantumDatumId, gravitationalWaveDatumId, note, createdAt) <> (DatumNote.tupled, DatumNote.unapply)
+
+    val id: Rep[Long] = column[Long]("id", O.AutoInc, O.PrimaryKey)
+    val particleColliderDatumId: Rep[Option[Long]] = column[Option[Long]]("particle_collider_datum_id")
+    val quantumDatumId: Rep[Option[Long]] = column[Option[Long]]("quantum_datum_id")
+    val gravitationalWaveDatumId: Rep[Option[Long]] = column[Option[Long]]("gravitational_wave_datum_id")
+    val note: Rep[String] = column[String]("note")
+    val createdAt: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("created_at")
+
+    lazy val fk1 = foreignKey("datum_notes_particle_collider_datum_id_fkey", particleColliderDatumId, ParticleColliderData)(_.id)
+    lazy val fk2 = foreignKey("datum_notes_quantum_datum_id_fkey", quantumDatumId, QuantumData)(_.id)
+    lazy val fk3 = foreignKey("datum_notes_gravitational_wave_datum_id_fkey", gravitationalWaveDatumId, GravitationalWaveData)(_.id)
+    val idx1 = index("datum_notes_particle_collider_datum_id_idx", particleColliderDatumId)
+    val idx2 = index("datum_notes_quantum_datum_id_idx", quantumDatumId)
+    val idx3 = index("datum_notes_gravitational_wave_datum_id_idx", gravitationalWaveDatumId)
+  }
+
+  lazy val DatumNotes = new TableQuery(tag => new DatumNotes(tag))
 }
