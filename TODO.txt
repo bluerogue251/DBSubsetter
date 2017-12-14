@@ -1,8 +1,7 @@
+* convert chronicle sink/source into a Flow
 * Separate stages: newTasks, statefulCounter, takeWhile, chronicle-queue
 * Option to --excludeTable
 * Make Physics DB bigger and compare performance with non-chronicle-queue version
-* Drop target DB docker containers after test
-* convert chronicle sink/source into a Flow
 
 * Manual option to --skipPkStore
 * Configurable pre-target-db-insert buffer size
