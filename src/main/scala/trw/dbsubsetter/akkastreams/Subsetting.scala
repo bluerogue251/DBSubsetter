@@ -56,7 +56,7 @@ object Subsetting {
       Sink.ignore
 
     broadcastPksAdded ~>
-      Flow[PksAdded].buffer(Int.MaxValue, OverflowStrategy.backpressure) ~> // TODO convert buffer to chronicle-queue?
+      Flow[PksAdded].buffer(20, OverflowStrategy.backpressure) ~> // TODO convert buffer to chronicle-queue?
       balanceTargetDb
 
     // FkTasks ~> cannotBePrechecked       ~>        OriginDbRequest
