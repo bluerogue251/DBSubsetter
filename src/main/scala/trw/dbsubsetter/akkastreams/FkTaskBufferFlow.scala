@@ -41,8 +41,14 @@ class FkTaskBufferFlow(sch: SchemaInfo) extends GraphStage[FlowShape[Map[(Foreig
     })
 
     setHandler(out, new OutHandler {
-      override def onPull(): Unit = doPull()
+      override def onPull(): Unit = {
+        doPull()
+      }
     })
+
+    override def preStart(): Unit = {
+      pull(in)
+    }
 
     private def doPull(): Unit = {
       tailer.readDocument { r =>
