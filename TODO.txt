@@ -1,8 +1,8 @@
 * convert chronicle sink/source into a Flow
 * Separate stages: newTasks, statefulCounter, takeWhile, chronicle-queue
-* Option to --excludeTable
 * Make Physics DB bigger and compare performance with non-chronicle-queue version
 
+* Option to --excludeTable
 * Manual option to --skipPkStore
 * Configurable pre-target-db-insert buffer size
 * Test UUID data types in MySQL and SQL Server
@@ -18,3 +18,4 @@ Nice-to-Haves for later
 * ChronicalMap for PKs
 * ChronicalQueue for pre-target-db-insert buffer instead of in-memory Akka Streams Flow.buffer
 * Performant `--fullTable` option
+* Consider if it's possible to limit memory usage with small-batch `selects` from origin DB
