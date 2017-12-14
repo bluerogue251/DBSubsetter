@@ -72,17 +72,14 @@ object SchemaInfoRetrieval {
         else ddl.getImportedKeys(catalog, table.schema, table.name)
       }
       while (foreignKeysJdbcResultSet.next()) {
-        val toTable = foreignKeysJdbcResultSet.getString("PKTABLE_NAME")
-        if (!Set("quantum_domain", "particle_collider_domain", "gravitational_wave_domain").contains(toTable)) {
-          foreignKeysQueryResult += ForeignKeyQueryRow(
-            if (isMysql) foreignKeysJdbcResultSet.getString("FKTABLE_CAT") else foreignKeysJdbcResultSet.getString("FKTABLE_SCHEM"),
-            foreignKeysJdbcResultSet.getString("FKTABLE_NAME"),
-            foreignKeysJdbcResultSet.getString("FKCOLUMN_NAME"),
-            if (isMysql) foreignKeysJdbcResultSet.getString("PKTABLE_CAT") else foreignKeysJdbcResultSet.getString("PKTABLE_SCHEM"),
-            toTable,
-            foreignKeysJdbcResultSet.getString("PKCOLUMN_NAME")
-          )
-        }
+        foreignKeysQueryResult += ForeignKeyQueryRow(
+          if (isMysql) foreignKeysJdbcResultSet.getString("FKTABLE_CAT") else foreignKeysJdbcResultSet.getString("FKTABLE_SCHEM"),
+          foreignKeysJdbcResultSet.getString("FKTABLE_NAME"),
+          foreignKeysJdbcResultSet.getString("FKCOLUMN_NAME"),
+          if (isMysql) foreignKeysJdbcResultSet.getString("PKTABLE_CAT") else foreignKeysJdbcResultSet.getString("PKTABLE_SCHEM"),
+          foreignKeysJdbcResultSet.getString("PKTABLE_NAME"),
+          foreignKeysJdbcResultSet.getString("PKCOLUMN_NAME")
+        )
       }
     }
 
