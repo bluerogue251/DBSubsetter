@@ -27,6 +27,21 @@ trait PhysicsTestCases extends AbstractEndToEndTest with PhysicsDDL with SlickSe
     Await.result(fut6, Duration.Inf)
     val fut7 = originDb.run(DBIO.seq(customDml.gravitationalWaveDataInserts: _*))
     Await.result(fut7, Duration.Inf)
+
+    (1 to customDml.numParticleColliderData by 2074).foreach { i =>
+      val f = originDb.run(DBIO.seq(customDml.particleColliderNotesInserts(i)))
+      Await.result(f, Duration.Inf)
+    }
+
+    (1 to customDml.numQuantumData by 1210).foreach { i =>
+      val f = originDb.run(DBIO.seq(customDml.quantumNotesInserts(i)))
+      Await.result(f, Duration.Inf)
+    }
+
+    (1 to customDml.numGravitationalWaveData by 501).foreach { i =>
+      val f = originDb.run(DBIO.seq(customDml.gravitationWaveNotesInserts(i)))
+      Await.result(f, Duration.Inf)
+    }
   }
 
   val dataSetName = "physics"
@@ -89,5 +104,10 @@ trait PhysicsTestCases extends AbstractEndToEndTest with PhysicsDDL with SlickSe
   test("Correct gravitational_wave_data rows were included") {
     assertCount(GravitationalWaveData, 2220000)
     assertThatLong(GravitationalWaveData.map(_.id).sum.result, 4427001110000l)
+  }
+
+  test("Correct datum_notes were included") {
+    assertCount(DatumNotes, 50000000)
+    assertThatLong(DatumNotes.map(_.id).sum.result, 1l)
   }
 }
