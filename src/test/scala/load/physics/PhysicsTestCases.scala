@@ -13,25 +13,27 @@ trait PhysicsTestCases extends AbstractEndToEndTest with PhysicsDDL with SlickSe
 
   override def setupDML(): Unit = {
     val customDml = new PhysicsDML(profile)
-    //    val dmlFut1 = originDb.run(customDml.initialInserts)
-    //    Await.result(dmlFut1, Duration.Inf)
-    //    val fut2 = originDb.run(DBIO.seq(customDml.particleDomainInserts: _*))
-    //    Await.result(fut2, Duration.Inf)
-    //    val fut3 = originDb.run(DBIO.seq(customDml.quantumDomainInserts: _*))
-    //    Await.result(fut3, Duration.Inf)
-    //    val fut4 = originDb.run(DBIO.seq(customDml.gravitationalWaveDomainInserts: _*))
-    //    Await.result(fut4, Duration.Inf)
-    //    val fut5 = originDb.run(DBIO.seq(customDml.particleColliderDataInserts: _*))
-    //    Await.result(fut5, Duration.Inf)
-    //    val fut6 = originDb.run(DBIO.seq(customDml.quantumDataInserts: _*))
-    //    Await.result(fut6, Duration.Inf)
-    //    val fut7 = originDb.run(DBIO.seq(customDml.gravitationalWaveDataInserts: _*))
-    //    Await.result(fut7, Duration.Inf)
+
+    val dmlFut1 = originDb.run(customDml.initialInserts)
+    Await.result(dmlFut1, Duration.Inf)
+    val fut2 = originDb.run(DBIO.seq(customDml.particleDomainInserts: _*))
+    Await.result(fut2, Duration.Inf)
+    val fut3 = originDb.run(DBIO.seq(customDml.quantumDomainInserts: _*))
+    Await.result(fut3, Duration.Inf)
+    val fut4 = originDb.run(DBIO.seq(customDml.gravitationalWaveDomainInserts: _*))
+    Await.result(fut4, Duration.Inf)
+    val fut5 = originDb.run(DBIO.seq(customDml.particleColliderDataInserts: _*))
+    Await.result(fut5, Duration.Inf)
+    val fut6 = originDb.run(DBIO.seq(customDml.quantumDataInserts: _*))
+    Await.result(fut6, Duration.Inf)
+    val fut7 = originDb.run(DBIO.seq(customDml.gravitationalWaveDataInserts: _*))
+    Await.result(fut7, Duration.Inf)
 
     import scala.concurrent.ExecutionContext.Implicits.global
 
     val pcFut = Future {
       (1 to customDml.numParticleColliderData by 50).foreach { i =>
+        if ((i - 1) % 100000 == 0) println(s"ParticleCollider-$i")
         val inserts = (i to i + 49).map(i => customDml.particleColliderNotesInserts(i))
         val f = originDb.run(DBIO.seq(inserts: _*))
         Await.result(f, Duration.Inf)
@@ -40,6 +42,7 @@ trait PhysicsTestCases extends AbstractEndToEndTest with PhysicsDDL with SlickSe
 
     val qdFut = Future {
       (1 to customDml.numQuantumData by 50).foreach { i =>
+        if ((i - 1) % 100000 == 0) println(s"Quantum-$i")
         val inserts = (i to i + 49).map(i => customDml.quantumNotesInserts(i))
         val f = originDb.run(DBIO.seq(inserts: _*))
         Await.result(f, Duration.Inf)
@@ -48,6 +51,7 @@ trait PhysicsTestCases extends AbstractEndToEndTest with PhysicsDDL with SlickSe
 
     val gwFut = Future {
       (1 to customDml.numGravitationalWaveData by 50).foreach { i =>
+        if ((i - 1) % 100000 == 0) println(s"GravitationalWave-$i")
         val inserts = (i to i + 49).map(i => customDml.gravitationWaveNotesInserts(i))
         val f = originDb.run(DBIO.seq(inserts: _*))
         Await.result(f, Duration.Inf)

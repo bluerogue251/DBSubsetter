@@ -4,13 +4,14 @@ import org.scalatest.{BeforeAndAfterAll, FunSuite}
 import slick.dbio.{DBIOAction, Effect}
 import slick.jdbc.JdbcBackend
 import slick.lifted.{AbstractTable, TableQuery}
-import trw.dbsubsetter.ApplicationAkkaStreams
 import trw.dbsubsetter.config.{CommandLineParser, Config}
 import trw.dbsubsetter.db.SchemaInfoRetrieval
 import trw.dbsubsetter.workflow.BaseQueries
+import trw.dbsubsetter.{ApplicationAkkaStreams, ApplicationSingleThreaded}
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
+import scala.sys.process._
 
 abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
   //
@@ -76,16 +77,14 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
     val schemaInfo = SchemaInfoRetrieval.getSchemaInfo(singleThreadedConfig)
     val baseQueries = BaseQueries.get(singleThreadedConfig, schemaInfo)
 
-    //    val startSingleThreaded = System.nanoTime()
-    //    ApplicationSingleThreaded.run(singleThreadedConfig, schemaInfo, baseQueries)
-    //    singleThreadedRuntimeMillis = (System.nanoTime() - startSingleThreaded) / 1000000
-    //    println(s"Single Threaded Took $singleThreadedRuntimeMillis milliseconds")
+    val startSingleThreaded = System.nanoTime()
+    ApplicationSingleThreaded.run(singleThreadedConfig, schemaInfo, baseQueries)
+    singleThreadedRuntimeMillis = (System.nanoTime() - startSingleThreaded) / 1000000
+    println(s"Single Threaded Took $singleThreadedRuntimeMillis milliseconds")
 
-    println("StartedProcessing")
     val startAkkaStreams = System.nanoTime()
     val futureResult = ApplicationAkkaStreams.run(akkaStreamsConfig, schemaInfo, baseQueries)
     Await.result(futureResult, Duration.Inf)
-    println("FinishedProcessing")
     akkStreamsRuntimeMillis = (System.nanoTime() - startAkkaStreams) / 1000000
     println(s"Akka Streams Took $akkStreamsRuntimeMillis milliseconds")
 
@@ -101,18 +100,22 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
 
   protected def assertCount[T <: AbstractTable[_]](tq: TableQuery[T], expected: Long): Unit = {
     import profile.api._
-    //    assert(Await.result(targetDbSt.run(tq.size.result), Duration.Inf) === expected)
+    assert(Await.result(targetDbSt.run(tq.size.result), Duration.Inf) === expected)
     assert(Await.result(targetDbAs.run(tq.size.result), Duration.Inf) === expected)
   }
 
   // Helper to get around intelliJ warnings, technically it could compile just with the Long version
   protected def assertThat(action: DBIOAction[Option[Int], profile.api.NoStream, Effect.Read], expected: Long): Unit = {
-    //    assert(Await.result(targetDbSt.run(action), Duration.Inf) === Some(expected))
+    assert(Await.result(targetDbSt.run(action), Duration.Inf) === Some(expected))
     assert(Await.result(targetDbAs.run(action), Duration.Inf) === Some(expected))
   }
 
   protected def assertThatLong(action: DBIOAction[Option[Long], profile.api.NoStream, Effect.Read], expected: Long): Unit = {
-    //    assert(Await.result(targetDbSt.run(action), Duration.Inf) === Some(expected))
+    assert(Await.result(targetDbSt.run(action), Duration.Inf) === Some(expected))
     assert(Await.result(targetDbAs.run(action), Duration.Inf) === Some(expected))
+  }
+
+  protected def removeDockerContainer(name: String): Unit = {
+    s"docker rm --force --volumes $name".!
   }
 }
