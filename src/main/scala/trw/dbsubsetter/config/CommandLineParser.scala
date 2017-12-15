@@ -137,6 +137,23 @@ object CommandLineParser {
           |                           Can be specified multiple times
           |""".stripMargin)
 
+    opt[String]("excludeTable")
+      .valueName("<schema>.<table>")
+      .maxOccurs(Int.MaxValue)
+      .action { (str, c) =>
+        val regex = """^\s*(.+)\.(.+)\s*$""".r
+        str match {
+          case regex(schema, table) =>
+            c.copy(excludeTables = c.excludeTables ++ Set((schema, table)))
+          case _ => throw new RuntimeException
+        }
+      }
+      .text(
+        """Exclude a table from the resulting subset
+          |                           Also ignore all foreign keys to and from this table
+          |                           Can be specified multiple times
+          |""".stripMargin)
+
     opt[String]("skipPkStore")
       .valueName("<schema>.<table>")
       .maxOccurs(Int.MaxValue)

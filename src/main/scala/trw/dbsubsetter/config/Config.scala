@@ -11,5 +11,6 @@ case class Config(schemas: Seq[String] = Seq.empty,
                   cmdLineForeignKeys: List[CmdLineForeignKey] = List.empty,
                   cmdLinePrimaryKeys: List[CmdLinePrimaryKey] = List.empty,
                   excludeColumns: Map[(SchemaName, TableName), Set[ColumnName]] = Map.empty.withDefaultValue(Set.empty),
+                  excludeTables: Set[(SchemaName, TableName)] = Set.empty,
                   skipPkStore: Set[(SchemaName, TableName)] = Set.empty,
                   isSingleThreadedDebugMode: Boolean = false)

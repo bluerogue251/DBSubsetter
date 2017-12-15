@@ -27,10 +27,10 @@ object SchemaInfoRetrieval {
         else ddl.getTables(catalog, schema, "%", Array("TABLE"))
       }
       while (tablesJdbcResultSet.next()) {
-        tablesQueryResult += TableQueryRow(
-          schema,
-          tablesJdbcResultSet.getString("TABLE_NAME")
-        )
+        val table = tablesJdbcResultSet.getString("TABLE_NAME")
+        if (!config.excludeTables.contains((schema, table))) {
+          tablesQueryResult += TableQueryRow(schema, table)
+        }
       }
     }
 
@@ -73,16 +73,17 @@ object SchemaInfoRetrieval {
         else ddl.getImportedKeys(catalog, table.schema, table.name)
       }
       while (foreignKeysJdbcResultSet.next()) {
-        val toTable = foreignKeysJdbcResultSet.getString("PKTABLE_NAME")
-        foreignKeysQueryResult += ForeignKeyQueryRow(
-          if (isMysql) foreignKeysJdbcResultSet.getString("FKTABLE_CAT") else foreignKeysJdbcResultSet.getString("FKTABLE_SCHEM"),
-          foreignKeysJdbcResultSet.getString("FKTABLE_NAME"),
-          foreignKeysJdbcResultSet.getString("FKCOLUMN_NAME"),
-          if (isMysql) foreignKeysJdbcResultSet.getString("PKTABLE_CAT") else foreignKeysJdbcResultSet.getString("PKTABLE_SCHEM"),
-          toTable,
-          foreignKeysJdbcResultSet.getString("PKCOLUMN_NAME")
-        )
+        val fromSchema = if (isMysql) foreignKeysJdbcResultSet.getString("FKTABLE_CAT") else foreignKeysJdbcResultSet.getString("FKTABLE_SCHEM")
+        val fromTable = foreignKeysJdbcResultSet.getString("FKTABLE_NAME")
+        val fromColumn = foreignKeysJdbcResultSet.getString("FKCOLUMN_NAME")
 
+        val toSchema = if (isMysql) foreignKeysJdbcResultSet.getString("PKTABLE_CAT") else foreignKeysJdbcResultSet.getString("PKTABLE_SCHEM")
+        val toTable = foreignKeysJdbcResultSet.getString("PKTABLE_NAME")
+        val toColumn = foreignKeysJdbcResultSet.getString("PKCOLUMN_NAME")
+
+        if (!config.excludeTables.contains((fromSchema, fromTable)) && !config.excludeTables.contains((toSchema, toTable))) {
+          foreignKeysQueryResult += ForeignKeyQueryRow(fromSchema, fromTable, fromColumn, toSchema, toTable, toColumn)
+        }
       }
     }
 
