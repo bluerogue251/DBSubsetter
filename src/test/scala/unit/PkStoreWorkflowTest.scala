@@ -9,7 +9,7 @@ class PkStoreWorkflowTest extends FunSuite {
     val table = Table("public", "users", hasSqlServerAutoIncrement = true)
     val map = Map(table -> Seq(0))
     val pkStore = new PkStoreWorkflow(map)
-    val fkValue = Array[Any]("fkValue")
+    val fkValue = "fkValue"
     val row: Row = Array(fkValue)
     val rows = Vector(row)
 
