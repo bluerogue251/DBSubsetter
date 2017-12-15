@@ -53,7 +53,7 @@ $ java -jar /path/to/DBSubsetter.jar \
 
 ## Resource consumption
 
-### RAM
+#### Memory
 
 RAM usage will be proportional to the sum of:
 
@@ -64,7 +64,7 @@ RAM usage will be proportional to the sum of:
   This is configurable with the `--preTargetBufferSize` option.
 * The in-memory size of your largest single query result multiplied by (`--originDbParallelism` + `--targetDbParallelism`)
 
-### Disk Space
+#### Disk Space
 
 Disk usage (in tempfiles) will be proportional to the size of all foreign keys in the target database.
 
