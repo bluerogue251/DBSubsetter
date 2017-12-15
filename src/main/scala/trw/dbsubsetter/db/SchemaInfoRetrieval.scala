@@ -42,10 +42,11 @@ object SchemaInfoRetrieval {
       while (colsJdbcResultSet.next()) {
         val columnName = colsJdbcResultSet.getString("COLUMN_NAME")
         val jdbcType = JDBCType.valueOf(colsJdbcResultSet.getInt("DATA_TYPE"))
+        val typeName = colsJdbcResultSet.getString("TYPE_NAME")
         val isSqlServerAutoIncrement = conn.isMsSqlServer && colsJdbcResultSet.getString("IS_AUTOINCREMENT") == "YES"
 
         if (!config.excludeColumns((table.schema, table.name)).contains(columnName)) {
-          columnsQueryResult += ColumnQueryRow(table.schema, table.name, columnName, jdbcType, isSqlServerAutoIncrement)
+          columnsQueryResult += ColumnQueryRow(table.schema, table.name, columnName, jdbcType, typeName, isSqlServerAutoIncrement)
         }
       }
     }
@@ -97,7 +98,7 @@ object SchemaInfoRetrieval {
       columnsQueryResult
         .groupBy(c => tablesByName(c.schema, c.table))
         .map { case (table, partialColumns) =>
-          table -> partialColumns.zipWithIndex.map { case (pc, i) => pc.name -> Column(table, pc.name, i, pc.jdbcType) }.toMap
+          table -> partialColumns.zipWithIndex.map { case (pc, i) => pc.name -> Column(table, pc.name, i, pc.jdbcType, pc.typeName) }.toMap
         }
     }
     val colByTableOrdered: Map[Table, Vector[Column]] = {
@@ -184,6 +185,7 @@ object SchemaInfoRetrieval {
                                           table: TableName,
                                           name: ColumnName,
                                           jdbcType: JDBCType,
+                                          typeName: String,
                                           isSqlServerAutoincrement: Boolean)
 
   private[this] case class PrimaryKeyQueryRow(schema: SchemaName,

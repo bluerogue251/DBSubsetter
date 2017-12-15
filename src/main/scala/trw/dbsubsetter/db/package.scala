@@ -7,6 +7,7 @@ package object db {
   type TableName = String
   type ColumnName = String
   type WhereClause = String
+  type TypeName = String
   type Row = Array[Any]
   type SqlQuery = String
   type SqlTemplates = Map[(ForeignKey, Table), SqlQuery]
@@ -20,7 +21,7 @@ package object db {
 
   case class Table(schema: SchemaName, name: TableName, hasSqlServerAutoIncrement: Boolean)
 
-  case class Column(table: Table, name: ColumnName, ordinalPosition: Int, jdbcType: JDBCType)
+  case class Column(table: Table, name: ColumnName, ordinalPosition: Int, jdbcType: JDBCType, typeName: String)
 
   case class ForeignKey(fromCols: Vector[Column], toCols: Vector[Column], pointsToPk: Boolean, i: Short) {
     val fromTable: Table = fromCols.head.table
