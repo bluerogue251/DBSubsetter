@@ -28,7 +28,13 @@ object ApplicationSingleThreaded {
         val pksAdded = pkWorkflow.add(dbResult)
         targetDbWorkflow.process(pksAdded)
         val newTasks = NewFkTaskWorkflow.process(pksAdded, schemaInfo)
-        queue.enqueue(newTasks: _*)
+        newTasks.foreach { case ((fk, fetchChildren), fkValues) =>
+          val tasks = fkValues.map { v =>
+            val table = if (fetchChildren) fk.fromTable else fk.toTable
+            FkTask(table, fk, v, fetchChildren)
+          }
+          queue.enqueue(tasks: _*)
+        }
       }
     }
   }

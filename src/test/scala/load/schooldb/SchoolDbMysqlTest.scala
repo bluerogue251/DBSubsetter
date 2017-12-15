@@ -1,6 +1,7 @@
 package load.schooldb
 
 import e2e.AbstractMysqlEndToEndTest
+import load.LoadTest
 
 import scala.sys.process._
 

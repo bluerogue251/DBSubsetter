@@ -18,8 +18,8 @@ class PkStoreWorkflow(pkOrdinalsByTable: Map[Table, Seq[Int]]) {
   // TreeSet in theory might provide more stable runtime of operations, so that we never encounter one big
   // time when we need to double the size of the HashSet, etc.
   // Both potential optimizations would need testing: it's not clear how much if any good they would do
-  private val pkStore: Map[Table, (mutable.HashSet[AnyRef], mutable.HashSet[AnyRef])] = tables.map { t =>
-    t -> (mutable.HashSet.empty[AnyRef], mutable.HashSet.empty[AnyRef])
+  private val pkStore: Map[Table, (mutable.HashSet[Any], mutable.HashSet[Any])] = tables.map { t =>
+    t -> (mutable.HashSet.empty[Any], mutable.HashSet.empty[Any])
   }.toMap
 
   def exists(req: FkTask): PkResult = {
@@ -39,8 +39,8 @@ class PkStoreWorkflow(pkOrdinalsByTable: Map[Table, Seq[Int]]) {
 
     val pkOrdinals = pkOrdinalsByTable(table)
     val pkOrdinal = pkOrdinals.head
-    val isSingleColPk = pkOrdinals.size == 1
-    val getPkValue: Row => AnyRef = if (isSingleColPk) row => row(pkOrdinal) else row => pkOrdinals.map(row)
+    val isSingleColPk = pkOrdinals.lengthCompare(1) == 0
+    val getPkValue: Row => Any = if (isSingleColPk) row => row(pkOrdinal) else row => pkOrdinals.map(row)
 
     if (fetchChildren) {
       val childrenNotYetFetched = rows.filter(row => childStore.add(getPkValue(row)))
@@ -55,7 +55,7 @@ class PkStoreWorkflow(pkOrdinalsByTable: Map[Table, Seq[Int]]) {
     }
   }
 
-  def getStorage(t: Table): (mutable.HashSet[AnyRef], mutable.HashSet[AnyRef]) = {
+  def getStorage(t: Table): (mutable.HashSet[Any], mutable.HashSet[Any]) = {
     pkStore.getOrElse(t, throw new RuntimeException(s"No primary key defined for table $t"))
   }
 }

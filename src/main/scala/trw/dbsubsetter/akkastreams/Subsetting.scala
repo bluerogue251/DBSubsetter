@@ -27,9 +27,11 @@ object Subsetting {
     val mergeNewTaskRequests = b.add(Merge[PkResult](2))
     val balanceTargetDb = b.add(Balance[PksAdded](config.targetDbParallelism, waitForAllDownstreams = true))
     val mergeTargetDbResults = b.add(Merge[TargetDbInsertResult](config.targetDbParallelism))
+    val fkTaskBufferFlow = b.add(new FkTaskBufferFlow(schemaInfo).async)
 
     // Start everything off
-    Source(baseQueries) ~> mergeOriginDbRequests
+    Source(baseQueries) ~>
+      mergeOriginDbRequests
 
     // Process Origin DB Queries in Parallel
     mergeOriginDbRequests.out ~> balanceOriginDb
@@ -50,17 +52,22 @@ object Subsetting {
 
     broadcastPksAdded ~>
       mergeNewTaskRequests ~>
-      NewTasks.flow(schemaInfo, baseQueries.size) ~>
-      partitionFkTasks
+      NewTasks.flow(schemaInfo) ~>
+      OutstandingTaskCounter.counter(baseQueries.size) ~>
+      fkTaskBufferFlow
 
     broadcastPksAdded ~>
-      Flow[PksAdded].buffer(Int.MaxValue, OverflowStrategy.backpressure) ~>
+      Flow[PksAdded].buffer(Int.MaxValue, OverflowStrategy.backpressure) ~> // TODO convert buffer to chronicle-queue?
       balanceTargetDb
 
     // FkTasks ~> cannotBePrechecked       ~>        OriginDbRequest
     // FkTasks ~> canBePrechecked ~> PkStoreQuery ~> OriginDbRequest
     //                                            ~> DuplicateTask
-    partitionFkTasks.out(0) ~> mergeOriginDbRequests
+    fkTaskBufferFlow ~>
+      partitionFkTasks
+
+    partitionFkTasks.out(0) ~>
+      mergeOriginDbRequests
 
     partitionFkTasks.out(1) ~>
       Flow[FkTask].mapAsync(500)(req => (pkStore ? req).mapTo[PkResult]) ~>

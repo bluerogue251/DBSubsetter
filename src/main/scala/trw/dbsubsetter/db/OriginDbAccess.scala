@@ -14,16 +14,17 @@ class OriginDbAccess(connStr: String, sch: SchemaInfo) {
     (fk, table) -> conn.prepareStatement(sqlStr)
   }
 
-  def getRowsFromTemplate(fk: ForeignKey, table: Table, fkValue: AnyRef): Vector[Row] = {
+  def getRowsFromTemplate(fk: ForeignKey, table: Table, fkValue: Any): Vector[Row] = {
     val stmt = statements(fk, table)
     stmt.clearParameters()
     if (fk.isSingleCol) {
       stmt.setObject(1, fkValue)
     } else {
-      fkValue.asInstanceOf[Vector[AnyRef]].zipWithIndex.foreach { case (value, i) =>
+      fkValue.asInstanceOf[Array[Any]].zipWithIndex.foreach { case (value, i) =>
         stmt.setObject(i + 1, value)
       }
     }
+
     val jdbcResult = stmt.executeQuery()
     jdbcResultToRows(jdbcResult, table)
   }
@@ -37,7 +38,7 @@ class OriginDbAccess(connStr: String, sch: SchemaInfo) {
     val cols = sch.colsByTableOrdered(table).size
     val rows = ArrayBuffer.empty[Row]
     while (res.next()) {
-      val row = new Array[AnyRef](cols)
+      val row = new Row(cols)
       (1 to cols).foreach(i => row(i - 1) = res.getObject(i))
       rows += row
     }

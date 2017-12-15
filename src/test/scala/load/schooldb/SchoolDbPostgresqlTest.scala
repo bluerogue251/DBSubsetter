@@ -1,6 +1,7 @@
 package load.schooldb
 
 import e2e.AbstractPostgresqlEndToEndTest
+import load.LoadTest
 
 import scala.sys.process._
 
@@ -26,5 +27,5 @@ class SchoolDbPostgresqlTest extends AbstractPostgresqlEndToEndTest with SchoolD
 
   override val singleThreadedRuntimeThreshold: Long = 210000
 
-  override val akkaStreamsRuntimeThreshold: Long = 24000
+  override val akkaStreamsRuntimeThreshold: Long = 25000
 }

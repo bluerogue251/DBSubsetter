@@ -1,33 +1,29 @@
 package trw.dbsubsetter
 
-import java.sql.Connection
-
-import scala.collection.mutable
+import java.sql.{Connection, JDBCType}
 
 package object db {
   type SchemaName = String
   type TableName = String
   type ColumnName = String
-  type FullyQualifiedTableName = String
-  type JoinClause = String
   type WhereClause = String
-  type PrimaryKeyStore = Map[Table, mutable.HashSet[Vector[AnyRef]]]
-  type Row = Array[AnyRef]
+  type TypeName = String
+  type Row = Array[Any]
   type SqlQuery = String
   type SqlTemplates = Map[(ForeignKey, Table), SqlQuery]
 
   case class SchemaInfo(tablesByName: Map[(SchemaName, TableName), Table],
                         colsByTableOrdered: Map[Table, Vector[Column]],
                         pkOrdinalsByTable: Map[Table, Vector[Int]],
-                        fks: Set[ForeignKey],
-                        fksFromTable: Map[Table, Set[ForeignKey]],
-                        fksToTable: Map[Table, Set[ForeignKey]])
+                        fksOrdered: Array[ForeignKey],
+                        fksFromTable: Map[Table, Vector[ForeignKey]],
+                        fksToTable: Map[Table, Vector[ForeignKey]])
 
   case class Table(schema: SchemaName, name: TableName, hasSqlServerAutoIncrement: Boolean)
 
-  case class Column(table: Table, name: ColumnName, ordinalPosition: Int)
+  case class Column(table: Table, name: ColumnName, ordinalPosition: Int, jdbcType: JDBCType, typeName: String)
 
-  case class ForeignKey(fromCols: Vector[Column], toCols: Vector[Column], pointsToPk: Boolean) {
+  case class ForeignKey(fromCols: Vector[Column], toCols: Vector[Column], pointsToPk: Boolean, i: Short) {
     val fromTable: Table = fromCols.head.table
     val toTable: Table = toCols.head.table
 

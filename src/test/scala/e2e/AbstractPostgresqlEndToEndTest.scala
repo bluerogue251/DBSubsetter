@@ -26,7 +26,7 @@ abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest {
   }
 
   private def setupDockerContainer(containerName: String, port: Int): Unit = {
-    s"docker rm --force --volumes $containerName".!
+    removeDockerContainer(containerName)
     s"docker create --name $containerName -p $port:5432 postgres:9.6.3".!!
     s"docker start $containerName".!!
     Thread.sleep(10000)

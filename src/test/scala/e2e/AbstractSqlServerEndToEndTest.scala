@@ -14,7 +14,7 @@ abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest {
   override def makeConnStr(port: Int, dbName: String): String = s"jdbc:sqlserver://localhost:$port;databaseName=$dbName;user=sa;password=MsSqlServerLocal1"
 
   override def createOriginDb(): Unit = {
-    s"docker rm --force --volumes $containerName".!
+    removeDockerContainer(containerName)
     s"docker create --name $containerName -p $originPort:1433 --env ACCEPT_EULA=Y --env SA_PASSWORD=MsSqlServerLocal1 --env MSSQL_PID=Developer microsoft/mssql-server-linux:2017-CU2".!!
     s"docker start $containerName".!!
     Thread.sleep(20000)
@@ -29,5 +29,11 @@ abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest {
   override def postSubset(): Unit = {
     s"./src/test/util/sqlserver_post_subset.sh $containerName $targetSingleThreadedDbName".!!
     s"./src/test/util/sqlserver_post_subset.sh $containerName $targetAkkaStreamsDbName".!!
+  }
+
+  override protected def afterAll(): Unit = {
+    super.afterAll()
+    // TODO fix test class hierarchy to get rid of this messy string equals check
+    if (!(dataSetName == "school_db")) removeDockerContainer(containerName)
   }
 }
