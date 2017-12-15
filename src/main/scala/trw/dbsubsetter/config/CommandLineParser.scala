@@ -138,6 +138,8 @@ object CommandLineParser {
           |""".stripMargin)
 
     opt[String]("skipPkStore")
+      .valueName("<schema>.<table>")
+      .maxOccurs(Int.MaxValue)
       .action { (str, c) =>
         val regex = """^\s*(.+)\.(.+)\s*$""".r
         str match {

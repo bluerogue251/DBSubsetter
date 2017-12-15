@@ -1,5 +1,4 @@
 * Option to --excludeTable
-* Manual option to --skipPkStore
 * Configurable pre-target-db-insert buffer size
 * Test UUID data types in MySQL and SQL Server
 * Test all different byte sizes of Pk/Fk Ints (tiny, small, int, bigint, etc) work with Chronicle Queue
