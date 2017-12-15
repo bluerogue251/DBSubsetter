@@ -5,10 +5,10 @@ import scala.sys.process._
 abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest {
   override val profile = slick.jdbc.MySQLProfile
 
-  private val targetSithContainerName = s"${dataSetName}_target_sith_mysql"
-  private val targetAkstContainerName = s"${dataSetName}_target_akst_mysql"
-
   def dataSetName: String
+
+  private lazy val targetSithContainerName = s"${dataSetName}_target_sith_mysql"
+  private lazy val targetAkstContainerName = s"${dataSetName}_target_akst_mysql"
 
   override def makeConnStr(port: Int, dbName: String): String = s"jdbc:mysql://localhost:$port/$dataSetName?user=root&useSSL=false&rewriteBatchedStatements=true"
 
