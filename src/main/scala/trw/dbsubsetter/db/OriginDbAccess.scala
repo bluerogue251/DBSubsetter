@@ -20,7 +20,9 @@ class OriginDbAccess(connStr: String, sch: SchemaInfo) {
     if (fk.isSingleCol) {
       stmt.setObject(1, fkValue)
     } else {
-      fkValue.asInstanceOf[Array[Any]].zipWithIndex.foreach { case (value, i) => stmt.setObject(i + 1, value) }
+      fkValue.asInstanceOf[Vector[Any]].zipWithIndex.foreach { case (value, i) =>
+        stmt.setObject(i + 1, value)
+      }
     }
     val jdbcResult = stmt.executeQuery()
     jdbcResultToRows(jdbcResult, table)
