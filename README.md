@@ -84,15 +84,12 @@ Here are some other similar or related resources:
 * [abridger](https://github.com/freewilll/abridger)
 * [postgres-subset](https://github.com/BeautifulDestinations/postgres-subset)
 
-DBSubsetter is built with:
+DBSubsetter is built using:
 
 * [Scala](https://www.scala-lang.org/)
 * [Akka Streams](https://doc.akka.io/docs/akka/2.5.8/stream/index.html?language=scala)
 * [Chronicle-Queue](https://github.com/OpenHFT/Chronicle-Queue)
 * [scopt](https://github.com/scopt/scopt)
-
-and tested with:
-
 * [Slick](http://slick.lightbend.com/)
 
 ## License
