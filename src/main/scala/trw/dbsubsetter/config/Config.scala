@@ -13,4 +13,5 @@ case class Config(schemas: Seq[String] = Seq.empty,
                   excludeColumns: Map[(SchemaName, TableName), Set[ColumnName]] = Map.empty.withDefaultValue(Set.empty),
                   excludeTables: Set[(SchemaName, TableName)] = Set.empty,
                   skipPkStore: Set[(SchemaName, TableName)] = Set.empty,
+                  preTargetBufferSize: Int = 100,
                   isSingleThreadedDebugMode: Boolean = false)

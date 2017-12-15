@@ -173,6 +173,14 @@ object CommandLineParser {
         |                           Can be specified multiple times
         |""".stripMargin)
 
+    opt[Int]("preTargetBufferSize")
+      .action((int, c) => c.copy(preTargetBufferSize = int))
+      .text(
+        """Buffer up to this many target database insert statements in memory if the target database is not yet ready for them
+          |                           This can sometimes improve performance at the cost of increased RAM usage
+          |                           The default buffer size is 100
+          |""".stripMargin)
+
     opt[Unit]("singleThreadedDebugMode")
       .action((_, c) => c.copy(isSingleThreadedDebugMode = true))
       .text(
