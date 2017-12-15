@@ -67,7 +67,7 @@ object Subsetting {
       fkTaskBufferFlow
 
     broadcastPksAdded ~>
-      Flow[PksAdded].buffer(config.preTargetBufferSize, OverflowStrategy.backpressure)
+      Flow[PksAdded].buffer(config.preTargetBufferSize, OverflowStrategy.backpressure) ~>
       balanceTargetDb
 
     // FkTasks ~> cannotBePrechecked       ~>        OriginDbRequest

@@ -28,7 +28,6 @@ class PhysicsPostgresqlTest extends AbstractPostgresqlEndToEndTest with PhysicsT
 
   override def setupDML(): Unit = {}
 
-
   override def setupTargetDbs(): Unit = {
     super.setupTargetDbs()
     "./src/test/scala/load/physics/copy_domain_data_postgres.sh".!
@@ -36,5 +35,5 @@ class PhysicsPostgresqlTest extends AbstractPostgresqlEndToEndTest with PhysicsT
 
   override val singleThreadedRuntimeThreshold: Long = 400000
 
-  override val akkaStreamsRuntimeThreshold: Long = 2
+  override val akkaStreamsRuntimeThreshold: Long = 2600000
 }
