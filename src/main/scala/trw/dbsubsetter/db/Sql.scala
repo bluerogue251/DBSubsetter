@@ -3,7 +3,7 @@ package trw.dbsubsetter.db
 object Sql {
   def preparedQueryStatementStrings(sch: SchemaInfo): SqlTemplates = {
     val allCombos = for {
-      fk <- sch.fks
+      fk <- sch.fksOrdered
       table <- Set(fk.fromTable, fk.toTable)
     } yield (fk, table)
 

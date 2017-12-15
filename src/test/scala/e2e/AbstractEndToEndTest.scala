@@ -11,6 +11,7 @@ import trw.dbsubsetter.{ApplicationAkkaStreams, ApplicationSingleThreaded}
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
+import scala.sys.process._
 
 abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
   //
@@ -112,5 +113,9 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
   protected def assertThatLong(action: DBIOAction[Option[Long], profile.api.NoStream, Effect.Read], expected: Long): Unit = {
     //    assert(Await.result(targetDbSt.run(action), Duration.Inf) === Some(expected))
     assert(Await.result(targetDbAs.run(action), Duration.Inf) === Some(expected))
+  }
+
+  protected def removeDockerContainer(name: String): Unit = {
+    s"docker rm --force --volumes $name".!
   }
 }

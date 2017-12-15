@@ -1,6 +1,26 @@
+* Option to --excludeTable
+* Manual option to --skipPkStore
+* Configurable pre-target-db-insert buffer size
+* Make Physics DB bigger and compare performance with non-chronicle-queue version
 * Test UUID data types in MySQL and SQL Server
 * IN-PROGRESS Consider if for certain schemas we can skip storing certain tables' PKs because we know we will only ever see a row once?
 * Optimize case where a unique index means we might _not_ have to store PKs for a table
 * Optimize case where we know we are fetching _all_ PKs for a table so we can skip their FK tasks and their PKs
 * Make a YouTube tutorial
 * Make DBSubsetter available as a Maven/Ivy/SBT, etc library, for example by using package cloud
+* Test all different byte sizes of Pk/Fk Ints (tiny, small, int, bigint, etc) work with Chronicle Queue
+
+* RELEASE v1.0.0
+
+* Try 1 chronicle-queue flow *per Fk* without wasting too much compute time checking nearly-always-empty queues
+* Report SQL Server docker bug
+* Report MySQL Foreign Key "to" column captitalization bug
+
+Nice-to-Haves for later
+* Automatic `--skipPkStore` option
+* ChronicalMap for PKs
+* ChronicalQueue for pre-target-db-insert buffer instead of in-memory Akka Streams Flow.buffer
+* Performant `--fullTable` option
+* Consider if it's possible to limit memory usage with small-batch `selects` from origin DB
+* Delete ChronicleQueue files as they are consumed
+* Delete all outstanding ChronicleQueue files and ChronicleMap files after subsetting

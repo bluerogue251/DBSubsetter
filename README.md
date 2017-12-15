@@ -53,10 +53,13 @@ $ java -jar /path/to/DBSubsetter.jar \
 
 ## Resource consumption
 
-Memory usage in the worst case is proportional to the size of all the primary keys in the small "target" database. However, depending on your schema structure, in practice DBSubsetter often uses just a small fraction of that amount. To see which tables will need to have their primary keys stored, run DBSubsetter with the `--printPkStoreTables` option.
+Memory usage will be proportional to the sum of:
+ * The size of all the primary keys in the target database
+ ## Memory usage in the worst case is proportional to the size of all the primary keys in the small "target" database. However, depending on your schema structure, in practice DBSubsetter often uses just a small fraction of that amount. To see which tables will need to have their primary keys stored, run DBSubsetter with the `--printPkStoreTables` option.
 
-Temporary spikes above this amount can sometimes occur when copying rows between databases.
+ * The size of the outstanding queue of rows needing to be inserted into the target database
 
+Disk usage (in tempfiles) will be proportional to the size of all foreign keys in the target database.
 
 ## Contributing
 
@@ -67,7 +70,7 @@ Whether it is to fix a typo, improve the documentation, report or fix a bug, add
 The only condition for contributing to this project is to follow our [code of conduct](CODE_OF_CONDUCT.md) so that everyone is treated with respect.
 
 
-## Related projects and resources
+## Related projects and acknowledgments
 
 DBSubsetter was inspired by and borrowed ideas from:
 
@@ -83,6 +86,12 @@ Here are some other similar or related resources:
 * [abridger](https://github.com/freewilll/abridger)
 * [postgres-subset](https://github.com/BeautifulDestinations/postgres-subset)
 
+DBSubsetter is written in [Scala](https://www.scala-lang.org/) using:
+
+* [Akka Streams](https://doc.akka.io/docs/akka/2.5.8/stream/index.html?language=scala)
+* [Chronicle-Queue](https://github.com/OpenHFT/Chronicle-Queue)
+* [scopt](https://github.com/scopt/scopt)
+* [Slick](http://slick.lightbend.com/)
 
 ## License
 

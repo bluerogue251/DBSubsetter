@@ -1,6 +1,6 @@
 package trw.dbsubsetter.db
 
-import java.sql.DriverManager
+import java.sql.{DriverManager, JDBCType}
 import java.util.NoSuchElementException
 
 import trw.dbsubsetter.config.Config
@@ -41,10 +41,12 @@ object SchemaInfoRetrieval {
       }
       while (colsJdbcResultSet.next()) {
         val columnName = colsJdbcResultSet.getString("COLUMN_NAME")
+        val jdbcType = JDBCType.valueOf(colsJdbcResultSet.getInt("DATA_TYPE"))
+        val typeName = colsJdbcResultSet.getString("TYPE_NAME")
         val isSqlServerAutoIncrement = conn.isMsSqlServer && colsJdbcResultSet.getString("IS_AUTOINCREMENT") == "YES"
 
         if (!config.excludeColumns((table.schema, table.name)).contains(columnName)) {
-          columnsQueryResult += ColumnQueryRow(table.schema, table.name, columnName, isSqlServerAutoIncrement)
+          columnsQueryResult += ColumnQueryRow(table.schema, table.name, columnName, jdbcType, typeName, isSqlServerAutoIncrement)
         }
       }
     }
@@ -101,7 +103,7 @@ object SchemaInfoRetrieval {
       columnsQueryResult
         .groupBy(c => tablesByName(c.schema, c.table))
         .map { case (table, partialColumns) =>
-          table -> partialColumns.zipWithIndex.map { case (pc, i) => pc.name -> Column(table, pc.name, i) }.toMap
+          table -> partialColumns.zipWithIndex.map { case (pc, i) => pc.name -> Column(table, pc.name, i, pc.jdbcType, pc.typeName) }.toMap
         }
     }
     val colByTableOrdered: Map[Table, Vector[Column]] = {
@@ -116,7 +118,7 @@ object SchemaInfoRetrieval {
         }
     }
 
-    val foreignKeys: Set[ForeignKey] = {
+    val foreignKeysOrdered: Array[ForeignKey] = {
       val userSuppliedPartialFks: Seq[ForeignKeyQueryRow] = config.cmdLineForeignKeys.flatMap { cfk =>
         cfk.fromColumns.zip(cfk.toColumns).map { case (fromCol, toCol) =>
           ForeignKeyQueryRow(cfk.fromSchema, cfk.fromTable, fromCol, cfk.toSchema, cfk.toTable, toCol)
@@ -124,8 +126,8 @@ object SchemaInfoRetrieval {
       }
       val allPartialFKs = userSuppliedPartialFks ++ foreignKeysQueryResult
 
-      allPartialFKs.groupBy(fkm => (fkm.fromSchema, fkm.fromTable, fkm.toSchema, fkm.toTable))
-        .map { case ((fromSchemaName, fromTableName, toSchemaName, toTableName), partialForeignKeys) =>
+      val allFksUnordered = allPartialFKs.groupBy(fkm => (fkm.fromSchema, fkm.fromTable, fkm.toSchema, fkm.toTable))
+        .zipWithIndex.map { case (((fromSchemaName, fromTableName, toSchemaName, toTableName), partialForeignKeys), i) =>
           val fromTable = tablesByName(fromSchemaName, fromTableName)
           val fromCols = partialForeignKeys.map { pfk => colsByTableAndName(fromTable)(pfk.fromColumn) }.toVector
           val toTable = tablesByName(toSchemaName, toTableName)
@@ -157,23 +159,25 @@ object SchemaInfoRetrieval {
             pkOpt.fold(false)(pkColOrdinals => pkColOrdinals == toCols.map(_.ordinalPosition))
           }
 
-          ForeignKey(fromCols, toCols, pointsToPk)
-        }.toSet
+        ForeignKey(fromCols, toCols, pointsToPk, 0)
+      }
+
+      allFksUnordered.toArray.zipWithIndex.map { case (fk, idx) => fk.copy(i = idx.toShort) }
     }
 
-    val fksFromTable: Map[Table, Set[ForeignKey]] = {
-      foreignKeys.groupBy(_.fromTable).withDefaultValue(Set.empty)
+    val fksFromTable: Map[Table, Vector[ForeignKey]] = {
+      foreignKeysOrdered.toVector.groupBy(_.fromTable).withDefaultValue(Vector.empty)
     }
 
-    val fksToTable: Map[Table, Set[ForeignKey]] = {
-      foreignKeys.groupBy(_.toTable).withDefaultValue(Set.empty)
+    val fksToTable: Map[Table, Vector[ForeignKey]] = {
+      foreignKeysOrdered.toVector.groupBy(_.toTable).withDefaultValue(Vector.empty)
     }
 
     SchemaInfo(
       tablesByName,
       colByTableOrdered,
       pkColumnOrdinalsByTable,
-      foreignKeys,
+      foreignKeysOrdered,
       fksFromTable,
       fksToTable
     )
@@ -185,6 +189,8 @@ object SchemaInfoRetrieval {
   private[this] case class ColumnQueryRow(schema: SchemaName,
                                           table: TableName,
                                           name: ColumnName,
+                                          jdbcType: JDBCType,
+                                          typeName: String,
                                           isSqlServerAutoincrement: Boolean)
 
   private[this] case class PrimaryKeyQueryRow(schema: SchemaName,
