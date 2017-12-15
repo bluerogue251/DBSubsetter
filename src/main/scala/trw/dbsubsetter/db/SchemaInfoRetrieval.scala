@@ -95,7 +95,7 @@ object SchemaInfoRetrieval {
 
     val tablesByName = tablesQueryResult.map { t =>
       val hasSqlServerAutoincrement = columnsQueryResult.exists(c => c.schema == t.schema && c.table == t.name && c.isSqlServerAutoincrement)
-      val storePks = true // !Set("particle_collider_data", "quantum_data", "gravitational_wave_data", "particle_domain", "quantum_domain", "gravitational_wave_domain").contains(t.name)
+      val storePks = !config.skipPkStore.contains((t.schema, t.name))
       (t.schema, t.name) -> Table(t.schema, t.name, hasSqlServerAutoincrement, storePks)
     }.toMap
 

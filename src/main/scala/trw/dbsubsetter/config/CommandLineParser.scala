@@ -137,6 +137,23 @@ object CommandLineParser {
           |                           Can be specified multiple times
           |""".stripMargin)
 
+    opt[String]("skipPkStore")
+      .action { (str, c) =>
+        val regex = """^\s*(.+)\.(.+)\s*$""".r
+        str match {
+          case regex(schema, table) => c.copy(skipPkStore = c.skipPkStore ++ Set((schema, table)))
+          case _ => throw new RuntimeException()
+        }
+      }.text(
+      """Skip runtime in-memory storage for a table's primary keys
+        |                           For large tables, this can significantly reduce DBSubsetter's memory footprint.
+        |                           Right now, this is not very user friendly and involves understanding how DBSubsetter
+        |                           works and knowing that a given table's rows will all only be processed once.
+        |                           Feel free to open a GitHub ticket to learn more about this.
+        |                           A future release of DBSubsetter will hopefully automate this step.
+        |                           Can be specified multiple times
+          |""".stripMargin)
+
     opt[Unit]("singleThreadedDebugMode")
       .action((_, c) => c.copy(isSingleThreadedDebugMode = true))
       .text(
