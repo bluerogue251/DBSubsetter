@@ -9,7 +9,7 @@
 * Make a YouTube tutorial
 
 Nice-to-Haves for later
-* Report MySQL Foreign Key "to" column captitalization bug
+* Report MySQL Foreign Key "to" column capitalization bug
 * Automatic `--skipPkStore` option
   - Including case where a unique index means we might _not_ have to store PKs for a table
 * ChronicalMap for PKs
