@@ -33,6 +33,7 @@ abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest {
 
   override protected def afterAll(): Unit = {
     super.afterAll()
-    removeDockerContainer(containerName)
+    // TODO fix test class hierarchy to get rid of this messy string equals check
+    if (!(dataSetName == "school_db")) removeDockerContainer(containerName)
   }
 }
