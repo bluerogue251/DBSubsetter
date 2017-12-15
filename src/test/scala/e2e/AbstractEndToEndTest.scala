@@ -4,10 +4,10 @@ import org.scalatest.{BeforeAndAfterAll, FunSuite}
 import slick.dbio.{DBIOAction, Effect}
 import slick.jdbc.JdbcBackend
 import slick.lifted.{AbstractTable, TableQuery}
+import trw.dbsubsetter.ApplicationAkkaStreams
 import trw.dbsubsetter.config.{CommandLineParser, Config}
 import trw.dbsubsetter.db.SchemaInfoRetrieval
 import trw.dbsubsetter.workflow.BaseQueries
-import trw.dbsubsetter.{ApplicationAkkaStreams, ApplicationSingleThreaded}
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
@@ -77,10 +77,10 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
     val schemaInfo = SchemaInfoRetrieval.getSchemaInfo(singleThreadedConfig)
     val baseQueries = BaseQueries.get(singleThreadedConfig, schemaInfo)
 
-    val startSingleThreaded = System.nanoTime()
-    ApplicationSingleThreaded.run(singleThreadedConfig, schemaInfo, baseQueries)
-    singleThreadedRuntimeMillis = (System.nanoTime() - startSingleThreaded) / 1000000
-    println(s"Single Threaded Took $singleThreadedRuntimeMillis milliseconds")
+    //    val startSingleThreaded = System.nanoTime()
+    //    ApplicationSingleThreaded.run(singleThreadedConfig, schemaInfo, baseQueries)
+    //    singleThreadedRuntimeMillis = (System.nanoTime() - startSingleThreaded) / 1000000
+    //    println(s"Single Threaded Took $singleThreadedRuntimeMillis milliseconds")
 
     val startAkkaStreams = System.nanoTime()
     val futureResult = ApplicationAkkaStreams.run(akkaStreamsConfig, schemaInfo, baseQueries)
