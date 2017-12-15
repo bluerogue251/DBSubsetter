@@ -3,14 +3,14 @@ package trw.dbsubsetter.workflow
 import trw.dbsubsetter.db._
 
 object NewFkTaskWorkflow {
-  def process(pksAdded: PksAdded, sch: SchemaInfo): Map[(ForeignKey, Boolean), Vector[Any]] = {
+  def process(pksAdded: PksAdded, sch: SchemaInfo): Map[(ForeignKey, Boolean), Array[Any]] = {
     val PksAdded(table, rowsNeedingParentTasks, rowsNeedingChildTasks, viaTableOpt) = pksAdded
     val parentTasks = calcParentTasks(sch, table, rowsNeedingParentTasks, viaTableOpt)
     val childTasks = calcChildTasks(sch, table, rowsNeedingChildTasks)
     parentTasks ++ childTasks
   }
 
-  private def calcParentTasks(sch: SchemaInfo, table: Table, rows: Vector[Row], viaTableOpt: Option[Table]): Map[(ForeignKey, Boolean), Vector[Any]] = {
+  private def calcParentTasks(sch: SchemaInfo, table: Table, rows: Vector[Row], viaTableOpt: Option[Table]): Map[(ForeignKey, Boolean), Array[Any]] = {
     // Re: `distinct`
     // It is (hopefully) a performance improvement which prevents duplicate tasks from being created
     //
@@ -28,7 +28,7 @@ object NewFkTaskWorkflow {
     }.toMap
   }
 
-  private def calcChildTasks(sch: SchemaInfo, table: Table, rows: Vector[Row]): Map[(ForeignKey, Boolean), Vector[Any]] = {
+  private def calcChildTasks(sch: SchemaInfo, table: Table, rows: Vector[Row]): Map[(ForeignKey, Boolean), Array[Any]] = {
     sch.fksToTable(table).map { fk =>
       val fkValues = valuesFunc(fk)(fk, fk.toCols, rows)
       (fk, true) -> fkValues
@@ -37,13 +37,13 @@ object NewFkTaskWorkflow {
 
   private def valuesFunc(fk: ForeignKey) = if (fk.isSingleCol) getSingleColForeignKeyValues _ else getMultiColForeignKeyValues _
 
-  private def getSingleColForeignKeyValues(fk: ForeignKey, cols: Vector[Column], rows: Vector[Row]): Vector[Any] = {
+  private def getSingleColForeignKeyValues(fk: ForeignKey, cols: Vector[Column], rows: Vector[Row]): Array[Any] = {
     val ordinalPosition = cols.head.ordinalPosition
-    rows.map(row => row(ordinalPosition))
+    rows.map(row => row(ordinalPosition)).toArray
   }
 
-  private def getMultiColForeignKeyValues(fk: ForeignKey, cols: Vector[Column], rows: Vector[Row]): Vector[Array[Any]] = {
+  private def getMultiColForeignKeyValues(fk: ForeignKey, cols: Vector[Column], rows: Vector[Row]): Array[Any] = {
     val ordinalPositions = cols.map(_.ordinalPosition).toArray
-    rows.map(row => ordinalPositions.map(row))
+    rows.map(row => ordinalPositions.map(row)).toArray
   }
 }

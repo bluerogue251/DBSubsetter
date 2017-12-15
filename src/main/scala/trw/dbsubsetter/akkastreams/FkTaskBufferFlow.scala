@@ -10,10 +10,10 @@ import trw.dbsubsetter.db.{ForeignKey, SchemaInfo}
 import trw.dbsubsetter.workflow._
 
 // Adapted from https://github.com/torodb/akka-chronicle-queue
-class FkTaskBufferFlow(sch: SchemaInfo) extends GraphStage[FlowShape[Map[(ForeignKey, Boolean), Vector[Any]], FkTask]] {
-  val in: Inlet[Map[(ForeignKey, Boolean), Vector[Any]]] = Inlet.create[Map[(ForeignKey, Boolean), Vector[Any]]]("FkTaskBufferFlow.in")
+class FkTaskBufferFlow(sch: SchemaInfo) extends GraphStage[FlowShape[Map[(ForeignKey, Boolean), Array[Any]], FkTask]] {
+  val in: Inlet[Map[(ForeignKey, Boolean), Array[Any]]] = Inlet.create[Map[(ForeignKey, Boolean), Array[Any]]]("FkTaskBufferFlow.in")
   val out: Outlet[FkTask] = Outlet.create[FkTask]("FkTaskBufferFlow.out")
-  override val shape: FlowShape[Map[(ForeignKey, Boolean), Vector[Any]], FkTask] = FlowShape.of(in, out)
+  override val shape: FlowShape[Map[(ForeignKey, Boolean), Array[Any]], FkTask] = FlowShape.of(in, out)
 
   override def createLogic(inheritedAttributes: Attributes): GraphStageLogic = new GraphStageLogic(shape) {
     private val storageDir = Files.createTempDirectory("DBSubsetter-")

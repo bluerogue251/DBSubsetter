@@ -6,8 +6,8 @@ import trw.dbsubsetter.db.{ForeignKey, SchemaInfo}
 import trw.dbsubsetter.workflow._
 
 object NewTasks {
-  def flow(sch: SchemaInfo): Flow[PkResult, Map[(ForeignKey, Boolean), Vector[Any]], NotUsed] = {
-    Flow[PkResult].map[Map[(ForeignKey, Boolean), Vector[Any]]] { pkResult => {
+  def flow(sch: SchemaInfo): Flow[PkResult, Map[(ForeignKey, Boolean), Array[Any]], NotUsed] = {
+    Flow[PkResult].map[Map[(ForeignKey, Boolean), Array[Any]]] { pkResult => {
       pkResult match {
         case pka: PksAdded =>
           NewFkTaskWorkflow.process(pka, sch)
