@@ -104,16 +104,16 @@ trait SchoolDbDDL {
     val emptyTable5Id: Rep[Option[Int]] = column[Option[Int]]("empty_table_5_id", O.Default(None))
     val createdAt: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("created_at")
 
-    lazy val eventTypesFk = foreignKey("events_event_type_key_fkey", eventTypeKey, EventTypes)(r => r.key, onUpdate = ForeignKeyAction.NoAction, onDelete = ForeignKeyAction.NoAction)
-    lazy val districtsFk = foreignKey("events_district_id_fkey", districtId, Districts)(r => Rep.Some(r.id), onUpdate = ForeignKeyAction.NoAction, onDelete = ForeignKeyAction.NoAction)
-    lazy val schoolsFk = foreignKey("events_school_id_fkey", schoolId, Schools)(r => Rep.Some(r.id), onUpdate = ForeignKeyAction.NoAction, onDelete = ForeignKeyAction.NoAction)
-    lazy val studentsFk = foreignKey("events_student_id_fkey", studentId, Students)(r => Rep.Some(r.studentId), onUpdate = ForeignKeyAction.NoAction, onDelete = ForeignKeyAction.NoAction)
-    lazy val schoolAssignmentsFk = foreignKey("events_school_assignment_school_id_fkey", (schoolAssignmentSchoolId, schoolAssignmentStudentId), SchoolAssignments)(r => (Rep.Some(r.schoolId), Rep.Some(r.studentId)), onUpdate = ForeignKeyAction.NoAction, onDelete = ForeignKeyAction.NoAction)
-    lazy val emptyTable1Fk = foreignKey("events_empty_table_1_id_fkey", emptyTable1Id, EmptyTable1)(r => Rep.Some(r.id), onUpdate = ForeignKeyAction.NoAction, onDelete = ForeignKeyAction.NoAction)
-    lazy val emptyTable2Fk = foreignKey("events_empty_table_2_id_fkey", emptyTable2Id, EmptyTable2)(r => Rep.Some(r.id), onUpdate = ForeignKeyAction.NoAction, onDelete = ForeignKeyAction.NoAction)
-    lazy val emptyTable3Fk = foreignKey("events_empty_table_3_id_fkey", emptyTable3Id, EmptyTable3)(r => Rep.Some(r.id), onUpdate = ForeignKeyAction.NoAction, onDelete = ForeignKeyAction.NoAction)
-    lazy val emptyTable4Fk = foreignKey("events_empty_table_4_id_fkey", emptyTable4Id, EmptyTable4)(r => Rep.Some(r.id), onUpdate = ForeignKeyAction.NoAction, onDelete = ForeignKeyAction.NoAction)
-    lazy val emptyTable5Fk = foreignKey("events_empty_table_5_id_fkey", emptyTable5Id, EmptyTable5)(r => Rep.Some(r.id), onUpdate = ForeignKeyAction.NoAction, onDelete = ForeignKeyAction.NoAction)
+    lazy val eventTypesFk = foreignKey("events_event_type_key_fkey", eventTypeKey, EventTypes)(r => r.key)
+    lazy val districtsFk = foreignKey("events_district_id_fkey", districtId, Districts)(r => Rep.Some(r.id))
+    lazy val schoolsFk = foreignKey("events_school_id_fkey", schoolId, Schools)(r => Rep.Some(r.id))
+    lazy val studentsFk = foreignKey("events_student_id_fkey", studentId, Students)(r => Rep.Some(r.studentId))
+    lazy val schoolAssignmentsFk = foreignKey("events_school_assignment_school_id_fkey", (schoolAssignmentSchoolId, schoolAssignmentStudentId), SchoolAssignments)(r => (Rep.Some(r.schoolId), Rep.Some(r.studentId)))
+    lazy val emptyTable1Fk = foreignKey("events_empty_table_1_id_fkey", emptyTable1Id, EmptyTable1)(r => Rep.Some(r.id))
+    lazy val emptyTable2Fk = foreignKey("events_empty_table_2_id_fkey", emptyTable2Id, EmptyTable2)(r => Rep.Some(r.id))
+    lazy val emptyTable3Fk = foreignKey("events_empty_table_3_id_fkey", emptyTable3Id, EmptyTable3)(r => Rep.Some(r.id))
+    lazy val emptyTable4Fk = foreignKey("events_empty_table_4_id_fkey", emptyTable4Id, EmptyTable4)(r => Rep.Some(r.id))
+    lazy val emptyTable5Fk = foreignKey("events_empty_table_5_id_fkey", emptyTable5Id, EmptyTable5)(r => Rep.Some(r.id))
 
     val index1 = index("events_event_type_key_idx", eventTypeKey)
     val index2 = index("events_event_district_id_idx", districtId)
@@ -154,7 +154,7 @@ trait SchoolDbDDL {
     val createdAt: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("created_at")
     val updatedAt: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("updated_at")
 
-    lazy val studentsFk = foreignKey("student_id", studentId, Students)(_.studentId, onUpdate = ForeignKeyAction.NoAction, onDelete = ForeignKeyAction.NoAction)
+    lazy val studentsFk = foreignKey("student_id", studentId, Students)(_.studentId)
     val index1 = index("homework_grades_student_id_idx", studentId)
     val index2 = index("homework_grades_assignment_type_idx", assignmentType)
     val index3 = index("homework_grades_assignment_id_idx", assignmentId)
@@ -187,8 +187,8 @@ trait SchoolDbDDL {
     val updatedAt: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("updated_at")
 
     val pk = primaryKey("school_assignments_pkey", (schoolId, studentId))
-    lazy val studentsFk = foreignKey("school_assignments_student_id_fkey", studentId, Students)(r => r.studentId, onUpdate = ForeignKeyAction.NoAction, onDelete = ForeignKeyAction.NoAction)
-    lazy val schoolsFk = foreignKey("school_assignments_school_id_fkey", schoolId, Schools)(r => r.id, onUpdate = ForeignKeyAction.NoAction, onDelete = ForeignKeyAction.NoAction)
+    lazy val studentsFk = foreignKey("school_assignments_student_id_fkey", studentId, Students)(r => r.studentId)
+    lazy val schoolsFk = foreignKey("school_assignments_school_id_fkey", schoolId, Schools)(r => r.id)
     val index1 = index("school_assignments_school_id_idx", schoolId)
     val index2 = index("school_assignments_student_id_idx", studentId)
   }
@@ -208,8 +208,8 @@ trait SchoolDbDDL {
     val updatedAt: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("updated_at")
     val latestValedictorianIdCache: Rep[Option[Long]] = column[Option[Long]]("latest_valedictorian_id_cache", O.Default(None))
 
-    lazy val districtsFk = foreignKey("schools_district_id_fkey", districtId, Districts)(_.id, onUpdate = ForeignKeyAction.NoAction, onDelete = ForeignKeyAction.NoAction)
-    lazy val studentsFk = foreignKey("schools_latest_valedictorian_id_cache_fkey", latestValedictorianIdCache, Students)(r => r.studentId, onUpdate = ForeignKeyAction.NoAction, onDelete = ForeignKeyAction.NoAction)
+    lazy val districtsFk = foreignKey("schools_district_id_fkey", districtId, Districts)(_.id)
+    lazy val studentsFk = foreignKey("schools_latest_valedictorian_id_cache_fkey", latestValedictorianIdCache, Students)(r => r.studentId)
     val index1 = index("schools_district_id_idx", districtId)
     val index2 = index("schools_latest_valedictorian_id_cache_idx", latestValedictorianIdCache)
   }
@@ -240,7 +240,7 @@ trait SchoolDbDDL {
     val createdAt: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("created_at")
     val updatedAt: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("updated_at")
 
-    lazy val schoolFk = foreignKey("Students_current_school_id_cache_fkey", currentSchoolIdCache, Schools)(_.id, onUpdate = ForeignKeyAction.NoAction, onDelete = ForeignKeyAction.NoAction)
+    lazy val schoolFk = foreignKey("Students_current_school_id_cache_fkey", currentSchoolIdCache, Schools)(_.id)
     val index2 = index("Students_current_school_id_cache_idx", currentSchoolIdCache)
   }
 

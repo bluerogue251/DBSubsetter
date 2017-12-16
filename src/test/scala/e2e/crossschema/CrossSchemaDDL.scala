@@ -4,7 +4,6 @@ trait CrossSchemaDDL {
   val profile: slick.jdbc.JdbcProfile
 
   import profile.api._
-  import slick.model.ForeignKeyAction
 
   lazy val schema: profile.SchemaDescription = Schema1Table.schema ++ Schema2Table.schema ++ Schema3Table.schema
 
@@ -31,7 +30,7 @@ trait CrossSchemaDDL {
 
     val id: Rep[Int] = column[Int]("id", O.PrimaryKey)
     val schema1TableId: Rep[Int] = column[Int]("schema_1_table_id")
-    lazy val fk = foreignKey("fkey", schema1TableId, Schema1Table)(_.id, onUpdate = ForeignKeyAction.NoAction, onDelete = ForeignKeyAction.NoAction)
+    lazy val fk = foreignKey("fkey", schema1TableId, Schema1Table)(_.id)
   }
 
   lazy val Schema2Table = new TableQuery(tag => new Schema2Table(tag))
@@ -46,7 +45,7 @@ trait CrossSchemaDDL {
 
     val id: Rep[Int] = column[Int]("id", O.PrimaryKey)
     val schema2TableId: Rep[Int] = column[Int]("schema_2_table_id")
-    lazy val fk = foreignKey("fkey", schema2TableId, Schema2Table)(_.id, onUpdate = ForeignKeyAction.NoAction, onDelete = ForeignKeyAction.NoAction)
+    lazy val fk = foreignKey("fkey", schema2TableId, Schema2Table)(_.id)
   }
 
   lazy val Schema3Table = new TableQuery(tag => new Schema3Table(tag))

@@ -4,7 +4,6 @@ trait FkReferenceNonPkDDL {
   val profile: slick.jdbc.JdbcProfile
 
   import profile.api._
-  import slick.model.ForeignKeyAction
 
   lazy val schema: profile.SchemaDescription = Array(ReferencedTable.schema, ReferencingTable.schema).reduceLeft(_ ++ _)
 
@@ -33,7 +32,7 @@ trait FkReferenceNonPkDDL {
     val id: Rep[Int] = column[Int]("id", O.PrimaryKey)
     val referencedTableBusinessKey: Rep[String] = column[String]("referenced_table_business_key", O.Length(40, varying = true))
 
-    lazy val fk = foreignKey("fkey", referencedTableBusinessKey, ReferencedTable)(_.businessKey, onUpdate = ForeignKeyAction.NoAction, onDelete = ForeignKeyAction.NoAction)
+    lazy val fk = foreignKey("fkey", referencedTableBusinessKey, ReferencedTable)(_.businessKey)
     val index1 = index("referencing_table_referenced_table_business_key_idx", referencedTableBusinessKey)
   }
 

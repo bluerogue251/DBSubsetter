@@ -4,7 +4,6 @@ trait BaseQueriesDDL {
   val profile: slick.jdbc.JdbcProfile
 
   import profile.api._
-  import slick.model.ForeignKeyAction
 
   lazy val schema: profile.SchemaDescription = BaseTable.schema ++ ChildTable.schema
 
@@ -31,7 +30,7 @@ trait BaseQueriesDDL {
 
     val id: Rep[Int] = column[Int]("id", O.PrimaryKey)
     val baseTableId: Rep[Int] = column[Int]("base_table_id")
-    lazy val baseTableFk = foreignKey("child_table_base_table_id_fkey", baseTableId, BaseTable)(_.id, onUpdate = ForeignKeyAction.NoAction, onDelete = ForeignKeyAction.NoAction)
+    lazy val baseTableFk = foreignKey("child_table_base_table_id_fkey", baseTableId, BaseTable)(_.id)
   }
 
   lazy val ChildTable = new TableQuery(tag => new ChildTable(tag))

@@ -4,7 +4,6 @@ trait SelfReferencingDDL {
   val profile: slick.jdbc.JdbcProfile
 
   import profile.api._
-  import slick.model.ForeignKeyAction
 
   lazy val schema: profile.SchemaDescription = SelfReferencingTable.schema
 
@@ -18,7 +17,7 @@ trait SelfReferencingDDL {
 
     val id: Rep[Int] = column[Int]("id", O.PrimaryKey)
     val parentId: Rep[Option[Int]] = column[Option[Int]]("parent_id")
-    lazy val selfReferencingTableFk = foreignKey("self_referencing_table_parent_id_fkey", parentId, SelfReferencingTable)(r => Rep.Some(r.id), onUpdate = ForeignKeyAction.NoAction, onDelete = ForeignKeyAction.NoAction)
+    lazy val selfReferencingTableFk = foreignKey("self_referencing_table_parent_id_fkey", parentId, SelfReferencingTable)(r => Rep.Some(r.id))
   }
 
   lazy val SelfReferencingTable = new TableQuery(tag => new SelfReferencingTable(tag))
