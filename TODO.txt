@@ -4,7 +4,6 @@
 * RELEASE v1.0.0
 
 * One chronicle-queue flow *per Fk* without always checking nearly-always-empty queues
-* Make Physics DB bigger and compare performance with non-chronicle-queue version
 * Make a YouTube tutorial
 
 Nice-to-Haves for later
