@@ -13,6 +13,6 @@ class PkTypesMysqlTest extends AbstractMysqlEndToEndTest with PkTypesTestCases {
     "--baseQuery", "pk_types.uuid_pks ::: id = 'ae2c53e6-bef2-42cb-aaf7-3bdd58b0b645' ::: includeChildren",
     "--baseQuery", "pk_types.char_10_pks ::: id = 'two ' ::: includeChildren",
     "--baseQuery", "pk_types.varchar_10_pks ::: id = 'six ' ::: includeChildren",
-    "--baseQuery", "pk_types.referencing_table ::: id in (2, 4, 7, 8, 10, 12, 14, 16, 18, 21, 24) ::: includeChildren"
+    "--baseQuery", "pk_types.referencing_table ::: id in (2, 4, 7, 8, 10, 12, 15, 16, 18, 21, 24) ::: includeChildren"
   )
 }

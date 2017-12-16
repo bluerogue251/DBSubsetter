@@ -105,21 +105,14 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
   }
 
   // Helper to get around intelliJ warnings, technically it could compile just with the Long version
-  protected def assertThatByte(action: DBIOAction[Option[Byte], profile.api.NoStream, Effect.Read], expected: Long): Unit = {
-    assert(Await.result(targetDbSt.run(action), Duration.Inf) === Some(expected))
-    assert(Await.result(targetDbAs.run(action), Duration.Inf) === Some(expected))
-  }
-
-  // Helper to get around intelliJ warnings, technically it could compile just with the Long version
-  protected def assertThatShort(action: DBIOAction[Option[Short], profile.api.NoStream, Effect.Read], expected: Long): Unit = {
-    assert(Await.result(targetDbSt.run(action), Duration.Inf) === Some(expected))
-    assert(Await.result(targetDbAs.run(action), Duration.Inf) === Some(expected))
-  }
-
-  // Helper to get around intelliJ warnings, technically it could compile just with the Long version
   protected def assertThat(action: DBIOAction[Option[Int], profile.api.NoStream, Effect.Read], expected: Long): Unit = {
     assert(Await.result(targetDbSt.run(action), Duration.Inf) === Some(expected))
     assert(Await.result(targetDbAs.run(action), Duration.Inf) === Some(expected))
+  }
+
+  protected def assertResult[T](action: DBIOAction[T, profile.api.NoStream, Effect.Read], expected: T): Unit = {
+    assert(Await.result(targetDbSt.run(action), Duration.Inf) === expected)
+    assert(Await.result(targetDbAs.run(action), Duration.Inf) === expected)
   }
 
   protected def assertThatLong(action: DBIOAction[Option[Long], profile.api.NoStream, Effect.Read], expected: Long): Unit = {
