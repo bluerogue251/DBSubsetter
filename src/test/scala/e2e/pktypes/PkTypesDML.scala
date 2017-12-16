@@ -66,11 +66,11 @@ class PkTypesDML(val profile: JdbcProfile) extends PkTypesDDL {
       ReferencingTableRow(14, None, None, None, Some(0), None, None),
       ReferencingTableRow(15, None, None, None, Some(1), None, None),
       ReferencingTableRow(16, None, None, None, Some(9223372036854775807L), None, None),
-      ReferencingTableRow(13, None, None, None, None, Some(UUID.fromString("ae2c53e6-bef2-42cb-aaf7-3bdd58b0b645")), None),
-      ReferencingTableRow(14, None, None, None, None, Some(UUID.fromString("1607ce51-dcd1-480a-99a1-78027b654f50")), None),
-      ReferencingTableRow(13, None, None, None, None, None, Some("one")),
-      ReferencingTableRow(14, None, None, None, None, None, Some("two ")),
-      ReferencingTableRow(14, None, None, None, None, None, Some(" four "))
+      ReferencingTableRow(17, None, None, None, None, Some(UUID.fromString("ae2c53e6-bef2-42cb-aaf7-3bdd58b0b645")), None),
+      ReferencingTableRow(18, None, None, None, None, Some(UUID.fromString("1607ce51-dcd1-480a-99a1-78027b654f50")), None),
+      ReferencingTableRow(19, None, None, None, None, None, Some("one")),
+      ReferencingTableRow(20, None, None, None, None, None, Some("two ")),
+      ReferencingTableRow(21, None, None, None, None, None, Some(" four "))
     )
   )
 }

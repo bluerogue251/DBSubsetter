@@ -10,11 +10,27 @@ trait PkTypesTestCases extends AbstractEndToEndTest with PkTypesDDL with SlickSe
   override lazy val ddl = schema.create
   override lazy val dml = new PkTypesDML(profile).dbioSeq
 
-  test("Correct table 1 records were included") {
-    ???
+  test("Correct byte_pk_table records were included") {
+    assertCount(BytePkTable, 3)
   }
 
-  test("Correct table 2 records were included") {
-    ???
+  test("Correct short_pk_table records were included") {
+    assertCount(ShortPkTable, 3)
+  }
+
+  test("Correct int_pk_table records were included") {
+    assertCount(IntPkTable, 3)
+  }
+
+  test("Correct long_pk_table records were included") {
+    assertCount(LongPkTable, 3)
+  }
+
+  test("Correct uuid_pk_table records were included") {
+    assertCount(UUIDPkTable, 3)
+  }
+
+  test("Correct string_pk_table records were included") {
+    assertCount(StringPkTable, 3)
   }
 }

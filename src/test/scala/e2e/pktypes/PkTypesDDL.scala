@@ -14,7 +14,7 @@ trait PkTypesDDL {
   class BytePkTable(_tableTag: Tag) extends profile.api.Table[BytePkTableRow](_tableTag, "byte_pks") {
     def * = id <> (BytePkTableRow, BytePkTableRow.unapply)
 
-    val id: Rep[Byte] = column[Byte]("id")
+    val id: Rep[Byte] = column[Byte]("id", O.PrimaryKey)
   }
 
   lazy val BytePkTable = new TableQuery(tag => new BytePkTable(tag))
@@ -24,7 +24,7 @@ trait PkTypesDDL {
   class ShortPkTable(_tableTag: Tag) extends profile.api.Table[ShortPkTableRow](_tableTag, "short_pks") {
     def * = id <> (ShortPkTableRow, ShortPkTableRow.unapply)
 
-    val id: Rep[Short] = column[Short]("id")
+    val id: Rep[Short] = column[Short]("id", O.PrimaryKey)
   }
 
   lazy val ShortPkTable = new TableQuery(tag => new ShortPkTable(tag))
@@ -34,7 +34,7 @@ trait PkTypesDDL {
   class IntPkTable(_tableTag: Tag) extends profile.api.Table[IntPkTableRow](_tableTag, "int_pks") {
     def * = id <> (IntPkTableRow, IntPkTableRow.unapply)
 
-    val id: Rep[Int] = column[Int]("id")
+    val id: Rep[Int] = column[Int]("id", O.PrimaryKey)
   }
 
   lazy val IntPkTable = new TableQuery(tag => new IntPkTable(tag))
@@ -44,7 +44,7 @@ trait PkTypesDDL {
   class LongPkTable(_tableTag: Tag) extends profile.api.Table[LongPkTableRow](_tableTag, "long_pks") {
     def * = id <> (LongPkTableRow, LongPkTableRow.unapply)
 
-    val id: Rep[Long] = column[Long]("id")
+    val id: Rep[Long] = column[Long]("id", O.PrimaryKey)
   }
 
   lazy val LongPkTable = new TableQuery(tag => new LongPkTable(tag))
@@ -54,7 +54,7 @@ trait PkTypesDDL {
   class UUIDPkTable(_tableTag: Tag) extends profile.api.Table[UUIDPkTableRow](_tableTag, "uuid_pks") {
     def * = id <> (UUIDPkTableRow, UUIDPkTableRow.unapply)
 
-    val id: Rep[UUID] = column[UUID]("id")
+    val id: Rep[UUID] = column[UUID]("id", O.PrimaryKey)
   }
 
   lazy val UUIDPkTable = new TableQuery(tag => new UUIDPkTable(tag))
@@ -64,7 +64,7 @@ trait PkTypesDDL {
   class StringPkTable(_tableTag: Tag) extends profile.api.Table[StringPkTableRow](_tableTag, "string_pks") {
     def * = id <> (StringPkTableRow, StringPkTableRow.unapply)
 
-    val id: Rep[String] = column[String]("id")
+    val id: Rep[String] = column[String]("id", O.PrimaryKey)
   }
 
   lazy val StringPkTable = new TableQuery(tag => new StringPkTable(tag))
@@ -74,10 +74,10 @@ trait PkTypesDDL {
   class ReferencingTable(_tableTag: Tag) extends profile.api.Table[ReferencingTableRow](_tableTag, "referencing_table") {
     def * = (id, byteId, shortId, intId, longId, uuidId, stringId) <> (ReferencingTableRow.tupled, ReferencingTableRow.unapply)
 
-    val id: Rep[Int] = column[Int]("id")
+    val id: Rep[Int] = column[Int]("id", O.PrimaryKey)
     val byteId: Rep[Option[Byte]] = column[Option[Byte]]("byte_id")
     val shortId: Rep[Option[Short]] = column[Option[Short]]("short_id")
-    val intId: Rep[Option[Int]] = column[Option[Int]]("long_id")
+    val intId: Rep[Option[Int]] = column[Option[Int]]("int_id")
     val longId: Rep[Option[Long]] = column[Option[Long]]("long_id")
     val uuidId: Rep[Option[UUID]] = column[Option[UUID]]("uuid_id")
     val stringId: Rep[Option[String]] = column[Option[String]]("string_id")
