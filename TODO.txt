@@ -1,4 +1,3 @@
-* Only run load tests against Akka Streams version
 * Test UUID data types in MySQL and SQL Server
 * Test all different byte sizes of Pk/Fk Ints (tiny, small, int, bigint, etc) work with Chronicle Queue
 
@@ -9,6 +8,7 @@
 * Make a YouTube tutorial
 
 Nice-to-Haves for later
+* Only run load tests against Akka Streams version
 * Report MySQL Foreign Key "to" column capitalization bug
 * Automatic `--skipPkStore` option
   - Including case where a unique index means we might _not_ have to store PKs for a table
