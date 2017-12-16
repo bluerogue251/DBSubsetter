@@ -11,12 +11,18 @@ class TaskQueueReader(typeList: Seq[(JDBCType, TypeName)]) {
 
   private val handlerFunc: ValueIn => Any = {
     val funcs: Seq[ValueIn => Any] = typeList.map {
-      case (JDBCType.TINYINT | JDBCType.SMALLINT, _) => (in: ValueIn) => in.int16()
-      case (JDBCType.INTEGER, _) => (in: ValueIn) => in.int32()
-      case (JDBCType.BIGINT, _) => (in: ValueIn) => in.int64()
-      case (JDBCType.VARCHAR | JDBCType.CHAR | JDBCType.LONGVARCHAR | JDBCType.NCHAR, _) => (in: ValueIn) => in.text()
-      case (_, "uuid") => (in: ValueIn) => val t = in.text(); if (t == null) null else UUID.fromString(t)
-      case other => throw new RuntimeException(s"JDBC Type not yet supported for foreign key column: $other. Please open a GitHub issue for this.")
+      case (JDBCType.TINYINT | JDBCType.SMALLINT | JDBCType.INTEGER, _) =>
+        (in: ValueIn) => in.int32()
+      case (JDBCType.BIGINT, _) =>
+        (in: ValueIn) => in.int64()
+      case (JDBCType.VARCHAR | JDBCType.CHAR | JDBCType.LONGVARCHAR | JDBCType.NCHAR, _) =>
+        (in: ValueIn) => in.text()
+      case (JDBCType.BINARY | JDBCType.VARBINARY | JDBCType.LONGVARBINARY, _) =>
+        (in: ValueIn) => in.bytes()
+      case (_, "uuid") =>
+        (in: ValueIn) => val t = in.text(); if (t == null) null else UUID.fromString(t)
+      case other =>
+        throw new RuntimeException(s"JDBC Type not yet supported for foreign key column: $other. Please open a GitHub issue for this.")
     }
 
     val headFunc: ValueIn => Any = funcs.head

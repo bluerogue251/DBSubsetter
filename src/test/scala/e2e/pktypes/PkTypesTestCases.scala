@@ -12,10 +12,12 @@ trait PkTypesTestCases extends AbstractEndToEndTest with PkTypesDDL with SlickSe
 
   test("Correct byte_pk_table records were included") {
     assertCount(BytePkTable, 3)
+    assertThatByte(BytePkTable.map(_.id).sum.result, -1)
   }
 
   test("Correct short_pk_table records were included") {
     assertCount(ShortPkTable, 3)
+    assertThatShort(ShortPkTable.map(_.id).sum.result, -1)
   }
 
   test("Correct int_pk_table records were included") {
@@ -30,7 +32,11 @@ trait PkTypesTestCases extends AbstractEndToEndTest with PkTypesDDL with SlickSe
     assertCount(UUIDPkTable, 3)
   }
 
-  test("Correct string_pk_table records were included") {
-    assertCount(StringPkTable, 3)
+  test("Correct char_10_pk_table records were included") {
+    assertCount(Char10PkTable, 3)
+  }
+
+  test("Correct varchar_10_pk_table records were included") {
+    assertCount(Varchar10PkTable, 3)
   }
 }

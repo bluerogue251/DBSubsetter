@@ -7,7 +7,7 @@ trait PkTypesDDL {
 
   import profile.api._
 
-  lazy val schema: profile.SchemaDescription = Seq(BytePkTable, ShortPkTable, IntPkTable, LongPkTable, UUIDPkTable, StringPkTable, ReferencingTable).map(_.schema).reduce(_ ++ _)
+  lazy val schema: profile.SchemaDescription = Seq(BytePkTable, ShortPkTable, IntPkTable, LongPkTable, UUIDPkTable, Char10PkTable, Varchar10PkTable, ReferencingTable).map(_.schema).reduce(_ ++ _)
 
   case class BytePkTableRow(id: Byte)
 
@@ -59,20 +59,30 @@ trait PkTypesDDL {
 
   lazy val UUIDPkTable = new TableQuery(tag => new UUIDPkTable(tag))
 
-  case class StringPkTableRow(id: String)
+  case class Char10PkTableRow(id: String)
 
-  class StringPkTable(_tableTag: Tag) extends profile.api.Table[StringPkTableRow](_tableTag, "string_pks") {
-    def * = id <> (StringPkTableRow, StringPkTableRow.unapply)
+  class Char10PkTable(_tableTag: Tag) extends profile.api.Table[Char10PkTableRow](_tableTag, "char_10_pks") {
+    def * = id <> (Char10PkTableRow, Char10PkTableRow.unapply)
 
-    val id: Rep[String] = column[String]("id", O.PrimaryKey)
+    val id: Rep[String] = column[String]("id", O.PrimaryKey, O.Length(10, varying = false))
   }
 
-  lazy val StringPkTable = new TableQuery(tag => new StringPkTable(tag))
+  lazy val Char10PkTable = new TableQuery(tag => new Char10PkTable(tag))
 
-  case class ReferencingTableRow(id: Int, byteId: Option[Byte], shortId: Option[Short], intId: Option[Int], longId: Option[Long], uuidId: Option[UUID], stringId: Option[String])
+  case class Varchar10PkTableRow(id: String)
+
+  class Varchar10PkTable(_tableTag: Tag) extends profile.api.Table[Varchar10PkTableRow](_tableTag, "varchar_10_pks") {
+    def * = id <> (Varchar10PkTableRow, Varchar10PkTableRow.unapply)
+
+    val id: Rep[String] = column[String]("id", O.PrimaryKey, O.Length(10, varying = true))
+  }
+
+  lazy val Varchar10PkTable = new TableQuery(tag => new Varchar10PkTable(tag))
+
+  case class ReferencingTableRow(id: Int, byteId: Option[Byte], shortId: Option[Short], intId: Option[Int], longId: Option[Long], uuidId: Option[UUID], char10Id: Option[String], varchar10Id: Option[String])
 
   class ReferencingTable(_tableTag: Tag) extends profile.api.Table[ReferencingTableRow](_tableTag, "referencing_table") {
-    def * = (id, byteId, shortId, intId, longId, uuidId, stringId) <> (ReferencingTableRow.tupled, ReferencingTableRow.unapply)
+    def * = (id, byteId, shortId, intId, longId, uuidId, char10Id, varchar10Id) <> (ReferencingTableRow.tupled, ReferencingTableRow.unapply)
 
     val id: Rep[Int] = column[Int]("id", O.PrimaryKey)
     val byteId: Rep[Option[Byte]] = column[Option[Byte]]("byte_id")
@@ -80,14 +90,16 @@ trait PkTypesDDL {
     val intId: Rep[Option[Int]] = column[Option[Int]]("int_id")
     val longId: Rep[Option[Long]] = column[Option[Long]]("long_id")
     val uuidId: Rep[Option[UUID]] = column[Option[UUID]]("uuid_id")
-    val stringId: Rep[Option[String]] = column[Option[String]]("string_id")
+    val char10Id: Rep[Option[String]] = column[Option[String]]("char_10_id", O.Length(10, varying = false))
+    val varchar10Id: Rep[Option[String]] = column[Option[String]]("varchar_10_id", O.Length(10, varying = true))
 
     lazy val byteIdFk = foreignKey("byte_id_fkey", byteId, BytePkTable)(_.id)
     lazy val shortIdFk = foreignKey("short_id_fkey", shortId, ShortPkTable)(_.id)
     lazy val intIdFk = foreignKey("int_id_fkey", intId, IntPkTable)(_.id)
     lazy val longIdFk = foreignKey("long_id_fkey", longId, LongPkTable)(_.id)
     lazy val uuidIdFk = foreignKey("uuid_id_fkey", uuidId, UUIDPkTable)(_.id)
-    lazy val stringIdFk = foreignKey("string_id_fkey", stringId, StringPkTable)(_.id)
+    lazy val char10IdFk = foreignKey("char_10_id_fkey", char10Id, Char10PkTable)(_.id)
+    lazy val varchar10IdFk = foreignKey("varchar_10_id_fkey", varchar10Id, Varchar10PkTable)(_.id)
   }
 
   lazy val ReferencingTable = new TableQuery(tag => new ReferencingTable(tag))
