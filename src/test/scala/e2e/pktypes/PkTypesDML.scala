@@ -9,7 +9,6 @@ class PkTypesDML(val profile: JdbcProfile) extends PkTypesDDL {
   import profile.api._
 
   def dbioSeq = slick.dbio.DBIO.seq(
-    // What about up to 255?
     BytePkTable ++= Seq(
       BytePkTableRow(-128),
       BytePkTableRow(0),
@@ -47,13 +46,15 @@ class PkTypesDML(val profile: JdbcProfile) extends PkTypesDDL {
       Char10PkTableRow("one"),
       Char10PkTableRow("two "),
       Char10PkTableRow(" three"),
-      Char10PkTableRow(" four ")
+      Char10PkTableRow(" four "),
+      Char10PkTableRow("")
     ),
     Varchar10PkTable ++= Seq(
       Varchar10PkTableRow("five"),
       Varchar10PkTableRow("six "),
       Varchar10PkTableRow(" seven"),
-      Varchar10PkTableRow(" eight ")
+      Varchar10PkTableRow(" eight "),
+      Varchar10PkTableRow("")
     ),
     ReferencingTable ++= Seq(
       ReferencingTableRow(1, Some(-128), None, None, None, None, None, None),

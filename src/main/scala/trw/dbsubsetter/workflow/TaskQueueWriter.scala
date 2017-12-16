@@ -3,7 +3,6 @@ package trw.dbsubsetter.workflow
 import java.sql.JDBCType
 import java.util.UUID
 
-import net.openhft.chronicle.bytes.BytesStore
 import net.openhft.chronicle.wire.{ValueOut, WireOut, WriteMarshallable}
 import trw.dbsubsetter.db.TypeName
 
@@ -26,11 +25,9 @@ class TaskQueueWriter(fkOrdinal: Short, typeList: Seq[(JDBCType, TypeName)]) {
       case (JDBCType.CHAR | JDBCType.VARCHAR | JDBCType.LONGVARCHAR | JDBCType.NCHAR, _) =>
         (out: ValueOut, fkVal: Any) => out.text(fkVal.asInstanceOf[String])
       case (JDBCType.BINARY | JDBCType.VARBINARY | JDBCType.LONGVARBINARY, _) =>
-        (out: ValueOut, fkVal: Any) =>
-          val s: BytesStore[_, _] = if (fkVal == null) BytesStore.empty() else BytesStore.wrap(fkVal.asInstanceOf[Array[Byte]])
-          out.bytes(s)
-      case (_, "uuid") => (out: ValueOut, fkVal: Any) =>
-        out.text(if (fkVal == null) null else fkVal.asInstanceOf[UUID].toString)
+        (out: ValueOut, fkVal: Any) => out.bytes(fkVal.asInstanceOf[Array[Byte]])
+      case (_, "uuid") =>
+        (out: ValueOut, fkVal: Any) => out.text(fkVal.asInstanceOf[UUID].toString) // TODO optimize to use byte[] instead of string
       case (otherJDBCType, otherTypeName) =>
         throw new RuntimeException(s"Type not yet supported for foreign key. JDBC Type: $otherJDBCType. Type Name: $otherTypeName. Please open a GitHub issue for this.")
     }

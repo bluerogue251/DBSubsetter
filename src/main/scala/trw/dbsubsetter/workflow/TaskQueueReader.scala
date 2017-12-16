@@ -20,7 +20,7 @@ class TaskQueueReader(typeList: Seq[(JDBCType, TypeName)]) {
       case (JDBCType.BINARY | JDBCType.VARBINARY | JDBCType.LONGVARBINARY, _) =>
         (in: ValueIn) => in.bytes()
       case (_, "uuid") =>
-        (in: ValueIn) => val t = in.text(); if (t == null) null else UUID.fromString(t)
+        (in: ValueIn) => UUID.fromString(in.text()) // TODO optimize to use byte[] instead of string
       case other =>
         throw new RuntimeException(s"JDBC Type not yet supported for foreign key column: $other. Please open a GitHub issue for this.")
     }

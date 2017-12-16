@@ -20,10 +20,12 @@ object NewFkTaskWorkflow {
     //
     // `distinct` and `viaTableOpt` only apply for calculating parent tasks, not child tasks.
     // Both of these seem necessary for avoiding always needing to store PKs for all parents
+    //
+    // `filterNot(_ == null)` should also only be necessary for parentTasks
     val allFks = sch.fksFromTable(table)
     val useFks = viaTableOpt.fold(allFks)(viaTable => allFks.filterNot(fk => fk.toTable == viaTable))
     useFks.map { fk =>
-      val distinctFkValues = valuesFunc(fk)(fk, fk.fromCols, rows).distinct
+      val distinctFkValues = valuesFunc(fk)(fk, fk.fromCols, rows).distinct.filterNot(_ == null)
       (fk, false) -> distinctFkValues
     }.toMap
   }
