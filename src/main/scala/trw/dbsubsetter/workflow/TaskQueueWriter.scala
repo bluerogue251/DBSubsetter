@@ -4,9 +4,9 @@ import java.sql.JDBCType
 import java.util.UUID
 
 import net.openhft.chronicle.wire.{ValueOut, WireOut, WriteMarshallable}
-import trw.dbsubsetter.db.TypeName
+import trw.dbsubsetter.db.{DbVendor, TypeName}
 
-class TaskQueueWriter(fkOrdinal: Short, typeList: Seq[(JDBCType, TypeName)]) {
+class TaskQueueWriter(fkOrdinal: Short, typeList: Seq[(JDBCType, TypeName)], dbVendor: DbVendor) {
   def writeHandler(fetchChildren: Boolean, fkValue: Any): WriteMarshallable = {
     wireOut => {
       val out = wireOut.getValueOut
@@ -18,6 +18,8 @@ class TaskQueueWriter(fkOrdinal: Short, typeList: Seq[(JDBCType, TypeName)]) {
 
   private val handlerFunc: (ValueOut, Any) => Unit = {
     val funcs: Seq[(ValueOut, Any) => WireOut] = typeList.map {
+      case (JDBCType.TINYINT | JDBCType.SMALLINT, _) if dbVendor == DbVendor.MicrosoftSQLServer =>
+        (out: ValueOut, fkVal: Any) => out.int16(fkVal.asInstanceOf[Short])
       case (JDBCType.TINYINT | JDBCType.SMALLINT | JDBCType.INTEGER, _) =>
         (out: ValueOut, fkVal: Any) => out.int32(fkVal.asInstanceOf[Int])
       case (JDBCType.BIGINT, _) =>

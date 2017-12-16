@@ -4,13 +4,15 @@ import java.sql.JDBCType
 import java.util.UUID
 
 import net.openhft.chronicle.wire.ValueIn
-import trw.dbsubsetter.db.TypeName
+import trw.dbsubsetter.db.{DbVendor, TypeName}
 
-class TaskQueueReader(typeList: Seq[(JDBCType, TypeName)]) {
+class TaskQueueReader(typeList: Seq[(JDBCType, TypeName)], dbVendor: DbVendor) {
   def read(in: ValueIn): Any = handlerFunc(in)
 
   private val handlerFunc: ValueIn => Any = {
     val funcs: Seq[ValueIn => Any] = typeList.map {
+      case (JDBCType.TINYINT | JDBCType.SMALLINT, _) if dbVendor == DbVendor.MicrosoftSQLServer =>
+        (in: ValueIn) => in.int16()
       case (JDBCType.TINYINT | JDBCType.SMALLINT | JDBCType.INTEGER, _) =>
         (in: ValueIn) => in.int32()
       case (JDBCType.BIGINT, _) =>

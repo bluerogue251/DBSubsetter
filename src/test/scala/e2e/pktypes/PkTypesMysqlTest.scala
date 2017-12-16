@@ -5,6 +5,9 @@ import e2e.AbstractMysqlEndToEndTest
 // Still need to test what happens with MySQL *unsigned* numerical primary keys
 class PkTypesMysqlTest extends AbstractMysqlEndToEndTest with PkTypesTestCases {
   override val originPort = 5570
+
+  override def expectedChar10Ids = Seq[String](" four", "two")
+
   override val programArgs = Array(
     "--schemas", "pk_types",
     "--baseQuery", "pk_types.byte_pks ::: id = -128 ::: includeChildren",
