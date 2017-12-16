@@ -7,11 +7,11 @@ import e2e.AbstractSqlServerEndToEndTest
 class PkTypesSqlServerTest extends AbstractSqlServerEndToEndTest with PkTypesTestCases {
   override val originPort = 5576
 
-  override def expectedByteIds = Seq[Byte](1, 127)
+  override def expectedByteIds = super.expectedByteIds.filterNot(_ == -128)
 
   override def expectedUUIDs: Seq[UUID] = super.expectedUUIDs.reverse
 
-  override def expectedReferencingTableIds: Seq[Int] = super.expectedReferencingTableIds.filterNot(_ == -128)
+  override def expectedReferencingTableIds: Seq[Int] = super.expectedReferencingTableIds.filterNot(_ == 1)
 
   override val programArgs = Array(
     "--schemas", "dbo",
