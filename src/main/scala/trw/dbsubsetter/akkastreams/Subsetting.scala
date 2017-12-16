@@ -21,8 +21,10 @@ object Subsetting {
     val mergeOriginDbRequests = b.add(Merge[OriginDbRequest](3))
     val balanceOriginDb = b.add(Balance[OriginDbRequest](config.originDbParallelism, waitForAllDownstreams = true))
     val mergeOriginDbResults = b.add(Merge[OriginDbResult](config.originDbParallelism))
-    val partitionFkTasks = b.add(Partition[FkTask](2, t => if (FkTaskPreCheck.canPrecheck(t)) 1 else 0))
+    val partitionOriginDbResults = b.add(Partition[OriginDbResult](2, res => if (res.table.storePks) 1 else 0))
+    val partitionFkTasks = b.add(Partition[FkTask](2, t => if (FkTaskPreCheck.shouldPrecheck(t)) 1 else 0))
     val broadcastPkExistResult = b.add(Broadcast[PkResult](2))
+    val mergePksAdded = b.add(Merge[PksAdded](2))
     val broadcastPksAdded = b.add(Broadcast[PksAdded](2))
     val mergeNewTaskRequests = b.add(Merge[PkResult](2))
     val balanceTargetDb = b.add(Balance[PksAdded](config.targetDbParallelism, waitForAllDownstreams = true))
@@ -44,11 +46,19 @@ object Subsetting {
       balanceTargetDb ~> TargetDb.insert(config, schemaInfo).async ~> mergeTargetDbResults
     }
 
-    // DB Results ~> PkStoreAdd ~> NewTasks
-    //                          ~> TargetDbInserts
-    mergeOriginDbResults ~>
-      Flow[OriginDbResult].mapAsync(500)(dbResult => (pkStore ? dbResult).mapTo[PksAdded]) ~>
-      broadcastPksAdded
+    // Origin DB Results ~> PkStoreAdd  ~> |merge| ~> NewTasks
+    //                   ~> SkipPkStore ~> |merge| ~> TargetDbInserts
+    mergeOriginDbResults ~> partitionOriginDbResults
+
+    partitionOriginDbResults.out(0) ~>
+      Flow[OriginDbResult].map(SkipPkStore.process) ~>
+      mergePksAdded
+
+    partitionOriginDbResults.out(1) ~>
+      Flow[OriginDbResult].mapAsyncUnordered(10)(dbResult => (pkStore ? dbResult).mapTo[PksAdded]) ~>
+      mergePksAdded
+
+    mergePksAdded ~> broadcastPksAdded
 
     broadcastPksAdded ~>
       mergeNewTaskRequests ~>
@@ -57,7 +67,7 @@ object Subsetting {
       fkTaskBufferFlow
 
     broadcastPksAdded ~>
-      Flow[PksAdded].buffer(Int.MaxValue, OverflowStrategy.backpressure) ~> // TODO convert buffer to chronicle-queue?
+      Flow[PksAdded].buffer(config.preTargetBufferSize, OverflowStrategy.backpressure) ~>
       balanceTargetDb
 
     // FkTasks ~> cannotBePrechecked       ~>        OriginDbRequest
@@ -70,7 +80,7 @@ object Subsetting {
       mergeOriginDbRequests
 
     partitionFkTasks.out(1) ~>
-      Flow[FkTask].mapAsync(500)(req => (pkStore ? req).mapTo[PkResult]) ~>
+      Flow[FkTask].mapAsyncUnordered(10)(req => (pkStore ? req).mapTo[PkResult]) ~>
       broadcastPkExistResult
 
     broadcastPkExistResult ~>

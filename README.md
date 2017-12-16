@@ -9,7 +9,7 @@ This is useful for local development and testing or for exporting all the data b
 
 ## Project Goals
 
-_High performance_: Optimized to take advantage of parallelism for fast runtimes on large datasets.
+_High performance_: Optimized for fast runtimes on large datasets.
 
 _Deterministic_: Identical inputs yield identical outputs. Random subsets are possible, but only if purposely configured.
 
@@ -54,8 +54,13 @@ $ java -jar /path/to/DBSubsetter.jar \
 ## Resource consumption
 
 Memory usage will be proportional to the sum of:
- * The size of all the primary keys in the target database
- * The size of the outstanding queue of rows needing to be inserted into the target database
+
+* The size of all primary keys in the target database. (But depending on your 
+  schema structure, you may be able to use the `--skipPkStore` option to
+  configure DBSubsetter to use just a small fraction of that amount.)
+* The size of the outstanding queue of rows needing to be inserted into the target database.
+  This is configurable with the `--preTargetBufferSize` option.
+* The in-memory size of your largest single query result multiplied by (`--originDbParallelism` + `--targetDbParallelism`)
 
 Disk usage (in tempfiles) will be proportional to the size of all foreign keys in the target database.
 

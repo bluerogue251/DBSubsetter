@@ -137,6 +137,50 @@ object CommandLineParser {
           |                           Can be specified multiple times
           |""".stripMargin)
 
+    opt[String]("excludeTable")
+      .valueName("<schema>.<table>")
+      .maxOccurs(Int.MaxValue)
+      .action { (str, c) =>
+        val regex = """^\s*(.+)\.(.+)\s*$""".r
+        str match {
+          case regex(schema, table) =>
+            c.copy(excludeTables = c.excludeTables ++ Set((schema, table)))
+          case _ => throw new RuntimeException
+        }
+      }
+      .text(
+        """Exclude a table from the resulting subset
+          |                           Also ignore all foreign keys to and from this table
+          |                           Can be specified multiple times
+          |""".stripMargin)
+
+    opt[String]("skipPkStore")
+      .valueName("<schema>.<table>")
+      .maxOccurs(Int.MaxValue)
+      .action { (str, c) =>
+        val regex = """^\s*(.+)\.(.+)\s*$""".r
+        str match {
+          case regex(schema, table) => c.copy(skipPkStore = c.skipPkStore ++ Set((schema, table)))
+          case _ => throw new RuntimeException()
+        }
+      }.text(
+      """Skip runtime in-memory storage for a table's primary keys
+        |                           For large tables, this can significantly reduce DBSubsetter's memory footprint.
+        |                           Right now, this is not well documented, and involves understanding how DBSubsetter
+        |                           works and knowing that a given table's rows will all only be processed once.
+        |                           Feel free to open a GitHub ticket to ask for more information about this.
+        |                           A future release of DBSubsetter will hopefully automate this step.
+        |                           Can be specified multiple times
+        |""".stripMargin)
+
+    opt[Int]("preTargetBufferSize")
+      .action((int, c) => c.copy(preTargetBufferSize = int))
+      .text(
+        """Buffer up to this many target database insert statements in memory if the target database is not yet ready for them
+          |                           This can sometimes improve performance at the cost of increased RAM usage
+          |                           The default buffer size is 100
+          |""".stripMargin)
+
     opt[Unit]("singleThreadedDebugMode")
       .action((_, c) => c.copy(isSingleThreadedDebugMode = true))
       .text(

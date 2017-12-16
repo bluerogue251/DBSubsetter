@@ -6,6 +6,8 @@ class MixedCaseMysqlTest extends AbstractMysqlEndToEndTest with MixedCaseTestCas
   override val originPort = 5530
   override val programArgs = Array(
     "--schemas", "mIXED_case_DB",
-    "--baseQuery", "mIXED_case_DB.mixed_CASE_table_1 ::: `ID` = 2 ::: includeChildren"
+    "--baseQuery", "mIXED_case_DB.mixed_CASE_table_1 ::: `ID` = 2 ::: includeChildren",
+    "--skipPkStore", "mIXED_case_DB.mixed_CASE_table_1",
+    "--skipPkStore", "mIXED_case_DB.mixed_CASE_table_2"
   )
 }
