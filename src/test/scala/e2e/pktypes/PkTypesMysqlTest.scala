@@ -2,7 +2,6 @@ package e2e.pktypes
 
 import e2e.AbstractMysqlEndToEndTest
 
-// Still need to test what happens with MySQL *unsigned* numerical primary keys
 class PkTypesMysqlTest extends AbstractMysqlEndToEndTest with PkTypesTestCases {
   override val originPort = 5570
 
