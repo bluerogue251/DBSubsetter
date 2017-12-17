@@ -31,9 +31,10 @@ class PgDataTypesPostgresqlTest extends AbstractPostgresqlEndToEndTest {
     "--excludeColumns", "public.bit_string_table(bit_1, bit_5)"
   )
 
-  test("No error was thrown during subsetting") {
+  test("No error was thrown during subsetting -- TODO write some real tests") {
     // Do nothing, just make sure an exception wasn't thrown
     assert(1 === 1)
+    pending
   }
 
   override protected def setupDDL(): Unit = {
