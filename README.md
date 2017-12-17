@@ -87,7 +87,7 @@ Other related resources include
 
 DBSubsetter is written in [Scala](https://www.scala-lang.org/) using
 [Akka Streams](https://doc.akka.io/docs/akka/2.5.8/stream/index.html?language=scala),
-[Chronicle-Queue](https://github.com/OpenHFT/Chronicle-Queue),
+[Chronicle-Queue](https://github.com/OpenHFT/Chronicle-Queue), and
 [scopt](https://github.com/scopt/scopt).
 [Slick](http://slick.lightbend.com/) is used for testing.
 
