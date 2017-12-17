@@ -20,7 +20,7 @@ class MySqlDataTypesMySqlTest extends AbstractMysqlEndToEndTest {
     "--baseQuery", "mysql_data_types.ints_unsigned ::: id in (4294967295) ::: includeChildren",
     "--baseQuery", "mysql_data_types.bigints_signed ::: id in (9223372036854775807) ::: includeChildren",
     "--baseQuery", "mysql_data_types.bigints_unsigned ::: id in (18446744073709551615) ::: includeChildren",
-    "--baseQuery", "mysql_data_types.referencing_table ::: id in (1, 2, 6) ::: includeChildren"
+    "--baseQuery", "mysql_data_types.referencing_table ::: id in (1, 2, 6, 8, 12, 14, 18, 20, 24, 26, 30) ::: includeChildren"
   )
 
   // Do nothing, just make sure an exception wasn't thrown
