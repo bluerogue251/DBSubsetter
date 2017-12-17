@@ -35,10 +35,10 @@ class MySqlDataTypesMySqlTest extends AbstractMysqlEndToEndTest {
   }
 
   override protected def setupDDL(): Unit = {
-    s"./src/test/scala/e2e/mysqldatatypes/load_ddl.sh $originPort $dataSetName".!
+    s"./src/test/scala/e2e/mysqldatatypes/load_ddl.sh $originPort $dataSetName".!!
   }
 
   override protected def setupDML(): Unit = {
-    s"./src/test/scala/e2e/mysqldatatypes/load_dml.sh $originPort $dataSetName".!
+    s"./src/test/scala/e2e/mysqldatatypes/load_dml.sh $originPort $dataSetName".!!
   }
 }

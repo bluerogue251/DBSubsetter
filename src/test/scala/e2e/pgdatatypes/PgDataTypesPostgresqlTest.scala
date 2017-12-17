@@ -32,8 +32,6 @@ class PgDataTypesPostgresqlTest extends AbstractPostgresqlEndToEndTest {
   )
 
   test("No error was thrown during subsetting -- TODO write some real tests") {
-    // Do nothing, just make sure an exception wasn't thrown
-    assert(1 === 1)
     pending
   }
 
