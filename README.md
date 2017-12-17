@@ -74,7 +74,7 @@ The only condition for contributing to this project is to follow our [code of co
 
 ## Related projects
 
-DBSubsetter was inspired by and borrowed ideas from
+DBSubsetter was inspired by
 [Jailer](http://jailer.sourceforge.net/home.htm) and
 [rdbms-subsetter](https://github.com/18F/rdbms-subsetter).
 Other related resources include
