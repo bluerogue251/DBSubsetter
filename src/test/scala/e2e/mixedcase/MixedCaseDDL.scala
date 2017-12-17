@@ -4,7 +4,6 @@ trait MixedCaseDDL {
   val profile: slick.jdbc.JdbcProfile
 
   import profile.api._
-  import slick.model.ForeignKeyAction
 
   lazy val schema: profile.SchemaDescription = MixedCaseTable1.schema ++ MixedCaseTable2.schema
 
@@ -31,7 +30,7 @@ trait MixedCaseDDL {
 
     val id: Rep[Int] = column[Int]("iD", O.PrimaryKey)
     val mixedCaseTable1Id: Rep[Int] = column[Int]("mixed_case_TABLE_1_id")
-    lazy val selfReferencingTableFk = foreignKey("fkey", mixedCaseTable1Id, MixedCaseTable1)(_.id, onUpdate = ForeignKeyAction.NoAction, onDelete = ForeignKeyAction.NoAction)
+    lazy val selfReferencingTableFk = foreignKey("fkey", mixedCaseTable1Id, MixedCaseTable1)(_.id)
   }
 
   lazy val MixedCaseTable2 = new TableQuery(tag => new MixedCaseTable2(tag))

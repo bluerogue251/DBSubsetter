@@ -17,7 +17,8 @@ package object db {
                         pkOrdinalsByTable: Map[Table, Vector[Int]],
                         fksOrdered: Array[ForeignKey],
                         fksFromTable: Map[Table, Vector[ForeignKey]],
-                        fksToTable: Map[Table, Vector[ForeignKey]])
+                        fksToTable: Map[Table, Vector[ForeignKey]],
+                        dbVendor: DbVendor)
 
   case class Table(schema: SchemaName, name: TableName, hasSqlServerAutoIncrement: Boolean, storePks: Boolean)
 
@@ -31,10 +32,16 @@ package object db {
   }
 
   implicit class VendorAwareJdbcConnection(conn: Connection) {
-    private val vendor: String = conn.getMetaData.getDatabaseProductName
+    private val vendorName: String = conn.getMetaData.getDatabaseProductName
 
-    def isMysql: Boolean = vendor == "MySQL"
+    val dbVendor: DbVendor = vendorName match {
+      case "Microsoft SQL Server" => DbVendor.MicrosoftSQLServer
+      case "MySQL" => DbVendor.MySQL
+      case "PostgreSQL" => DbVendor.PostgreSQL
+    }
 
-    def isMsSqlServer: Boolean = vendor == "Microsoft SQL Server"
+    def isMysql: Boolean = dbVendor == DbVendor.MySQL
+
+    def isMsSqlServer: Boolean = dbVendor == DbVendor.MicrosoftSQLServer
   }
 }

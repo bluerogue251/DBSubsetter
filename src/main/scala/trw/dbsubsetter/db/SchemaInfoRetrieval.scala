@@ -87,6 +87,7 @@ object SchemaInfoRetrieval {
       }
     }
 
+    val dbVendor = conn.dbVendor
     conn.close()
 
     config.cmdLinePrimaryKeys.foreach { clpk =>
@@ -179,7 +180,8 @@ object SchemaInfoRetrieval {
       pkColumnOrdinalsByTable,
       foreignKeysOrdered,
       fksFromTable,
-      fksToTable
+      fksToTable,
+      dbVendor
     )
   }
 

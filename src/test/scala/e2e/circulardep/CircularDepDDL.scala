@@ -4,7 +4,6 @@ trait CircularDepDDL {
   val profile: slick.jdbc.JdbcProfile
 
   import profile.api._
-  import slick.model.ForeignKeyAction
 
   lazy val schema: profile.SchemaDescription = Grandparents.schema ++ Parents.schema ++ Children.schema
 
@@ -18,7 +17,7 @@ trait CircularDepDDL {
 
     val id: Rep[Int] = column[Int]("id", O.PrimaryKey)
     val favoriteParentId: Rep[Option[Int]] = column[Option[Int]]("favorite_parent_id", O.Default(None))
-    lazy val parentsFk = foreignKey("grandparents_favorite_parent_id_fkey", favoriteParentId, Parents)(r => Rep.Some(r.id), onUpdate = ForeignKeyAction.NoAction, onDelete = ForeignKeyAction.NoAction)
+    lazy val parentsFk = foreignKey("grandparents_favorite_parent_id_fkey", favoriteParentId, Parents)(r => Rep.Some(r.id))
     val index1 = index("grandparents_points_to_parents_idx", favoriteParentId)
   }
 
@@ -34,7 +33,7 @@ trait CircularDepDDL {
 
     val id: Rep[Int] = column[Int]("id", O.PrimaryKey)
     val grandparentId: Rep[Int] = column[Int]("grandparent_id")
-    lazy val grandparentsFk = foreignKey("parents_grandparent_id_fkey", grandparentId, Grandparents)(r => r.id, onUpdate = ForeignKeyAction.NoAction, onDelete = ForeignKeyAction.NoAction)
+    lazy val grandparentsFk = foreignKey("parents_grandparent_id_fkey", grandparentId, Grandparents)(r => r.id)
     val index1 = index("parents_points_to_grandparents_idx", grandparentId)
   }
 
@@ -50,7 +49,7 @@ trait CircularDepDDL {
 
     val id: Rep[Int] = column[Int]("id", O.PrimaryKey)
     val parentId: Rep[Int] = column[Int]("parent_id")
-    lazy val parentsFk = foreignKey("children_parent_id_fkey", parentId, Parents)(r => r.id, onUpdate = ForeignKeyAction.NoAction, onDelete = ForeignKeyAction.NoAction)
+    lazy val parentsFk = foreignKey("children_parent_id_fkey", parentId, Parents)(r => r.id)
     val index1 = index("children_points_to_parents_idx", parentId)
   }
 

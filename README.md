@@ -53,14 +53,13 @@ $ java -jar /path/to/DBSubsetter.jar \
 
 ## Resource consumption
 
-Memory usage will be proportional to the sum of:
+Memory usage in the worst case will be proportional to the sum of:
 
 * The size of all primary keys in the target database. (But depending on your 
   schema structure, you may be able to use the `--skipPkStore` option to
   configure DBSubsetter to use just a small fraction of that amount.)
-* The size of the outstanding queue of rows needing to be inserted into the target database.
-  This is configurable with the `--preTargetBufferSize` option.
-* The in-memory size of your largest single query result multiplied by (`--originDbParallelism` + `--targetDbParallelism`)
+* The size of your largest single query result multiplied by 
+  (`--originDbParallelism` + `--targetDbParallelism` + `--preTargetBufferSize`)
 
 Disk usage (in tempfiles) will be proportional to the size of all foreign keys in the target database.
 
