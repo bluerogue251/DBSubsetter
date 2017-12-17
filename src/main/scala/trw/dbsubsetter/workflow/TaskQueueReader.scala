@@ -10,22 +10,26 @@ class TaskQueueReader(typeList: Seq[(JDBCType, TypeName)], dbVendor: DbVendor) {
   def read(in: ValueIn): Any = handlerFunc(in)
 
   private val handlerFunc: ValueIn => Any = {
-    val funcs: Seq[ValueIn => Any] = typeList.map {
-      case (JDBCType.TINYINT | JDBCType.SMALLINT, _) if dbVendor == DbVendor.MicrosoftSQLServer =>
+    import DbVendor._
+
+    val typeListWithVendors = typeList.map { case (jdbc, name) => (jdbc, name, dbVendor) }
+
+    val funcs: Seq[ValueIn => Any] = typeListWithVendors.map {
+      case (JDBCType.TINYINT | JDBCType.SMALLINT, _, MicrosoftSQLServer) =>
         (in: ValueIn) => in.int16()
-      case (JDBCType.INTEGER, "INT UNSIGNED") if dbVendor == DbVendor.MySQL =>
+      case (JDBCType.INTEGER, "INT UNSIGNED", MySQL) =>
         (in: ValueIn) => in.int64()
-      case (JDBCType.TINYINT | JDBCType.SMALLINT | JDBCType.INTEGER, _) =>
+      case (JDBCType.TINYINT | JDBCType.SMALLINT | JDBCType.INTEGER, _, _) =>
         (in: ValueIn) => in.int32()
-      case (JDBCType.BIGINT, "BIGINT UNSIGNED") if dbVendor == DbVendor.MySQL =>
+      case (JDBCType.BIGINT, "BIGINT UNSIGNED", MySQL) =>
         (in: ValueIn) => in.`object`()
-      case (JDBCType.BIGINT, _) =>
+      case (JDBCType.BIGINT, _, _) =>
         (in: ValueIn) => in.int64()
-      case (JDBCType.VARCHAR | JDBCType.CHAR | JDBCType.LONGVARCHAR | JDBCType.NCHAR, _) =>
+      case (JDBCType.VARCHAR | JDBCType.CHAR | JDBCType.LONGVARCHAR | JDBCType.NCHAR, _, _) =>
         (in: ValueIn) => in.text()
-      case (JDBCType.BINARY | JDBCType.VARBINARY | JDBCType.LONGVARBINARY, _) =>
+      case (JDBCType.BINARY | JDBCType.VARBINARY | JDBCType.LONGVARBINARY, _, _) =>
         (in: ValueIn) => in.bytes()
-      case (_, "uuid") =>
+      case (_, "uuid", PostgreSQL) =>
         (in: ValueIn) => UUID.fromString(in.text()) // TODO optimize to use byte[] instead of string
       case other =>
         throw new RuntimeException(s"JDBC Type not yet supported for foreign key column: $other. Please open a GitHub issue for this.")
