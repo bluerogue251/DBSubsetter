@@ -101,7 +101,7 @@ object CommandLineParser {
 
     opt[String]("primaryKey")
       .maxOccurs(Int.MaxValue)
-      .valueName("<schema1>.<table1>(<column1>, <column2>, ...)")
+      .valueName("<schema>.<table>(<column1>, <column2>, ...)")
       .action { case (fk, c) =>
         val regex = """^\s*(.+)\.(.+)\((.+)\)\s*$""".r
         fk match {
@@ -113,6 +113,23 @@ object CommandLineParser {
       }
       .text(
         """Primary key to recognize during subsetting even though it is not defined in the database
+          |                           Can be specified multiple times
+          |""".stripMargin)
+
+    opt[String]("excludeTable")
+      .valueName("<schema>.<table>")
+      .maxOccurs(Int.MaxValue)
+      .action { (str, c) =>
+        val regex = """^\s*(.+)\.(.+)\s*$""".r
+        str match {
+          case regex(schema, table) =>
+            c.copy(excludeTables = c.excludeTables ++ Set((schema, table)))
+          case _ => throw new RuntimeException
+        }
+      }
+      .text(
+        """Exclude a table from the resulting subset
+          |                           Also ignore all foreign keys to and from this table
           |                           Can be specified multiple times
           |""".stripMargin)
 
@@ -137,23 +154,6 @@ object CommandLineParser {
           |                           Can be specified multiple times
           |""".stripMargin)
 
-    opt[String]("excludeTable")
-      .valueName("<schema>.<table>")
-      .maxOccurs(Int.MaxValue)
-      .action { (str, c) =>
-        val regex = """^\s*(.+)\.(.+)\s*$""".r
-        str match {
-          case regex(schema, table) =>
-            c.copy(excludeTables = c.excludeTables ++ Set((schema, table)))
-          case _ => throw new RuntimeException
-        }
-      }
-      .text(
-        """Exclude a table from the resulting subset
-          |                           Also ignore all foreign keys to and from this table
-          |                           Can be specified multiple times
-          |""".stripMargin)
-
     opt[String]("skipPkStore")
       .valueName("<schema>.<table>")
       .maxOccurs(Int.MaxValue)
@@ -166,18 +166,19 @@ object CommandLineParser {
       }.text(
       """Skip runtime in-memory storage for a table's primary keys
         |                           For large tables, this can significantly reduce DBSubsetter's memory footprint.
-        |                           Right now, this is not well documented, and involves understanding how DBSubsetter
+        |                           This currently is not well documented. It involves understanding how DBSubsetter
         |                           works and knowing that a given table's rows will all only be processed once.
         |                           Feel free to open a GitHub ticket to ask for more information about this.
-        |                           A future release of DBSubsetter will hopefully automate this step.
+        |                           A future release of DBSubsetter will hopefully automate this.
         |                           Can be specified multiple times
         |""".stripMargin)
 
     opt[Int]("preTargetBufferSize")
+      .valueName("<int>")
       .action((int, c) => c.copy(preTargetBufferSize = int))
       .text(
-        """Buffer up to this many target database insert statements in memory if the target database is not yet ready for them
-          |                           This can sometimes improve performance at the cost of increased RAM usage
+        """Buffer up to this many target database insert statements in memory
+          |                           This can sometimes improve performance at the cost of an increased memory footprint
           |                           The default buffer size is 100
           |""".stripMargin)
 
@@ -185,7 +186,8 @@ object CommandLineParser {
       .action((_, c) => c.copy(isSingleThreadedDebugMode = true))
       .text(
         """Run DBSubsetter in debug mode (NOT recommended)
-          |                           Uses a simplified architecture which avoids akka-streams and parallel computations
+          |                           Uses a simplified, single-threaded architecture
+          |                           Avoids using Akka Streams and Chronicle-Queue
           |                           Ignores `--originDbParallelism` and `--targetDbParallelism` and uses one connection per database
           |                           Subsetting may be significantly slower
           |                           The resulting subset should be exactly the same as in regular mode
