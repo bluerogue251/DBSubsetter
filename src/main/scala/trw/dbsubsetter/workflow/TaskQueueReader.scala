@@ -21,8 +21,8 @@ class TaskQueueReader(typeList: Seq[(JDBCType, TypeName)], dbVendor: DbVendor) {
         (in: ValueIn) => in.int64()
       case (JDBCType.TINYINT | JDBCType.SMALLINT | JDBCType.INTEGER, _, _) =>
         (in: ValueIn) => in.int32()
-      case (JDBCType.BIGINT, "BIGINT UNSIGNED", MySQL) =>
-        (in: ValueIn) => in.`object`()
+      //      case (JDBCType.BIGINT, "BIGINT UNSIGNED", MySQL) =>
+      //        (in: ValueIn) => in.`object`()
       case (JDBCType.BIGINT, _, _) =>
         (in: ValueIn) => in.int64()
       case (JDBCType.VARCHAR | JDBCType.CHAR | JDBCType.LONGVARCHAR | JDBCType.NCHAR, _, _) =>

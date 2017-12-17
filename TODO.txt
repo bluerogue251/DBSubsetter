@@ -1,6 +1,3 @@
-* Test SQL Server TinyInt values up to 255
-* Test MySQL Unsigned Int values up to double Int.MAX_VALUE
-
 * RELEASE v1.0.0.beta.3
 
 * Automatic `--skipPkStore` option
