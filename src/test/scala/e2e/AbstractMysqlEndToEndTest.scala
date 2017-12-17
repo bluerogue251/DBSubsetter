@@ -36,7 +36,7 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest {
 
   override protected def afterAll(): Unit = {
     super.afterAll()
-    //    removeDockerContainer(targetSithContainerName)
-    //    removeDockerContainer(targetAkstContainerName)
+    removeDockerContainer(targetSithContainerName)
+    removeDockerContainer(targetAkstContainerName)
   }
 }
