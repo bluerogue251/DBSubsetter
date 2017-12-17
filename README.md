@@ -31,7 +31,7 @@ Feel free to open a GitHub ticket if you would like support for a different data
 
 ```bash
 # Download the DBSubsetter.jar file
-$ wget https://github.com/bluerogue251/DBSubsetter/releases/download/v1.0.0-beta.2/DBSubsetter.jar --output-document /path/to/DBSubsetter.jar
+$ wget https://github.com/bluerogue251/DBSubsetter/releases/download/v1.0.0-beta.3/DBSubsetter.jar --output-document /path/to/DBSubsetter.jar
  
 # Show explanation and examples of how to configure multiple schemas, 
 # multiple base queries, missing foreign or primary keys, columns to exclude,
@@ -72,28 +72,24 @@ Whether it is to fix a typo, improve the documentation, report or fix a bug, add
 The only condition for contributing to this project is to follow our [code of conduct](CODE_OF_CONDUCT.md) so that everyone is treated with respect.
 
 
-## Related projects and acknowledgments
+## Related projects
 
-DBSubsetter was inspired by and borrowed ideas from:
+DBSubsetter was inspired by
+[Jailer](http://jailer.sourceforge.net/home.htm) and
+[rdbms-subsetter](https://github.com/18F/rdbms-subsetter).
+Other related resources include
+[db_subsetter](https://github.com/lostapathy/db_subsetter), 
+[DataBee](https://www.databee.com/),
+[pg_sample](https://github.com/mla/pg_sample),
+[DATPROF](http://www.datprof.com/products/datprof-subset/),
+[abridger](https://github.com/freewilll/abridger), and
+[postgres-subset](https://github.com/BeautifulDestinations/postgres-subset).
 
-* [Jailer](http://jailer.sourceforge.net/home.htm)
-* [rdbms-subsetter](https://github.com/18F/rdbms-subsetter)
-
-Here are some other similar or related resources:
-
-* [db_subsetter](https://github.com/lostapathy/db_subsetter)
-* [DataBee](https://www.databee.com/)
-* [pg_sample](https://github.com/mla/pg_sample)
-* [DATPROF](http://www.datprof.com/products/datprof-subset/)
-* [abridger](https://github.com/freewilll/abridger)
-* [postgres-subset](https://github.com/BeautifulDestinations/postgres-subset)
-
-DBSubsetter is written in [Scala](https://www.scala-lang.org/) using:
-
-* [Akka Streams](https://doc.akka.io/docs/akka/2.5.8/stream/index.html?language=scala)
-* [Chronicle-Queue](https://github.com/OpenHFT/Chronicle-Queue)
-* [scopt](https://github.com/scopt/scopt)
-* [Slick](http://slick.lightbend.com/)
+DBSubsetter is written in [Scala](https://www.scala-lang.org/) using
+[Akka Streams](https://doc.akka.io/docs/akka/2.5.8/stream/index.html?language=scala),
+[Chronicle-Queue](https://github.com/OpenHFT/Chronicle-Queue), and
+[scopt](https://github.com/scopt/scopt).
+[Slick](http://slick.lightbend.com/) is used for testing.
 
 ## License
 
