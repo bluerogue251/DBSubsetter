@@ -23,10 +23,15 @@ class MySqlDataTypesMySqlTest extends AbstractMysqlEndToEndTest {
     "--baseQuery", "mysql_data_types.referencing_table ::: id in (1, 2, 6, 8, 12, 14, 18, 20, 24, 26, 30) ::: includeChildren"
   )
 
-  // Do nothing, just make sure an exception wasn't thrown
   test("No error was thrown during subsetting -- TODO write some real tests here") {
-    assert(1 === 1)
     pending
+  }
+
+  // TODO check list of ids so future developers can more easily see which IDs we expect
+  test("referencing_table contained correct rows") {
+    import profile.api._
+    val sql = sql"checksum TABLE mysql_data_types.referencing_table EXTENDED".as[(String, String)]
+    assertResult(sql, Seq(("mysql_data_types.referencing_table", "1211714113")))
   }
 
   override protected def setupDDL(): Unit = {

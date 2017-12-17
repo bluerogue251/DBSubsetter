@@ -31,8 +31,8 @@ class TaskQueueReader(typeList: Seq[(JDBCType, TypeName)], dbVendor: DbVendor) {
         (in: ValueIn) => in.bytes()
       case (_, "uuid", PostgreSQL) =>
         (in: ValueIn) => UUID.fromString(in.text()) // TODO optimize to use byte[] instead of string
-      case other =>
-        throw new RuntimeException(s"JDBC Type not yet supported for foreign key column: $other. Please open a GitHub issue for this.")
+      case (otherJDBCType, otherTypeName, _) =>
+        throw new RuntimeException(s"Type not yet supported for foreign key. JDBC Type: $otherJDBCType. Type Name: $otherTypeName. Please open a GitHub issue for this.")
     }
 
     val headFunc: ValueIn => Any = funcs.head
