@@ -78,7 +78,7 @@ DBSubsetter was inspired by and borrowed ideas from
 [Jailer](http://jailer.sourceforge.net/home.htm) and
 [rdbms-subsetter](https://github.com/18F/rdbms-subsetter).
 
-Here are some other similar or related resources:
+Other related resources include
 [db_subsetter](https://github.com/lostapathy/db_subsetter), 
 [DataBee](https://www.databee.com/),
 [pg_sample](https://github.com/mla/pg_sample),
