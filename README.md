@@ -72,7 +72,7 @@ Whether it is to fix a typo, improve the documentation, report or fix a bug, add
 The only condition for contributing to this project is to follow our [code of conduct](CODE_OF_CONDUCT.md) so that everyone is treated with respect.
 
 
-## Related projects and acknowledgments
+## Related projects
 
 DBSubsetter was inspired by and borrowed ideas from
 [Jailer](http://jailer.sourceforge.net/home.htm) and
