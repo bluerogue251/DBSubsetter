@@ -19,3 +19,4 @@ Nice-to-Haves for later
 * Consider if it's possible to limit memory usage with small-batch `selects` from origin DB
 * Delete ChronicleQueue files as they are consumed
 * Delete all outstanding ChronicleQueue files and ChronicleMap files after subsetting
+* CLI option to disable ChronicleQueue and use in-memory FkTask queue instead
