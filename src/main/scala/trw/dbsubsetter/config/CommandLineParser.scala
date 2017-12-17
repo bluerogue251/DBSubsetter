@@ -10,7 +10,7 @@ object CommandLineParser {
     version("version").text("Prints the application version\n")
 
     opt[Seq[String]]("schemas")
-      .valueName("<schema1>, <schema2>, <schema3>, ...")
+      .valueName("<schema1>,<schema2>,<schema3>, ...")
       .action((s, c) => c.copy(schemas = s.map(_.trim)))
       .required()
       .text("Names of the schemas to include when subsetting\n")

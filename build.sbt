@@ -19,6 +19,9 @@ libraryDependencies ++= Seq(
   // Off-heap data structures
   "net.openhft" % "chronicle-queue" % "4.6.57",
 
+  // No-op logger to silence slf4j warnings
+  "org.slf4j" % "slf4j-nop" % "1.7.25",
+
   // For testing only
   "org.scalatest" %% "scalatest" % "3.0.4" % "test",
   "com.typesafe.slick" %% "slick" % "3.2.1" % "test",

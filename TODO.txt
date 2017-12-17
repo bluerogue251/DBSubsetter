@@ -1,3 +1,5 @@
+* Configurable Chronicle-Queue storage directory
+
 * Automatic `--skipPkStore` option
   - Including case where a unique index means we might _not_ have to store PKs for a table
   - Include config option to print out which tables' PKs will be stored
