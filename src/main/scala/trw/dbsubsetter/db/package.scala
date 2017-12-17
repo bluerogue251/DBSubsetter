@@ -42,6 +42,6 @@ package object db {
 
     def isMysql: Boolean = dbVendor == DbVendor.MySQL
 
-    def isMsSqlServer: Boolean = dbVendor == DbVendor.MySQL
+    def isMsSqlServer: Boolean = dbVendor == DbVendor.MicrosoftSQLServer
   }
 }
