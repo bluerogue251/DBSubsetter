@@ -13,8 +13,12 @@ class TaskQueueReader(typeList: Seq[(JDBCType, TypeName)], dbVendor: DbVendor) {
     val funcs: Seq[ValueIn => Any] = typeList.map {
       case (JDBCType.TINYINT | JDBCType.SMALLINT, _) if dbVendor == DbVendor.MicrosoftSQLServer =>
         (in: ValueIn) => in.int16()
+      case (JDBCType.INTEGER, "INT UNSIGNED") if dbVendor == DbVendor.MySQL =>
+        (in: ValueIn) => in.int64()
       case (JDBCType.TINYINT | JDBCType.SMALLINT | JDBCType.INTEGER, _) =>
         (in: ValueIn) => in.int32()
+      case (JDBCType.BIGINT, "BIGINT UNSIGNED") if dbVendor == DbVendor.MySQL =>
+        (in: ValueIn) => in.`object`()
       case (JDBCType.BIGINT, _) =>
         (in: ValueIn) => in.int64()
       case (JDBCType.VARCHAR | JDBCType.CHAR | JDBCType.LONGVARCHAR | JDBCType.NCHAR, _) =>

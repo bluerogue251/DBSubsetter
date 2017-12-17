@@ -1,5 +1,6 @@
 package trw.dbsubsetter.workflow
 
+import java.math.BigInteger
 import java.sql.JDBCType
 import java.util.UUID
 
@@ -20,8 +21,12 @@ class TaskQueueWriter(fkOrdinal: Short, typeList: Seq[(JDBCType, TypeName)], dbV
     val funcs: Seq[(ValueOut, Any) => WireOut] = typeList.map {
       case (JDBCType.TINYINT | JDBCType.SMALLINT, _) if dbVendor == DbVendor.MicrosoftSQLServer =>
         (out: ValueOut, fkVal: Any) => out.int16(fkVal.asInstanceOf[Short])
+      case (JDBCType.INTEGER, "INT UNSIGNED") if dbVendor == DbVendor.MySQL =>
+        (out: ValueOut, fkVal: Any) => out.int64(fkVal.asInstanceOf[Long])
       case (JDBCType.TINYINT | JDBCType.SMALLINT | JDBCType.INTEGER, _) =>
         (out: ValueOut, fkVal: Any) => out.int32(fkVal.asInstanceOf[Int])
+      case (JDBCType.BIGINT, "BIGINT UNSIGNED") if dbVendor == DbVendor.MySQL =>
+        (out: ValueOut, fkVal: Any) => out.`object`(fkVal.asInstanceOf[BigInteger])
       case (JDBCType.BIGINT, _) =>
         (out: ValueOut, fkVal: Any) => out.int64(fkVal.asInstanceOf[Long])
       case (JDBCType.CHAR | JDBCType.VARCHAR | JDBCType.LONGVARCHAR | JDBCType.NCHAR, _) =>
