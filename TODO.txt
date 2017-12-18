@@ -2,6 +2,8 @@
 
 * Try one chronicle-queue flow *per Fk* without always checking nearly-always-empty queues
 
+* Clean up schema retrieval, etc. so someone else could work on auto --skipPkStore
+
 * Automatic `--skipPkStore` option
   - Including case where a unique index means we might _not_ have to store PKs for a table
   - Include config option to print out which tables' PKs will be stored
@@ -9,6 +11,7 @@
 * RELEASE v1.0.0
 
 * Make a YouTube tutorial
+* Investigate grouping origin DB Selects and Target DB inserts for performance improvements
 * Investigate Bulk Copy API for faster target DB inserts
 
 Nice-to-Haves for later
