@@ -46,6 +46,8 @@ object DbMetadataQueries {
         val columnName = colsJdbcResultSet.getString("COLUMN_NAME")
         val jdbcType = JDBCType.valueOf(colsJdbcResultSet.getInt("DATA_TYPE"))
         val typeName = colsJdbcResultSet.getString("TYPE_NAME")
+        // If trying to generalize autoincrement across vendors, check if "YES" is what other vendors use
+        // Or if it's something else like "y", "1", "true" etc.
         val isSqlServerAutoIncrement = conn.isMsSqlServer && colsJdbcResultSet.getString("IS_AUTOINCREMENT") == "YES"
 
         if (!config.excludeColumns((table.schema, table.name)).contains(columnName)) {

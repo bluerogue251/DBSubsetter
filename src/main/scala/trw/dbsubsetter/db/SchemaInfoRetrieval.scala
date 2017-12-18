@@ -6,7 +6,7 @@ import trw.dbsubsetter.config.Config
 
 object SchemaInfoRetrieval {
   def getSchemaInfo(config: Config): SchemaInfo = {
-    val DbMetadataQueryResult(tables, columns, pks, fks, dbVendor) = DbMetadataQueries.queryDb(config)
+    val DbMetadataQueryResult(tables, columns, primaryKeys, foreignKeys, dbVendor) = DbMetadataQueries.queryDb(config)
 
     val tablesByName = tables.map { t =>
       val hasSqlServerAutoincrement = columns.exists(c => c.schema == t.schema && c.table == t.name && c.isSqlServerAutoincrement)
@@ -17,8 +17,8 @@ object SchemaInfoRetrieval {
     val colsByTableAndName: Map[Table, Map[ColumnName, Column]] = {
       columns
         .groupBy(c => tablesByName(c.schema, c.table))
-        .map { case (table, partialColumns) =>
-          table -> partialColumns.zipWithIndex.map { case (pc, i) => pc.name -> Column(table, pc.name, i, pc.jdbcType, pc.typeName) }.toMap
+        .map { case (table, cols) =>
+          table -> cols.zipWithIndex.map { case (c, i) => c.name -> Column(table, c.name, i, c.jdbcType, c.typeName) }.toMap
         }
     }
 
@@ -27,15 +27,15 @@ object SchemaInfoRetrieval {
     }
 
     val pkOrdinalsByTable: Map[Table, Vector[Int]] = {
-      pks
+      primaryKeys
         .groupBy(pk => tablesByName(pk.schema, pk.table))
-        .map { case (table, partialPks) =>
-          table -> partialPks.map(ppk => colsByTableAndName(table)(ppk.column)).map(_.ordinalPosition).sorted
+        .map { case (table, pks) =>
+          table -> pks.map(p => colsByTableAndName(table)(p.column)).map(_.ordinalPosition).sorted
         }
     }
 
     val foreignKeysOrdered: Array[ForeignKey] = {
-      val fksUnordered = fks
+      val fksUnordered = foreignKeys
         .groupBy(fkm => (fkm.fromSchema, fkm.fromTable, fkm.toSchema, fkm.toTable))
         .map { case ((fromSchemaName, fromTableName, toSchemaName, toTableName), partialForeignKeys) =>
           val fromTable = tablesByName(fromSchemaName, fromTableName)
