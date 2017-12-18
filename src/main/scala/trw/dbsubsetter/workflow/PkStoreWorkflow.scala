@@ -6,7 +6,7 @@ import scala.collection.mutable
 
 
 class PkStoreWorkflow(pkOrdinalsByTable: Map[Table, Seq[Int]]) {
-  private val tables = pkOrdinalsByTable.keys
+  private val tables = pkOrdinalsByTable.keys.filter(_.storePks)
   // Left side of the tuple is for parents, right side of the tuple is for children
   // If a PK is on the children side, then both its children AND its parents have been fetched.
   // IF a PK is on the parent side, then only its parents have been fetched
