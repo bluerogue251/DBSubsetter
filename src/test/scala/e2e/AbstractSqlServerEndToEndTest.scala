@@ -14,7 +14,7 @@ abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest {
   override def makeConnStr(port: Int, dbName: String): String = s"jdbc:sqlserver://localhost:$port;databaseName=$dbName;user=sa;password=MsSqlServerLocal1"
 
   override def setupOriginDb(): Unit = {
-    if (recreateOriginDBS) s"./src/test/util/create_sqlserver_db.sh $containerName $dataSetName".!!
+    if (recreateOriginDBs) s"./src/test/util/create_sqlserver_db.sh $containerName $dataSetName".!!
   }
 
   override def setupTargetDbs(): Unit = {
@@ -28,7 +28,7 @@ abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest {
   }
 
   override protected def createDockerContainers(): Unit = {
-    if (recreateOriginDBS) {
+    if (recreateOriginDBs) {
       dockerRm(containerName)
       s"docker create --name $containerName -p $originPort:1433 --env ACCEPT_EULA=Y --env SA_PASSWORD=MsSqlServerLocal1 --env MSSQL_PID=Developer microsoft/mssql-server-linux:2017-CU2".!!
     }

@@ -13,7 +13,7 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest {
 
   override def makeConnStr(port: Int, dbName: String): String = s"jdbc:mysql://localhost:$port/$dataSetName?user=root&useSSL=false&rewriteBatchedStatements=true"
 
-  override def setupOriginDb(): Unit = if (recreateOriginDBS) createMySqlDatabase(originPort)
+  override def setupOriginDb(): Unit = if (recreateOriginDBs) createMySqlDatabase(originPort)
 
   override def setupTargetDbs(): Unit = {
     createMySqlDatabase(targetSingleThreadedPort)
@@ -32,7 +32,7 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest {
     }
 
     val originContainerName = s"${dataSetName}_origin_mysql"
-    if (recreateOriginDBS) createAndStart(originContainerName, originPort) else dockerStart(originContainerName)
+    if (recreateOriginDBs) createAndStart(originContainerName, originPort) else dockerStart(originContainerName)
     createAndStart(targetSithContainerName, targetSingleThreadedPort)
     createAndStart(targetAkstContainerName, targetAkkaStreamsPort)
     Thread.sleep(12000)
