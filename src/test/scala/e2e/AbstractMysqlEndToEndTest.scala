@@ -5,7 +5,12 @@ import scala.sys.process._
 abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest {
   override val profile = slick.jdbc.MySQLProfile
 
+  // Unfortunately a bug in MySQL does not allow us to keep around too many containers
+  override protected val recreateOriginDBs: Boolean = true
+
   def dataSetName: String
+
+  def originContainerName = s"${dataSetName}_origin_mysql"
 
   def targetSithContainerName = s"${dataSetName}_target_sith_mysql"
 
@@ -31,7 +36,6 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest {
       dockerStart(name)
     }
 
-    val originContainerName = s"${dataSetName}_origin_mysql"
     if (recreateOriginDBs) createAndStart(originContainerName, originPort) else dockerStart(originContainerName)
     createAndStart(targetSithContainerName, targetSingleThreadedPort)
     createAndStart(targetAkstContainerName, targetAkkaStreamsPort)
@@ -42,6 +46,7 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest {
 
   override protected def afterAll(): Unit = {
     super.afterAll()
+    if (recreateOriginDBs) dockerRm(originContainerName)
     dockerRm(targetSithContainerName)
     dockerRm(targetAkstContainerName)
   }

@@ -5,6 +5,8 @@ import scala.sys.process._
 abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest {
   override val profile = slick.jdbc.SQLServerProfile
 
+  override protected val recreateOriginDBs: Boolean = true
+
   override lazy val targetSingleThreadedPort: Int = originPort
   override lazy val targetAkkaStreamsPort: Int = originPort
   override lazy val targetSingleThreadedDbName = s"${dataSetName}_sith"
