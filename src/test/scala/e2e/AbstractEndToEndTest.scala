@@ -5,7 +5,7 @@ import slick.dbio.{DBIOAction, Effect}
 import slick.jdbc.JdbcBackend
 import slick.lifted.{AbstractTable, TableQuery}
 import trw.dbsubsetter.config.{CommandLineParser, Config}
-import trw.dbsubsetter.db.SchemaInfoRetrieval
+import trw.dbsubsetter.db.{SchemaInfo, SchemaInfoRetrieval}
 import trw.dbsubsetter.workflow.BaseQueries
 import trw.dbsubsetter.{ApplicationAkkaStreams, ApplicationSingleThreaded}
 
@@ -53,6 +53,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
   lazy val targetAkkaStreamsConnString: String = makeConnStr(targetAkkaStreamsPort, targetAkkaStreamsDbName)
   var singleThreadedRuntimeMillis: Long = 0
   var akkStreamsRuntimeMillis: Long = 0
+  var schemaInfo: SchemaInfo = _
 
   //
   // Set this to true the first time you run tests, for initial setup
@@ -80,7 +81,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
     targetDbAs = profile.backend.Database.forURL(akkaStreamsConfig.targetDbConnectionString)
 
     // `schemaInfo` and `baseQueries` will be the same regardless of whether we use `singleThreadedConfig` or `akkaStreamsConfig`
-    val schemaInfo = SchemaInfoRetrieval.getSchemaInfo(singleThreadedConfig)
+    schemaInfo = SchemaInfoRetrieval.getSchemaInfo(singleThreadedConfig)
     val baseQueries = BaseQueries.get(singleThreadedConfig, schemaInfo)
 
     val startSingleThreaded = System.nanoTime()
