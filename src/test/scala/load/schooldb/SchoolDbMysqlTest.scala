@@ -16,18 +16,6 @@ class SchoolDbMysqlTest extends AbstractMysqlEndToEndTest with SchoolDbTestCases
     "--preTargetBufferSize", "10000"
   )
 
-  override protected def createDockerContainers(): Unit = {
-    def createAndStart(name: String, port: Int): Unit = {
-      removeDockerContainer(name)
-      s"docker create --name $name -p $port:3306 --env MYSQL_ALLOW_EMPTY_PASSWORD=true mysql:8.0".!!
-      s"docker start $name".!!
-    }
-    s"docker start school_db_origin_mysql".!
-    createAndStart(targetSithContainerName, targetSingleThreadedPort)
-    createAndStart(targetAkstContainerName, targetAkkaStreamsPort)
-    Thread.sleep(12000)
-  }
-
   override def setupOriginDb(): Unit = {}
 
   override def setupDDL(): Unit = {

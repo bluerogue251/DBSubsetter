@@ -26,12 +26,13 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest {
 
   override protected def createDockerContainers(): Unit = {
     def createAndStart(name: String, port: Int): Unit = {
-      removeDockerContainer(name)
+      dockerRm(name)
       s"docker create --name $name -p $port:3306 --env MYSQL_ALLOW_EMPTY_PASSWORD=true mysql:8.0".!!
-      s"docker start $name".!!
+      dockerStart(name)
     }
 
-    createAndStart(s"${dataSetName}_origin_mysql", originPort)
+    val originContainerName = s"${dataSetName}_origin_mysql"
+    if (recreateOriginDBS) createAndStart(originContainerName, originPort) else dockerStart(originContainerName)
     createAndStart(targetSithContainerName, targetSingleThreadedPort)
     createAndStart(targetAkstContainerName, targetAkkaStreamsPort)
     Thread.sleep(12000)
@@ -41,7 +42,7 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest {
 
   override protected def afterAll(): Unit = {
     super.afterAll()
-    removeDockerContainer(targetSithContainerName)
-    removeDockerContainer(targetAkstContainerName)
+    dockerRm(targetSithContainerName)
+    dockerRm(targetAkstContainerName)
   }
 }

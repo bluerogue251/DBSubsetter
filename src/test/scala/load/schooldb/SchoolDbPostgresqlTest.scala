@@ -3,8 +3,6 @@ package load.schooldb
 import e2e.AbstractPostgresqlEndToEndTest
 import load.LoadTest
 
-import scala.sys.process._
-
 class SchoolDbPostgresqlTest extends AbstractPostgresqlEndToEndTest with SchoolDbTestCases with LoadTest {
   override val originPort = 5453
   override val programArgs = Array(
@@ -16,9 +14,7 @@ class SchoolDbPostgresqlTest extends AbstractPostgresqlEndToEndTest with SchoolD
     "--preTargetBufferSize", "10000"
   )
 
-  override def setupOriginDb(): Unit = {
-    s"docker start school_db_origin_postgres".!
-  }
+  override def setupOriginDb(): Unit = dockerStart("school_db_origin_postgres")
 
   override def setupDML(): Unit = {}
 

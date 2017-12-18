@@ -26,15 +26,17 @@ abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest {
   }
 
   override protected def createDockerContainers(): Unit = {
-    removeDockerContainer(containerName)
-    s"docker create --name $containerName -p $originPort:1433 --env ACCEPT_EULA=Y --env SA_PASSWORD=MsSqlServerLocal1 --env MSSQL_PID=Developer microsoft/mssql-server-linux:2017-CU2".!!
-    s"docker start $containerName".!!
+    if (recreateOriginDBS) {
+      dockerRm(containerName)
+      s"docker create --name $containerName -p $originPort:1433 --env ACCEPT_EULA=Y --env SA_PASSWORD=MsSqlServerLocal1 --env MSSQL_PID=Developer microsoft/mssql-server-linux:2017-CU2".!!
+    }
+    dockerStart(containerName)
     Thread.sleep(6000)
   }
 
   override protected def afterAll(): Unit = {
     super.afterAll()
     // TODO fix test class hierarchy to get rid of this messy string equals check
-    if (!(dataSetName == "school_db")) removeDockerContainer(containerName)
+    if (!(dataSetName == "school_db")) dockerRm(containerName)
   }
 }

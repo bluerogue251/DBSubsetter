@@ -25,11 +25,13 @@ abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest {
 
   override protected def createDockerContainers(): Unit = {
     def createAndStart(name: String, port: Int): Unit = {
-      removeDockerContainer(name)
+      dockerRm(name)
       s"docker create --name $name -p $port:5432 postgres:9.6.3".!!
-      s"docker start $name".!!
+      dockerStart(name)
     }
 
+    val originContainerName = s"${dataSetName}_origin_postgres"
+    if (recreateOriginDBS) createAndStart(originContainerName, originPort) else dockerStart(originContainerName)
     createAndStart(s"${dataSetName}_target_sith_postgres", targetSingleThreadedPort)
     createAndStart(s"${dataSetName}_target_akst_postgres", targetAkkaStreamsPort)
     Thread.sleep(5000)

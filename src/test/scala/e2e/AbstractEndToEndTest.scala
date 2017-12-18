@@ -54,6 +54,11 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
   var singleThreadedRuntimeMillis: Long = 0
   var akkStreamsRuntimeMillis: Long = 0
 
+  //
+  // Set this to true the first time you run tests, for initial setup
+  //
+  protected val recreateOriginDBS: Boolean = false
+
   override protected def beforeAll(): Unit = {
     super.beforeAll()
 
@@ -123,7 +128,11 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
 
   protected def createDockerContainers(): Unit
 
-  protected def removeDockerContainer(name: String): Unit = {
+  protected def dockerRm(name: String): Unit = {
     s"docker rm --force --volumes $name".!
+  }
+
+  protected def dockerStart(name: String): Unit = {
+    s"docker start $name".!
   }
 }

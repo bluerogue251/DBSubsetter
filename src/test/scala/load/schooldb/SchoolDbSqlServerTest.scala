@@ -3,8 +3,6 @@ package load.schooldb
 import e2e.AbstractSqlServerEndToEndTest
 import load.LoadTest
 
-import scala.sys.process._
-
 class SchoolDbSqlServerTest extends AbstractSqlServerEndToEndTest with SchoolDbTestCases with LoadTest {
   override val originPort = 5456
   override val programArgs = Array(
@@ -16,9 +14,7 @@ class SchoolDbSqlServerTest extends AbstractSqlServerEndToEndTest with SchoolDbT
     "--preTargetBufferSize", "10000"
   )
 
-  override def setupOriginDb(): Unit = {
-    s"docker start school_db_sqlserver".!
-  }
+  override def setupOriginDb(): Unit = dockerStart("school_db_sqlserver")
 
   override def setupDDL(): Unit = {
     //    s"./src/test/util/create_schema_sqlserver.sh $containerName $dataSetName school_db".!!

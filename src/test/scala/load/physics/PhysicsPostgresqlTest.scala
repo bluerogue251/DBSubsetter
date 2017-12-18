@@ -22,7 +22,7 @@ class PhysicsPostgresqlTest extends AbstractPostgresqlEndToEndTest with PhysicsT
     "--skipPkStore", "public.quantum_data"
   )
 
-  override def setupOriginDb(): Unit = s"docker start physics_origin_postgres".!
+  override def setupOriginDb(): Unit = dockerStart("physics_origin_postgres")
 
   override def setupDDL(): Unit = {}
 
