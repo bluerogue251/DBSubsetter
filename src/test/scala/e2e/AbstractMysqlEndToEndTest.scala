@@ -6,7 +6,7 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest {
   override val profile = slick.jdbc.MySQLProfile
 
   // Unfortunately a bug in MySQL does not allow us to keep around too many containers
-  override protected val recreateOriginDBs: Boolean = true
+  override protected val recreateOriginDB: Boolean = true
 
   def dataSetName: String
 
@@ -18,7 +18,7 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest {
 
   override def makeConnStr(port: Int, dbName: String): String = s"jdbc:mysql://localhost:$port/$dataSetName?user=root&useSSL=false&rewriteBatchedStatements=true"
 
-  override def setupOriginDb(): Unit = if (recreateOriginDBs) createMySqlDatabase(originPort)
+  override def setupOriginDb(): Unit = if (recreateOriginDB) createMySqlDatabase(originPort)
 
   override def setupTargetDbs(): Unit = {
     createMySqlDatabase(targetSingleThreadedPort)
@@ -36,17 +36,17 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest {
       dockerStart(name)
     }
 
-    if (recreateOriginDBs) createAndStart(originContainerName, originPort) else dockerStart(originContainerName)
+    if (recreateOriginDB) createAndStart(originContainerName, originPort) else dockerStart(originContainerName)
     createAndStart(targetSithContainerName, targetSingleThreadedPort)
     createAndStart(targetAkstContainerName, targetAkkaStreamsPort)
-    Thread.sleep(12000)
+    Thread.sleep(13000)
   }
 
   private def createMySqlDatabase(port: Int): Unit = s"./src/test/util/create_mysql_db.sh $dataSetName $port".!!
 
   override protected def afterAll(): Unit = {
     super.afterAll()
-    if (recreateOriginDBs) dockerRm(originContainerName)
+    if (recreateOriginDB) dockerRm(originContainerName)
     dockerRm(targetSithContainerName)
     dockerRm(targetAkstContainerName)
   }

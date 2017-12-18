@@ -5,7 +5,7 @@ import scala.sys.process._
 abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest {
   override val profile = slick.jdbc.SQLServerProfile
 
-  override protected val recreateOriginDBs: Boolean = true
+  override protected val recreateOriginDB: Boolean = true
 
   override lazy val targetSingleThreadedPort: Int = originPort
   override lazy val targetAkkaStreamsPort: Int = originPort
@@ -16,7 +16,7 @@ abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest {
   override def makeConnStr(port: Int, dbName: String): String = s"jdbc:sqlserver://localhost:$port;databaseName=$dbName;user=sa;password=MsSqlServerLocal1"
 
   override def setupOriginDb(): Unit = {
-    if (recreateOriginDBs) s"./src/test/util/create_sqlserver_db.sh $containerName $dataSetName".!!
+    if (recreateOriginDB) s"./src/test/util/create_sqlserver_db.sh $containerName $dataSetName".!!
   }
 
   override def setupTargetDbs(): Unit = {
@@ -30,9 +30,12 @@ abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest {
   }
 
   override protected def createDockerContainers(): Unit = {
-    if (recreateOriginDBs) {
+    if (recreateOriginDB) {
       dockerRm(containerName)
-      s"docker create --name $containerName -p $originPort:1433 --env ACCEPT_EULA=Y --env SA_PASSWORD=MsSqlServerLocal1 --env MSSQL_PID=Developer microsoft/mssql-server-linux:2017-CU2".!!
+      // For now, we must explicitly specify command `/opt/mssql/bin/sqlservr` due to:
+      // https://github.com/Microsoft/mssql-docker/issues/181
+      // https://github.com/Microsoft/mssql-docker/issues/171
+      s"docker create --name $containerName -p $originPort:1433 --env ACCEPT_EULA=Y --env SA_PASSWORD=MsSqlServerLocal1 --env MSSQL_PID=Developer microsoft/mssql-server-linux:2017-CU2 /opt/mssql/bin/sqlservr".!!
     }
     dockerStart(containerName)
     Thread.sleep(6000)
@@ -40,7 +43,6 @@ abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest {
 
   override protected def afterAll(): Unit = {
     super.afterAll()
-    // TODO fix test class hierarchy to get rid of this messy string equals check
-    if (!(dataSetName == "school_db")) dockerRm(containerName)
+    if (recreateOriginDB) dockerRm(containerName)
   }
 }
