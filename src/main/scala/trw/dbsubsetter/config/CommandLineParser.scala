@@ -187,9 +187,18 @@ object CommandLineParser {
     opt[File]("taskQueueDir")
       .valueName("</path/to/task/queue/dir>")
       .action((dir, c) => c.copy(taskQueueDirOpt = Some(dir)))
+      .validate { dir =>
+        if (!dir.exists()) dir.mkdir()
+        if (!dir.isDirectory)
+          failure("--taskQueueDir must be a directory")
+        else if (dir.listFiles().nonEmpty)
+          failure("--taskQueueDir must be an empty directory")
+        else
+          success
+      }
       .text(
         """Directory in which DBSubsetter will store its queue of outstanding tasks
-          |                           Defaults to the standard temporary file location of your OS
+          |                           Defaults to the standard tempfile location of your OS
           |""".stripMargin)
 
     opt[Unit]("singleThreadedDebugMode")
