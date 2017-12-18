@@ -66,10 +66,7 @@ object SchemaInfoRetrieval {
             }
           }
 
-          val pointsToPk = {
-            val pkOpt = pksByTableOrdered.get(toTable)
-            pkOpt.fold(false)(pkColOrdinals => pkColOrdinals == toCols.map(_.ordinalPosition))
-          }
+          val pointsToPk = pksByTableOrdered.get(toTable).fold(false)(pkCols => pkCols == toCols)
 
         ForeignKey(fromCols, toCols, pointsToPk, 0)
       }
