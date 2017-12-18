@@ -32,9 +32,10 @@ abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest {
   override protected def createDockerContainers(): Unit = {
     if (recreateOriginDB) {
       dockerRm(containerName)
-      // For now, we must explicitly specify command `/opt/mssql/bin/sqlservr` due to:
+      // Still having trouble with
       // https://github.com/Microsoft/mssql-docker/issues/181
       // https://github.com/Microsoft/mssql-docker/issues/171
+      // even when we explicitly specify command `/opt/mssql/bin/sqlservr`
       s"docker create --name $containerName -p $originPort:1433 --env ACCEPT_EULA=Y --env SA_PASSWORD=MsSqlServerLocal1 --env MSSQL_PID=Developer microsoft/mssql-server-linux:2017-CU2 /opt/mssql/bin/sqlservr".!!
     }
     dockerStart(containerName)
