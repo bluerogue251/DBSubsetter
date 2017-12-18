@@ -1,8 +1,6 @@
 * Configurable Chronicle-Queue storage directory
 
-* Try one chronicle-queue flow *per Fk* without always checking nearly-always-empty queues
-
-* Clean up schema retrieval, etc. so someone else could work on auto --skipPkStore
+* Clean up schema retrieval, SchemaInfo class population to prep for auto --skipPkStore feature
 
 * Automatic `--skipPkStore` option
   - Including case where a unique index means we might _not_ have to store PKs for a table
@@ -16,6 +14,8 @@
 
 Nice-to-Haves for later
 * Does Chronicle-Map for PKs (with pre-checking before queueing up a task) help performance?
+* Try one chronicle-queue flow *per Fk* without always checking nearly-always-empty queues
+  - Need to consider whether this would take up a lot of disk space per table.
 * Report MySQL Foreign Key "to" column capitalization bug
 * Chronicle-Queue for pre-target-db-insert buffer instead of in-memory Akka Streams Flow.buffer
 * Performant and automatic `--fullTable` option
