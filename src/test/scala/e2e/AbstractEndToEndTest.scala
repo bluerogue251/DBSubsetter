@@ -5,7 +5,7 @@ import slick.dbio.{DBIOAction, Effect}
 import slick.jdbc.JdbcBackend
 import slick.lifted.{AbstractTable, TableQuery}
 import trw.dbsubsetter.config.{CommandLineParser, Config}
-import trw.dbsubsetter.db.SchemaInfoRetrieval
+import trw.dbsubsetter.db.{SchemaInfo, SchemaInfoRetrieval}
 import trw.dbsubsetter.workflow.BaseQueries
 import trw.dbsubsetter.{ApplicationAkkaStreams, ApplicationSingleThreaded}
 
@@ -25,15 +25,15 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
 
   protected def programArgs: Array[String]
 
-  protected def createOriginDb(): Unit
+  protected def setupOriginDb(): Unit
 
   protected def setupTargetDbs(): Unit
 
   protected def postSubset(): Unit
 
-  protected def setupDDL(): Unit
+  protected def setupOriginDDL(): Unit
 
-  protected def setupDML(): Unit
+  protected def setupOriginDML(): Unit
 
   protected def dataSetName: String
 
@@ -53,11 +53,18 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
   lazy val targetAkkaStreamsConnString: String = makeConnStr(targetAkkaStreamsPort, targetAkkaStreamsDbName)
   var singleThreadedRuntimeMillis: Long = 0
   var akkStreamsRuntimeMillis: Long = 0
+  var schemaInfo: SchemaInfo = _
+
+  //
+  // Set this to true the first time you run tests, for initial setup
+  //
+  protected val recreateOriginDB: Boolean = false
 
   override protected def beforeAll(): Unit = {
     super.beforeAll()
 
-    createOriginDb()
+    createDockerContainers()
+    setupOriginDb()
 
     val originConnString = makeConnStr(originPort, originDbName)
     val sharedArgs = Array("--originDbConnStr", originConnString, "--originDbParallelism", "10", "--targetDbParallelism", "10")
@@ -67,14 +74,14 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
     val akkaStreamsConfig = CommandLineParser.parser.parse(asArgs, Config()).get
 
     originDb = profile.backend.Database.forURL(singleThreadedConfig.originDbConnectionString)
-    setupDDL()
-    setupDML()
+    if (recreateOriginDB) setupOriginDDL()
+    if (recreateOriginDB) setupOriginDML()
     setupTargetDbs()
     targetDbSt = profile.backend.Database.forURL(singleThreadedConfig.targetDbConnectionString)
     targetDbAs = profile.backend.Database.forURL(akkaStreamsConfig.targetDbConnectionString)
 
     // `schemaInfo` and `baseQueries` will be the same regardless of whether we use `singleThreadedConfig` or `akkaStreamsConfig`
-    val schemaInfo = SchemaInfoRetrieval.getSchemaInfo(singleThreadedConfig)
+    schemaInfo = SchemaInfoRetrieval.getSchemaInfo(singleThreadedConfig)
     val baseQueries = BaseQueries.get(singleThreadedConfig, schemaInfo)
 
     val startSingleThreaded = System.nanoTime()
@@ -120,7 +127,13 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
     assert(Await.result(targetDbAs.run(action), Duration.Inf) === Some(expected))
   }
 
-  protected def removeDockerContainer(name: String): Unit = {
+  protected def createDockerContainers(): Unit
+
+  protected def dockerRm(name: String): Unit = {
     s"docker rm --force --volumes $name".!
+  }
+
+  protected def dockerStart(name: String): Unit = {
+    s"docker start $name".!
   }
 }

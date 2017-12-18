@@ -6,6 +6,7 @@ import load.LoadTest
 import scala.sys.process._
 
 class SchoolDbSqlServerTest extends AbstractSqlServerEndToEndTest with SchoolDbTestCases with LoadTest {
+  override protected val recreateOriginDB: Boolean = false
   override val originPort = 5456
   override val programArgs = Array(
     "--schemas", "school_db,Audit",
@@ -16,17 +17,11 @@ class SchoolDbSqlServerTest extends AbstractSqlServerEndToEndTest with SchoolDbT
     "--preTargetBufferSize", "10000"
   )
 
-  override def createOriginDb(): Unit = {
-    s"docker start school_db_sqlserver".!
+  override def setupOriginDDL(): Unit = {
+    s"./src/test/util/create_schema_sqlserver.sh $containerName $dataSetName school_db".!!
+    s"./src/test/util/create_schema_sqlserver.sh $containerName $dataSetName Audit".!!
+    super.setupOriginDDL()
   }
-
-  override def setupDDL(): Unit = {
-    //    s"./src/test/util/create_schema_sqlserver.sh $containerName $dataSetName school_db".!!
-    //    s"./src/test/util/create_schema_sqlserver.sh $containerName $dataSetName Audit".!!
-    //    super.setupDDL()
-  }
-
-  override def setupDML(): Unit = {}
 
   override val singleThreadedRuntimeThreshold: Long = 110000
 

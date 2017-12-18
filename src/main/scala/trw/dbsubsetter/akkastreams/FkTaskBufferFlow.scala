@@ -6,17 +6,21 @@ import akka.stream._
 import akka.stream.stage._
 import net.openhft.chronicle.queue.RollCycles
 import net.openhft.chronicle.queue.impl.single.SingleChronicleQueueBuilder
+import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.{ForeignKey, SchemaInfo}
 import trw.dbsubsetter.workflow._
 
 // Adapted from https://github.com/torodb/akka-chronicle-queue
-class FkTaskBufferFlow(sch: SchemaInfo) extends GraphStage[FlowShape[Map[(ForeignKey, Boolean), Array[Any]], FkTask]] {
+class FkTaskBufferFlow(config: Config, sch: SchemaInfo) extends GraphStage[FlowShape[Map[(ForeignKey, Boolean), Array[Any]], FkTask]] {
   val in: Inlet[Map[(ForeignKey, Boolean), Array[Any]]] = Inlet.create[Map[(ForeignKey, Boolean), Array[Any]]]("FkTaskBufferFlow.in")
   val out: Outlet[FkTask] = Outlet.create[FkTask]("FkTaskBufferFlow.out")
   override val shape: FlowShape[Map[(ForeignKey, Boolean), Array[Any]], FkTask] = FlowShape.of(in, out)
 
   override def createLogic(inheritedAttributes: Attributes): GraphStageLogic = new GraphStageLogic(shape) {
-    private val storageDir = Files.createTempDirectory("DBSubsetter-")
+    private val storageDir = config.taskQueueDirOpt match {
+      case None => Files.createTempDirectory("DBSubsetter-")
+      case Some(dir) => dir.toPath
+    }
     private val queue = SingleChronicleQueueBuilder.binary(storageDir).rollCycle(RollCycles.MINUTELY).build()
     private val appender = queue.acquireAppender()
     private val tailer = queue.createTailer()

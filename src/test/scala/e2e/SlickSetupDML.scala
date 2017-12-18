@@ -8,7 +8,7 @@ import scala.concurrent.duration.Duration
 trait SlickSetupDML extends AbstractEndToEndTest {
   val dml: DBIOAction[Unit, NoStream, Effect.Write]
 
-  override def setupDML(): Unit = {
+  override def setupOriginDML(): Unit = {
     val dmlFut = originDb.run(dml)
     Await.result(dmlFut, Duration.Inf)
   }

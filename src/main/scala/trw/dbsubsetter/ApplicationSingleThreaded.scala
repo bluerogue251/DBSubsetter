@@ -11,7 +11,7 @@ object ApplicationSingleThreaded {
     // Set up workflow objects
     val originDbWorkflow = new OriginDbWorkflow(config, schemaInfo)
     val targetDbWorkflow = new TargetDbWorkflow(config, schemaInfo)
-    val pkWorkflow = new PkStoreWorkflow(schemaInfo.pkOrdinalsByTable)
+    val pkWorkflow = new PkStoreWorkflow(schemaInfo)
 
     // Set up task queue
     val queue = mutable.Queue.empty[OriginDbRequest]

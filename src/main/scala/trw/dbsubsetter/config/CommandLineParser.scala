@@ -1,5 +1,7 @@
 package trw.dbsubsetter.config
 
+import java.io.File
+
 import scopt.OptionParser
 import trw.dbsubsetter.db.{ColumnName, SchemaName, TableName}
 
@@ -10,7 +12,7 @@ object CommandLineParser {
     version("version").text("Prints the application version\n")
 
     opt[Seq[String]]("schemas")
-      .valueName("<schema1>, <schema2>, <schema3>, ...")
+      .valueName("<schema1>,<schema2>,<schema3>, ...")
       .action((s, c) => c.copy(schemas = s.map(_.trim)))
       .required()
       .text("Names of the schemas to include when subsetting\n")
@@ -182,6 +184,23 @@ object CommandLineParser {
           |                           The default buffer size is 100
           |""".stripMargin)
 
+    opt[File]("taskQueueDir")
+      .valueName("</path/to/task/queue/dir>")
+      .action((dir, c) => c.copy(taskQueueDirOpt = Some(dir)))
+      .validate { dir =>
+        if (!dir.exists()) dir.mkdir()
+        if (!dir.isDirectory)
+          failure("--taskQueueDir must be a directory")
+        else if (dir.listFiles().nonEmpty)
+          failure("--taskQueueDir must be an empty directory")
+        else
+          success
+      }
+      .text(
+        """Directory in which DBSubsetter will store its queue of outstanding tasks
+          |                           Defaults to the standard tempfile location of your OS
+          |""".stripMargin)
+
     opt[Unit]("singleThreadedDebugMode")
       .action((_, c) => c.copy(isSingleThreadedDebugMode = true))
       .text(
@@ -238,13 +257,17 @@ object CommandLineParser {
         |
         |Notes:
         |
-        |   # Arguments containing whitespace must be enclosed in quotes:
+        |   # Arguments containing whitespace, parentheses, and other special characters must be enclosed in quotes:
         |      (OK)    --schemas public,audit,finance
         |      (OK)    --schemas "public, audit, finance"
         |      (OK)    --schemas 'public, audit, finance'
         |      (OK)    --schemas "public","audit","finance"
         |      (ERROR) --schemas public, audit, finance
         |      (ERROR) --schemas "public", "audit", "finance"
+        |
+        |      (OK)    --excludeColumns "dboSchema.myTable(myColumn)"
+        |      (OK)    --excludeColumns 'dboSchema.myTable(myColumn)'
+        |      (ERROR) --excludeColumns dboSchema.myTable(myColumn)
         |
         |   # Arguments containing a quotation mark must either alternate single and double quotes or use backslash escaping:
         |      (OK)    --baseQuery 'primary_schools."Districts" ::: "Districts"."Id" in (2, 78, 945) ::: includeChildren'

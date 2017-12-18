@@ -29,7 +29,7 @@ object Subsetting {
     val mergeNewTaskRequests = b.add(Merge[PkResult](2))
     val balanceTargetDb = b.add(Balance[PksAdded](config.targetDbParallelism, waitForAllDownstreams = true))
     val mergeTargetDbResults = b.add(Merge[TargetDbInsertResult](config.targetDbParallelism))
-    val fkTaskBufferFlow = b.add(new FkTaskBufferFlow(schemaInfo).async)
+    val fkTaskBufferFlow = b.add(new FkTaskBufferFlow(config, schemaInfo).async)
 
     // Start everything off
     Source(baseQueries) ~>

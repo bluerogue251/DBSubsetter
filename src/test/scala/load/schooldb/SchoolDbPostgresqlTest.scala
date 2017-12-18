@@ -16,15 +16,9 @@ class SchoolDbPostgresqlTest extends AbstractPostgresqlEndToEndTest with SchoolD
     "--preTargetBufferSize", "10000"
   )
 
-  override def createOriginDb(): Unit = {
-    s"docker start school_db_origin_postgres".!
-  }
-
-  override def setupDML(): Unit = {}
-
-  override def setupDDL(): Unit = {
-    //    s"psql --host 0.0.0.0 --port $originPort --user postgres $dataSetName --file ./src/test/scala/load/schooldb/create_schemas_postgresql.sql".!!
-    //    super.setupDDL()
+  override def setupOriginDDL(): Unit = {
+    s"psql --host 0.0.0.0 --port $originPort --user postgres $dataSetName --file ./src/test/scala/load/schooldb/create_schemas_postgresql.sql".!!
+    super.setupOriginDDL()
   }
 
   override val singleThreadedRuntimeThreshold: Long = 220000

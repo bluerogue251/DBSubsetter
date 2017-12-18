@@ -11,11 +11,11 @@ class CrossSchemaMysqlTest extends AbstractMysqlEndToEndTest with CrossSchemaTes
     "--baseQuery", "schema_1.schema_1_table ::: id = 2 ::: includeChildren"
   )
 
-  override def setupDDL(): Unit = {
+  override def setupOriginDDL(): Unit = {
     s"./src/test/util/create_mysql_db.sh schema_1 $originPort".!!
     s"./src/test/util/create_mysql_db.sh schema_2 $originPort".!!
     s"./src/test/util/create_mysql_db.sh schema_3 $originPort".!!
-    super.setupDDL()
+    super.setupOriginDDL()
   }
 
   override def setupTargetDbs(): Unit = {

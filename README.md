@@ -82,8 +82,9 @@ Other related resources include
 [DataBee](https://www.databee.com/),
 [pg_sample](https://github.com/mla/pg_sample),
 [DATPROF](http://www.datprof.com/products/datprof-subset/),
-[abridger](https://github.com/freewilll/abridger), and
-[postgres-subset](https://github.com/BeautifulDestinations/postgres-subset).
+[abridger](https://github.com/freewilll/abridger),
+[postgres-subset](https://github.com/BeautifulDestinations/postgres-subset), and
+[CA Data Subset](https://docops.ca.com/ca-test-data-manager/4-2/en/provisioning-test-data/subset-production-data).
 
 DBSubsetter is written in [Scala](https://www.scala-lang.org/) using
 [Akka Streams](https://doc.akka.io/docs/akka/2.5.8/stream/index.html?language=scala),

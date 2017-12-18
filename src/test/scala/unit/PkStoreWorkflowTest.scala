@@ -1,14 +1,15 @@
 package unit
 
 import org.scalatest.FunSuite
-import trw.dbsubsetter.db.{Row, Table}
+import trw.dbsubsetter.db.{Column, Row, SchemaInfo, Table}
 import trw.dbsubsetter.workflow._
 
 class PkStoreWorkflowTest extends FunSuite {
   test("PkStore is conscious of fetchChildren for `exists` requests") {
     val table = Table("public", "users", hasSqlServerAutoIncrement = true, storePks = true)
-    val map = Map(table -> Seq(0))
-    val pkStore = new PkStoreWorkflow(map)
+    val pkCol = Column(table, null, 0, null, null)
+    val sch = SchemaInfo(Map.empty, Map.empty, Map(table -> Vector(pkCol)), Array.empty, Map.empty, Map.empty, null)
+    val pkStore = new PkStoreWorkflow(sch)
     val fkValue = "fkValue"
     val row: Row = Array(fkValue)
     val rows = Vector(row)

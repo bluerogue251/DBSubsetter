@@ -1,12 +1,12 @@
 package trw.dbsubsetter.workflow
 
-import trw.dbsubsetter.db.{Row, Table}
+import trw.dbsubsetter.db.{Row, SchemaInfo, Table}
 
 import scala.collection.mutable
 
 
-class PkStoreWorkflow(pkOrdinalsByTable: Map[Table, Seq[Int]]) {
-  private val tables = pkOrdinalsByTable.keys
+class PkStoreWorkflow(sch: SchemaInfo) {
+  private val tables = sch.pksByTableOrdered.keys.filter(_.storePks)
   // Left side of the tuple is for parents, right side of the tuple is for children
   // If a PK is on the children side, then both its children AND its parents have been fetched.
   // IF a PK is on the parent side, then only its parents have been fetched
@@ -37,7 +37,7 @@ class PkStoreWorkflow(pkOrdinalsByTable: Map[Table, Seq[Int]]) {
     val OriginDbResult(table, rows, viaTableOpt, fetchChildren) = req
     val (parentStore, childStore) = getStorage(table)
 
-    val pkOrdinals = pkOrdinalsByTable(table)
+    val pkOrdinals = sch.pksByTableOrdered(table).map(_.ordinalPosition)
     val pkOrdinal = pkOrdinals.head
     val isSingleColPk = pkOrdinals.lengthCompare(1) == 0
     val getPkValue: Row => Any = if (isSingleColPk) row => row(pkOrdinal) else row => pkOrdinals.map(row)

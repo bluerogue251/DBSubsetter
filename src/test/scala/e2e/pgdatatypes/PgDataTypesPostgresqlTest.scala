@@ -35,11 +35,11 @@ class PgDataTypesPostgresqlTest extends AbstractPostgresqlEndToEndTest {
     pending
   }
 
-  override protected def setupDDL(): Unit = {
+  override protected def setupOriginDDL(): Unit = {
     s"psql --host 0.0.0.0 --port $originPort --user postgres $dataSetName --file ./src/test/scala/e2e/pgdatatypes/ddl.sql".!!
   }
 
-  override protected def setupDML(): Unit = {
+  override protected def setupOriginDML(): Unit = {
     s"psql --host 0.0.0.0 --port $originPort --user postgres $dataSetName --file ./src/test/scala/e2e/pgdatatypes/dml.sql".!!
   }
 }

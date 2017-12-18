@@ -1,5 +1,7 @@
 package trw.dbsubsetter.config
 
+import java.io.File
+
 import trw.dbsubsetter.db.{ColumnName, SchemaName, TableName, WhereClause}
 
 case class Config(schemas: Seq[String] = Seq.empty,
@@ -14,4 +16,5 @@ case class Config(schemas: Seq[String] = Seq.empty,
                   excludeTables: Set[(SchemaName, TableName)] = Set.empty,
                   skipPkStore: Set[(SchemaName, TableName)] = Set.empty,
                   preTargetBufferSize: Int = 100,
+                  taskQueueDirOpt: Option[File] = None,
                   isSingleThreadedDebugMode: Boolean = false)
