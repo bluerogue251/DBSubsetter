@@ -25,7 +25,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
 
   protected def programArgs: Array[String]
 
-  protected def createOriginDb(): Unit
+  protected def setupOriginDb(): Unit
 
   protected def setupTargetDbs(): Unit
 
@@ -57,7 +57,8 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
   override protected def beforeAll(): Unit = {
     super.beforeAll()
 
-    createOriginDb()
+    createDockerContainers()
+    setupOriginDb()
 
     val originConnString = makeConnStr(originPort, originDbName)
     val sharedArgs = Array("--originDbConnStr", originConnString, "--originDbParallelism", "10", "--targetDbParallelism", "10")
@@ -119,6 +120,8 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
     assert(Await.result(targetDbSt.run(action), Duration.Inf) === Some(expected))
     assert(Await.result(targetDbAs.run(action), Duration.Inf) === Some(expected))
   }
+
+  protected def createDockerContainers(): Unit
 
   protected def removeDockerContainer(name: String): Unit = {
     s"docker rm --force --volumes $name".!

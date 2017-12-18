@@ -16,7 +16,7 @@ class SchoolDbPostgresqlTest extends AbstractPostgresqlEndToEndTest with SchoolD
     "--preTargetBufferSize", "10000"
   )
 
-  override def createOriginDb(): Unit = {
+  override def setupOriginDb(): Unit = {
     s"docker start school_db_origin_postgres".!
   }
 
