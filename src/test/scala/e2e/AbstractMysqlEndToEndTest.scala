@@ -13,7 +13,7 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest {
 
   override def makeConnStr(port: Int, dbName: String): String = s"jdbc:mysql://localhost:$port/$dataSetName?user=root&useSSL=false&rewriteBatchedStatements=true"
 
-  override def setupOriginDb(): Unit = createMySqlDatabase(originPort)
+  override def setupOriginDb(): Unit = if (recreateOriginDBS) createMySqlDatabase(originPort)
 
   override def setupTargetDbs(): Unit = {
     createMySqlDatabase(targetSingleThreadedPort)

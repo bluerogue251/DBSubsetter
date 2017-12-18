@@ -11,7 +11,7 @@ trait SchoolDbTestCases extends AbstractEndToEndTest with SchoolDbDDL with Slick
 
   override val ddl = schema.create
 
-  override def setupDML(): Unit = {
+  override def setupOriginDML(): Unit = {
     val customDml = new SchoolDBDML(profile)
     val dmlFut1 = originDb.run(customDml.initialInserts)
     Await.result(dmlFut1, Duration.Inf)

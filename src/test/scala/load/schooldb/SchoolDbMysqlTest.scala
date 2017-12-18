@@ -18,12 +18,12 @@ class SchoolDbMysqlTest extends AbstractMysqlEndToEndTest with SchoolDbTestCases
 
   override def setupOriginDb(): Unit = {}
 
-  override def setupDDL(): Unit = {
+  override def setupOriginDDL(): Unit = {
     //    s"./src/test/util/create_mysql_db.sh `Audit` $originPort".!!
     //    super.setupDDL()
   }
 
-  override def setupDML(): Unit = {}
+  override def setupOriginDML(): Unit = {}
 
   override def setupTargetDbs(): Unit = {
     super.setupTargetDbs()

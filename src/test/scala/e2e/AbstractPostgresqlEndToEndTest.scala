@@ -9,7 +9,7 @@ abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest {
 
   override def makeConnStr(p: Int, dbName: String): String = s"jdbc:postgresql://0.0.0.0:$p/$dataSetName?user=postgres"
 
-  override def setupOriginDb(): Unit = createDb(originPort)
+  override def setupOriginDb(): Unit = if (recreateOriginDBS) createDb(originPort)
 
   override def setupTargetDbs(): Unit = {
     createDb(targetSingleThreadedPort)

@@ -16,9 +16,9 @@ class SchoolDbPostgresqlTest extends AbstractPostgresqlEndToEndTest with SchoolD
 
   override def setupOriginDb(): Unit = dockerStart("school_db_origin_postgres")
 
-  override def setupDML(): Unit = {}
+  override def setupOriginDML(): Unit = {}
 
-  override def setupDDL(): Unit = {
+  override def setupOriginDDL(): Unit = {
     //    s"psql --host 0.0.0.0 --port $originPort --user postgres $dataSetName --file ./src/test/scala/load/schooldb/create_schemas_postgresql.sql".!!
     //    super.setupDDL()
   }

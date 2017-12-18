@@ -11,7 +11,7 @@ trait PhysicsTestCases extends AbstractEndToEndTest with PhysicsDDL with SlickSe
 
   override val ddl = schema.create
 
-  override def setupDML(): Unit = {
+  override def setupOriginDML(): Unit = {
     val customDml = new PhysicsDML(profile)
 
     val dmlFut1 = originDb.run(customDml.initialInserts)

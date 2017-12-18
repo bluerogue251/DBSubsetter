@@ -31,9 +31,9 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
 
   protected def postSubset(): Unit
 
-  protected def setupDDL(): Unit
+  protected def setupOriginDDL(): Unit
 
-  protected def setupDML(): Unit
+  protected def setupOriginDML(): Unit
 
   protected def dataSetName: String
 
@@ -73,8 +73,8 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
     val akkaStreamsConfig = CommandLineParser.parser.parse(asArgs, Config()).get
 
     originDb = profile.backend.Database.forURL(singleThreadedConfig.originDbConnectionString)
-    setupDDL()
-    setupDML()
+    if (recreateOriginDBS) setupOriginDDL()
+    if (recreateOriginDBS) setupOriginDML()
     setupTargetDbs()
     targetDbSt = profile.backend.Database.forURL(singleThreadedConfig.targetDbConnectionString)
     targetDbAs = profile.backend.Database.forURL(akkaStreamsConfig.targetDbConnectionString)

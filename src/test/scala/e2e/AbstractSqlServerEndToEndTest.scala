@@ -13,7 +13,9 @@ abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest {
 
   override def makeConnStr(port: Int, dbName: String): String = s"jdbc:sqlserver://localhost:$port;databaseName=$dbName;user=sa;password=MsSqlServerLocal1"
 
-  override def setupOriginDb(): Unit = s"./src/test/util/create_sqlserver_db.sh $containerName $dataSetName".!!
+  override def setupOriginDb(): Unit = {
+    if (recreateOriginDBS) s"./src/test/util/create_sqlserver_db.sh $containerName $dataSetName".!!
+  }
 
   override def setupTargetDbs(): Unit = {
     s"./src/test/util/sync_sqlserver_origin_to_target.sh $containerName $dataSetName $targetSingleThreadedDbName".!!

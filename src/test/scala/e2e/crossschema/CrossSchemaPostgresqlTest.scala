@@ -11,8 +11,8 @@ class CrossSchemaPostgresqlTest extends AbstractPostgresqlEndToEndTest with Cros
     "--baseQuery", "schema_1.schema_1_table ::: id = 2 ::: includeChildren"
   )
 
-  override def setupDDL(): Unit = {
+  override def setupOriginDDL(): Unit = {
     s"psql --host 0.0.0.0 --port $originPort --user postgres $dataSetName --file ./src/test/scala/e2e/crossschema/create_schemas_postgresql.sql".!!
-    super.setupDDL()
+    super.setupOriginDDL()
   }
 }

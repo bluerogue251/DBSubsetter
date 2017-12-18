@@ -16,13 +16,13 @@ class SchoolDbSqlServerTest extends AbstractSqlServerEndToEndTest with SchoolDbT
 
   override def setupOriginDb(): Unit = dockerStart("school_db_sqlserver")
 
-  override def setupDDL(): Unit = {
+  override def setupOriginDDL(): Unit = {
     //    s"./src/test/util/create_schema_sqlserver.sh $containerName $dataSetName school_db".!!
     //    s"./src/test/util/create_schema_sqlserver.sh $containerName $dataSetName Audit".!!
     //    super.setupDDL()
   }
 
-  override def setupDML(): Unit = {}
+  override def setupOriginDML(): Unit = {}
 
   override val singleThreadedRuntimeThreshold: Long = 110000
 

@@ -34,11 +34,11 @@ class MySqlDataTypesMySqlTest extends AbstractMysqlEndToEndTest {
     assertResult(sql, Seq(("mysql_data_types.referencing_table", "1211714113")))
   }
 
-  override protected def setupDDL(): Unit = {
+  override protected def setupOriginDDL(): Unit = {
     s"./src/test/scala/e2e/mysqldatatypes/load_ddl.sh $originPort $dataSetName".!!
   }
 
-  override protected def setupDML(): Unit = {
+  override protected def setupOriginDML(): Unit = {
     s"./src/test/scala/e2e/mysqldatatypes/load_dml.sh $originPort $dataSetName".!!
   }
 }

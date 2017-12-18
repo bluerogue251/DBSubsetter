@@ -11,10 +11,10 @@ class CrossSchemaSqlServerTest extends AbstractSqlServerEndToEndTest with CrossS
     "--baseQuery", "schema_1.schema_1_table ::: id = 2 ::: includeChildren"
   )
 
-  override def setupDDL(): Unit = {
+  override def setupOriginDDL(): Unit = {
     s"./src/test/util/create_schema_sqlserver.sh $containerName $dataSetName schema_1".!!
     s"./src/test/util/create_schema_sqlserver.sh $containerName $dataSetName schema_2".!!
     s"./src/test/util/create_schema_sqlserver.sh $containerName $dataSetName schema_3".!!
-    super.setupDDL()
+    super.setupOriginDDL()
   }
 }

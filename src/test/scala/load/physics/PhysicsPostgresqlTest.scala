@@ -24,9 +24,9 @@ class PhysicsPostgresqlTest extends AbstractPostgresqlEndToEndTest with PhysicsT
 
   override def setupOriginDb(): Unit = dockerStart("physics_origin_postgres")
 
-  override def setupDDL(): Unit = {}
+  override def setupOriginDDL(): Unit = {}
 
-  override def setupDML(): Unit = {}
+  override def setupOriginDML(): Unit = {}
 
   override def setupTargetDbs(): Unit = {
     super.setupTargetDbs()
