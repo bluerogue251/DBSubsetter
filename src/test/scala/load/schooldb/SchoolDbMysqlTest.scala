@@ -16,14 +16,10 @@ class SchoolDbMysqlTest extends AbstractMysqlEndToEndTest with SchoolDbTestCases
     "--preTargetBufferSize", "10000"
   )
 
-  override def setupOriginDb(): Unit = {}
-
   override def setupOriginDDL(): Unit = {
-    //    s"./src/test/util/create_mysql_db.sh `Audit` $originPort".!!
-    //    super.setupDDL()
+    s"./src/test/util/create_mysql_db.sh `Audit` $originPort".!!
+    super.setupOriginDDL()
   }
-
-  override def setupOriginDML(): Unit = {}
 
   override def setupTargetDbs(): Unit = {
     super.setupTargetDbs()
