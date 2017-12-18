@@ -7,6 +7,12 @@ abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest {
 
   def dataSetName: String
 
+  private def originContainerName = s"${dataSetName}_origin_postgres"
+
+  private def targetSingleThreadedContainerName = s"${dataSetName}_target_sith_postgres"
+
+  private def targetAkkaStreamsContainerName = s"${dataSetName}_target_akst_postgres"
+
   override def makeConnStr(p: Int, dbName: String): String = s"jdbc:postgresql://0.0.0.0:$p/$dataSetName?user=postgres"
 
   override def setupOriginDb(): Unit = if (recreateOriginDB) createDb(originPort)
@@ -30,14 +36,19 @@ abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest {
       dockerStart(name)
     }
 
-    val originContainerName = s"${dataSetName}_origin_postgres"
     if (recreateOriginDB) createAndStart(originContainerName, originPort) else dockerStart(originContainerName)
-    createAndStart(s"${dataSetName}_target_sith_postgres", targetSingleThreadedPort)
-    createAndStart(s"${dataSetName}_target_akst_postgres", targetAkkaStreamsPort)
+    createAndStart(targetSingleThreadedContainerName, targetSingleThreadedPort)
+    createAndStart(targetAkkaStreamsContainerName, targetAkkaStreamsPort)
     Thread.sleep(5000)
   }
 
   private def createDb(port: Int): Unit = {
     s"createdb --port $port --host 0.0.0.0 --user postgres $dataSetName".!!
+  }
+
+  override protected def afterAll(): Unit = {
+    super.afterAll()
+    dockerRm(targetSingleThreadedContainerName)
+    dockerRm(targetAkkaStreamsContainerName)
   }
 }

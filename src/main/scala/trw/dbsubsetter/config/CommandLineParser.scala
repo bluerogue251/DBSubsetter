@@ -1,5 +1,7 @@
 package trw.dbsubsetter.config
 
+import java.io.File
+
 import scopt.OptionParser
 import trw.dbsubsetter.db.{ColumnName, SchemaName, TableName}
 
@@ -180,6 +182,14 @@ object CommandLineParser {
         """Buffer up to this many target database insert statements in memory
           |                           This can sometimes improve performance at the cost of an increased memory footprint
           |                           The default buffer size is 100
+          |""".stripMargin)
+
+    opt[File]("taskQueueDir")
+      .valueName("</path/to/task/queue/dir>")
+      .action((dir, c) => c.copy(taskQueueDirOpt = Some(dir)))
+      .text(
+        """Directory in which DBSubsetter will store its queue of outstanding tasks
+          |                           Defaults to the standard temporary file location of your OS
           |""".stripMargin)
 
     opt[Unit]("singleThreadedDebugMode")

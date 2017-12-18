@@ -1,5 +1,3 @@
-* Configurable Chronicle-Queue storage directory
-
 * Clean up schema retrieval, SchemaInfo class population to prep for auto --skipPkStore feature
 
 * Automatic `--skipPkStore` option
