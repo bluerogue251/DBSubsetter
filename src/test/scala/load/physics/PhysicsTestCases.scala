@@ -66,33 +66,33 @@ trait PhysicsTestCases extends AbstractEndToEndTest with PhysicsDDL with SlickSe
   val dataSetName = "physics"
 
   test("Correct research_institutions were included") {
-    assertCount(ResearchInstitutions, 9)
-    assertThat(ResearchInstitutions.map(_.id).sum.result, 45)
+    assertCount(ResearchInstitutions, 1)
+    assertThat(ResearchInstitutions.map(_.id).sum.result, 4)
   }
 
   test("Correct research_groups were included") {
-    assertCount(ResearchGroups, 29)
-    assertThat(ResearchGroups.map(_.id).sum.result, 435)
+    assertCount(ResearchGroups, 1)
+    assertThat(ResearchGroups.map(_.id).sum.result, 3)
   }
 
   test("Correct scientists were included") {
-    assertCount(Scientists, 50)
-    assertThat(Scientists.map(_.id).sum.result, 2550)
+    assertCount(Scientists, 1)
+    assertThat(Scientists.map(_.id).sum.result, 2)
   }
 
   test("Correct experiment_metadata rows were included") {
-    assertCount(ExperimentMetadata, 5)
-    assertThat(ExperimentMetadata.map(_.id).sum.result, 25)
+    assertCount(ExperimentMetadata, 1)
+    assertThat(ExperimentMetadata.map(_.id).sum.result, 1)
   }
 
   test("Correct experiment_plans were included") {
-    assertCount(ExperimentPlans, 5)
-    assertThat(ExperimentPlans.map(_.id).sum.result, 25)
+    assertCount(ExperimentPlans, 1)
+    assertThat(ExperimentPlans.map(_.id).sum.result, 1)
   }
 
   test("Correct experiments were included") {
-    assertCount(Experiments, 111)
-    assertThat(Experiments.map(_.id).sum.result, 11233)
+    assertCount(Experiments, 22)
+    assertThat(Experiments.map(_.id).sum.result, 2277)
   }
 
   test("Correct particle_domain rows were included") {
@@ -111,22 +111,22 @@ trait PhysicsTestCases extends AbstractEndToEndTest with PhysicsDDL with SlickSe
   }
 
   test("Correct particle_collider_data rows were included") {
-    assertCount(ParticleColliderData, 2775000)
-    assertThatLong(ParticleColliderData.map(_.id).sum.result, 6917188887500l)
+    assertCount(ParticleColliderData, 550000)
+    assertThatLong(ParticleColliderData.map(_.id).sum.result, 1402500275000l)
   }
 
   test("Correct quantum_data rows were included") {
-    assertCount(QuantumData, 3330000)
-    assertThatLong(QuantumData.map(_.id).sum.result, 9960751665000l)
+    assertCount(QuantumData, 660000)
+    assertThatLong(QuantumData.map(_.id).sum.result, 2019600330000l)
   }
 
   test("Correct gravitational_wave_data rows were included") {
-    assertCount(GravitationalWaveData, 2220000)
-    assertThatLong(GravitationalWaveData.map(_.id).sum.result, 4427001110000l)
+    assertCount(GravitationalWaveData, 440000)
+    assertThatLong(GravitationalWaveData.map(_.id).sum.result, 897600220000l)
   }
 
   test("Correct datum_notes were included") {
-    assertCount(DatumNotes, 50000000)
-    assertThatLong(DatumNotes.map(_.id).sum.result, 1l)
+    assertCount(DatumNotes, 21010000)
+    assertThatLong(DatumNotes.map(_.id).sum.result, 2006021074421801l)
   }
 }
