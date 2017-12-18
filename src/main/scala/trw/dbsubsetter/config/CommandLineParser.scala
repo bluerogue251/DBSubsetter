@@ -257,13 +257,17 @@ object CommandLineParser {
         |
         |Notes:
         |
-        |   # Arguments containing whitespace must be enclosed in quotes:
+        |   # Arguments containing whitespace, parentheses, and other special characters must be enclosed in quotes:
         |      (OK)    --schemas public,audit,finance
         |      (OK)    --schemas "public, audit, finance"
         |      (OK)    --schemas 'public, audit, finance'
         |      (OK)    --schemas "public","audit","finance"
         |      (ERROR) --schemas public, audit, finance
         |      (ERROR) --schemas "public", "audit", "finance"
+        |
+        |      (OK)    --excludeColumns "dboSchema.myTable(myColumn)"
+        |      (OK)    --excludeColumns 'dboSchema.myTable(myColumn)'
+        |      (ERROR) --excludeColumns dboSchema.myTable(myColumn)
         |
         |   # Arguments containing a quotation mark must either alternate single and double quotes or use backslash escaping:
         |      (OK)    --baseQuery 'primary_schools."Districts" ::: "Districts"."Id" in (2, 78, 945) ::: includeChildren'
