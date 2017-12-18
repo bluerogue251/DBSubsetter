@@ -16,7 +16,7 @@ object ApplicationAkkaStreams {
     implicit val system: ActorSystem = ActorSystem("DbSubsetter")
     implicit val materializer: ActorMaterializer = ActorMaterializer()
     implicit val ec: ExecutionContext = system.dispatcher
-    val pkStore: ActorRef = system.actorOf(PkStore.props(schemaInfo.pkOrdinalsByTable))
+    val pkStore: ActorRef = system.actorOf(PkStore.props(schemaInfo))
 
     Subsetting
       .source(config, schemaInfo, baseQueries, pkStore)

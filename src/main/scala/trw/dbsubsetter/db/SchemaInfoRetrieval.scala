@@ -22,15 +22,17 @@ object SchemaInfoRetrieval {
         }
     }
 
-    val colByTableOrdered: Map[Table, Vector[Column]] = {
+    val colsByTableOrdered: Map[Table, Vector[Column]] = {
       colsByTableAndName.map { case (table, map) => table -> map.values.toVector.sortBy(_.ordinalPosition) }
     }
 
-    val pkOrdinalsByTable: Map[Table, Vector[Int]] = {
+    val pksByTableOrdered: Map[Table, Vector[Column]] = {
       primaryKeys
         .groupBy(pk => tablesByName(pk.schema, pk.table))
         .map { case (table, pks) =>
-          table -> pks.map(p => colsByTableAndName(table)(p.column)).map(_.ordinalPosition).sorted
+          val pkColNames = pks.map(_.column).toSet
+          val pkCols = colsByTableOrdered(table).filter(c => pkColNames.contains(c.name))
+          table -> pkCols
         }
     }
 
@@ -65,7 +67,7 @@ object SchemaInfoRetrieval {
           }
 
           val pointsToPk = {
-            val pkOpt = pkOrdinalsByTable.get(toTable)
+            val pkOpt = pksByTableOrdered.get(toTable)
             pkOpt.fold(false)(pkColOrdinals => pkColOrdinals == toCols.map(_.ordinalPosition))
           }
 
@@ -85,8 +87,8 @@ object SchemaInfoRetrieval {
 
     SchemaInfo(
       tablesByName,
-      colByTableOrdered,
-      pkOrdinalsByTable,
+      colsByTableOrdered,
+      pksByTableOrdered,
       foreignKeysOrdered,
       fksFromTable,
       fksToTable,
