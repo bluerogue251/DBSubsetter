@@ -7,7 +7,7 @@ abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest {
 
   def dataSetName: String
 
-  private def originContainerName = s"${dataSetName}_origin_postgres"
+  protected def originContainerName = s"${dataSetName}_origin_postgres"
 
   private def targetSingleThreadedContainerName = s"${dataSetName}_target_sith_postgres"
 

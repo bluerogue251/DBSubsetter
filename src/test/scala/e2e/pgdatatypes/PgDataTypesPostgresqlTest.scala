@@ -1,5 +1,7 @@
 package e2e.pgdatatypes
 
+import java.io.File
+
 import e2e.AbstractPostgresqlEndToEndTest
 
 import scala.sys.process._
@@ -31,15 +33,19 @@ class PgDataTypesPostgresqlTest extends AbstractPostgresqlEndToEndTest {
     "--excludeColumns", "public.bit_string_table(bit_1, bit_5)"
   )
 
-  test("No error was thrown during subsetting -- TODO write some real tests") {
+  test("No error was thrown during subsetting -- TODO write some more assertions") {
     pending
   }
 
+  private val originPsqlCommand = s"docker exec -i $originContainerName psql --user postgres $dataSetName"
+
   override protected def setupOriginDDL(): Unit = {
-    s"psql --host 0.0.0.0 --port $originPort --user postgres $dataSetName --file ./src/test/scala/e2e/pgdatatypes/ddl.sql".!!
+    val ddlFile = new File("./src/test/scala/e2e/pgdatatypes/ddl.sql")
+    (ddlFile #> originPsqlCommand).!!
   }
 
   override protected def setupOriginDML(): Unit = {
-    s"psql --host 0.0.0.0 --port $originPort --user postgres $dataSetName --file ./src/test/scala/e2e/pgdatatypes/dml.sql".!!
+    val dmlFile = new File("./src/test/scala/e2e/pgdatatypes/dml.sql")
+    (dmlFile #> originPsqlCommand).!!
   }
 }
