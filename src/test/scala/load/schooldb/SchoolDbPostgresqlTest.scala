@@ -2,8 +2,11 @@ package load.schooldb
 
 import e2e.AbstractPostgresqlEndToEndTest
 import load.LoadTest
+import slick.dbio.DBIO
+import slick.jdbc.PostgresProfile.api._
 
-import scala.sys.process._
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 class SchoolDbPostgresqlTest extends AbstractPostgresqlEndToEndTest with SchoolDbTestCases with LoadTest {
   override val originPort = 5453
@@ -16,9 +19,12 @@ class SchoolDbPostgresqlTest extends AbstractPostgresqlEndToEndTest with SchoolD
     "--preTargetBufferSize", "10000"
   )
 
-  // Currently broken: must update to match CrossSchemaPostgresqlTest
   override def setupOriginDDL(): Unit = {
-    s"psql --host 0.0.0.0 --port $originPort --user postgres $dataSetName --file ./src/test/scala/load/schooldb/create_schemas_postgresql.sql".!!
+    val createSchemaStatements: DBIO[Unit] = DBIO.seq(
+      sqlu"create schema school_db",
+      sqlu"""create schema "Audit""""
+    )
+    Await.ready(originDb.run(createSchemaStatements), Duration.Inf)
     super.setupOriginDDL()
   }
 

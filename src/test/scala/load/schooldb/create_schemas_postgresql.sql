@@ -1,2 +1,0 @@
-CREATE SCHEMA school_db;
-CREATE SCHEMA "Audit";

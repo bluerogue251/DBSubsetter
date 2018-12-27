@@ -17,16 +17,16 @@ class SchoolDbMysqlTest extends AbstractMysqlEndToEndTest with SchoolDbTestCases
   )
 
   override def setupOriginDDL(): Unit = {
-    s"./src/test/util/create_mysql_db.sh `Audit` $originPort".!!
+    s"./src/test/util/create_mysql_db.sh Audit $originContainerName".!!
     super.setupOriginDDL()
   }
 
   override def setupTargetDbs(): Unit = {
     super.setupTargetDbs()
-    s"./src/test/util/create_mysql_db.sh Audit $targetSingleThreadedPort".!!
-    s"./src/test/util/sync_mysql_origin_to_target.sh Audit $originPort $targetSingleThreadedPort".!!
-    s"./src/test/util/create_mysql_db.sh Audit $targetAkkaStreamsPort".!!
-    s"./src/test/util/sync_mysql_origin_to_target.sh Audit $originPort $targetAkkaStreamsPort".!!
+    s"./src/test/util/create_mysql_db.sh Audit $targetSithContainerName".!!
+    s"./src/test/util/sync_mysql_origin_to_target.sh Audit $originContainerName $targetSithContainerName".!!
+    s"./src/test/util/create_mysql_db.sh Audit $targetAkstContainerName".!!
+    s"./src/test/util/sync_mysql_origin_to_target.sh Audit $originContainerName $targetAkstContainerName".!!
   }
 
   override val singleThreadedRuntimeThreshold: Long = 1150000
