@@ -33,7 +33,7 @@ class PgDataTypesPostgresqlTest extends AbstractPostgresqlEndToEndTest {
     "--excludeColumns", "public.bit_string_table(bit_1, bit_5)"
   )
 
-  test("No error was thrown during subsetting -- TODO write some more assertions") {
+  test("No error was thrown during subsetting -- TODO add more detailed assertions") {
     pending
   }
 

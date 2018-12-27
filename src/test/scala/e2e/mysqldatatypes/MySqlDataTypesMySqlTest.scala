@@ -1,5 +1,7 @@
 package e2e.mysqldatatypes
 
+import java.io.File
+
 import e2e.AbstractMysqlEndToEndTest
 
 import scala.sys.process._
@@ -23,7 +25,7 @@ class MySqlDataTypesMySqlTest extends AbstractMysqlEndToEndTest {
     "--baseQuery", "mysql_data_types.referencing_table ::: id in (1, 2, 6, 8, 12, 14, 18, 20, 24, 26, 30) ::: includeChildren"
   )
 
-  test("No error was thrown during subsetting -- TODO write some real tests here") {
+  test("No error was thrown during subsetting -- TODO add more detailed assertions") {
     pending
   }
 
@@ -34,11 +36,15 @@ class MySqlDataTypesMySqlTest extends AbstractMysqlEndToEndTest {
     assertResult(sql, Seq(("mysql_data_types.referencing_table", "1211714113")))
   }
 
+  private val originMySqlCommand = s"docker exec -i $originContainerName mysql --user root $originDbName"
+
   override protected def setupOriginDDL(): Unit = {
-    s"./src/test/scala/e2e/mysqldatatypes/load_ddl.sh $originPort $dataSetName".!!
+    val ddlFile = new File("./src/test/scala/e2e/mysqldatatypes/ddl.sql")
+    (ddlFile #> originMySqlCommand).!!
   }
 
   override protected def setupOriginDML(): Unit = {
-    s"./src/test/scala/e2e/mysqldatatypes/load_dml.sh $originPort $dataSetName".!!
+    val dmlFile = new File("./src/test/scala/e2e/mysqldatatypes/dml.sql")
+    (dmlFile #> originMySqlCommand).!!
   }
 }

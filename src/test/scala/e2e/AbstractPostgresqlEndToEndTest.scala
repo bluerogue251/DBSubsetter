@@ -48,6 +48,7 @@ abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest {
 
   override protected def afterAll(): Unit = {
     super.afterAll()
+    dockerRm(originContainerName)
     dockerRm(targetSingleThreadedContainerName)
     dockerRm(targetAkkaStreamsContainerName)
   }
