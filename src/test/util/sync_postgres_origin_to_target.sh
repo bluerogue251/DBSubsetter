@@ -3,7 +3,7 @@
 set -eou pipefail
 
 data_set_name=$1
-origin_port=$2
-target_port=$3
+origin_container=$2
+target_container=$3
 
-pg_dump --host 0.0.0.0 --port ${origin_port} --user postgres --section=pre-data ${data_set_name} | psql --host 0.0.0.0 --port ${target_port} --user postgres ${data_set_name}
+docker exec ${origin_container} pg_dump --user postgres --section=pre-data ${data_set_name} | docker exec -i ${target_container} psql --user postgres ${data_set_name}

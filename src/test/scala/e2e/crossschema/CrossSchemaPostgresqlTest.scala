@@ -1,8 +1,11 @@
 package e2e.crossschema
 
 import e2e.AbstractPostgresqlEndToEndTest
+import slick.dbio.DBIO
+import slick.jdbc.PostgresProfile.api._
 
-import scala.sys.process._
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 class CrossSchemaPostgresqlTest extends AbstractPostgresqlEndToEndTest with CrossSchemaTestCases {
   override val originPort = 5543
@@ -12,7 +15,12 @@ class CrossSchemaPostgresqlTest extends AbstractPostgresqlEndToEndTest with Cros
   )
 
   override def setupOriginDDL(): Unit = {
-    s"psql --host 0.0.0.0 --port $originPort --user postgres $dataSetName --file ./src/test/scala/e2e/crossschema/create_schemas_postgresql.sql".!!
+    val createSchemaStatements: DBIO[Unit] = DBIO.seq(
+      sqlu"create schema schema_1",
+      sqlu"create schema schema_2",
+      sqlu"create schema schema_3"
+    )
+    Await.ready(originDb.run(createSchemaStatements), Duration.Inf)
     super.setupOriginDDL()
   }
 }

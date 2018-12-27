@@ -6,7 +6,6 @@ import load.LoadTest
 import scala.sys.process._
 
 class SchoolDbSqlServerTest extends AbstractSqlServerEndToEndTest with SchoolDbTestCases with LoadTest {
-  override protected val recreateOriginDB: Boolean = false
   override val originPort = 5456
   override val programArgs = Array(
     "--schemas", "school_db,Audit",

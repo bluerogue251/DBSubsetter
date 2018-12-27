@@ -16,6 +16,7 @@ class SchoolDbPostgresqlTest extends AbstractPostgresqlEndToEndTest with SchoolD
     "--preTargetBufferSize", "10000"
   )
 
+  // Currently broken: must update to match CrossSchemaPostgresqlTest
   override def setupOriginDDL(): Unit = {
     s"psql --host 0.0.0.0 --port $originPort --user postgres $dataSetName --file ./src/test/scala/load/schooldb/create_schemas_postgresql.sql".!!
     super.setupOriginDDL()

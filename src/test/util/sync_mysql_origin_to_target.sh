@@ -3,7 +3,7 @@
 set -eou pipefail
 
 data_set_name=$1
-origin_port=$2
-target_port=$3
+origin_container=$2
+target_container=$3
 
-mysqldump --host 0.0.0.0 --port ${origin_port} --user root --no-data ${data_set_name} | mysql --host 0.0.0.0 --port ${target_port} --user root ${data_set_name}
+docker exec ${origin_container} mysqldump --user root --no-data ${data_set_name} | docker exec -i ${target_container} mysql --user root ${data_set_name}

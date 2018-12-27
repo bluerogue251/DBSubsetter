@@ -37,7 +37,6 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
 
   protected def dataSetName: String
 
-
   //
   // The following is generic enough that it usually does not need to be overridden
   //
@@ -55,11 +54,6 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
   var akkStreamsRuntimeMillis: Long = 0
   var schemaInfo: SchemaInfo = _
 
-  //
-  // Set this to true the first time you run tests, for initial setup
-  //
-  protected val recreateOriginDB: Boolean = false
-
   override protected def beforeAll(): Unit = {
     super.beforeAll()
 
@@ -74,8 +68,8 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
     val akkaStreamsConfig = CommandLineParser.parser.parse(asArgs, Config()).get
 
     originDb = profile.backend.Database.forURL(singleThreadedConfig.originDbConnectionString)
-    if (recreateOriginDB) setupOriginDDL()
-    if (recreateOriginDB) setupOriginDML()
+    setupOriginDDL()
+    setupOriginDML()
     setupTargetDbs()
     targetDbSt = profile.backend.Database.forURL(singleThreadedConfig.targetDbConnectionString)
     targetDbAs = profile.backend.Database.forURL(akkaStreamsConfig.targetDbConnectionString)
