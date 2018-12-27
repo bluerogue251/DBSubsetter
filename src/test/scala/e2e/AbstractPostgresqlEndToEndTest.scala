@@ -15,18 +15,18 @@ abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest {
 
   override def makeConnStr(p: Int, dbName: String): String = s"jdbc:postgresql://0.0.0.0:$p/$dataSetName?user=postgres"
 
-  override def setupOriginDb(): Unit = if (recreateOriginDB) createDb(originPort)
+  override def setupOriginDb(): Unit = createDb(originContainerName)
 
   override def setupTargetDbs(): Unit = {
-    createDb(targetSingleThreadedPort)
-    createDb(targetAkkaStreamsPort)
-    s"./src/test/util/sync_postgres_origin_to_target.sh $dataSetName $originPort $targetSingleThreadedPort".!!
-    s"./src/test/util/sync_postgres_origin_to_target.sh $dataSetName $originPort $targetAkkaStreamsPort".!!
+    createDb(targetSingleThreadedContainerName)
+    createDb(targetAkkaStreamsContainerName)
+    s"./src/test/util/sync_postgres_origin_to_target.sh $dataSetName $originContainerName $targetSingleThreadedContainerName".!!
+    s"./src/test/util/sync_postgres_origin_to_target.sh $dataSetName $originContainerName $targetAkkaStreamsContainerName".!!
   }
 
   override def postSubset(): Unit = {
-    s"./src/test/util/postgres_post_subset.sh $dataSetName $originPort $targetSingleThreadedPort".!!
-    s"./src/test/util/postgres_post_subset.sh $dataSetName $originPort $targetAkkaStreamsPort".!!
+    s"./src/test/util/postgres_post_subset.sh $dataSetName $originContainerName $targetSingleThreadedContainerName".!!
+    s"./src/test/util/postgres_post_subset.sh $dataSetName $originContainerName $targetAkkaStreamsContainerName".!!
   }
 
   override protected def createDockerContainers(): Unit = {
@@ -36,14 +36,14 @@ abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest {
       dockerStart(name)
     }
 
-    if (recreateOriginDB) createAndStart(originContainerName, originPort) else dockerStart(originContainerName)
+    createAndStart(originContainerName, originPort)
     createAndStart(targetSingleThreadedContainerName, targetSingleThreadedPort)
     createAndStart(targetAkkaStreamsContainerName, targetAkkaStreamsPort)
     Thread.sleep(5000)
   }
 
-  private def createDb(port: Int): Unit = {
-    s"createdb --port $port --host 0.0.0.0 --user postgres $dataSetName".!!
+  private def createDb(dockerContainer: String): Unit = {
+    s"docker exec $dockerContainer createdb --user postgres $dataSetName".!!
   }
 
   override protected def afterAll(): Unit = {
