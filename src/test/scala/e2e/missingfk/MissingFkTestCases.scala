@@ -1,8 +1,9 @@
 package e2e.missingfk
 
 import e2e.{AbstractEndToEndTest, SlickSetup}
+import util.assertion.AssertionUtil
 
-trait MissingFkTestCases extends AbstractEndToEndTest with MissingFkDDL with SlickSetup {
+trait MissingFkTestCases extends AbstractEndToEndTest with MissingFkDDL with SlickSetup with AssertionUtil {
   import profile.api._
 
   override val ddl = schema.create

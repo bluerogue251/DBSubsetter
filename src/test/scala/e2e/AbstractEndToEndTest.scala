@@ -1,9 +1,7 @@
 package e2e
 
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
-import slick.dbio.{DBIOAction, Effect}
 import slick.jdbc.JdbcBackend
-import slick.lifted.{AbstractTable, TableQuery}
 import trw.dbsubsetter.config.{CommandLineParser, Config}
 import trw.dbsubsetter.db.{SchemaInfo, SchemaInfoRetrieval}
 import trw.dbsubsetter.workflow.BaseQueries
@@ -23,6 +21,8 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
   protected def makeConnStr(port: Int, dbName: String): String
 
   protected def programArgs: Array[String]
+
+  protected def createDockerContainers(): Unit
 
   protected def setupOriginDb(): Unit
 
@@ -97,28 +97,4 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
     targetDbSt.close()
     targetDbAs.close()
   }
-
-  protected def assertCount[T <: AbstractTable[_]](tq: TableQuery[T], expected: Long): Unit = {
-    import profile.api._
-    assert(Await.result(targetDbSt.run(tq.size.result), Duration.Inf) === expected)
-    assert(Await.result(targetDbAs.run(tq.size.result), Duration.Inf) === expected)
-  }
-
-  // Helper to get around intelliJ warnings, technically it could compile just with the Long version
-  protected def assertThat(action: DBIOAction[Option[Int], profile.api.NoStream, Effect.Read], expected: Long): Unit = {
-    assert(Await.result(targetDbSt.run(action), Duration.Inf) === Some(expected))
-    assert(Await.result(targetDbAs.run(action), Duration.Inf) === Some(expected))
-  }
-
-  protected def assertResult[T](action: DBIOAction[T, profile.api.NoStream, Effect.Read], expected: T): Unit = {
-    assert(Await.result(targetDbSt.run(action), Duration.Inf) === expected)
-    assert(Await.result(targetDbAs.run(action), Duration.Inf) === expected)
-  }
-
-  protected def assertThatLong(action: DBIOAction[Option[Long], profile.api.NoStream, Effect.Read], expected: Long): Unit = {
-    assert(Await.result(targetDbSt.run(action), Duration.Inf) === Some(expected))
-    assert(Await.result(targetDbAs.run(action), Duration.Inf) === Some(expected))
-  }
-
-  protected def createDockerContainers(): Unit
 }

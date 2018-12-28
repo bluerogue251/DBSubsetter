@@ -2,8 +2,9 @@ package e2e.crossschema
 
 import e2e.{AbstractEndToEndTest, SlickSetup}
 import trw.dbsubsetter.db.Table
+import util.assertion.AssertionUtil
 
-trait CrossSchemaTestCases extends AbstractEndToEndTest with CrossSchemaDDL with SlickSetup {
+trait CrossSchemaTestCases extends AbstractEndToEndTest with CrossSchemaDDL with SlickSetup with AssertionUtil {
   val dataSetName = "cross_schema"
 
   import profile.api._

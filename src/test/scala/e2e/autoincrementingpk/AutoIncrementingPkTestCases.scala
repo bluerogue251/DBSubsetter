@@ -1,8 +1,9 @@
 package e2e.autoincrementingpk
 
 import e2e.{AbstractEndToEndTest, SlickSetup}
+import util.assertion.AssertionUtil
 
-trait AutoIncrementingPkTestCases extends AbstractEndToEndTest with AutoIncrementingPkDDL with SlickSetup {
+trait AutoIncrementingPkTestCases extends AbstractEndToEndTest with AutoIncrementingPkDDL with SlickSetup with AssertionUtil {
   val dataSetName = "autoincrementing_pk"
 
   import profile.api._

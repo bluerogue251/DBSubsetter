@@ -1,11 +1,12 @@
 package e2e.circulardep
 
 import e2e.{AbstractEndToEndTest, SlickSetup}
+import util.assertion.AssertionUtil
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
-trait CircularDepTestCases extends AbstractEndToEndTest with CircularDepDDL with SlickSetup {
+trait CircularDepTestCases extends AbstractEndToEndTest with CircularDepDDL with SlickSetup with AssertionUtil {
   val dataSetName = "circular_dep"
 
   import profile.api._
