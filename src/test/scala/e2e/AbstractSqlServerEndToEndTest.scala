@@ -5,7 +5,7 @@ import util.db._
 import scala.sys.process._
 
 abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest[SqlServerDatabase] {
-  override val profile = slick.jdbc.SQLServerProfile
+  override protected val profile = slick.jdbc.SQLServerProfile
 
   protected def testName: String
 

@@ -1,9 +1,10 @@
 package e2e.fkreferencenonpk
 
-import e2e.{AbstractEndToEndTest, SlickSetup}
+import e2e.SlickSetup
+import org.scalatest.FunSuiteLike
 import util.assertion.AssertionUtil
 
-trait FkReferenceNonPkTestCases extends AbstractEndToEndTest with FkReferenceNonPkDDL with SlickSetup with AssertionUtil {
+trait FkReferenceNonPkTestCases extends FunSuiteLike with FkReferenceNonPkDDL with SlickSetup with AssertionUtil {
 
   import profile.api._
 

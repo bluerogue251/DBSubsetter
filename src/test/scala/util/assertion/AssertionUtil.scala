@@ -2,7 +2,6 @@ package util.assertion
 
 import org.scalatest.Assertions
 import slick.dbio.{DBIOAction, Effect}
-import slick.jdbc.JdbcBackend
 import slick.lifted.{AbstractTable, TableQuery}
 
 import scala.concurrent.Await
@@ -11,8 +10,8 @@ import scala.concurrent.duration.Duration
 trait AssertionUtil extends Assertions {
 
   val profile: slick.jdbc.JdbcProfile
-  def targetSingleThreadedSlick: JdbcBackend#DatabaseDef
-  def targetAkkaStreamsSlick: JdbcBackend#DatabaseDef
+  def targetSingleThreadedSlick: profile.backend.DatabaseDef
+  def targetAkkaStreamsSlick: profile.backend.DatabaseDef
 
   final def assertCount[T <: AbstractTable[_]](tq: TableQuery[T], expected: Long): Unit = {
     import profile.api._
