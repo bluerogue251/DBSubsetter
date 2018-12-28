@@ -2,10 +2,11 @@ package e2e.pktypes
 
 import java.util.UUID
 
-import e2e.{AbstractEndToEndTest, SlickSetup}
+import e2e.SlickSetup
+import org.scalatest.FunSuiteLike
 import util.assertion.AssertionUtil
 
-trait PkTypesTestCases extends AbstractEndToEndTest with PkTypesDDL with SlickSetup with AssertionUtil {
+trait PkTypesTestCases extends FunSuiteLike with PkTypesDDL with SlickSetup with AssertionUtil {
   val dataSetName = "pk_types"
 
   import profile.api._

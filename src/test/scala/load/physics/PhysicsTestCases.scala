@@ -1,12 +1,13 @@
 package load.physics
 
-import e2e.{AbstractEndToEndTest, SlickSetupDDL}
+import e2e.SlickSetupDDL
+import org.scalatest.FunSuiteLike
 import util.assertion.AssertionUtil
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
-trait PhysicsTestCases extends AbstractEndToEndTest with PhysicsDDL with SlickSetupDDL with AssertionUtil {
+trait PhysicsTestCases extends FunSuiteLike with PhysicsDDL with SlickSetupDDL with AssertionUtil {
 
   import profile.api._
 

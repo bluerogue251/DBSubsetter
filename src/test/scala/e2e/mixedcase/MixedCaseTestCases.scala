@@ -1,9 +1,10 @@
 package e2e.mixedcase
 
-import e2e.{AbstractEndToEndTest, SlickSetup}
+import e2e.SlickSetup
+import org.scalatest.FunSuiteLike
 import util.assertion.AssertionUtil
 
-trait MixedCaseTestCases extends AbstractEndToEndTest with MixedCaseDDL with SlickSetup with AssertionUtil {
+trait MixedCaseTestCases extends FunSuiteLike with MixedCaseDDL with SlickSetup with AssertionUtil {
   val dataSetName = "mIXED_case_DB"
 
   import profile.api._
