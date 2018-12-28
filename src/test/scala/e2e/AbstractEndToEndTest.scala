@@ -1,46 +1,35 @@
 package e2e
 
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
-import slick.jdbc.JdbcBackend
 import trw.dbsubsetter.config.{CommandLineParser, Config}
 import trw.dbsubsetter.db.{SchemaInfo, SchemaInfoRetrieval}
 import trw.dbsubsetter.workflow.BaseQueries
 import trw.dbsubsetter.{ApplicationAkkaStreams, ApplicationSingleThreaded}
+import util.db.DatabaseContainerSet
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
-  protected def originPort: Int
 
-  protected def makeConnStr(port: Int, dbName: String): String
+  protected val profile: slick.jdbc.JdbcProfile
+
+  protected def createContainers(): DatabaseContainerSet
+
+  protected var containers: DatabaseContainerSet
+
+  protected def prepareOriginDb(): Unit
+
+  protected def prepareTargetDbs(): Unit
 
   protected def programArgs: Array[String]
 
-  protected def createDockerContainers(): Unit
-
-  protected def setupOriginDb(): Unit
-
-  protected def setupOriginDDL(): Unit
-
-  protected def setupOriginDML(): Unit
-
-  protected def setupTargetDbs(): Unit
-
   protected def postSubset(): Unit
-  //
-  // The following is generic enough that it usually does not need to be overridden
-  //
-  lazy val originDbName: String = dataSetName
-  lazy val targetSingleThreadedDbName: String = originDbName
-  lazy val targetAkkaStreamsDbName: String = originDbName
-  var originDb: JdbcBackend#DatabaseDef = _
-  var targetDbSt: JdbcBackend#DatabaseDef = _
-  var targetDbAs: JdbcBackend#DatabaseDef = _
-  lazy val targetSingleThreadedPort: Int = originPort + 1
-  lazy val targetAkkaStreamsPort: Int = originPort + 2
-  lazy val targetSingleThreadedConnString: String = makeConnStr(targetSingleThreadedPort, targetSingleThreadedDbName)
-  lazy val targetAkkaStreamsConnString: String = makeConnStr(targetAkkaStreamsPort, targetAkkaStreamsDbName)
+
+  var originSlick: profile.backend.DatabaseDef
+  var targetSingleThreadedSlick: profile.backend.DatabaseDef
+  var targetAkkaStreamsSlick: profile.backend.DatabaseDef
+
   var singleThreadedRuntimeMillis: Long = 0
   var akkStreamsRuntimeMillis: Long = 0
   var schemaInfo: SchemaInfo = _
@@ -48,45 +37,83 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
   override protected def beforeAll(): Unit = {
     super.beforeAll()
 
-    createDockerContainers()
-    setupOriginDb()
+    /*
+     * Spin up docker containers for the origin and target DBs
+     */
+    containers = createContainers()
 
-    val originConnString = makeConnStr(originPort, originDbName)
-    val sharedArgs = Array("--originDbConnStr", originConnString, "--originDbParallelism", "10", "--targetDbParallelism", "10")
-    val stArgs = programArgs ++ sharedArgs ++ Array("--targetDbConnStr", targetSingleThreadedConnString)
-    val asArgs = programArgs ++ sharedArgs ++ Array("--targetDbConnStr", targetAkkaStreamsConnString)
-    val singleThreadedConfig = CommandLineParser.parser.parse(stArgs, Config()).get
-    val akkaStreamsConfig = CommandLineParser.parser.parse(asArgs, Config()).get
+    /*
+     * Create slick connections to the origin and target DBs. These connections are utilities for testing
+     * purposes such as populating the origin DB with DDL/DML, querying the target DBs after subsetting
+     * to make assertions about their contents, etc.
+     */
+    originSlick = profile.backend.Database.forURL(containers.origin.db.connectionString)
+    targetSingleThreadedSlick = profile.backend.Database.forURL(containers.targetSingleThreaded.db.connectionString)
+    targetAkkaStreamsSlick = profile.backend.Database.forURL(containers.targetAkkaStreams.db.connectionString)
 
-    originDb = profile.backend.Database.forURL(singleThreadedConfig.originDbConnectionString)
-    setupOriginDDL()
-    setupOriginDML()
-    setupTargetDbs()
-    targetDbSt = profile.backend.Database.forURL(singleThreadedConfig.targetDbConnectionString)
-    targetDbAs = profile.backend.Database.forURL(akkaStreamsConfig.targetDbConnectionString)
+    /*
+     * Set up the DDL and DML in the origin DB
+     */
+    prepareOriginDb()
 
-    // `schemaInfo` and `baseQueries` will be the same regardless of whether we use `singleThreadedConfig` or `akkaStreamsConfig`
-    schemaInfo = SchemaInfoRetrieval.getSchemaInfo(singleThreadedConfig)
-    val baseQueries = BaseQueries.get(singleThreadedConfig, schemaInfo)
+    /*
+     * Set up the DDL (but NOT the DML) in the target DB
+     */
+    prepareTargetDbs()
 
-    val startSingleThreaded = System.nanoTime()
-    ApplicationSingleThreaded.run(singleThreadedConfig, schemaInfo, baseQueries)
-    singleThreadedRuntimeMillis = (System.nanoTime() - startSingleThreaded) / 1000000
-    println(s"Single Threaded Took $singleThreadedRuntimeMillis milliseconds")
 
-    val startAkkaStreams = System.nanoTime()
-    val futureResult = ApplicationAkkaStreams.run(akkaStreamsConfig, schemaInfo, baseQueries)
-    Await.result(futureResult, Duration.Inf)
-    akkStreamsRuntimeMillis = (System.nanoTime() - startAkkaStreams) / 1000000
-    println(s"Akka Streams Took $akkStreamsRuntimeMillis milliseconds")
+    /*
+     * Run subsetting to copy a subset of the DML from the origin DB to the target DBs
+     */
+    runSingleThreaded()
+    runAkkaStreams()
 
+    /*
+     * Do any steps necessary after subsetting, such as re-enabling foreign keys, re-adding indices
+     * to the target DBs, etc.
+     */
     postSubset()
   }
 
   override protected def afterAll(): Unit = {
     super.afterAll()
-    originDb.close()
-    targetDbSt.close()
-    targetDbAs.close()
+    originSlick.close()
+    targetSingleThreadedSlick.close()
+    targetAkkaStreamsSlick.close()
+  }
+
+  private def runSingleThreaded(): Unit = {
+    val args: Array[String] = Array(
+      "--originDbConnStr", containers.origin.db.connectionString,
+      "--targetDbConnStr", containers.targetSingleThreaded.db.connectionString
+    )
+
+    val config: Config = CommandLineParser.parser.parse(args, Config()).get
+    schemaInfo = SchemaInfoRetrieval.getSchemaInfo(config)
+    val baseQueries = BaseQueries.get(config, schemaInfo)
+
+    val startSingleThreaded = System.nanoTime()
+    ApplicationSingleThreaded.run(config, schemaInfo, baseQueries)
+    singleThreadedRuntimeMillis = (System.nanoTime() - startSingleThreaded) / 1000000
+    println(s"Single Threaded Took $singleThreadedRuntimeMillis milliseconds")
+  }
+
+  private def runAkkaStreams(): Unit = {
+    val args: Array[String] = Array(
+      "--originDbConnStr", containers.origin.db.connectionString,
+      "--originDbParallelism", "10",
+      "--targetDbParallelism", "10",
+      "--targetDbConnStr", containers.targetAkkaStreams.db.connectionString
+    )
+
+    val config: Config = CommandLineParser.parser.parse(args, Config()).get
+    schemaInfo = SchemaInfoRetrieval.getSchemaInfo(config)
+    val baseQueries = BaseQueries.get(config, schemaInfo)
+
+    val startAkkaStreams = System.nanoTime()
+    val futureResult = ApplicationAkkaStreams.run(config, schemaInfo, baseQueries)
+    Await.result(futureResult, Duration.Inf)
+    akkStreamsRuntimeMillis = (System.nanoTime() - startAkkaStreams) / 1000000
+    println(s"Akka Streams Took $akkStreamsRuntimeMillis milliseconds")
   }
 }

@@ -15,11 +15,11 @@ abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest {
 
   override def makeConnStr(port: Int, dbName: String): String = s"jdbc:sqlserver://localhost:$port;databaseName=$dbName;user=sa;password=MsSqlServerLocal1"
 
-  override def setupOriginDb(): Unit = {
+  override def prepareOriginDb(): Unit = {
     s"./src/test/util/create_sqlserver_db.sh $containerName $dataSetName".!!
   }
 
-  override def setupTargetDbs(): Unit = {
+  override def prepareTargetDbs(): Unit = {
     s"./src/test/util/sync_sqlserver_origin_to_target.sh $containerName $dataSetName $targetSingleThreadedDbName".!!
     s"./src/test/util/sync_sqlserver_origin_to_target.sh $containerName $dataSetName $targetAkkaStreamsDbName".!!
   }
@@ -29,7 +29,7 @@ abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest {
     s"./src/test/util/sqlserver_post_subset.sh $containerName $targetAkkaStreamsDbName".!!
   }
 
-  override protected def createDockerContainers(): Unit = {
+  override protected def createContainers(): Unit = {
     ContainerUtil.rm(containerName)
     s"docker create --name $containerName -p $originPort:1433 --env ACCEPT_EULA=Y --env SA_PASSWORD=MsSqlServerLocal1 --env MSSQL_PID=Developer microsoft/mssql-server-linux:2017-CU12 /opt/mssql/bin/sqlservr".!!
     ContainerUtil.start(containerName)

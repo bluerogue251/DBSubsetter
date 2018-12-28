@@ -22,8 +22,8 @@ class PhysicsPostgresqlTest extends AbstractPostgresqlEndToEndTest with PhysicsT
     "--skipPkStore", "public.quantum_data"
   )
 
-  override def setupTargetDbs(): Unit = {
-    super.setupTargetDbs()
+  override def prepareTargetDbs(): Unit = {
+    super.prepareTargetDbs()
     "./src/test/scala/load/physics/copy_domain_data_postgres.sh".!
   }
 

@@ -18,8 +18,8 @@ class CrossSchemaMysqlTest extends AbstractMysqlEndToEndTest with CrossSchemaTes
     super.setupOriginDDL()
   }
 
-  override def setupTargetDbs(): Unit = {
-    super.setupTargetDbs()
+  override def prepareTargetDbs(): Unit = {
+    super.prepareTargetDbs()
 
     s"./src/test/util/create_mysql_db.sh schema_1 $targetSithContainerName".!!
     s"./src/test/util/create_mysql_db.sh schema_2 $targetSithContainerName".!!

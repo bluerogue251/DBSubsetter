@@ -17,9 +17,9 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest {
 
   override def makeConnStr(port: Int, dbName: String): String = s"jdbc:mysql://localhost:$port/$dataSetName?user=root&useSSL=false&rewriteBatchedStatements=true"
 
-  override def setupOriginDb(): Unit = createMySqlDatabase(originContainerName)
+  override def prepareOriginDb(): Unit = createMySqlDatabase(originContainerName)
 
-  override def setupTargetDbs(): Unit = {
+  override def prepareTargetDbs(): Unit = {
     createMySqlDatabase(targetSithContainerName)
     createMySqlDatabase(targetAkstContainerName)
     s"./src/test/util/sync_mysql_origin_to_target.sh $dataSetName $originContainerName $targetSithContainerName".!!
@@ -28,7 +28,7 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest {
 
   override def postSubset(): Unit = {} // No-op
 
-  override protected def createDockerContainers(): Unit = {
+  override protected def createContainers(): Unit = {
     def createAndStart(name: String, port: Int): Unit = {
       ContainerUtil.rm(name)
       s"docker create --name $name -p $port:3306 --env MYSQL_ALLOW_EMPTY_PASSWORD=true mysql:8.0.3".!!

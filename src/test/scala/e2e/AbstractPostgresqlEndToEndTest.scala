@@ -17,9 +17,9 @@ abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest {
 
   override def makeConnStr(p: Int, dbName: String): String = s"jdbc:postgresql://0.0.0.0:$p/$dataSetName?user=postgres"
 
-  override def setupOriginDb(): Unit = createDb(originContainerName)
+  override def prepareOriginDb(): Unit = createDb(originContainerName)
 
-  override def setupTargetDbs(): Unit = {
+  override def prepareTargetDbs(): Unit = {
     createDb(targetSingleThreadedContainerName)
     createDb(targetAkkaStreamsContainerName)
     s"./src/test/util/sync_postgres_origin_to_target.sh $dataSetName $originContainerName $targetSingleThreadedContainerName".!!
@@ -31,7 +31,7 @@ abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest {
     s"./src/test/util/postgres_post_subset.sh $dataSetName $originContainerName $targetAkkaStreamsContainerName".!!
   }
 
-  override protected def createDockerContainers(): Unit = {
+  override protected def createContainers(): Unit = {
     def createAndStart(name: String, port: Int): Unit = {
       ContainerUtil.rm(name)
       s"docker create --name $name -p $port:5432 postgres:9.6.3".!!
