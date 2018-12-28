@@ -1,11 +1,10 @@
 package load.schooldb
 
 import e2e.AbstractSqlServerEndToEndTest
-import load.LoadTest
 
 import scala.sys.process._
 
-class SchoolDbSqlServerTest extends AbstractSqlServerEndToEndTest with SchoolDbTestCases with LoadTest {
+class SchoolDbSqlServerTest extends AbstractSqlServerEndToEndTest with SchoolDbTestCases {
   override protected val port = 5456
 
   override protected val programArgs = Array(

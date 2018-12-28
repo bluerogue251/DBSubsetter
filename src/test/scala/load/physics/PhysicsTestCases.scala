@@ -7,6 +7,7 @@ import util.assertion.AssertionUtil
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
+// TODO: Add back in with LoadTest
 trait PhysicsTestCases extends FunSuiteLike with PhysicsDDL with SlickSetupDDL with AssertionUtil {
 
   import profile.api._

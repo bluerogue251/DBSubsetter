@@ -7,6 +7,7 @@ import util.assertion.AssertionUtil
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
+// TODO add back in LoadTest
 trait SchoolDbTestCases extends FunSuiteLike with SchoolDbDDL with SlickSetupDDL with AssertionUtil {
 
   import profile.api._

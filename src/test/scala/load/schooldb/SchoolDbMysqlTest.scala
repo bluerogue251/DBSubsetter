@@ -1,11 +1,10 @@
 package load.schooldb
 
 import e2e.AbstractMysqlEndToEndTest
-import load.LoadTest
 
 import scala.sys.process._
 
-class SchoolDbMysqlTest extends AbstractMysqlEndToEndTest with SchoolDbTestCases with LoadTest {
+class SchoolDbMysqlTest extends AbstractMysqlEndToEndTest with SchoolDbTestCases {
   override protected val originPort = 5450
 
   override protected val programArgs = Array(

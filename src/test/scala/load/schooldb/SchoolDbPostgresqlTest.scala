@@ -1,14 +1,13 @@
 package load.schooldb
 
 import e2e.AbstractPostgresqlEndToEndTest
-import load.LoadTest
 import slick.dbio.DBIO
 import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
-class SchoolDbPostgresqlTest extends AbstractPostgresqlEndToEndTest with SchoolDbTestCases with LoadTest {
+class SchoolDbPostgresqlTest extends AbstractPostgresqlEndToEndTest with SchoolDbTestCases {
   override protected val originPort = 5453
 
   override protected val programArgs = Array(
