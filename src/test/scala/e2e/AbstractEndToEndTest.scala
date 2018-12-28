@@ -5,19 +5,19 @@ import trw.dbsubsetter.config.{CommandLineParser, Config}
 import trw.dbsubsetter.db.{SchemaInfo, SchemaInfoRetrieval}
 import trw.dbsubsetter.workflow.BaseQueries
 import trw.dbsubsetter.{ApplicationAkkaStreams, ApplicationSingleThreaded}
-import util.db.DatabaseContainerSet
+import util.db.{Database, DatabaseContainerSet}
 import util.docker.ContainerUtil
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
-abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
-
+abstract class AbstractEndToEndTest[T <: Database] extends FunSuite with BeforeAndAfterAll {
+  /*
+   * Concrete test classes must override the following
+   */
   protected val profile: slick.jdbc.JdbcProfile
 
-  protected def createContainers(): DatabaseContainerSet[_]
-
-  protected var containers: DatabaseContainerSet[_]
+  protected def createContainers(): DatabaseContainerSet[T]
 
   protected def prepareOriginDb(): Unit
 
@@ -28,10 +28,17 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
   protected def postSubset(): Unit
 
   /*
-   * Slick testing utility connections
+   * Docker containers holding the origin and target DBs (do not override)
+   */
+  var containers: DatabaseContainerSet[T]
+
+  /*
+   * Slick testing utility connections (do not override)
    */
   var originSlick: profile.backend.DatabaseDef
+
   var targetSingleThreadedSlick: profile.backend.DatabaseDef
+
   var targetAkkaStreamsSlick: profile.backend.DatabaseDef
 
   override protected def beforeAll(): Unit = {
