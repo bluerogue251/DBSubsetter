@@ -32,13 +32,13 @@ abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest[SqlSer
   }
 
   override def prepareTargetDbs(): Unit = {
-    s"./src/test/util/sync_sqlserver_origin_to_target.sh $containerName $dataSetName $targetSingleThreadedDbName".!!
-    s"./src/test/util/sync_sqlserver_origin_to_target.sh $containerName $dataSetName $targetAkkaStreamsDbName".!!
+    s"./src/test/util/sync_sqlserver_origin_to_target.sh ${containers.origin.name} ${containers.origin.db.name} ${containers.targetSingleThreaded.db.name}".!!
+    s"./src/test/util/sync_sqlserver_origin_to_target.sh ${containers.origin.name} ${containers.origin.db.name} ${containers.targetAkkaStreams.db.name}".!!
   }
 
   override def postSubset(): Unit = {
-    s"./src/test/util/sqlserver_post_subset.sh $containerName $targetSingleThreadedDbName".!!
-    s"./src/test/util/sqlserver_post_subset.sh $containerName $targetAkkaStreamsDbName".!!
+    s"./src/test/util/sqlserver_post_subset.sh ${containers.origin.name} ${containers.targetSingleThreaded.db.name}".!!
+    s"./src/test/util/sqlserver_post_subset.sh ${containers.origin.name} ${containers.targetAkkaStreams.db.name}".!!
   }
 
   private def buildContainer(containerName: String, dbName: String, dbPort: Int): SqlServerContainer = {
