@@ -33,9 +33,9 @@ abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest[Postg
   }
 
   override protected def createEmptyDatabases(): Unit = {
-    createDb(containers.origin.db.name)
-    createDb(containers.targetSingleThreaded.db.name)
-    createDb(containers.targetAkkaStreams.db.name)
+    createDb(containers.origin.name)
+    createDb(containers.targetSingleThreaded.name)
+    createDb(containers.targetAkkaStreams.name)
   }
 
   override protected def prepareOriginDDL(): Unit

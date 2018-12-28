@@ -15,13 +15,13 @@ class CrossSchemaPostgresqlTest extends AbstractPostgresqlEndToEndTest with Cros
   )
 
   override def prepareOriginDDL(): Unit = {
-    super.prepareOriginDDL()
-
     val createSchemaStatements: DBIO[Unit] = DBIO.seq(
     sqlu"create schema schema_1",
     sqlu"create schema schema_2",
     sqlu"create schema schema_3"
     )
     Await.ready(originSlick.run(createSchemaStatements), Duration.Inf)
+
+    super.prepareOriginDDL()
   }
 }
