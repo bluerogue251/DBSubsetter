@@ -14,16 +14,13 @@ class CrossSchemaMysqlTest extends AbstractMysqlEndToEndTest with CrossSchemaTes
   )
 
   override def prepareOriginDDL(): Unit = {
-    super.prepareOriginDDL()
-
     s"./src/test/util/create_mysql_db.sh schema_1 ${containers.origin.name}".!!
     s"./src/test/util/create_mysql_db.sh schema_2 ${containers.origin.name}".!!
     s"./src/test/util/create_mysql_db.sh schema_3 ${containers.origin.name}".!!
+    super.prepareOriginDDL()
   }
 
   override def prepareTargetDDL(): Unit = {
-    super.prepareTargetDDL()
-
     s"./src/test/util/create_mysql_db.sh schema_1 ${containers.targetSingleThreaded.name}".!!
     s"./src/test/util/create_mysql_db.sh schema_2 ${containers.targetSingleThreaded.name}".!!
     s"./src/test/util/create_mysql_db.sh schema_3 ${containers.targetSingleThreaded.name}".!!
@@ -37,6 +34,7 @@ class CrossSchemaMysqlTest extends AbstractMysqlEndToEndTest with CrossSchemaTes
     s"./src/test/util/sync_mysql_origin_to_target.sh schema_1 ${containers.origin.name} ${containers.targetAkkaStreams.name}".!!
     s"./src/test/util/sync_mysql_origin_to_target.sh schema_2 ${containers.origin.name} ${containers.targetAkkaStreams.name}".!!
     s"./src/test/util/sync_mysql_origin_to_target.sh schema_3 ${containers.origin.name} ${containers.targetAkkaStreams.name}".!!
+    super.prepareTargetDDL()
   }
 
 }
