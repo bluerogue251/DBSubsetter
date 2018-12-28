@@ -27,14 +27,4 @@ trait CrossSchemaTestCases extends FunSuiteLike with CrossSchemaDDL with SlickSe
     assertCount(Schema3Table, 2)
     assertThat(Schema3Table.map(_.id).sum.result, 7)
   }
-
-  /*
-   * TODO: fix compilation here
-   */
-//  test("ForeignKey.pointsToPk") {
-//    val table = Table("schema_2", "schema_2_table", hasSqlServerAutoIncrement = false, storePks = true)
-//    val fk = schemaInfo.fksFromTable(table)
-//    assert(fk.lengthCompare(1) == 0)
-//    assert(fk.head.pointsToPk)
-//  }
 }

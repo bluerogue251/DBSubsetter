@@ -34,7 +34,6 @@ class CrossSchemaMysqlTest extends AbstractMysqlEndToEndTest with CrossSchemaTes
     s"./src/test/util/sync_mysql_origin_to_target.sh schema_1 ${containers.origin.name} ${containers.targetAkkaStreams.name}".!!
     s"./src/test/util/sync_mysql_origin_to_target.sh schema_2 ${containers.origin.name} ${containers.targetAkkaStreams.name}".!!
     s"./src/test/util/sync_mysql_origin_to_target.sh schema_3 ${containers.origin.name} ${containers.targetAkkaStreams.name}".!!
-    super.prepareTargetDDL()
   }
 
 }
