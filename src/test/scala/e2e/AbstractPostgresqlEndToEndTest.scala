@@ -5,7 +5,7 @@ import util.db._
 import scala.sys.process._
 
 abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest[PostgreSQLDatabase] {
-  override val profile = slick.jdbc.PostgresProfile
+  override protected val profile = slick.jdbc.PostgresProfile
 
   protected def testName: String
 

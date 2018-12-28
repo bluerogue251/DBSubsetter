@@ -1,7 +1,7 @@
 package e2e.basequeries
 
 trait BaseQueriesDDL {
-  val profile: slick.jdbc.JdbcProfile
+  protected val profile: slick.jdbc.JdbcProfile
 
   import profile.api._
 

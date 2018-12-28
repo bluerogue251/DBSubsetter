@@ -9,8 +9,8 @@ trait AutoIncrementingPkTestCases extends FunSuiteLike with AutoIncrementingPkDD
 
   import profile.api._
 
-  override lazy val ddl = schema.create
-  override lazy val dml = new AutoIncrementingPkDML(profile).dbioSeq
+  override protected lazy val ddl = schema.create
+  override protected lazy val dml = new AutoIncrementingPkDML(profile).dbioSeq
 
   test("Correct records were included for main table and their primary keys values are correct") {
     assertCount(AutoincrementingPkTable, 10)
