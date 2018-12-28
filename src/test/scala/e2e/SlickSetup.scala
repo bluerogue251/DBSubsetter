@@ -1,3 +1,5 @@
 package e2e
 
-trait SlickSetup extends SlickSetupDDL with SlickSetupDML
+import util.db.Database
+
+trait SlickSetup[T <: Database] extends SlickSetupDDL[T] with SlickSetupDML[T]

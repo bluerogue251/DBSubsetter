@@ -17,11 +17,15 @@ abstract class AbstractEndToEndTest[T <: Database] extends FunSuite with BeforeA
    */
   protected val profile: slick.jdbc.JdbcProfile
 
-  protected def createContainers(): DatabaseContainerSet[T]
+  protected def startContainers(): DatabaseContainerSet[T]
 
-  protected def prepareOriginDb(): Unit
+  protected def createEmptyDatabases(): Unit
 
-  protected def prepareTargetDbs(): Unit
+  protected def prepareOriginDDL(): Unit
+
+  protected def prepareOriginDML(): Unit
+
+  protected def prepareTargetDDL(): Unit
 
   protected def programArgs: Array[String]
 
@@ -47,7 +51,12 @@ abstract class AbstractEndToEndTest[T <: Database] extends FunSuite with BeforeA
     /*
      * Spin up docker containers for the origin and target DBs
      */
-    containers = createContainers()
+    containers = startContainers()
+
+    /*
+     * Create empty origin and target databases with correct database names
+     */
+    createEmptyDatabases()
 
     /*
      * Create slick connections to the origin and target DBs. These connections are utilities for testing
@@ -61,12 +70,13 @@ abstract class AbstractEndToEndTest[T <: Database] extends FunSuite with BeforeA
     /*
      * Set up the DDL and DML in the origin DB
      */
-    prepareOriginDb()
+    prepareOriginDDL()
+    prepareOriginDML()
 
     /*
      * Set up the DDL (but NOT the DML) in the target DB
      */
-    prepareTargetDbs()
+    prepareTargetDDL()
 
 
     /*

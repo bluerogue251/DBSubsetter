@@ -21,8 +21,8 @@ class SchoolDbMysqlTest extends AbstractMysqlEndToEndTest with SchoolDbTestCases
     super.setupOriginDDL()
   }
 
-  override def prepareTargetDbs(): Unit = {
-    super.prepareTargetDbs()
+  override def prepareTargetDDL(): Unit = {
+    super.prepareTargetDDL()
     s"./src/test/util/create_mysql_db.sh Audit $targetSithContainerName".!!
     s"./src/test/util/sync_mysql_origin_to_target.sh Audit $originContainerName $targetSithContainerName".!!
     s"./src/test/util/create_mysql_db.sh Audit $targetAkstContainerName".!!

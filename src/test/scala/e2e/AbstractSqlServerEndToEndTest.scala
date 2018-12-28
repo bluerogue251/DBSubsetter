@@ -11,7 +11,7 @@ abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest[SqlSer
 
   protected def port: Int
 
-  override protected def createContainers(): DatabaseContainerSet[SqlServerDatabase] = {
+  override protected def startContainers(): DatabaseContainerSet[SqlServerDatabase] = {
     val containerName = s"${testName}_sqlserver"
     DatabaseContainer.startSqlServer(containerName, port)
     Thread.sleep(6000)
@@ -27,16 +27,20 @@ abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest[SqlSer
     new DatabaseContainerSet(originContainer, targetSingleThreadedContainer, targetAkkaStreamsContainer)
   }
 
-  override def prepareOriginDb(): Unit = {
+  override protected def createEmptyDatabases(): Unit = {
     s"./src/test/util/create_sqlserver_db.sh ${containers.origin.name} ${containers.origin.db.name}".!!
   }
 
-  override def prepareTargetDbs(): Unit = {
+  override protected def prepareOriginDDL(): Unit
+
+  override protected def prepareOriginDML(): Unit
+
+  override protected def prepareTargetDDL(): Unit = {
     s"./src/test/util/sync_sqlserver_origin_to_target.sh ${containers.origin.name} ${containers.origin.db.name} ${containers.targetSingleThreaded.db.name}".!!
     s"./src/test/util/sync_sqlserver_origin_to_target.sh ${containers.origin.name} ${containers.origin.db.name} ${containers.targetAkkaStreams.db.name}".!!
   }
 
-  override def postSubset(): Unit = {
+  override protected def postSubset(): Unit = {
     s"./src/test/util/sqlserver_post_subset.sh ${containers.origin.name} ${containers.targetSingleThreaded.db.name}".!!
     s"./src/test/util/sqlserver_post_subset.sh ${containers.origin.name} ${containers.targetAkkaStreams.db.name}".!!
   }

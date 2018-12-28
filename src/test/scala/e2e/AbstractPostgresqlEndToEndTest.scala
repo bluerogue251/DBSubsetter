@@ -11,7 +11,7 @@ abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest[Postg
 
   protected def originPort: Int
 
-  override protected def createContainers(): DatabaseContainerSet[PostgreSQLDatabase] = {
+  override protected def startContainers(): DatabaseContainerSet[PostgreSQLDatabase] = {
     val originContainerName = s"${testName}_origin_postgres"
     val targetSingleThreadedContainerName = s"${testName}_target_sith_postgres"
     val targetAkkaStreamsContainerName = s"${testName}_target_akst_postgres"
@@ -32,18 +32,22 @@ abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest[Postg
     new DatabaseContainerSet(originContainer, targetSingleThreadedContainer, targetAkkaStreamsContainer)
   }
 
-  override def prepareOriginDb(): Unit = {
+  override protected def createEmptyDatabases(): Unit = {
     createDb(containers.origin.db.name)
-  }
-
-  override def prepareTargetDbs(): Unit = {
     createDb(containers.targetSingleThreaded.db.name)
     createDb(containers.targetAkkaStreams.db.name)
+  }
+
+  override protected def prepareOriginDDL(): Unit
+
+  override protected def prepareOriginDML(): Unit
+
+  override protected def prepareTargetDDL(): Unit = {
     s"./src/test/util/sync_postgres_origin_to_target.sh $testName ${containers.origin.name} ${containers.targetSingleThreaded.name}".!!
     s"./src/test/util/sync_postgres_origin_to_target.sh $testName ${containers.origin.name} ${containers.targetAkkaStreams.name}".!!
   }
 
-  override def postSubset(): Unit = {
+  override protected def postSubset(): Unit = {
     s"./src/test/util/postgres_post_subset.sh $testName ${containers.origin.name} ${containers.targetSingleThreaded.name}".!!
     s"./src/test/util/postgres_post_subset.sh $testName ${containers.origin.name} ${containers.targetAkkaStreams.name}".!!
   }

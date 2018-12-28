@@ -11,7 +11,7 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest[MySqlDatab
 
   protected def originPort: Int
 
-  override protected def createContainers(): DatabaseContainerSet[MySqlDatabase] = {
+  override protected def startContainers(): DatabaseContainerSet[MySqlDatabase] = {
     val originContainerName = s"${testName}_origin_mysql"
     val targetSingleThreadedContainerName = s"${testName}_target_single_threaded_mysql"
     val targetAkkaStreamsContainerName = s"${testName}_target_akka_streams_mysql"
@@ -32,13 +32,17 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest[MySqlDatab
     new DatabaseContainerSet(originContainer, targetSingleThreadedContainer, targetAkkaStreamsContainer)
   }
 
-  override protected def prepareOriginDb(): Unit = {
+  override protected def createEmptyDatabases(): Unit = {
     createMySqlDatabase(containers.origin.name)
-  }
-
-  override protected def prepareTargetDbs(): Unit = {
     createMySqlDatabase(containers.targetSingleThreaded.name)
     createMySqlDatabase(containers.targetAkkaStreams.name)
+  }
+
+  override protected def prepareOriginDDL(): Unit
+
+  override protected def prepareOriginDML(): Unit
+
+  override protected def prepareTargetDDL(): Unit = {
     s"./src/test/util/sync_mysql_origin_to_target.sh $testName ${containers.origin.name} ${containers.targetSingleThreaded.name}".!!
     s"./src/test/util/sync_mysql_origin_to_target.sh $testName ${containers.origin.name} ${containers.targetAkkaStreams.name}".!!
   }
