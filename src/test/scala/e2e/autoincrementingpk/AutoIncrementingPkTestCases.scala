@@ -1,16 +1,16 @@
 package e2e.autoincrementingpk
 
-import e2e.SlickSetup
 import org.scalatest.FunSuiteLike
 import util.assertion.AssertionUtil
 
-trait AutoIncrementingPkTestCases extends FunSuiteLike with AutoIncrementingPkDDL with SlickSetup with AssertionUtil {
+trait AutoIncrementingPkTestCases extends FunSuiteLike with AssertionUtil {
   val testName = "autoincrementing_pk"
 
-  import profile.api._
+  protected def ddl: AutoIncrementingPkDDL = {
 
-  override protected lazy val ddl = schema.create
-  override protected lazy val dml = new AutoIncrementingPkDML(profile).dbioSeq
+  }
+
+  override protected lazy val dml = new AutoIncrementingPkDML(ddl).dbioSeq
 
   test("Correct records were included for main table and their primary keys values are correct") {
     assertCount(AutoincrementingPkTable, 10)

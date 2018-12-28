@@ -1,15 +1,13 @@
 package e2e.autoincrementingpk
 
-import slick.jdbc.JdbcProfile
+class AutoIncrementingPkDML(ddl: AutoIncrementingPkDDL) {
 
-class AutoIncrementingPkDML(val profile: JdbcProfile) extends AutoIncrementingPkDDL {
-
-  import profile.api._
+  import ddl.profile.api._
 
   def dbioSeq = {
     slick.dbio.DBIO.seq(
-      AutoincrementingPkTable ++= (1 to 20).map(i => AutoincrementingPkTableRow(i, i.toString)),
-      OtherAutoincrementingPkTable ++= (1 to 20).map(i => OtherAutoincrementingPkTableRow(i, i.toString))
+      ddl.AutoincrementingPkTable ++= (1 to 20).map(i => ddl.AutoincrementingPkTableRow(i, i.toString)),
+      ddl.OtherAutoincrementingPkTable ++= (1 to 20).map(i => ddl.OtherAutoincrementingPkTableRow(i, i.toString))
     )
   }
 }
