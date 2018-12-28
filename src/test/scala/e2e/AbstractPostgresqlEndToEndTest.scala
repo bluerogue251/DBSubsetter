@@ -1,57 +1,63 @@
 package e2e
 
-import util.docker.ContainerUtil
+import util.db._
 
 import scala.sys.process._
 
-abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest {
-  override val profile = slick.jdbc.PostgresProfile
+abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest[PostgreSQLDatabase] {
+  override protected val profile = slick.jdbc.PostgresProfile
 
-  def dataSetName: String
+  protected def testName: String
 
-  protected def originContainerName = s"${dataSetName}_origin_postgres"
+  protected def originPort: Int
 
-  private def targetSingleThreadedContainerName = s"${dataSetName}_target_sith_postgres"
+  override protected def startContainers(): DatabaseContainerSet[PostgreSQLDatabase] = {
+    val originContainerName = s"${testName}_origin_postgres"
+    val targetSingleThreadedContainerName = s"${testName}_target_sith_postgres"
+    val targetAkkaStreamsContainerName = s"${testName}_target_akst_postgres"
 
-  private def targetAkkaStreamsContainerName = s"${dataSetName}_target_akst_postgres"
+    val targetSingleThreadedPort: Int = originPort + 1
+    val targetAkkaStreamsPort: Int = originPort + 2
 
-  override def makeConnStr(p: Int, dbName: String): String = s"jdbc:postgresql://0.0.0.0:$p/$dataSetName?user=postgres"
+    DatabaseContainer.startPostgreSQL(originContainerName, originPort)
+    DatabaseContainer.startPostgreSQL(targetSingleThreadedContainerName, targetSingleThreadedPort)
+    DatabaseContainer.startPostgreSQL(targetAkkaStreamsContainerName, targetAkkaStreamsPort)
 
-  override def setupOriginDb(): Unit = createDb(originContainerName)
-
-  override def setupTargetDbs(): Unit = {
-    createDb(targetSingleThreadedContainerName)
-    createDb(targetAkkaStreamsContainerName)
-    s"./src/test/util/sync_postgres_origin_to_target.sh $dataSetName $originContainerName $targetSingleThreadedContainerName".!!
-    s"./src/test/util/sync_postgres_origin_to_target.sh $dataSetName $originContainerName $targetAkkaStreamsContainerName".!!
-  }
-
-  override def postSubset(): Unit = {
-    s"./src/test/util/postgres_post_subset.sh $dataSetName $originContainerName $targetSingleThreadedContainerName".!!
-    s"./src/test/util/postgres_post_subset.sh $dataSetName $originContainerName $targetAkkaStreamsContainerName".!!
-  }
-
-  override protected def createDockerContainers(): Unit = {
-    def createAndStart(name: String, port: Int): Unit = {
-      ContainerUtil.rm(name)
-      s"docker create --name $name -p $port:5432 postgres:9.6.3".!!
-      ContainerUtil.start(name)
-    }
-
-    createAndStart(originContainerName, originPort)
-    createAndStart(targetSingleThreadedContainerName, targetSingleThreadedPort)
-    createAndStart(targetAkkaStreamsContainerName, targetAkkaStreamsPort)
     Thread.sleep(5000)
+
+    val originContainer = buildContainer(originContainerName, testName, originPort)
+    val targetSingleThreadedContainer = buildContainer(targetSingleThreadedContainerName, testName, targetSingleThreadedPort)
+    val targetAkkaStreamsContainer = buildContainer(targetAkkaStreamsContainerName, testName, targetAkkaStreamsPort)
+
+    new DatabaseContainerSet(originContainer, targetSingleThreadedContainer, targetAkkaStreamsContainer)
+  }
+
+  override protected def createEmptyDatabases(): Unit = {
+    createDb(containers.origin.name)
+    createDb(containers.targetSingleThreaded.name)
+    createDb(containers.targetAkkaStreams.name)
+  }
+
+  override protected def prepareOriginDDL(): Unit
+
+  override protected def prepareOriginDML(): Unit
+
+  override protected def prepareTargetDDL(): Unit = {
+    s"./src/test/util/sync_postgres_origin_to_target.sh $testName ${containers.origin.name} ${containers.targetSingleThreaded.name}".!!
+    s"./src/test/util/sync_postgres_origin_to_target.sh $testName ${containers.origin.name} ${containers.targetAkkaStreams.name}".!!
+  }
+
+  override protected def postSubset(): Unit = {
+    s"./src/test/util/postgres_post_subset.sh $testName ${containers.origin.name} ${containers.targetSingleThreaded.name}".!!
+    s"./src/test/util/postgres_post_subset.sh $testName ${containers.origin.name} ${containers.targetAkkaStreams.name}".!!
+  }
+
+  private def buildContainer(containerName: String, dbName: String, dbPort: Int): PostgreSQLContainer = {
+    val db: PostgreSQLDatabase = new PostgreSQLDatabase(dbName, dbPort)
+    new PostgreSQLContainer(containerName, db)
   }
 
   private def createDb(dockerContainer: String): Unit = {
-    s"docker exec $dockerContainer createdb --user postgres $dataSetName".!!
-  }
-
-  override protected def afterAll(): Unit = {
-    super.afterAll()
-    ContainerUtil.rm(originContainerName)
-    ContainerUtil.rm(targetSingleThreadedContainerName)
-    ContainerUtil.rm(targetAkkaStreamsContainerName)
+    s"docker exec $dockerContainer createdb --user postgres $testName".!!
   }
 }

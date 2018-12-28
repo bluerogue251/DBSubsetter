@@ -1,10 +1,11 @@
 package e2e.selfreferencing
 
-import e2e.{AbstractEndToEndTest, SlickSetup}
+import e2e.SlickSetup
+import org.scalatest.FunSuiteLike
 import util.assertion.AssertionUtil
 
-trait SelfReferencingTestCases extends AbstractEndToEndTest with SelfReferencingDDL with SlickSetup with AssertionUtil {
-  val dataSetName = "self_referencing"
+trait SelfReferencingTestCases extends FunSuiteLike with SelfReferencingDDL with SlickSetup with AssertionUtil {
+  val testName = "self_referencing"
 
   import profile.api._
 

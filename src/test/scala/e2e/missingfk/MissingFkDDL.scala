@@ -2,7 +2,7 @@ package e2e.missingfk
 
 
 trait MissingFkDDL {
-  val profile: slick.jdbc.JdbcProfile
+  protected val profile: slick.jdbc.JdbcProfile
   import profile.api._
 
   lazy val schema: profile.SchemaDescription = Array(Table1.schema, Table2.schema, Table3.schema, Table4.schema, Table5.schema, TableA.schema, TableB.schema, TableC.schema, TableD.schema).reduceLeft(_ ++ _)

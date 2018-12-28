@@ -1,13 +1,13 @@
 package load.physics
 
 import e2e.AbstractPostgresqlEndToEndTest
-import load.LoadTest
 
 import scala.sys.process._
 
-class PhysicsPostgresqlTest extends AbstractPostgresqlEndToEndTest with PhysicsTestCases with LoadTest {
-  override val originPort = 5573
-  override val programArgs = Array(
+class PhysicsPostgresqlTest extends AbstractPostgresqlEndToEndTest with PhysicsTestCases {
+  override protected val originPort = 5573
+
+  override protected val programArgs = Array(
     "--schemas", "public",
     "--baseQuery", "public.scientists ::: id in (2) ::: includeChildren",
     //    TODO: fix so that some experiment plans have no scientist. Then use this base query to test auto-skipPkStore calculations
@@ -22,12 +22,13 @@ class PhysicsPostgresqlTest extends AbstractPostgresqlEndToEndTest with PhysicsT
     "--skipPkStore", "public.quantum_data"
   )
 
-  override def setupTargetDbs(): Unit = {
-    super.setupTargetDbs()
+  override protected def prepareTargetDDL(): Unit = {
+    super.prepareTargetDDL()
     "./src/test/scala/load/physics/copy_domain_data_postgres.sh".!
   }
 
-  override val singleThreadedRuntimeThreshold: Long = 400000
-
-  override val akkaStreamsRuntimeThreshold: Long = 2600000
+// TODO: put back when we reintroduce load tests
+//  override val singleThreadedRuntimeThreshold: Long = 400000
+//
+//  override val akkaStreamsRuntimeThreshold: Long = 2600000
 }

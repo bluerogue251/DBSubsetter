@@ -1,15 +1,16 @@
 package e2e.missingfk
 
-import e2e.{AbstractEndToEndTest, SlickSetup}
+import e2e.SlickSetup
+import org.scalatest.FunSuiteLike
 import util.assertion.AssertionUtil
 
-trait MissingFkTestCases extends AbstractEndToEndTest with MissingFkDDL with SlickSetup with AssertionUtil {
+trait MissingFkTestCases extends FunSuiteLike with MissingFkDDL with SlickSetup with AssertionUtil {
   import profile.api._
 
   override val ddl = schema.create
   override val dml = new MissingFkDML(profile).dbioSeq
 
-  val dataSetName = "missing_fk"
+  val testName = "missing_fk"
 
   test("Correct table_1 records were included") {
     assertCount(Table1, 1)

@@ -1,15 +1,16 @@
 package e2e.basequeries
 
-import e2e.{AbstractEndToEndTest, SlickSetup}
+import e2e.SlickSetup
+import org.scalatest.FunSuiteLike
 import util.assertion.AssertionUtil
 
-trait BaseQueriesTestCases extends AbstractEndToEndTest with BaseQueriesDDL with SlickSetup with AssertionUtil {
+trait BaseQueriesTestCases extends FunSuiteLike with BaseQueriesDDL with SlickSetup with AssertionUtil {
   import profile.api._
 
   override val ddl = schema.create
   override val dml = new BaseQueriesDML(profile).dbioSeq
 
-  val dataSetName = "base_queries"
+  val testName = "base_queries"
 
   test("Correct base_table records were included") {
     assertCount(BaseTable, 10)

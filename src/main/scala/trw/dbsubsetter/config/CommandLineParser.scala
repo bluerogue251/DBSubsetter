@@ -67,7 +67,6 @@ object CommandLineParser {
 
     opt[Int]("originDbParallelism")
       .valueName("<int>")
-      .required()
       .action((dbp, c) => c.copy(originDbParallelism = dbp))
       .text(
         """Number of concurrent connections to the full-size origin DB
@@ -76,7 +75,6 @@ object CommandLineParser {
 
     opt[Int]("targetDbParallelism")
       .valueName("<int>")
-      .required()
       .action((dbp, c) => c.copy(targetDbParallelism = dbp))
       .text(
         """Number of concurrent connections to the smaller target DB

@@ -5,11 +5,16 @@ import slick.dbio.{DBIOAction, Effect, NoStream}
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
-trait SlickSetupDDL extends AbstractEndToEndTest {
-  val ddl: DBIOAction[Unit, NoStream, Effect.Schema]
+trait SlickSetupDDL {
 
-  override def setupOriginDDL(): Unit = {
-    val ddlFut = originDb.run(ddl)
+  protected val profile: slick.jdbc.JdbcProfile
+
+  protected def originSlick: profile.backend.DatabaseDef
+
+  protected def ddl: DBIOAction[Unit, NoStream, Effect.Schema]
+
+  protected def prepareOriginDDL(): Unit = {
+    val ddlFut = originSlick.run(ddl)
     Await.result(ddlFut, Duration.Inf)
   }
 }

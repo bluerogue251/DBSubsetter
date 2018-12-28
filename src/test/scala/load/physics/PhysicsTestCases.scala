@@ -1,33 +1,37 @@
 package load.physics
 
-import e2e.{AbstractEndToEndTest, SlickSetupDDL}
+import e2e.SlickSetupDDL
+import org.scalatest.FunSuiteLike
 import util.assertion.AssertionUtil
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
-trait PhysicsTestCases extends AbstractEndToEndTest with PhysicsDDL with SlickSetupDDL with AssertionUtil {
+// TODO: Add back in with LoadTest
+trait PhysicsTestCases extends FunSuiteLike with PhysicsDDL with SlickSetupDDL with AssertionUtil {
+
+  protected val testName = "physics"
 
   import profile.api._
 
   override val ddl = schema.create
 
-  override def setupOriginDML(): Unit = {
+  protected def prepareOriginDML(): Unit = {
     val customDml = new PhysicsDML(profile)
 
-    val dmlFut1 = originDb.run(customDml.initialInserts)
+    val dmlFut1 = originSlick.run(customDml.initialInserts)
     Await.result(dmlFut1, Duration.Inf)
-    val fut2 = originDb.run(DBIO.seq(customDml.particleDomainInserts: _*))
+    val fut2 = originSlick.run(DBIO.seq(customDml.particleDomainInserts: _*))
     Await.result(fut2, Duration.Inf)
-    val fut3 = originDb.run(DBIO.seq(customDml.quantumDomainInserts: _*))
+    val fut3 = originSlick.run(DBIO.seq(customDml.quantumDomainInserts: _*))
     Await.result(fut3, Duration.Inf)
-    val fut4 = originDb.run(DBIO.seq(customDml.gravitationalWaveDomainInserts: _*))
+    val fut4 = originSlick.run(DBIO.seq(customDml.gravitationalWaveDomainInserts: _*))
     Await.result(fut4, Duration.Inf)
-    val fut5 = originDb.run(DBIO.seq(customDml.particleColliderDataInserts: _*))
+    val fut5 = originSlick.run(DBIO.seq(customDml.particleColliderDataInserts: _*))
     Await.result(fut5, Duration.Inf)
-    val fut6 = originDb.run(DBIO.seq(customDml.quantumDataInserts: _*))
+    val fut6 = originSlick.run(DBIO.seq(customDml.quantumDataInserts: _*))
     Await.result(fut6, Duration.Inf)
-    val fut7 = originDb.run(DBIO.seq(customDml.gravitationalWaveDataInserts: _*))
+    val fut7 = originSlick.run(DBIO.seq(customDml.gravitationalWaveDataInserts: _*))
     Await.result(fut7, Duration.Inf)
 
     import scala.concurrent.ExecutionContext.Implicits.global
@@ -36,7 +40,7 @@ trait PhysicsTestCases extends AbstractEndToEndTest with PhysicsDDL with SlickSe
       (1 to customDml.numParticleColliderData by 50).foreach { i =>
         if ((i - 1) % 100000 == 0) println(s"ParticleCollider-$i")
         val inserts = (i to i + 49).map(i => customDml.particleColliderNotesInserts(i))
-        val f = originDb.run(DBIO.seq(inserts: _*))
+        val f = originSlick.run(DBIO.seq(inserts: _*))
         Await.result(f, Duration.Inf)
       }
     }
@@ -45,7 +49,7 @@ trait PhysicsTestCases extends AbstractEndToEndTest with PhysicsDDL with SlickSe
       (1 to customDml.numQuantumData by 50).foreach { i =>
         if ((i - 1) % 100000 == 0) println(s"Quantum-$i")
         val inserts = (i to i + 49).map(i => customDml.quantumNotesInserts(i))
-        val f = originDb.run(DBIO.seq(inserts: _*))
+        val f = originSlick.run(DBIO.seq(inserts: _*))
         Await.result(f, Duration.Inf)
       }
     }
@@ -54,7 +58,7 @@ trait PhysicsTestCases extends AbstractEndToEndTest with PhysicsDDL with SlickSe
       (1 to customDml.numGravitationalWaveData by 50).foreach { i =>
         if ((i - 1) % 100000 == 0) println(s"GravitationalWave-$i")
         val inserts = (i to i + 49).map(i => customDml.gravitationWaveNotesInserts(i))
-        val f = originDb.run(DBIO.seq(inserts: _*))
+        val f = originSlick.run(DBIO.seq(inserts: _*))
         Await.result(f, Duration.Inf)
       }
     }
@@ -63,8 +67,6 @@ trait PhysicsTestCases extends AbstractEndToEndTest with PhysicsDDL with SlickSe
     Await.result(qdFut, Duration.Inf)
     Await.result(gwFut, Duration.Inf)
   }
-
-  val dataSetName = "physics"
 
   test("Correct research_institutions were included") {
     assertCount(ResearchInstitutions, 1)

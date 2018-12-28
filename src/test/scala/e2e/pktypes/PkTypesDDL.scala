@@ -3,7 +3,7 @@ package e2e.pktypes
 import java.util.UUID
 
 trait PkTypesDDL {
-  val profile: slick.jdbc.JdbcProfile
+  protected val profile: slick.jdbc.JdbcProfile
 
   import profile.api._
 
