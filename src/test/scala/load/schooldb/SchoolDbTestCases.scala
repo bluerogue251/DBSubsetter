@@ -1,11 +1,12 @@
 package load.schooldb
 
 import e2e.{AbstractEndToEndTest, SlickSetupDDL}
+import util.assertion.AssertionUtil
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
-trait SchoolDbTestCases extends AbstractEndToEndTest with SchoolDbDDL with SlickSetupDDL {
+trait SchoolDbTestCases extends AbstractEndToEndTest with SchoolDbDDL with SlickSetupDDL with AssertionUtil {
 
   import profile.api._
 

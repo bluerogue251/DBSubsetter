@@ -3,10 +3,11 @@ package e2e.mysqldatatypes
 import java.io.File
 
 import e2e.AbstractMysqlEndToEndTest
+import util.assertion.AssertionUtil
 
 import scala.sys.process._
 
-class MySqlDataTypesMySqlTest extends AbstractMysqlEndToEndTest {
+class MySqlDataTypesMySqlTest extends AbstractMysqlEndToEndTest with AssertionUtil {
   override val dataSetName = "mysql_data_types"
   override val originPort = 5580
 

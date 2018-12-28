@@ -1,8 +1,9 @@
 package e2e.fkreferencenonpk
 
 import e2e.{AbstractEndToEndTest, SlickSetup}
+import util.assertion.AssertionUtil
 
-trait FkReferenceNonPkTestCases extends AbstractEndToEndTest with FkReferenceNonPkDDL with SlickSetup {
+trait FkReferenceNonPkTestCases extends AbstractEndToEndTest with FkReferenceNonPkDDL with SlickSetup with AssertionUtil {
 
   import profile.api._
 

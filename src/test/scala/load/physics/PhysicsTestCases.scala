@@ -1,11 +1,12 @@
 package load.physics
 
 import e2e.{AbstractEndToEndTest, SlickSetupDDL}
+import util.assertion.AssertionUtil
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
-trait PhysicsTestCases extends AbstractEndToEndTest with PhysicsDDL with SlickSetupDDL {
+trait PhysicsTestCases extends AbstractEndToEndTest with PhysicsDDL with SlickSetupDDL with AssertionUtil {
 
   import profile.api._
 

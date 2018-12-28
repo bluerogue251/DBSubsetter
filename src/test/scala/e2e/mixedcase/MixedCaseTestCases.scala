@@ -1,8 +1,9 @@
 package e2e.mixedcase
 
 import e2e.{AbstractEndToEndTest, SlickSetup}
+import util.assertion.AssertionUtil
 
-trait MixedCaseTestCases extends AbstractEndToEndTest with MixedCaseDDL with SlickSetup {
+trait MixedCaseTestCases extends AbstractEndToEndTest with MixedCaseDDL with SlickSetup with AssertionUtil {
   val dataSetName = "mIXED_case_DB"
 
   import profile.api._
