@@ -1,17 +1,17 @@
 package e2e
 
-import util.db.{DatabaseContainer, MySqlDatabase}
+import util.db.{DatabaseContainer, DatabaseContainerSet, MySqlContainer, MySqlDatabase}
 
 import scala.sys.process._
 
-abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest {
+abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest[MySqlDatabase] {
   override val profile = slick.jdbc.MySQLProfile
 
   def originPort: Int
 
   def testName: String
 
-  override protected def createContainers(): Unit = {
+  override protected def createContainers(): DatabaseContainerSet[MySqlDatabase] = {
     val originContainerName = s"${testName}_origin_mysql"
     val targetSingleThreadedContainerName = s"${testName}_target_single_threaded_mysql"
     val targetAkkaStreamsContainerName = s"${testName}_target_akka_streams_mysql"
@@ -23,25 +23,34 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest {
     DatabaseContainer.startMySql(targetSingleThreadedContainerName, targetSingleThreadedPort)
     DatabaseContainer.startMySql(targetAkkaStreamsContainerName, targetAkkaStreamsPort)
 
+    val originContainer = buildContainer(originContainerName, testName, originPort)
+    val targetSingleThreadedContainer = buildContainer(targetSingleThreadedContainerName, testName, targetSingleThreadedPort)
+    val targetAkkaStreamsContainer = buildContainer(targetAkkaStreamsContainerName, testName, targetAkkaStreamsPort)
+
     Thread.sleep(13000)
+
+    new DatabaseContainerSet(originContainer, targetSingleThreadedContainer, targetAkkaStreamsContainer)
   }
 
-  override def prepareOriginDb(): Unit = {
-    createMySqlDatabase(originContainerName)
+  override protected def prepareOriginDb(): Unit = {
+    createMySqlDatabase(containers.origin.name)
   }
 
-  override def prepareTargetDbs(): Unit = {
-    createMySqlDatabase(targetSithContainerName)
-    createMySqlDatabase(targetAkstContainerName)
-    s"./src/test/util/sync_mysql_origin_to_target.sh $testName $originContainerName $targetSithContainerName".!!
-    s"./src/test/util/sync_mysql_origin_to_target.sh $testName $originContainerName $targetAkstContainerName".!!
+  override protected def prepareTargetDbs(): Unit = {
+    createMySqlDatabase(containers.targetSingleThreaded.name)
+    createMySqlDatabase(containers.targetAkkaStreams.name)
+    s"./src/test/util/sync_mysql_origin_to_target.sh $testName ${containers.origin.name} ${containers.targetSingleThreaded.name}".!!
+    s"./src/test/util/sync_mysql_origin_to_target.sh $testName ${containers.origin.name} ${containers.targetAkkaStreams.name}".!!
   }
 
-  override def postSubset(): Unit = {} // No-op
+  override protected def postSubset(): Unit = {} // No-op
 
-  private def container(containerName: String, dbName: String, dbPort: Int): DatabaseContainer[MySqlDatabase] {
-    return DatabaseContainer
+  private def buildContainer(containerName: String, dbName: String, dbPort: Int): MySqlContainer = {
+    val db: MySqlDatabase = new MySqlDatabase(dbName, dbPort)
+    new MySqlContainer(containerName, db)
   }
 
-  private def createMySqlDatabase(container: String): Unit = s"./src/test/util/create_mysql_db.sh $testName $container".!!
+  private def createMySqlDatabase(container: String): Unit = {
+    s"./src/test/util/create_mysql_db.sh $testName $container".!!
+  }
 }

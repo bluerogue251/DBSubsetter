@@ -1,12 +1,12 @@
 package util.db
 
-import util.docker.{Container, ContainerUtil}
+import util.docker.ContainerUtil
 
 import scala.sys.process._
 
-class DatabaseContainer[T <: Database](container: Container[T]) {
-  def name: String = container.name
-  def db: T = container.process
+trait DatabaseContainer[T <: Database] {
+  def name: String
+  def db: T
 }
 
 object DatabaseContainer {
@@ -28,3 +28,5 @@ object DatabaseContainer {
     ContainerUtil.start(name)
   }
 }
+
+class MySqlContainer(val name: String, val db: MySqlDatabase) extends DatabaseContainer[MySqlDatabase]
