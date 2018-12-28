@@ -34,16 +34,16 @@ abstract class AbstractEndToEndTest[T <: Database] extends FunSuite with BeforeA
   /*
    * Docker containers holding the origin and target DBs (do not override)
    */
-  var containers: DatabaseContainerSet[T]
+  protected var containers: DatabaseContainerSet[T]
 
   /*
    * Slick testing utility connections (do not override)
    */
-  var originSlick: profile.backend.DatabaseDef
+  protected var originSlick: profile.backend.DatabaseDef
 
-  var targetSingleThreadedSlick: profile.backend.DatabaseDef
+  protected var targetSingleThreadedSlick: profile.backend.DatabaseDef
 
-  var targetAkkaStreamsSlick: profile.backend.DatabaseDef
+  protected var targetAkkaStreamsSlick: profile.backend.DatabaseDef
 
   override protected def beforeAll(): Unit = {
     super.beforeAll()
