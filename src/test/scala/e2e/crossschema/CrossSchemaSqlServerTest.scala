@@ -13,9 +13,9 @@ class CrossSchemaSqlServerTest extends AbstractSqlServerEndToEndTest with CrossS
   )
 
   override protected def prepareOriginDDL(): Unit = {
-    super.prepareOriginDDL()
     s"./src/test/util/create_schema_sqlserver.sh ${containers.origin.name} ${containers.origin.db.name} schema_1".!!
     s"./src/test/util/create_schema_sqlserver.sh ${containers.origin.name} ${containers.origin.db.name} schema_2".!!
     s"./src/test/util/create_schema_sqlserver.sh ${containers.origin.name} ${containers.origin.db.name} schema_3".!!
+    super.prepareOriginDDL()
   }
 }
