@@ -111,12 +111,13 @@ abstract class AbstractEndToEndTest[T <: Database] extends FunSuite with BeforeA
   }
 
   private def runSubsetInSingleThreadedMode(): Unit = {
-    val args: Array[String] = Array(
+    val defaultArgs: Array[String] = Array(
       "--originDbConnStr", containers.origin.db.connectionString,
       "--targetDbConnStr", containers.targetSingleThreaded.db.connectionString
     )
+    val finalArgs: Array[String] = defaultArgs ++ programArgs
 
-    val config: Config = CommandLineParser.parser.parse(args, Config()).get
+    val config: Config = CommandLineParser.parser.parse(finalArgs, Config()).get
     val schemaInfo: SchemaInfo = SchemaInfoRetrieval.getSchemaInfo(config)
     val baseQueries = BaseQueries.get(config, schemaInfo)
 
@@ -127,14 +128,15 @@ abstract class AbstractEndToEndTest[T <: Database] extends FunSuite with BeforeA
   }
 
   private def runSubsetInAkkaStreamsMode(): Unit = {
-    val args: Array[String] = Array(
+    val defaultArgs: Array[String] = Array(
       "--originDbConnStr", containers.origin.db.connectionString,
       "--originDbParallelism", "10",
       "--targetDbParallelism", "10",
       "--targetDbConnStr", containers.targetAkkaStreams.db.connectionString
     )
+    val finalArgs: Array[String] = defaultArgs ++ programArgs
 
-    val config: Config = CommandLineParser.parser.parse(args, Config()).get
+    val config: Config = CommandLineParser.parser.parse(finalArgs, Config()).get
     val schemaInfo: SchemaInfo = SchemaInfoRetrieval.getSchemaInfo(config)
     val baseQueries = BaseQueries.get(config, schemaInfo)
 
