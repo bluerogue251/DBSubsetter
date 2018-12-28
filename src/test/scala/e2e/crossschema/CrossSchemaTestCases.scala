@@ -5,7 +5,7 @@ import trw.dbsubsetter.db.Table
 import util.assertion.AssertionUtil
 
 trait CrossSchemaTestCases extends AbstractEndToEndTest with CrossSchemaDDL with SlickSetup with AssertionUtil {
-  val dataSetName = "cross_schema"
+  protected val testName: String = "cross_schema"
 
   import profile.api._
 
