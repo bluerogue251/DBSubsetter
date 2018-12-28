@@ -1,11 +1,31 @@
 package e2e
 
-import util.docker.ContainerUtil
+import util.db._
 
 import scala.sys.process._
 
-abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest {
+abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest[SqlServerDatabase] {
   override val profile = slick.jdbc.SQLServerProfile
+
+  protected def testName: String
+
+  protected def port: Int
+
+  override protected def createContainers(): DatabaseContainerSet[SqlServerDatabase] = {
+    val containerName = s"${testName}_sqlserver"
+    DatabaseContainer.startSqlServer(containerName, port)
+    Thread.sleep(6000)
+
+    val originDbName = s"${testName}_origin"
+    val targetSingleThreadedDbName = s"${testName}_target_single_threaded"
+    val targetAkkaStreamsDbName = s"${testName}_target_akka_streams"
+
+    val originContainer = buildContainer(containerName, originDbName, port)
+    val targetSingleThreadedContainer = buildContainer(containerName, targetSingleThreadedDbName, port)
+    val targetAkkaStreamsContainer = buildContainer(containerName, targetAkkaStreamsDbName, port)
+
+    new DatabaseContainerSet(originContainer, targetSingleThreadedContainer, targetAkkaStreamsContainer)
+  }
 
   override def prepareOriginDb(): Unit = {
     s"./src/test/util/create_sqlserver_db.sh ${containers.origin.name} ${containers.origin.db.name}".!!
@@ -21,10 +41,9 @@ abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest {
     s"./src/test/util/sqlserver_post_subset.sh $containerName $targetAkkaStreamsDbName".!!
   }
 
-  override protected def createContainers(): Unit = {
-    ContainerUtil.rm(containerName)
-    s"docker create --name $containerName -p $originPort:1433 --env ACCEPT_EULA=Y --env SA_PASSWORD=MsSqlServerLocal1 --env MSSQL_PID=Developer microsoft/mssql-server-linux:2017-CU12 /opt/mssql/bin/sqlservr".!!
-    ContainerUtil.start(containerName)
-    Thread.sleep(6000)
+  private def buildContainer(containerName: String, dbName: String, dbPort: Int): SqlServerContainer = {
+    val db: SqlServerDatabase = new SqlServerDatabase(dbName, dbPort)
+    new SqlServerContainer(containerName, db)
   }
+
 }

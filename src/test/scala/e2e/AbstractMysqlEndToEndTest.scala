@@ -7,9 +7,9 @@ import scala.sys.process._
 abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest[MySqlDatabase] {
   override val profile = slick.jdbc.MySQLProfile
 
-  def originPort: Int
+  protected def testName: String
 
-  def testName: String
+  protected def originPort: Int
 
   override protected def createContainers(): DatabaseContainerSet[MySqlDatabase] = {
     val originContainerName = s"${testName}_origin_mysql"

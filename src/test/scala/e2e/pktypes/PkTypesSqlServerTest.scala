@@ -5,7 +5,7 @@ import java.util.UUID
 import e2e.AbstractSqlServerEndToEndTest
 
 class PkTypesSqlServerTest extends AbstractSqlServerEndToEndTest with PkTypesTestCases {
-  override val originPort = 5576
+  override val port = 5576
 
   override def expectedByteIds = super.expectedByteIds.filterNot(_ == -128)
 

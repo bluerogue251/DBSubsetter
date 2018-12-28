@@ -7,9 +7,9 @@ import scala.sys.process._
 abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest[PostgreSQLDatabase] {
   override val profile = slick.jdbc.PostgresProfile
 
-  def originPort: Int
+  protected def testName: String
 
-  def testName: String
+  protected def originPort: Int
 
   override protected def createContainers(): DatabaseContainerSet[PostgreSQLDatabase] = {
     val originContainerName = s"${testName}_origin_postgres"
