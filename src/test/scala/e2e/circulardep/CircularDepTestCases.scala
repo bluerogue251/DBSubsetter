@@ -8,7 +8,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 trait CircularDepTestCases extends FunSuiteLike with CircularDepDDL with SlickSetup with AssertionUtil {
-  val dataSetName = "circular_dep"
+  val testName = "circular_dep"
 
   import profile.api._
 

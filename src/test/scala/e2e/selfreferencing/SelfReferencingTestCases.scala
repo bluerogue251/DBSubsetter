@@ -5,7 +5,7 @@ import org.scalatest.FunSuiteLike
 import util.assertion.AssertionUtil
 
 trait SelfReferencingTestCases extends FunSuiteLike with SelfReferencingDDL with SlickSetup with AssertionUtil {
-  val dataSetName = "self_referencing"
+  val testName = "self_referencing"
 
   import profile.api._
 

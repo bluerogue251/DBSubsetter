@@ -10,7 +10,7 @@ trait BaseQueriesTestCases extends FunSuiteLike with BaseQueriesDDL with SlickSe
   override val ddl = schema.create
   override val dml = new BaseQueriesDML(profile).dbioSeq
 
-  val dataSetName = "base_queries"
+  val testName = "base_queries"
 
   test("Correct base_table records were included") {
     assertCount(BaseTable, 10)

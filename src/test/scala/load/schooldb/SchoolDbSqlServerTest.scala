@@ -18,8 +18,8 @@ class SchoolDbSqlServerTest extends AbstractSqlServerEndToEndTest with SchoolDbT
   )
 
   override protected def prepareOriginDDL(): Unit = {
-    s"./src/test/util/create_schema_sqlserver.sh ${containers.origin.name} $dataSetName school_db".!!
-    s"./src/test/util/create_schema_sqlserver.sh ${containers.origin.name} $dataSetName Audit".!!
+    s"./src/test/util/create_schema_sqlserver.sh ${containers.origin.name} $testName school_db".!!
+    s"./src/test/util/create_schema_sqlserver.sh ${containers.origin.name} $testName Audit".!!
     super.prepareOriginDDL()
   }
 

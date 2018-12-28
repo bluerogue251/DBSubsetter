@@ -7,7 +7,7 @@ import org.scalatest.FunSuiteLike
 import util.assertion.AssertionUtil
 
 trait PkTypesTestCases extends FunSuiteLike with PkTypesDDL with SlickSetup with AssertionUtil {
-  val dataSetName = "pk_types"
+  val testName = "pk_types"
 
   import profile.api._
 

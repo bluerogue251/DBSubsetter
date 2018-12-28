@@ -11,7 +11,7 @@ trait FkReferenceNonPkTestCases extends FunSuiteLike with FkReferenceNonPkDDL wi
   override val ddl = schema.create
   override val dml = new FkReferenceNonPkDML(profile).dbioSeq
 
-  val dataSetName = "fk_reference_non_pk"
+  val testName = "fk_reference_non_pk"
 
   test("Correct referenced_table records were included") {
     assertCount(ReferencedTable, 3)

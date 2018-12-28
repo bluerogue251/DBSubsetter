@@ -9,9 +9,11 @@ import scala.concurrent.duration.Duration
 
 trait AssertionUtil extends Assertions {
 
-  val profile: slick.jdbc.JdbcProfile
-  def targetSingleThreadedSlick: profile.backend.DatabaseDef
-  def targetAkkaStreamsSlick: profile.backend.DatabaseDef
+  protected val profile: slick.jdbc.JdbcProfile
+
+  protected def targetSingleThreadedSlick: profile.backend.DatabaseDef
+
+  protected def targetAkkaStreamsSlick: profile.backend.DatabaseDef
 
   final def assertCount[T <: AbstractTable[_]](tq: TableQuery[T], expected: Long): Unit = {
     import profile.api._

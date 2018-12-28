@@ -5,7 +5,7 @@ import org.scalatest.FunSuiteLike
 import util.assertion.AssertionUtil
 
 trait MixedCaseTestCases extends FunSuiteLike with MixedCaseDDL with SlickSetup with AssertionUtil {
-  val dataSetName = "mIXED_case_DB"
+  val testName = "mIXED_case_DB"
 
   import profile.api._
 

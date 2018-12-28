@@ -29,7 +29,7 @@ trait SchoolDbTestCases extends FunSuiteLike with SchoolDbDDL with SlickSetupDDL
     Await.result(dmlFut6, Duration.Inf)
   }
 
-  val dataSetName = "school_db"
+  val testName = "school_db"
 
   test("Correct students were included") {
     assertCount(Students, 35758)

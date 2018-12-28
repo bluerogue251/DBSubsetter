@@ -65,7 +65,7 @@ trait PhysicsTestCases extends FunSuiteLike with PhysicsDDL with SlickSetupDDL w
     Await.result(gwFut, Duration.Inf)
   }
 
-  val dataSetName = "physics"
+  val testName = "physics"
 
   test("Correct research_institutions were included") {
     assertCount(ResearchInstitutions, 1)
