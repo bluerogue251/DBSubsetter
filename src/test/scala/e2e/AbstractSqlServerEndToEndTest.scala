@@ -1,5 +1,7 @@
 package e2e
 
+import util.docker.ContainerUtil
+
 import scala.sys.process._
 
 abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest {
@@ -28,14 +30,14 @@ abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest {
   }
 
   override protected def createDockerContainers(): Unit = {
-    dockerRm(containerName)
+    ContainerUtil.rm(containerName)
     s"docker create --name $containerName -p $originPort:1433 --env ACCEPT_EULA=Y --env SA_PASSWORD=MsSqlServerLocal1 --env MSSQL_PID=Developer microsoft/mssql-server-linux:2017-CU12 /opt/mssql/bin/sqlservr".!!
-    dockerStart(containerName)
+    ContainerUtil.start(containerName)
     Thread.sleep(6000)
   }
 
   override protected def afterAll(): Unit = {
     super.afterAll()
-    dockerRm(containerName)
+    ContainerUtil.rm(containerName)
   }
 }
