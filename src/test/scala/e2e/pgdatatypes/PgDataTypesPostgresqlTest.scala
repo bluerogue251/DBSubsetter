@@ -7,10 +7,11 @@ import e2e.AbstractPostgresqlEndToEndTest
 import scala.sys.process._
 
 class PgDataTypesPostgresqlTest extends AbstractPostgresqlEndToEndTest {
-  override val testName = "pg_data_types"
-  override val originPort = 5500
+  override protected val testName = "pg_data_types"
 
-  override val programArgs = Array(
+  override protected val originPort = 5500
+
+  override protected val programArgs = Array(
     "--schemas", "public",
     "--baseQuery", "public.arrays_table ::: true ::: includeChildren",
     "--baseQuery", "public.binary_table ::: true ::: includeChildren",
@@ -37,14 +38,14 @@ class PgDataTypesPostgresqlTest extends AbstractPostgresqlEndToEndTest {
     pending
   }
 
-  private val originPsqlCommand = s"docker exec -i $originContainerName psql --user postgres $testName"
+  private val originPsqlCommand = s"docker exec -i ${containers.origin.name} psql --user postgres ${containers.origin.db.name}"
 
-  override protected def setupOriginDDL(): Unit = {
+  override protected def prepareOriginDDL(): Unit = {
     val ddlFile = new File("./src/test/scala/e2e/pgdatatypes/ddl.sql")
     (ddlFile #> originPsqlCommand).!!
   }
 
-  override protected def setupOriginDML(): Unit = {
+  override protected def prepareOriginDML(): Unit = {
     val dmlFile = new File("./src/test/scala/e2e/pgdatatypes/dml.sql")
     (dmlFile #> originPsqlCommand).!!
   }

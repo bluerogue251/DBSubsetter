@@ -13,19 +13,19 @@ trait SchoolDbTestCases extends FunSuiteLike with SchoolDbDDL with SlickSetupDDL
 
   override val ddl = schema.create
 
-  override def setupOriginDML(): Unit = {
+  def prepareOriginDML(): Unit = {
     val customDml = new SchoolDBDML(profile)
-    val dmlFut1 = originDb.run(customDml.initialInserts)
+    val dmlFut1 = originSlick.run(customDml.initialInserts)
     Await.result(dmlFut1, Duration.Inf)
-    val dmlFut2 = originDb.run(customDml.homeworkGradeInserts)
+    val dmlFut2 = originSlick.run(customDml.homeworkGradeInserts)
     Await.result(dmlFut2, Duration.Inf)
-    val dmlFut3 = originDb.run(customDml.eventInserts1)
+    val dmlFut3 = originSlick.run(customDml.eventInserts1)
     Await.result(dmlFut3, Duration.Inf)
-    val dmlFut4 = originDb.run(customDml.eventsInsert2)
+    val dmlFut4 = originSlick.run(customDml.eventsInsert2)
     Await.result(dmlFut4, Duration.Inf)
-    val dmlFut5 = originDb.run(customDml.eventsInsert3)
+    val dmlFut5 = originSlick.run(customDml.eventsInsert3)
     Await.result(dmlFut5, Duration.Inf)
-    val dmlFut6 = originDb.run(customDml.latestValedictorianCacheUpdates)
+    val dmlFut6 = originSlick.run(customDml.latestValedictorianCacheUpdates)
     Await.result(dmlFut6, Duration.Inf)
   }
 

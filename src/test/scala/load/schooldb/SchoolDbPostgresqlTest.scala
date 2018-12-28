@@ -9,8 +9,9 @@ import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 class SchoolDbPostgresqlTest extends AbstractPostgresqlEndToEndTest with SchoolDbTestCases with LoadTest {
-  override val originPort = 5453
-  override val programArgs = Array(
+  override protected val originPort = 5453
+
+  override protected val programArgs = Array(
     "--schemas", "school_db,Audit",
     "--baseQuery", "school_db.Students ::: student_id % 100 = 0 ::: includeChildren",
     "--baseQuery", "school_db.standalone_table ::: id < 4 ::: includeChildren",
@@ -19,13 +20,13 @@ class SchoolDbPostgresqlTest extends AbstractPostgresqlEndToEndTest with SchoolD
     "--preTargetBufferSize", "10000"
   )
 
-  override def setupOriginDDL(): Unit = {
+  override protected def prepareOriginDDL(): Unit = {
     val createSchemaStatements: DBIO[Unit] = DBIO.seq(
       sqlu"create schema school_db",
       sqlu"""create schema "Audit""""
     )
-    Await.ready(originDb.run(createSchemaStatements), Duration.Inf)
-    super.setupOriginDDL()
+    Await.ready(originSlick.run(createSchemaStatements), Duration.Inf)
+    super.prepareOriginDML()
   }
 
   override val singleThreadedRuntimeThreshold: Long = 220000
