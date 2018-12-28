@@ -11,11 +11,6 @@ import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
-  //
-  // The following need to be overridden
-  //
-  protected val profile: slick.jdbc.JdbcProfile
-
   protected def originPort: Int
 
   protected def makeConnStr(port: Int, dbName: String): String
@@ -26,16 +21,13 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
 
   protected def setupOriginDb(): Unit
 
-  protected def setupTargetDbs(): Unit
-
-  protected def postSubset(): Unit
-
   protected def setupOriginDDL(): Unit
 
   protected def setupOriginDML(): Unit
 
-  protected def dataSetName: String
+  protected def setupTargetDbs(): Unit
 
+  protected def postSubset(): Unit
   //
   // The following is generic enough that it usually does not need to be overridden
   //
