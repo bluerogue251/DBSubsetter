@@ -11,7 +11,6 @@ import trw.dbsubsetter.{ApplicationAkkaStreams, ApplicationSingleThreaded}
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
-import scala.sys.process._
 
 abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
   //
@@ -122,12 +121,4 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
   }
 
   protected def createDockerContainers(): Unit
-
-  protected def dockerRm(name: String): Unit = {
-    s"docker rm --force --volumes $name".!
-  }
-
-  protected def dockerStart(name: String): Unit = {
-    s"docker start $name".!
-  }
 }

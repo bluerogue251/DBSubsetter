@@ -1,5 +1,7 @@
 package e2e
 
+import util.docker.ContainerUtil
+
 import scala.sys.process._
 
 abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest {
@@ -31,9 +33,9 @@ abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest {
 
   override protected def createDockerContainers(): Unit = {
     def createAndStart(name: String, port: Int): Unit = {
-      dockerRm(name)
+      ContainerUtil.rm(name)
       s"docker create --name $name -p $port:5432 postgres:9.6.3".!!
-      dockerStart(name)
+      ContainerUtil.start(name)
     }
 
     createAndStart(originContainerName, originPort)
@@ -48,8 +50,8 @@ abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest {
 
   override protected def afterAll(): Unit = {
     super.afterAll()
-    dockerRm(originContainerName)
-    dockerRm(targetSingleThreadedContainerName)
-    dockerRm(targetAkkaStreamsContainerName)
+    ContainerUtil.rm(originContainerName)
+    ContainerUtil.rm(targetSingleThreadedContainerName)
+    ContainerUtil.rm(targetAkkaStreamsContainerName)
   }
 }

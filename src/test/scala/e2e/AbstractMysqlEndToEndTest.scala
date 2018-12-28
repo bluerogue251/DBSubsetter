@@ -1,5 +1,7 @@
 package e2e
 
+import util.docker.ContainerUtil
+
 import scala.sys.process._
 
 abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest {
@@ -28,9 +30,9 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest {
 
   override protected def createDockerContainers(): Unit = {
     def createAndStart(name: String, port: Int): Unit = {
-      dockerRm(name)
+      ContainerUtil.rm(name)
       s"docker create --name $name -p $port:3306 --env MYSQL_ALLOW_EMPTY_PASSWORD=true mysql:8.0.3".!!
-      dockerStart(name)
+      ContainerUtil.start(name)
     }
 
     createAndStart(originContainerName, originPort)
@@ -43,8 +45,8 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest {
 
   override protected def afterAll(): Unit = {
     super.afterAll()
-    dockerRm(originContainerName)
-    dockerRm(targetSithContainerName)
-    dockerRm(targetAkstContainerName)
+    ContainerUtil.rm(originContainerName)
+    ContainerUtil.rm(targetSithContainerName)
+    ContainerUtil.rm(targetAkstContainerName)
   }
 }
