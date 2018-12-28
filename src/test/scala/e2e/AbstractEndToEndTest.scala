@@ -90,6 +90,12 @@ abstract class AbstractEndToEndTest[T <: Database] extends FunSuite with BeforeA
      * to the target DBs, etc.
      */
     postSubset()
+
+    /*
+     * All of our setup is now done. We are now ready to make assertions on the contents of the
+     * target DBs to ensure that our program copied the correct data from the origin to the target
+     * DBs.
+     */
   }
 
   override protected def afterAll(): Unit = {
