@@ -65,8 +65,8 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
     /*
      * Run subsetting to copy a subset of the DML from the origin DB to the target DBs
      */
-    runSingleThreaded()
-    runAkkaStreams()
+    runSubsetInSingleThreadedMode()
+    runSubsetInAkkaStreamsMode()
 
     /*
      * Do any steps necessary after subsetting, such as re-enabling foreign keys, re-adding indices
@@ -82,7 +82,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
     targetAkkaStreamsSlick.close()
   }
 
-  private def runSingleThreaded(): Unit = {
+  private def runSubsetInSingleThreadedMode(): Unit = {
     val args: Array[String] = Array(
       "--originDbConnStr", containers.origin.db.connectionString,
       "--targetDbConnStr", containers.targetSingleThreaded.db.connectionString
@@ -98,7 +98,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
     println(s"Single Threaded Took $singleThreadedRuntimeMillis milliseconds")
   }
 
-  private def runAkkaStreams(): Unit = {
+  private def runSubsetInAkkaStreamsMode(): Unit = {
     val args: Array[String] = Array(
       "--originDbConnStr", containers.origin.db.connectionString,
       "--originDbParallelism", "10",
