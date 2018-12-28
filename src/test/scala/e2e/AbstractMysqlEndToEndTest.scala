@@ -23,11 +23,11 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest[MySqlDatab
     DatabaseContainer.startMySql(targetSingleThreadedContainerName, targetSingleThreadedPort)
     DatabaseContainer.startMySql(targetAkkaStreamsContainerName, targetAkkaStreamsPort)
 
+    Thread.sleep(13000)
+
     val originContainer = buildContainer(originContainerName, testName, originPort)
     val targetSingleThreadedContainer = buildContainer(targetSingleThreadedContainerName, testName, targetSingleThreadedPort)
     val targetAkkaStreamsContainer = buildContainer(targetAkkaStreamsContainerName, testName, targetAkkaStreamsPort)
-
-    Thread.sleep(13000)
 
     new DatabaseContainerSet(originContainer, targetSingleThreadedContainer, targetAkkaStreamsContainer)
   }
