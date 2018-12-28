@@ -1,10 +1,11 @@
 package e2e.crossschema
 
-import e2e.{AbstractEndToEndTest, SlickSetup}
+import e2e.SlickSetup
+import org.scalatest.FunSuiteLike
 import trw.dbsubsetter.db.Table
 import util.assertion.AssertionUtil
 
-trait CrossSchemaTestCases extends AbstractEndToEndTest with CrossSchemaDDL with SlickSetup with AssertionUtil {
+trait CrossSchemaTestCases extends FunSuiteLike with CrossSchemaDDL with SlickSetup with AssertionUtil {
   protected val testName: String = "cross_schema"
 
   import profile.api._
@@ -27,6 +28,9 @@ trait CrossSchemaTestCases extends AbstractEndToEndTest with CrossSchemaDDL with
     assertThat(Schema3Table.map(_.id).sum.result, 7)
   }
 
+  /*
+   *
+   */
   test("ForeignKey.pointsToPk") {
     val table = Table("schema_2", "schema_2_table", hasSqlServerAutoIncrement = false, storePks = true)
     val fk = schemaInfo.fksFromTable(table)
