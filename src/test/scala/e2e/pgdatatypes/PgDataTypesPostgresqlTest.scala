@@ -38,8 +38,6 @@ class PgDataTypesPostgresqlTest extends AbstractPostgresqlEndToEndTest {
     pending
   }
 
-  private val originPsqlCommand = s"docker exec -i ${containers.origin.name} psql --user postgres ${containers.origin.db.name}"
-
   override protected def prepareOriginDDL(): Unit = {
     val ddlFile = new File("./src/test/scala/e2e/pgdatatypes/ddl.sql")
     (ddlFile #> originPsqlCommand).!!
@@ -48,5 +46,9 @@ class PgDataTypesPostgresqlTest extends AbstractPostgresqlEndToEndTest {
   override protected def prepareOriginDML(): Unit = {
     val dmlFile = new File("./src/test/scala/e2e/pgdatatypes/dml.sql")
     (dmlFile #> originPsqlCommand).!!
+  }
+
+  private def originPsqlCommand = {
+    s"docker exec -i ${containers.origin.name} psql --user postgres ${containers.origin.db.name}"
   }
 }

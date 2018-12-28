@@ -37,8 +37,6 @@ class MySqlDataTypesMySqlTest extends AbstractMysqlEndToEndTest with AssertionUt
     assertResult(sql, Seq(("mysql_data_types.referencing_table", "1211714113")))
   }
 
-  private val originMySqlCommand = s"docker exec -i ${containers.origin.name} mysql --user root ${containers.origin.db.name}"
-
   override protected def prepareOriginDDL(): Unit = {
     val ddlFile = new File("./src/test/scala/e2e/mysqldatatypes/ddl.sql")
     (ddlFile #> originMySqlCommand).!!
@@ -47,5 +45,9 @@ class MySqlDataTypesMySqlTest extends AbstractMysqlEndToEndTest with AssertionUt
   override protected def prepareOriginDML(): Unit = {
     val dmlFile = new File("./src/test/scala/e2e/mysqldatatypes/dml.sql")
     (dmlFile #> originMySqlCommand).!!
+  }
+
+  private def originMySqlCommand = {
+    s"docker exec -i ${containers.origin.name} mysql --user root ${containers.origin.db.name}"
   }
 }
