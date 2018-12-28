@@ -10,6 +10,8 @@ import scala.concurrent.duration.Duration
 // TODO add back in LoadTest
 trait SchoolDbTestCases extends FunSuiteLike with SchoolDbDDL with SlickSetupDDL with AssertionUtil {
 
+  protected val testName = "school_db"
+
   import profile.api._
 
   override val ddl = schema.create
@@ -29,8 +31,6 @@ trait SchoolDbTestCases extends FunSuiteLike with SchoolDbDDL with SlickSetupDDL
     val dmlFut6 = originSlick.run(customDml.latestValedictorianCacheUpdates)
     Await.result(dmlFut6, Duration.Inf)
   }
-
-  val testName = "school_db"
 
   test("Correct students were included") {
     assertCount(Students, 35758)

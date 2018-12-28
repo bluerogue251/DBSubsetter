@@ -10,6 +10,8 @@ import scala.concurrent.{Await, Future}
 // TODO: Add back in with LoadTest
 trait PhysicsTestCases extends FunSuiteLike with PhysicsDDL with SlickSetupDDL with AssertionUtil {
 
+  protected val testName = "physics"
+
   import profile.api._
 
   override val ddl = schema.create
@@ -65,8 +67,6 @@ trait PhysicsTestCases extends FunSuiteLike with PhysicsDDL with SlickSetupDDL w
     Await.result(qdFut, Duration.Inf)
     Await.result(gwFut, Duration.Inf)
   }
-
-  val testName = "physics"
 
   test("Correct research_institutions were included") {
     assertCount(ResearchInstitutions, 1)

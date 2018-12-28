@@ -16,16 +16,16 @@ class SchoolDbMysqlTest extends AbstractMysqlEndToEndTest with SchoolDbTestCases
     "--preTargetBufferSize", "10000"
   )
 
-  override protected def prepareOriginDDL(): Unit = {
-    super.prepareOriginDDL()
+  override protected def createEmptyDatabases(): Unit = {
+    super.createEmptyDatabases()
     s"./src/test/util/create_mysql_db.sh Audit ${containers.origin.name}".!!
+    s"./src/test/util/create_mysql_db.sh Audit ${containers.targetSingleThreaded.name}".!!
+    s"./src/test/util/create_mysql_db.sh Audit ${containers.targetAkkaStreams.name}".!!
   }
 
   override protected def prepareTargetDDL(): Unit = {
     super.prepareTargetDDL()
-    s"./src/test/util/create_mysql_db.sh Audit ${containers.targetSingleThreaded.name}".!!
     s"./src/test/util/sync_mysql_origin_to_target.sh Audit ${containers.origin.name} ${containers.targetSingleThreaded.name}".!!
-    s"./src/test/util/create_mysql_db.sh Audit ${containers.targetAkkaStreams.name}".!!
     s"./src/test/util/sync_mysql_origin_to_target.sh Audit ${containers.origin.name} ${containers.targetAkkaStreams.name}".!!
   }
 
