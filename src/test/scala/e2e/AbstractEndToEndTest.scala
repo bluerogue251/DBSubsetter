@@ -6,6 +6,7 @@ import trw.dbsubsetter.db.{SchemaInfo, SchemaInfoRetrieval}
 import trw.dbsubsetter.workflow.BaseQueries
 import trw.dbsubsetter.{ApplicationAkkaStreams, ApplicationSingleThreaded}
 import util.db.DatabaseContainerSet
+import util.docker.ContainerUtil
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
@@ -14,9 +15,9 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
 
   protected val profile: slick.jdbc.JdbcProfile
 
-  protected def createContainers(): DatabaseContainerSet
+  protected def createContainers(): DatabaseContainerSet[_]
 
-  protected var containers: DatabaseContainerSet
+  protected var containers: DatabaseContainerSet[_]
 
   protected def prepareOriginDb(): Unit
 
@@ -26,13 +27,12 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
 
   protected def postSubset(): Unit
 
+  /*
+   * Slick testing utility connections
+   */
   var originSlick: profile.backend.DatabaseDef
   var targetSingleThreadedSlick: profile.backend.DatabaseDef
   var targetAkkaStreamsSlick: profile.backend.DatabaseDef
-
-  var singleThreadedRuntimeMillis: Long = 0
-  var akkStreamsRuntimeMillis: Long = 0
-  var schemaInfo: SchemaInfo = _
 
   override protected def beforeAll(): Unit = {
     super.beforeAll()
@@ -77,9 +77,20 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
 
   override protected def afterAll(): Unit = {
     super.afterAll()
+
+    /*
+     * Close slick JDBC connections
+     */
     originSlick.close()
     targetSingleThreadedSlick.close()
     targetAkkaStreamsSlick.close()
+
+    /*
+     * Remove all containers
+     */
+    ContainerUtil.rm(containers.origin.name)
+    ContainerUtil.rm(containers.targetSingleThreaded.name)
+    ContainerUtil.rm(containers.targetAkkaStreams.name)
   }
 
   private def runSubsetInSingleThreadedMode(): Unit = {
@@ -89,12 +100,12 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
     )
 
     val config: Config = CommandLineParser.parser.parse(args, Config()).get
-    schemaInfo = SchemaInfoRetrieval.getSchemaInfo(config)
+    val schemaInfo: SchemaInfo = SchemaInfoRetrieval.getSchemaInfo(config)
     val baseQueries = BaseQueries.get(config, schemaInfo)
 
     val startSingleThreaded = System.nanoTime()
     ApplicationSingleThreaded.run(config, schemaInfo, baseQueries)
-    singleThreadedRuntimeMillis = (System.nanoTime() - startSingleThreaded) / 1000000
+    val singleThreadedRuntimeMillis = (System.nanoTime() - startSingleThreaded) / 1000000
     println(s"Single Threaded Took $singleThreadedRuntimeMillis milliseconds")
   }
 
@@ -107,13 +118,13 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfterAll {
     )
 
     val config: Config = CommandLineParser.parser.parse(args, Config()).get
-    schemaInfo = SchemaInfoRetrieval.getSchemaInfo(config)
+    val schemaInfo: SchemaInfo = SchemaInfoRetrieval.getSchemaInfo(config)
     val baseQueries = BaseQueries.get(config, schemaInfo)
 
     val startAkkaStreams = System.nanoTime()
     val futureResult = ApplicationAkkaStreams.run(config, schemaInfo, baseQueries)
     Await.result(futureResult, Duration.Inf)
-    akkStreamsRuntimeMillis = (System.nanoTime() - startAkkaStreams) / 1000000
+    val akkStreamsRuntimeMillis = (System.nanoTime() - startAkkaStreams) / 1000000
     println(s"Akka Streams Took $akkStreamsRuntimeMillis milliseconds")
   }
 }

@@ -15,8 +15,6 @@ abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest {
 
   private def targetAkkaStreamsContainerName = s"${dataSetName}_target_akst_postgres"
 
-  override def makeConnStr(p: Int, dbName: String): String = s"jdbc:postgresql://0.0.0.0:$p/$dataSetName?user=postgres"
-
   override def prepareOriginDb(): Unit = createDb(originContainerName)
 
   override def prepareTargetDbs(): Unit = {
@@ -46,12 +44,5 @@ abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest {
 
   private def createDb(dockerContainer: String): Unit = {
     s"docker exec $dockerContainer createdb --user postgres $dataSetName".!!
-  }
-
-  override protected def afterAll(): Unit = {
-    super.afterAll()
-    ContainerUtil.rm(originContainerName)
-    ContainerUtil.rm(targetSingleThreadedContainerName)
-    ContainerUtil.rm(targetAkkaStreamsContainerName)
   }
 }

@@ -3,11 +3,11 @@ package util.docker
 import scala.sys.process._
 
 object ContainerUtil {
-  def rm(containerName: String): Unit = {
-    s"docker rm --force --volumes $containerName".!
+  def rm(name: String): Unit = {
+    s"docker rm --force --volumes $name".!
   }
 
-  def start(containerName: String): Unit = {
-    s"docker start $containerName".!
+  def start(name: String): Unit = {
+    s"docker start $name".!
   }
 }

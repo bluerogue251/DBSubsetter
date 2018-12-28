@@ -7,16 +7,8 @@ import scala.sys.process._
 abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest {
   override val profile = slick.jdbc.SQLServerProfile
 
-  override lazy val targetSingleThreadedPort: Int = originPort
-  override lazy val targetAkkaStreamsPort: Int = originPort
-  override lazy val targetSingleThreadedDbName = s"${dataSetName}_sith"
-  override lazy val targetAkkaStreamsDbName = s"${dataSetName}_akst"
-  lazy val containerName = s"${dataSetName}_sqlserver"
-
-  override def makeConnStr(port: Int, dbName: String): String = s"jdbc:sqlserver://localhost:$port;databaseName=$dbName;user=sa;password=MsSqlServerLocal1"
-
   override def prepareOriginDb(): Unit = {
-    s"./src/test/util/create_sqlserver_db.sh $containerName $dataSetName".!!
+    s"./src/test/util/create_sqlserver_db.sh ${containers.origin.name} ${containers.origin.db.name}".!!
   }
 
   override def prepareTargetDbs(): Unit = {
@@ -34,10 +26,5 @@ abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest {
     s"docker create --name $containerName -p $originPort:1433 --env ACCEPT_EULA=Y --env SA_PASSWORD=MsSqlServerLocal1 --env MSSQL_PID=Developer microsoft/mssql-server-linux:2017-CU12 /opt/mssql/bin/sqlservr".!!
     ContainerUtil.start(containerName)
     Thread.sleep(6000)
-  }
-
-  override protected def afterAll(): Unit = {
-    super.afterAll()
-    ContainerUtil.rm(containerName)
   }
 }

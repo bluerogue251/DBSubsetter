@@ -1,3 +1,7 @@
 package util.db
 
-class DatabaseContainerSet(val origin: DatabaseContainer, val targetSingleThreaded: DatabaseContainer, val targetAkkaStreams: DatabaseContainer)
+class DatabaseContainerSet[T <: Database](
+  val origin: DatabaseContainer[T],
+  val targetSingleThreaded: DatabaseContainer[T],
+  val targetAkkaStreams: DatabaseContainer[T]
+)

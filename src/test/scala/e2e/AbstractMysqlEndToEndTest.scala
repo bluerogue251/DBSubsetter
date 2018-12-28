@@ -1,5 +1,6 @@
 package e2e
 
+import util.db.DatabaseContainer
 import util.docker.ContainerUtil
 
 import scala.sys.process._
@@ -15,7 +16,6 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest {
 
   def targetAkstContainerName = s"${dataSetName}_target_akst_mysql"
 
-  override def makeConnStr(port: Int, dbName: String): String = s"jdbc:mysql://localhost:$port/$dataSetName?user=root&useSSL=false&rewriteBatchedStatements=true"
 
   override def prepareOriginDb(): Unit = createMySqlDatabase(originContainerName)
 
@@ -31,7 +31,7 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest {
   override protected def createContainers(): Unit = {
     def createAndStart(name: String, port: Int): Unit = {
       ContainerUtil.rm(name)
-      s"docker create --name $name -p $port:3306 --env MYSQL_ALLOW_EMPTY_PASSWORD=true mysql:8.0.3".!!
+      DatabaseContainer.createMySqlContainer(name, port)
       ContainerUtil.start(name)
     }
 
@@ -42,11 +42,4 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest {
   }
 
   private def createMySqlDatabase(container: String): Unit = s"./src/test/util/create_mysql_db.sh $dataSetName $container".!!
-
-  override protected def afterAll(): Unit = {
-    super.afterAll()
-    ContainerUtil.rm(originContainerName)
-    ContainerUtil.rm(targetSithContainerName)
-    ContainerUtil.rm(targetAkstContainerName)
-  }
 }
