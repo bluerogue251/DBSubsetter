@@ -6,19 +6,21 @@ import util.assertion.AssertionUtil
 trait AutoIncrementingPkTestCases extends FunSuiteLike with AssertionUtil {
   val testName = "autoincrementing_pk"
 
-  protected def ddl: AutoIncrementingPkDDL = {
+  protected val profile = slick.jdbc.PostgresProfile
 
-  }
+  protected val ddl: AutoIncrementingPkDDL = new AutoIncrementingPkDDL(profile)
+
+  protected val dml: AutoIncrementingPkDML = new AutoIncrementingPkDML(ddl)
 
   override protected lazy val dml = new AutoIncrementingPkDML(ddl).dbioSeq
 
   test("Correct records were included for main table and their primary keys values are correct") {
-    assertCount(AutoincrementingPkTable, 10)
+    assertCount(ddl.AutoincrementingPkTable, 10)
     // Tests that target databases don't over-write the primary key values
     // with the default values from their own primary key sequences.
     // The correct values for the primary keys are: 2, 4, 6, 8, 10, 12, 14, 16, 18, 20
     // If the target database overwrites PK values, we would see: 1, 2, 3, 4, 5, 6, etc.
-    assertThat(AutoincrementingPkTable.map(_.id).sum.result, 110)
+    assertThat(ddl.AutoincrementingPkTable.map(_.id).sum.result, 110)
   }
 
   // Purposely including a second table because it is a known limitation of MS SQl Server
@@ -27,7 +29,7 @@ trait AutoIncrementingPkTestCases extends FunSuiteLike with AssertionUtil {
   // for any tables after I've set them, so I would expect things to error out on any table except the first
   // But for some reason it does appear to work.
   test("Correct records were included for other table and their primary keys values are correct") {
-    assertCount(OtherAutoincrementingPkTable, 10)
-    assertThat(OtherAutoincrementingPkTable.map(_.id).sum.result, 110)
+    assertCount(ddl.OtherAutoincrementingPkTable, 10)
+    assertThat(ddl.OtherAutoincrementingPkTable.map(_.id).sum.result, 110)
   }
 }
