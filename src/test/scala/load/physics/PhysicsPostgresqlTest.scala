@@ -27,7 +27,8 @@ class PhysicsPostgresqlTest extends AbstractPostgresqlEndToEndTest with PhysicsT
     "./src/test/scala/load/physics/copy_domain_data_postgres.sh".!
   }
 
-  override val singleThreadedRuntimeThreshold: Long = 400000
-
-  override val akkaStreamsRuntimeThreshold: Long = 2600000
+// TODO: put back when we reintroduce load tests
+//  override val singleThreadedRuntimeThreshold: Long = 400000
+//
+//  override val akkaStreamsRuntimeThreshold: Long = 2600000
 }

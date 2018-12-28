@@ -22,7 +22,8 @@ class SchoolDbSqlServerTest extends AbstractSqlServerEndToEndTest with SchoolDbT
     super.prepareOriginDDL()
   }
 
-  override val singleThreadedRuntimeThreshold: Long = 110000
-
-  override val akkaStreamsRuntimeThreshold: Long = 25000
+// TODO: put back when we reintroduce load tests
+//  override val singleThreadedRuntimeThreshold: Long = 110000
+//
+//  override val akkaStreamsRuntimeThreshold: Long = 25000
 }

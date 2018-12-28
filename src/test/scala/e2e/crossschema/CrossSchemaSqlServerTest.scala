@@ -5,8 +5,9 @@ import e2e.AbstractSqlServerEndToEndTest
 import scala.sys.process._
 
 class CrossSchemaSqlServerTest extends AbstractSqlServerEndToEndTest with CrossSchemaTestCases {
-  override val port = 5546
-  override val programArgs = Array(
+  override protected val port = 5546
+
+  override protected val programArgs = Array(
     "--schemas", "schema_1, schema_2, schema_3",
     "--baseQuery", "schema_1.schema_1_table ::: id = 2 ::: includeChildren"
   )

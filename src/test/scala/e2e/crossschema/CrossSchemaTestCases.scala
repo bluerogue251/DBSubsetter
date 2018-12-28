@@ -9,8 +9,9 @@ trait CrossSchemaTestCases extends FunSuiteLike with CrossSchemaDDL with SlickSe
 
   import profile.api._
 
-  override lazy val ddl = schema.create
-  override lazy val dml = new CrossSchemaDML(profile).dbioSeq
+  override protected lazy val ddl = schema.create
+
+  override protected lazy val dml = new CrossSchemaDML(profile).dbioSeq
 
   test("Correct table 1 records were included") {
     assertCount(Schema1Table, 1)
