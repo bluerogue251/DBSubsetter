@@ -1,3 +1,3 @@
 package e2e
 
-trait SlickSetup extends SlickSetupDDL with SlickSetupDML
+trait SlickSetup extends SlickSetupDDLWoot with SlickSetupDMLWoot

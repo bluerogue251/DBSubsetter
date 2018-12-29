@@ -1,9 +1,11 @@
 package e2e.autoincrementingpk
 
-class AutoIncrementingPkDDL(val profile: slick.jdbc.JdbcProfile) {
+class DDL(val profile: slick.jdbc.JdbcProfile) {
   import profile.api._
 
   lazy val schema: profile.SchemaDescription = AutoincrementingPkTable.schema ++ OtherAutoincrementingPkTable.schema
+
+  schema.create
 
   /**
     * autoincrementing_pk_table

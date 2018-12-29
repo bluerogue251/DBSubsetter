@@ -2,9 +2,10 @@ package e2e.autoincrementingpk
 
 import e2e.AbstractSqlServerEndToEndTest
 
-class AutoIncrementingPkSqlServerTest extends AbstractSqlServerEndToEndTest with AutoIncrementingPkTestCases {
-  override val port = 5556
-  override val programArgs = Array(
+class TestSqlServer extends AbstractSqlServerEndToEndTest with AutoIncrementingPkTest {
+  override protected val port = 5556
+
+  override protected val programArgs = Array(
     "--schemas", "dbo",
 
     "--baseQuery", "dbo.autoincrementing_pk_table ::: id = 2 ::: includeChildren",
