@@ -1,8 +1,8 @@
-package e2e.fkreferencenonpk
+package e2e.fktononpk
 
 import e2e.AbstractMysqlEndToEndTest
 
-class FkReferenceNonPkMysqlTest extends AbstractMysqlEndToEndTest with FkReferenceNonPkTestCases {
+class ForeignKeyToNonPrimaryKeyTestMySql extends AbstractMysqlEndToEndTest with ForeignKeyToNonPrimaryKeyTest {
   override val originPort = 5560
   override val programArgs = Array(
     "--schemas", "fk_reference_non_pk",

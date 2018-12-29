@@ -1,8 +1,8 @@
-package e2e.fkreferencenonpk
+package e2e.fktononpk
 
 import e2e.AbstractPostgresqlEndToEndTest
 
-class FkReferenceNonPkPostgresqlTest extends AbstractPostgresqlEndToEndTest with FkReferenceNonPkTestCases {
+class ForeignKeyToNonPrimaryKeyTestPostgreSQL extends AbstractPostgresqlEndToEndTest with ForeignKeyToNonPrimaryKeyTest {
   override val originPort = 5563
   override val programArgs = Array(
     "--schemas", "public",

@@ -1,8 +1,6 @@
-package e2e.fkreferencenonpk
+package e2e.fktononpk
 
-trait FkReferenceNonPkDDL {
-  protected val profile: slick.jdbc.JdbcProfile
-
+class ForeignKeyToNonPrimaryKeyDDL(val profile: slick.jdbc.JdbcProfile) {
   import profile.api._
 
   lazy val schema: profile.SchemaDescription = Array(ReferencedTable.schema, ReferencingTable.schema).reduceLeft(_ ++ _)
