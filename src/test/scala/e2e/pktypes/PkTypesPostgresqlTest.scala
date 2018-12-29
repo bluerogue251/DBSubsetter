@@ -3,8 +3,9 @@ package e2e.pktypes
 import e2e.AbstractPostgresqlEndToEndTest
 
 class PkTypesPostgresqlTest extends AbstractPostgresqlEndToEndTest with PkTypesTestCases {
-  override val originPort = 5573
-  override val programArgs = Array(
+  override protected val originPort = 5573
+
+  override protected val programArgs = Array(
     "--schemas", "public",
     "--baseQuery", "public.byte_pks ::: id = -128 ::: includeChildren",
     "--baseQuery", "public.short_pks ::: id = -32768 ::: includeChildren",

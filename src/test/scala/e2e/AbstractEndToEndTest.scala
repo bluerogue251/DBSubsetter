@@ -16,7 +16,7 @@ abstract class AbstractEndToEndTest[T <: Database] extends FunSuite with BeforeA
   /*
    * Concrete test classes must override the following
    */
-  protected val profile: slick.jdbc.JdbcProfile
+  protected def profile: slick.jdbc.JdbcProfile
 
   protected def startContainers(): DatabaseContainerSet[T]
 
