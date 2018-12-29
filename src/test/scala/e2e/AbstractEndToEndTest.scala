@@ -1,6 +1,7 @@
 package e2e
 
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
+import slick.jdbc.JdbcBackend
 import trw.dbsubsetter.config.{CommandLineParser, Config}
 import trw.dbsubsetter.db.{SchemaInfo, SchemaInfoRetrieval}
 import trw.dbsubsetter.workflow.BaseQueries
@@ -15,7 +16,7 @@ abstract class AbstractEndToEndTest[T <: Database] extends FunSuite with BeforeA
   /*
    * Concrete test classes must override the following
    */
-  protected val profile: slick.jdbc.JdbcProfile
+  protected def profile: slick.jdbc.JdbcProfile
 
   protected def startContainers(): DatabaseContainerSet[T]
 
@@ -39,11 +40,11 @@ abstract class AbstractEndToEndTest[T <: Database] extends FunSuite with BeforeA
   /*
    * Slick testing utility connections (do not override)
    */
-  protected var originSlick: profile.backend.DatabaseDef = _
+  protected var originSlick: JdbcBackend#DatabaseDef = _
 
-  protected var targetSingleThreadedSlick: profile.backend.DatabaseDef = _
+  protected var targetSingleThreadedSlick: JdbcBackend#DatabaseDef = _
 
-  protected var targetAkkaStreamsSlick: profile.backend.DatabaseDef = _
+  protected var targetAkkaStreamsSlick: JdbcBackend#DatabaseDef = _
 
   override protected def beforeAll(): Unit = {
     super.beforeAll()
