@@ -24,7 +24,7 @@ trait SchoolDbTest extends FunSuiteLike with AssertionUtil {
   }
 
   protected def prepareOriginDML(): Unit = {
-    val customDml = new SchoolDBDML(profile)
+    val customDml = new SchoolDBDML(ddl)
     val dmlFut1 = originSlick.run(customDml.initialInserts)
     Await.result(dmlFut1, Duration.Inf)
     val dmlFut2 = originSlick.run(customDml.homeworkGradeInserts)
