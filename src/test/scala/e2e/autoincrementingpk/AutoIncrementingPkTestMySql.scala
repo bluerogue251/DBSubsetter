@@ -2,7 +2,7 @@ package e2e.autoincrementingpk
 
 import e2e.AbstractMysqlEndToEndTest
 
-class AutoIncrementingPkTestMysql extends AbstractMysqlEndToEndTest with AutoIncrementingPkTest {
+class AutoIncrementingPkTestMySql extends AbstractMysqlEndToEndTest with AutoIncrementingPkTest {
   override protected val originPort = 5550
 
   override protected val programArgs = Array(

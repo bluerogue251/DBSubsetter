@@ -2,7 +2,7 @@ package e2e.circulardep
 
 import e2e.AbstractMysqlEndToEndTest
 
-class CircularDepMysqlTest extends AbstractMysqlEndToEndTest with CircularDepTestCases {
+class CircularDepTestMySql extends AbstractMysqlEndToEndTest with CircularDepTest {
   override val originPort = 5480
   override val programArgs = Array(
     "--schemas", "circular_dep",

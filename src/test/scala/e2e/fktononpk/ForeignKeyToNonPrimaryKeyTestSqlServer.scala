@@ -1,8 +1,8 @@
-package e2e.fkreferencenonpk
+package e2e.fktononpk
 
 import e2e.AbstractSqlServerEndToEndTest
 
-class FkReferenceNonPkSqlServerTest extends AbstractSqlServerEndToEndTest with FkReferenceNonPkTestCases {
+class ForeignKeyToNonPrimaryKeyTestSqlServer extends AbstractSqlServerEndToEndTest with ForeignKeyToNonPrimaryKeyTest {
   override protected val port = 5566
 
   override protected val programArgs = Array(

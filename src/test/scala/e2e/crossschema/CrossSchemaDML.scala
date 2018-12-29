@@ -1,12 +1,12 @@
 package e2e.crossschema
 
-import slick.jdbc.JdbcProfile
+import slick.dbio.{DBIOAction, Effect, NoStream}
 
-class CrossSchemaDML(val profile: JdbcProfile) extends CrossSchemaDDL {
+object CrossSchemaDML {
+  def dbioSeq(ddl: CrossSchemaDDL): DBIOAction[Unit, NoStream, Effect.Write] = {
+    import ddl._
+    import ddl.profile.api._
 
-  import profile.api._
-
-  def dbioSeq = {
     slick.dbio.DBIO.seq(
       Schema1Table ++= Seq(
         Schema1TableRow(1),

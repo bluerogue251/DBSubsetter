@@ -1,12 +1,11 @@
 package e2e.missingfk
 
-import slick.jdbc.JdbcProfile
+import slick.dbio.{DBIOAction, Effect, NoStream}
 
-class MissingFkDML(val profile: JdbcProfile) extends MissingFkDDL {
-
-  import profile.api._
-
-  def dbioSeq = {
+object MissingFkDML {
+  def dbioSeq(ddl: MissingFkDDL): DBIOAction[Unit, NoStream, Effect.Write] = {
+    import ddl._
+    import ddl.profile.api._
 
     slick.dbio.DBIO.seq(
       Table1 ++= Seq(

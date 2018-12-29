@@ -2,7 +2,7 @@ package e2e.circulardep
 
 import e2e.AbstractSqlServerEndToEndTest
 
-class CircularDepSqlServerTest extends AbstractSqlServerEndToEndTest with CircularDepTestCases {
+class CircularDepTestSqlServer extends AbstractSqlServerEndToEndTest with CircularDepTest {
   override val port = 5486
   override val programArgs = Array(
     "--schemas", "dbo",

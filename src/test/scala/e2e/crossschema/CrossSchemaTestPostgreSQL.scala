@@ -7,7 +7,7 @@ import slick.jdbc.PostgresProfile.api._
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
-class CrossSchemaPostgresqlTest extends AbstractPostgresqlEndToEndTest with CrossSchemaTestCases {
+class CrossSchemaTestPostgreSQL extends AbstractPostgresqlEndToEndTest with CrossSchemaTest {
   override val originPort = 5543
   override val programArgs = Array(
     "--schemas", "schema_1, schema_2, schema_3",
