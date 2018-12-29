@@ -1,8 +1,6 @@
 package load.schooldb
 
-trait SchoolDbDDL {
-  protected val profile: slick.jdbc.JdbcProfile
-
+class SchoolDbDDL(val profile: slick.jdbc.JdbcProfile) {
   val mainSchema: String = "school_db"
 
   import profile.api._

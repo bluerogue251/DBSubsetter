@@ -2,11 +2,9 @@ package load.physics
 
 import java.sql.Timestamp
 
-import slick.jdbc.JdbcProfile
-
-class PhysicsDML(val profile: JdbcProfile) extends PhysicsDDL {
-
-  import profile.api._
+class PhysicsDML(ddl: PhysicsDDL) {
+  import ddl._
+  import ddl.profile.api._
 
   private val numResearchInstitutions = 10
   private val numResearchGroups = 30

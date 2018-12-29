@@ -1,8 +1,6 @@
 package load.physics
 
-trait PhysicsDDL {
-  protected val profile: slick.jdbc.JdbcProfile
-
+class PhysicsDDL(val profile: slick.jdbc.JdbcProfile) {
   import profile.api._
 
   lazy val schema: profile.SchemaDescription = Array(

@@ -4,7 +4,7 @@ import e2e.AbstractPostgresqlEndToEndTest
 
 import scala.sys.process._
 
-class PhysicsPostgresqlTest extends AbstractPostgresqlEndToEndTest with PhysicsTestCases {
+class PhysicsTestPostgreSQL extends AbstractPostgresqlEndToEndTest with PhysicsTest {
   override protected val originPort = 5573
 
   override protected val programArgs = Array(
