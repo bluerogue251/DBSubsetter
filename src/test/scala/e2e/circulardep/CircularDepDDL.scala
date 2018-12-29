@@ -1,8 +1,6 @@
 package e2e.circulardep
 
-trait CircularDepDDL {
-  protected val profile: slick.jdbc.JdbcProfile
-
+class CircularDepDDL(val profile: slick.jdbc.JdbcProfile) {
   import profile.api._
 
   lazy val schema: profile.SchemaDescription = Grandparents.schema ++ Parents.schema ++ Children.schema
