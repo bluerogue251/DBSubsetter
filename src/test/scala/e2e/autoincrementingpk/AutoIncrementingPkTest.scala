@@ -9,7 +9,7 @@ import scala.concurrent.duration.Duration
 trait AutoIncrementingPkTest extends FunSuiteLike with AssertionUtil {
   protected val testName = "autoincrementing_pk"
 
-  protected def profile: slick.jdbc.JdbcProfile
+  protected val profile: slick.jdbc.JdbcProfile
 
   protected def originSlick: slick.jdbc.JdbcBackend#DatabaseDef
 
