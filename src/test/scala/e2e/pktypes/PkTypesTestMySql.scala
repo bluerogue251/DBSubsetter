@@ -2,7 +2,7 @@ package e2e.pktypes
 
 import e2e.AbstractMysqlEndToEndTest
 
-class PkTypesMysqlTest extends AbstractMysqlEndToEndTest with PkTypesTestCases {
+class PkTypesTestMySql extends AbstractMysqlEndToEndTest with PkTypesTest {
   override val originPort = 5570
 
   override def expectedChar10Ids = Seq[String](" four", "two")

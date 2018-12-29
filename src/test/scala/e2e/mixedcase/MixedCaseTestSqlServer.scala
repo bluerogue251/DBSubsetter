@@ -2,7 +2,7 @@ package e2e.mixedcase
 
 import e2e.AbstractSqlServerEndToEndTest
 
-class MixedCaseSqlServerTest extends AbstractSqlServerEndToEndTest with MixedCaseTestCases {
+class MixedCaseTestSqlServer extends AbstractSqlServerEndToEndTest with MixedCaseTest {
   override val port = 5536
   override val programArgs = Array(
     "--schemas", "dbo",

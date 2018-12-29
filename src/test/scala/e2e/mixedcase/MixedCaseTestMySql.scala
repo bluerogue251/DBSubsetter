@@ -2,7 +2,7 @@ package e2e.mixedcase
 
 import e2e.AbstractMysqlEndToEndTest
 
-class MixedCaseMysqlTest extends AbstractMysqlEndToEndTest with MixedCaseTestCases {
+class MixedCaseTestMySql extends AbstractMysqlEndToEndTest with MixedCaseTest {
   override val originPort = 5530
   override val programArgs = Array(
     "--schemas", "mIXED_case_DB",

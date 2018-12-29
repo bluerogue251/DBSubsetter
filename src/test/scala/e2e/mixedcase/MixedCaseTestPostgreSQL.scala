@@ -2,7 +2,7 @@ package e2e.mixedcase
 
 import e2e.AbstractPostgresqlEndToEndTest
 
-class MixedCasePostgresqlTest extends AbstractPostgresqlEndToEndTest with MixedCaseTestCases {
+class MixedCaseTestPostgreSQL extends AbstractPostgresqlEndToEndTest with MixedCaseTest {
   override val originPort = 5533
   override val programArgs = Array(
     "--schemas", "public",

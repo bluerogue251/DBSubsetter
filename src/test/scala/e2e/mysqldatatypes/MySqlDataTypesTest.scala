@@ -7,7 +7,7 @@ import util.assertion.AssertionUtil
 
 import scala.sys.process._
 
-class MySqlDataTypesMySqlTest extends AbstractMysqlEndToEndTest with AssertionUtil {
+class MySqlDataTypesTest extends AbstractMysqlEndToEndTest with AssertionUtil {
   override protected val testName = "mysql_data_types"
 
   override protected val originPort = 5580

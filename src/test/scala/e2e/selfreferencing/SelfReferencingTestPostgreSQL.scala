@@ -2,7 +2,7 @@ package e2e.selfreferencing
 
 import e2e.AbstractPostgresqlEndToEndTest
 
-class SelfReferencingPostgresqlTest extends AbstractPostgresqlEndToEndTest with SelfReferencingTestCases {
+class SelfReferencingTestPostgreSQL extends AbstractPostgresqlEndToEndTest with SelfReferencingTest {
   override val originPort = 5523
   override val programArgs = Array(
     "--schemas", "public",

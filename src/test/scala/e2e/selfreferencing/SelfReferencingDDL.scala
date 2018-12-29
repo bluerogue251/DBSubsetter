@@ -1,8 +1,8 @@
 package e2e.selfreferencing
 
-trait SelfReferencingDDL {
-  protected val profile: slick.jdbc.JdbcProfile
+import slick.jdbc.JdbcProfile
 
+class SelfReferencingDDL(val profile: JdbcProfile) {
   import profile.api._
 
   lazy val schema: profile.SchemaDescription = SelfReferencingTable.schema

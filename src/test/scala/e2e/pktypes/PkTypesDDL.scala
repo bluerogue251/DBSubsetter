@@ -2,9 +2,9 @@ package e2e.pktypes
 
 import java.util.UUID
 
-trait PkTypesDDL {
-  protected val profile: slick.jdbc.JdbcProfile
+import slick.jdbc.JdbcProfile
 
+class PkTypesDDL(val profile: JdbcProfile) {
   import profile.api._
 
   lazy val schema: profile.SchemaDescription = Seq(BytePkTable, ShortPkTable, IntPkTable, LongPkTable, UUIDPkTable, Char10PkTable, Varchar10PkTable, ReferencingTable).map(_.schema).reduce(_ ++ _)

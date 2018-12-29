@@ -1,8 +1,8 @@
 package e2e.mixedcase
 
-trait MixedCaseDDL {
-  protected val profile: slick.jdbc.JdbcProfile
+import slick.jdbc.JdbcProfile
 
+class MixedCaseDDL(val profile: JdbcProfile) {
   import profile.api._
 
   lazy val schema: profile.SchemaDescription = MixedCaseTable1.schema ++ MixedCaseTable2.schema
