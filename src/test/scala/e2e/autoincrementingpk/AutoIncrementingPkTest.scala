@@ -13,7 +13,7 @@ trait AutoIncrementingPkTest extends FunSuiteLike with AssertionUtil {
 
   protected def originSlick: slick.jdbc.JdbcBackend#DatabaseDef
 
-  protected val ddl: DDL = new DDL(profile)
+  private val ddl: DDL = new DDL(profile)
 
   import ddl.profile.api._
 
