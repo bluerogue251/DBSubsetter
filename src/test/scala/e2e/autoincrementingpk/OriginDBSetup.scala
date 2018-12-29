@@ -5,9 +5,9 @@ import scala.concurrent.duration.Duration
 
 trait OriginDBSetup {
 
-  protected val profile: slick.jdbc.JdbcProfile
+  protected def profile: slick.jdbc.JdbcProfile
 
-  protected def originSlick: profile.backend.DatabaseDef
+  protected def originSlick: slick.jdbc.JdbcBackend#DatabaseDef
 
   protected val ddl: DDL = new DDL(profile)
 

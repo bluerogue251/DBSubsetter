@@ -1,5 +1,6 @@
 package load.schooldb
 
+import e2e.SlickSetupDDL
 import org.scalatest.FunSuiteLike
 import util.assertion.AssertionUtil
 
@@ -7,7 +8,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 // TODO add back in LoadTest
-trait SchoolDbTestCases extends FunSuiteLike with SchoolDbDDL with SlickSetupDDLWoot with AssertionUtil {
+trait SchoolDbTestCases extends FunSuiteLike with SchoolDbDDL with SlickSetupDDL with AssertionUtil {
 
   protected val testName = "school_db"
 

@@ -1,5 +1,6 @@
 package load.physics
 
+import e2e.SlickSetupDDL
 import org.scalatest.FunSuiteLike
 import util.assertion.AssertionUtil
 
@@ -7,7 +8,7 @@ import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
 // TODO: Add back in with LoadTest
-trait PhysicsTestCases extends FunSuiteLike with PhysicsDDL with SlickSetupDDLWoot with AssertionUtil {
+trait PhysicsTestCases extends FunSuiteLike with PhysicsDDL with SlickSetupDDL with AssertionUtil {
 
   protected val testName = "physics"
 
