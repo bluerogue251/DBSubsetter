@@ -3,7 +3,7 @@ package e2e.autoincrementingpk
 class DDL(val profile: slick.jdbc.JdbcProfile) {
   import profile.api._
 
-  def schema: slick.sql.SqlProfile#DDL = AutoincrementingPkTable.schema ++ OtherAutoincrementingPkTable.schema
+  lazy val schema: profile.SchemaDescription = AutoincrementingPkTable.schema ++ OtherAutoincrementingPkTable.schema
 
   /**
     * autoincrementing_pk_table
@@ -17,7 +17,7 @@ class DDL(val profile: slick.jdbc.JdbcProfile) {
     val note: Rep[String] = column[String]("note")
   }
 
-  val AutoincrementingPkTable = new TableQuery(tag => new AutoincrementingPkTable(tag))
+  lazy val AutoincrementingPkTable = new TableQuery(tag => new AutoincrementingPkTable(tag))
 
   /**
     * other_autoincrementing_pk_table
@@ -31,5 +31,5 @@ class DDL(val profile: slick.jdbc.JdbcProfile) {
     val note: Rep[String] = column[String]("note")
   }
 
-  val OtherAutoincrementingPkTable = new TableQuery(tag => new OtherAutoincrementingPkTable(tag))
+  lazy val OtherAutoincrementingPkTable = new TableQuery(tag => new OtherAutoincrementingPkTable(tag))
 }
