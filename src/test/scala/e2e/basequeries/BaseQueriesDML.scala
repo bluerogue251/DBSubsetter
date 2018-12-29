@@ -1,30 +1,28 @@
 package e2e.basequeries
 
-import slick.jdbc.JdbcProfile
+import slick.dbio.{DBIOAction, Effect, NoStream}
 
-class BaseQueriesDML(val profile: JdbcProfile) extends BaseQueriesDDL {
-
-  import profile.api._
-
-  def dbioSeq = {
+object BaseQueriesDML {
+  def dbioSeq(ddl: BaseQueriesDDL): DBIOAction[Unit, NoStream, Effect.Write] = {
+    import ddl.profile.api._
     slick.dbio.DBIO.seq(
-      BaseTable ++= (1 to 10).map(BaseTableRow),
-      ChildTable ++= Seq(
-        ChildTableRow(1, 1),
-        ChildTableRow(2, 1),
-        ChildTableRow(3, 2),
-        ChildTableRow(4, 2),
-        ChildTableRow(5, 3),
-        ChildTableRow(6, 3),
-        ChildTableRow(7, 3),
-        ChildTableRow(8, 3),
-        ChildTableRow(9, 4),
-        ChildTableRow(10, 4),
-        ChildTableRow(11, 5),
-        ChildTableRow(12, 5),
-        ChildTableRow(13, 6),
-        ChildTableRow(14, 6),
-        ChildTableRow(15, 7))
+      ddl.BaseTable ++= (1 to 10).map(ddl.BaseTableRow),
+      ddl.ChildTable ++= Seq(
+        ddl.ChildTableRow(1, 1),
+        ddl.ChildTableRow(2, 1),
+        ddl.ChildTableRow(3, 2),
+        ddl.ChildTableRow(4, 2),
+        ddl.ChildTableRow(5, 3),
+        ddl.ChildTableRow(6, 3),
+        ddl.ChildTableRow(7, 3),
+        ddl.ChildTableRow(8, 3),
+        ddl.ChildTableRow(9, 4),
+        ddl.ChildTableRow(10, 4),
+        ddl.ChildTableRow(11, 5),
+        ddl.ChildTableRow(12, 5),
+        ddl.ChildTableRow(13, 6),
+        ddl.ChildTableRow(14, 6),
+        ddl.ChildTableRow(15, 7))
     )
   }
 }

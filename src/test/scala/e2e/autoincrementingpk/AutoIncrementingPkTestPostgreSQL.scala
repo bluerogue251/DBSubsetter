@@ -2,7 +2,7 @@ package e2e.autoincrementingpk
 
 import e2e.AbstractPostgresqlEndToEndTest
 
-class TestPostgreSQL extends AbstractPostgresqlEndToEndTest with AutoIncrementingPkTest {
+class AutoIncrementingPkTestPostgreSQL extends AbstractPostgresqlEndToEndTest with AutoIncrementingPkTest {
   override protected val originPort = 5553
 
   override protected val programArgs = Array(

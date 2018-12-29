@@ -11,7 +11,7 @@ trait AutoIncrementingPkTest extends FunSuiteLike with AssertionUtil {
 
   protected def originSlick: slick.jdbc.JdbcBackend#DatabaseDef
 
-  private val ddl: DDL = new DDL(profile)
+  private val ddl: AutoIncrementingPkDDL = new AutoIncrementingPkDDL(profile)
 
   import ddl.profile.api._
 
@@ -20,7 +20,7 @@ trait AutoIncrementingPkTest extends FunSuiteLike with AssertionUtil {
   }
 
   protected def prepareOriginDML(): Unit = {
-    SlickUtil.dml(originSlick, DML.dbioSeq(ddl))
+    SlickUtil.dml(originSlick, AutoIncrementingPkDML.dbioSeq(ddl))
   }
 
   test("Correct records were included for main table and their primary keys values are correct") {

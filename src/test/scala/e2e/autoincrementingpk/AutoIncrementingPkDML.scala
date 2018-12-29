@@ -2,8 +2,8 @@ package e2e.autoincrementingpk
 
 import slick.dbio.{DBIOAction, Effect, NoStream}
 
-object DML {
-  def dbioSeq(ddl: DDL): DBIOAction[Unit, NoStream, Effect.Write] = {
+object AutoIncrementingPkDML {
+  def dbioSeq(ddl: AutoIncrementingPkDDL): DBIOAction[Unit, NoStream, Effect.Write] = {
     import ddl.profile.api._
     slick.dbio.DBIO.seq(
       ddl.AutoincrementingPkTable ++= (1 to 20).map(i => ddl.AutoincrementingPkTableRow(i, i.toString)),
