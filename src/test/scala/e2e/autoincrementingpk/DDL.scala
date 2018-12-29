@@ -5,8 +5,6 @@ class DDL(val profile: slick.jdbc.JdbcProfile) {
 
   lazy val schema: profile.SchemaDescription = AutoincrementingPkTable.schema ++ OtherAutoincrementingPkTable.schema
 
-  schema.create
-
   /**
     * autoincrementing_pk_table
     */

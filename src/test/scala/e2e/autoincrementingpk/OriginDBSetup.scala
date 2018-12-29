@@ -11,16 +11,15 @@ trait OriginDBSetup {
 
   protected val ddl: DDL = new DDL(profile)
 
-  protected val dml: DML = new DML(ddl)
-
   protected def prepareOriginDDL(): Unit = {
     import ddl.profile.api._
-    val ddlFut = originSlick.run(ddl.schema.create)
-    Await.result(ddlFut, Duration.Inf)
+    val ddlFuture = originSlick.run(ddl.schema.create)
+    Await.ready(ddlFuture, Duration.Inf)
   }
 
   protected def prepareOriginDML(): Unit = {
-    val ddlFut = originSlick.run(dml.dbioSeq)
-    Await.result(ddlFut, Duration.Inf)
+    val dmlDbioAction = DML.dbioSeq(ddl)
+    val dmlFuture = originSlick.run(dmlDbioAction)
+    Await.ready(dmlFuture, Duration.Inf)
   }
 }
