@@ -2,7 +2,7 @@ package e2e.autoincrementingpk
 
 import e2e.AbstractSqlServerEndToEndTest
 
-class TestSqlServer extends AbstractSqlServerEndToEndTest with AutoIncrementingPkTest {
+class AutoIncrementingPkTestSqlServer extends AbstractSqlServerEndToEndTest with AutoIncrementingPkTest {
   override protected val port = 5556
 
   override protected val programArgs = Array(
