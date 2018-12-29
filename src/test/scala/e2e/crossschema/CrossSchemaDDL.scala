@@ -1,8 +1,6 @@
 package e2e.crossschema
 
-trait CrossSchemaDDL {
-  protected val profile: slick.jdbc.JdbcProfile
-
+class CrossSchemaDDL(val profile: slick.jdbc.JdbcProfile) {
   import profile.api._
 
   lazy val schema: profile.SchemaDescription = Schema1Table.schema ++ Schema2Table.schema ++ Schema3Table.schema
