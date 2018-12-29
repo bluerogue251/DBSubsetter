@@ -2,7 +2,7 @@ package e2e.basequeries
 
 import e2e.AbstractMysqlEndToEndTest
 
-class BaseQueriesTestMysql extends AbstractMysqlEndToEndTest with BaseQueriesTest {
+class BaseQueriesTestMySql extends AbstractMysqlEndToEndTest with BaseQueriesTest {
   override protected val originPort = 5510
 
   override protected val programArgs = Array(

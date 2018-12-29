@@ -1,6 +1,8 @@
 package e2e.basequeries
 
-class BaseQueriesDDL(val profile: slick.jdbc.JdbcProfile) {
+import slick.jdbc.JdbcProfile
+
+class BaseQueriesDDL(val profile: JdbcProfile) {
   import profile.api._
 
   lazy val schema: profile.SchemaDescription = BaseTable.schema ++ ChildTable.schema

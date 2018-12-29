@@ -2,7 +2,7 @@ package e2e.missingfk
 
 import e2e.AbstractPostgresqlEndToEndTest
 
-class MissingFkPostgresqlTest extends AbstractPostgresqlEndToEndTest with MissingFkTestCases {
+class MissingFkTestPostgreSQL extends AbstractPostgresqlEndToEndTest with MissingFkTest {
   override val originPort = 5493
   override val programArgs = Array(
     "--schemas", "public",

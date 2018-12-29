@@ -2,7 +2,7 @@ package e2e.missingfk
 
 import e2e.AbstractSqlServerEndToEndTest
 
-class MissingFkSqlServerTest extends AbstractSqlServerEndToEndTest with MissingFkTestCases {
+class MissingFkTestSqlServer extends AbstractSqlServerEndToEndTest with MissingFkTest {
   override val port = 5496
   override val programArgs = Array(
     "--schemas", "dbo",
