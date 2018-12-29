@@ -1,23 +1,30 @@
 package load.schooldb
 
-import e2e.SlickSetupDDL
 import org.scalatest.FunSuiteLike
 import util.assertion.AssertionUtil
+import util.slick.SlickUtil
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 // TODO add back in LoadTest
-trait SchoolDbTestCases extends FunSuiteLike with SchoolDbDDL with SlickSetupDDL with AssertionUtil {
-
+trait SchoolDbTest extends FunSuiteLike with AssertionUtil {
   protected val testName = "school_db"
 
-  import profile.api._
+  protected val profile: slick.jdbc.JdbcProfile
 
-  override val ddl = schema.create
+  protected def originSlick: slick.jdbc.JdbcBackend#DatabaseDef
 
-  def prepareOriginDML(): Unit = {
-    val customDml = new SchoolDBDML(profile)
+  private val ddl: SchoolDbDDL = new SchoolDbDDL(profile)
+
+  import ddl.profile.api._
+
+  protected def prepareOriginDDL(): Unit = {
+    SlickUtil.ddl(originSlick, ddl.schema.create)
+  }
+
+  protected def prepareOriginDML(): Unit = {
+    val customDml = new SchoolDBDML(ddl)
     val dmlFut1 = originSlick.run(customDml.initialInserts)
     Await.result(dmlFut1, Duration.Inf)
     val dmlFut2 = originSlick.run(customDml.homeworkGradeInserts)
@@ -33,47 +40,47 @@ trait SchoolDbTestCases extends FunSuiteLike with SchoolDbDDL with SlickSetupDDL
   }
 
   test("Correct students were included") {
-    assertCount(Students, 35758)
-    assertThatLong(Students.map(_.studentId).sum.result, 17880448387l)
+    assertCount(ddl.Students, 35758)
+    assertThatLong(ddl.Students.map(_.studentId).sum.result, 17880448387l)
   }
 
   test("Correct districts were included") {
-    assertCount(Districts, 99)
-    assertThat(Districts.map(_.id).sum.result, 4950)
+    assertCount(ddl.Districts, 99)
+    assertThat(ddl.Districts.map(_.id).sum.result, 4950)
   }
 
   test("Purposely empty tables remained empty") {
-    assertCount(EmptyTable1, 0)
-    assertCount(EmptyTable2, 0)
-    assertCount(EmptyTable3, 0)
-    assertCount(EmptyTable4, 0)
-    assertCount(EmptyTable5, 0)
+    assertCount(ddl.EmptyTable1, 0)
+    assertCount(ddl.EmptyTable2, 0)
+    assertCount(ddl.EmptyTable3, 0)
+    assertCount(ddl.EmptyTable4, 0)
+    assertCount(ddl.EmptyTable5, 0)
   }
 
   test("Correct homework grades were included") {
-    assertCount(HomeworkGrades, 40146)
-    assertThatLong(HomeworkGrades.map(_.id).sum.result, 60264681654l)
+    assertCount(ddl.HomeworkGrades, 40146)
+    assertThatLong(ddl.HomeworkGrades.map(_.id).sum.result, 60264681654l)
   }
 
   test("Correct school_assignments were included") {
-    assertCount(SchoolAssignments, 26297)
-    assertThat(SchoolAssignments.map(_.schoolId).sum.result, 131875362l)
-    assertThatLong(SchoolAssignments.map(_.studentId).sum.result, 13150077112l)
+    assertCount(ddl.SchoolAssignments, 26297)
+    assertThat(ddl.SchoolAssignments.map(_.schoolId).sum.result, 131875362l)
+    assertThatLong(ddl.SchoolAssignments.map(_.studentId).sum.result, 13150077112l)
   }
 
   test("Correct schools were included") {
-    assertCount(Schools, 9999)
-    assertThat(Schools.map(_.id).sum.result, 49995000)
+    assertCount(ddl.Schools, 9999)
+    assertThat(ddl.Schools.map(_.id).sum.result, 49995000)
   }
 
   test("Correct standalone_table records were included") {
-    assertCount(StandaloneTable, 3)
-    assertThatLong(StandaloneTable.map(_.id).sum.result, 6)
+    assertCount(ddl.StandaloneTable, 3)
+    assertThatLong(ddl.StandaloneTable.map(_.id).sum.result, 6)
   }
 
   test("Correct Audit.events were included") {
-    assertCount(Events, 131584)
-    assertThatLong(Events.map(_.id).sum.result, 314228470029l)
+    assertCount(ddl.Events, 131584)
+    assertThatLong(ddl.Events.map(_.id).sum.result, 314228470029l)
   }
 
   test("Correct essay_assignments were included") {

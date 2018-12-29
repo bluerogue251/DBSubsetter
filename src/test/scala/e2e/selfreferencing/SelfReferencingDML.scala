@@ -1,12 +1,12 @@
 package e2e.selfreferencing
 
-import slick.jdbc.JdbcProfile
+import slick.dbio.{DBIOAction, Effect, NoStream}
 
-class SelfReferencingDML(val profile: JdbcProfile) extends SelfReferencingDDL {
+object SelfReferencingDML {
+  def dbioSeq(ddl: SelfReferencingDDL): DBIOAction[Unit, NoStream, Effect.Write] = {
+    import ddl._
+    import ddl.profile.api._
 
-  import profile.api._
-
-  def dbioSeq = {
     slick.dbio.DBIO.seq(
       SelfReferencingTable ++= Seq(
         // edge case: it references not only its own table, but its own row in that table

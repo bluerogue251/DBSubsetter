@@ -2,17 +2,28 @@ package e2e.pktypes
 
 import java.util.UUID
 
-import e2e.SlickSetup
 import org.scalatest.FunSuiteLike
 import util.assertion.AssertionUtil
+import util.slick.SlickUtil
 
-trait PkTypesTestCases extends FunSuiteLike with PkTypesDDL with SlickSetup with AssertionUtil {
+trait PkTypesTest extends FunSuiteLike with AssertionUtil {
   val testName = "pk_types"
 
-  import profile.api._
+  protected val profile: slick.jdbc.JdbcProfile
 
-  override lazy val ddl = schema.create
-  override lazy val dml = new PkTypesDML(profile).dbioSeq
+  protected def originSlick: slick.jdbc.JdbcBackend#DatabaseDef
+
+  private val ddl: PkTypesDDL = new PkTypesDDL(profile)
+
+  import ddl.profile.api._
+
+  protected def prepareOriginDDL(): Unit = {
+    SlickUtil.ddl(originSlick, ddl.schema.create)
+  }
+
+  protected def prepareOriginDML(): Unit = {
+    SlickUtil.dml(originSlick, PkTypesDML.dbioSeq(ddl))
+  }
 
   def expectedUUIDs = Seq[UUID](
     UUID.fromString("1607ce51-dcd1-480a-99a1-78027b654f50"),
@@ -31,34 +42,34 @@ trait PkTypesTestCases extends FunSuiteLike with PkTypesDDL with SlickSetup with
   // fk values showed up, they caused the `0` row to accidentally be included
 
   test("Correct byte_pk_table records were included") {
-    assertResult(BytePkTable.map(_.id).sorted.result, expectedByteIds)
+    assertResult(ddl.BytePkTable.map(_.id).sorted.result, expectedByteIds)
   }
 
   test("Correct short_pk_table records were included") {
-    assertResult(ShortPkTable.map(_.id).sorted.result, Seq[Short](-32768, 1, 32767))
+    assertResult(ddl.ShortPkTable.map(_.id).sorted.result, Seq[Short](-32768, 1, 32767))
   }
 
   test("Correct int_pk_table records were included") {
-    assertResult(IntPkTable.map(_.id).sorted.result, Seq[Int](-2147483648, 1, 2147483647))
+    assertResult(ddl.IntPkTable.map(_.id).sorted.result, Seq[Int](-2147483648, 1, 2147483647))
   }
 
   test("Correct long_pk_table records were included") {
-    assertResult(LongPkTable.map(_.id).sorted.result, Seq[Long](-9223372036854775808L, 1, 9223372036854775807L))
+    assertResult(ddl.LongPkTable.map(_.id).sorted.result, Seq[Long](-9223372036854775808L, 1, 9223372036854775807L))
   }
 
   test("Correct uuid_pk_table records were included") {
-    assertResult(UUIDPkTable.map(_.id).sorted.result, expectedUUIDs)
+    assertResult(ddl.UUIDPkTable.map(_.id).sorted.result, expectedUUIDs)
   }
 
   test("Correct char_10_pk_table records were included") {
-    assertResult(Char10PkTable.map(_.id).sorted.result, expectedChar10Ids)
+    assertResult(ddl.Char10PkTable.map(_.id).sorted.result, expectedChar10Ids)
   }
 
   test("Correct varchar_10_pk_table records were included") {
-    assertResult(Varchar10PkTable.map(_.id).sorted.result, Seq[String](" eight ", "six "))
+    assertResult(ddl.Varchar10PkTable.map(_.id).sorted.result, Seq[String](" eight ", "six "))
   }
 
   test("Correct referencing_table records were included") {
-    assertResult(ReferencingTable.map(_.id).sorted.result, expectedReferencingTableIds)
+    assertResult(ddl.ReferencingTable.map(_.id).sorted.result, expectedReferencingTableIds)
   }
 }

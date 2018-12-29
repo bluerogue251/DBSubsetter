@@ -4,7 +4,7 @@ import e2e.AbstractSqlServerEndToEndTest
 
 import scala.sys.process._
 
-class SchoolDbSqlServerTest extends AbstractSqlServerEndToEndTest with SchoolDbTestCases {
+class SchoolDbTestSqlServer extends AbstractSqlServerEndToEndTest with SchoolDbTest {
   override protected val port = 5456
 
   override protected val programArgs = Array(

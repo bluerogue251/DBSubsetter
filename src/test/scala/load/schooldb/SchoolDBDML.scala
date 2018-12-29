@@ -2,11 +2,9 @@ package load.schooldb
 
 import java.sql.{Date, Timestamp}
 
-import slick.jdbc.JdbcProfile
-
-class SchoolDBDML(val profile: JdbcProfile) extends SchoolDbDDL {
-
-  import profile.api._
+class SchoolDBDML(ddl: SchoolDbDDL) {
+  import ddl._
+  import ddl.profile.api._
 
   private val numDistricts = 100
   private val numSchools = 10000

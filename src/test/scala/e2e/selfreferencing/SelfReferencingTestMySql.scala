@@ -2,7 +2,7 @@ package e2e.selfreferencing
 
 import e2e.AbstractMysqlEndToEndTest
 
-class SelfReferencingMysqlTest extends AbstractMysqlEndToEndTest with SelfReferencingTestCases {
+class SelfReferencingTestMySql extends AbstractMysqlEndToEndTest with SelfReferencingTest {
   override val originPort = 5520
   override val programArgs = Array(
     "--schemas", "self_referencing",

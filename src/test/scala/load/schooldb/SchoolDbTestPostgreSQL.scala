@@ -7,7 +7,7 @@ import slick.jdbc.PostgresProfile.api._
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
-class SchoolDbPostgresqlTest extends AbstractPostgresqlEndToEndTest with SchoolDbTestCases {
+class SchoolDbTestPostgreSQL extends AbstractPostgresqlEndToEndTest with SchoolDbTest {
   override protected val originPort = 5453
 
   override protected val programArgs = Array(

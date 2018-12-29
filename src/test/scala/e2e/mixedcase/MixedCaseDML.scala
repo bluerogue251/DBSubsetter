@@ -1,12 +1,11 @@
 package e2e.mixedcase
 
-import slick.jdbc.JdbcProfile
+import slick.dbio.{DBIOAction, Effect, NoStream}
 
-class MixedCaseDML(val profile: JdbcProfile) extends MixedCaseDDL {
-
-  import profile.api._
-
-  def dbioSeq = {
+object MixedCaseDML {
+  def dbioSeq(ddl: MixedCaseDDL): DBIOAction[Unit, NoStream, Effect.Write] = {
+    import ddl._
+    import ddl.profile.api._
     slick.dbio.DBIO.seq(
       MixedCaseTable1 ++= Seq(
         MixedCaseTable1Row(1),

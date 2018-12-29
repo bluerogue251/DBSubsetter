@@ -2,7 +2,7 @@ package e2e.selfreferencing
 
 import e2e.AbstractSqlServerEndToEndTest
 
-class SelfReferencingSqlServerTest extends AbstractSqlServerEndToEndTest with SelfReferencingTestCases {
+class SelfReferencingTestSqlServer extends AbstractSqlServerEndToEndTest with SelfReferencingTest {
   override val port = 5526
   override val programArgs = Array(
     "--schemas", "dbo",
