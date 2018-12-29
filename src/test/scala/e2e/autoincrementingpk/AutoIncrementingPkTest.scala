@@ -2,9 +2,7 @@ package e2e.autoincrementingpk
 
 import org.scalatest.FunSuiteLike
 import util.assertion.AssertionUtil
-
-import scala.concurrent.Await
-import scala.concurrent.duration.Duration
+import util.slick.SlickUtil
 
 trait AutoIncrementingPkTest extends FunSuiteLike with AssertionUtil {
   protected val testName = "autoincrementing_pk"
@@ -18,14 +16,11 @@ trait AutoIncrementingPkTest extends FunSuiteLike with AssertionUtil {
   import ddl.profile.api._
 
   protected def prepareOriginDDL(): Unit = {
-    val ddlFuture = originSlick.run(ddl.schema.create)
-    Await.ready(ddlFuture, Duration.Inf)
+    SlickUtil.ddl(originSlick, ddl.schema.create)
   }
 
   protected def prepareOriginDML(): Unit = {
-    val dmlDbioAction = DML.dbioSeq(ddl)
-    val dmlFuture = originSlick.run(dmlDbioAction)
-    Await.ready(dmlFuture, Duration.Inf)
+    SlickUtil.dml(originSlick, DML.dbioSeq(ddl))
   }
 
   test("Correct records were included for main table and their primary keys values are correct") {
