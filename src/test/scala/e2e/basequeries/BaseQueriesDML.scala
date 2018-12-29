@@ -3,7 +3,7 @@ package e2e.basequeries
 import slick.dbio.{DBIOAction, Effect, NoStream}
 
 object BaseQueriesDML {
-  def dbioSeq(ddl: BaseQueriesDDL): DBIOAction[Unit, NoStream, Effect] = {
+  def dbioSeq(ddl: BaseQueriesDDL): DBIOAction[Unit, NoStream, Effect.Write] = {
     import ddl.profile.api._
     slick.dbio.DBIO.seq(
       ddl.BaseTable ++= (1 to 10).map(ddl.BaseTableRow),
