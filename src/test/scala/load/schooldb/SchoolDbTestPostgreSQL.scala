@@ -2,10 +2,14 @@ package load.schooldb
 
 import e2e.{AbstractPostgresqlEndToEndTest, PostgresqlEndToEndTestUtil}
 import load.LoadTest
+import slick.dbio.DBIO
+import slick.jdbc.PostgresProfile.api._
 import util.Ports
 import util.db.{DatabaseContainer, DatabaseContainerSet, PostgreSQLContainer, PostgreSQLDatabase}
 import util.docker.ContainerUtil
 
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 import scala.sys.process._
 
 class SchoolDbTestPostgreSQL extends AbstractPostgresqlEndToEndTest with LoadTest[PostgreSQLDatabase] with SchoolDbTest {
@@ -14,12 +18,13 @@ class SchoolDbTestPostgreSQL extends AbstractPostgresqlEndToEndTest with LoadTes
 
   override val akkaStreamsRuntimeLimitMillis: Long = 25000
 
-  private lazy val mustReCreateOriginDb: Boolean = true // !ContainerUtil.exists(containers.origin.name)
+  private lazy val mustReCreateOriginDb: Boolean = !ContainerUtil.exists(containers.origin.name)
 
   /*
-   * Only to be used when changing the origin db definition. Otherwise we can just load the existing dump from S3
+   * Only to be used when changing the origin db definition, where the origin DB needs to be competely rebuilt from scratch.
+   * Otherwise we can just load the existing dump from S3
    */
-//  private val populateOriginFromScratch: Boolean = false
+  private val skipOriginDbPerformanceOptimization: Boolean = false
 
   override protected def startOriginContainer(): Unit = {
     if (mustReCreateOriginDb) {
@@ -49,20 +54,28 @@ class SchoolDbTestPostgreSQL extends AbstractPostgresqlEndToEndTest with LoadTes
   }
 
   override protected def prepareOriginDDL(): Unit = {
-    if (mustReCreateOriginDb) {
-      val dumpUrl = "https://s3.amazonaws.com/db-subsetter/load-test/school-db/pgdump.sql.gz"
-      s"./src/test/util/blarghy_mc_blargh_face.sh $dumpUrl ${containers.origin.name} ${containers.origin.db.name}".!!
-//      (dumpUrl #> "gunzip" #| s"docker exec -it ${containers.origin.name} psql --user postgres").!!
-//      val createSchemaStatements: DBIO[Unit] = DBIO.seq(
-//        sqlu"create schema school_db",
-//        sqlu"""create schema "Audit""""
-//      )
-//      Await.ready(originSlick.run(createSchemaStatements), Duration.Inf)
-//      super.prepareOriginDDL()
+    (mustReCreateOriginDb, skipOriginDbPerformanceOptimization) match {
+      case (false, _) => // No action necessary
+      case (true, false) => // Load origin DB from dump file stored in S3
+        val dumpUrl = "https://s3.amazonaws.com/db-subsetter/load-test/school-db/pgdump.sql.gz"
+        s"./src/test/util/load_postgres_db_from_s3.sh $dumpUrl ${containers.origin.name} ${containers.origin.db.name}".!!
+      case (true, true) => // Recreate origin DB from original slick definitions
+        val createSchemaStatements: DBIO[Unit] = DBIO.seq(
+          sqlu"create schema school_db",
+          sqlu"""create schema "Audit""""
+        )
+        Await.ready(originSlick.run(createSchemaStatements), Duration.Inf)
+        super.prepareOriginDDL()
     }
   }
 
-  override protected def prepareOriginDML(): Unit = {} // No-op (already taken care of in prepareOriginDDL)
+  override protected def prepareOriginDML(): Unit = {
+    (mustReCreateOriginDb, skipOriginDbPerformanceOptimization) match {
+      case (false, _) => // No action necessary
+      case (true, false) => // No action necessary (already done in prepareOriginDDL)
+      case (true, true) => super.prepareOriginDML() // We have to populate it from scratch
+    }
+  }
 
   override protected val programArgs = Array(
     "--schemas", "school_db,Audit",
