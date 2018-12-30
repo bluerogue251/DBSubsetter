@@ -20,6 +20,8 @@ object SharedTestContainers {
     new PostgreSQLContainer(containerName, db)
   }
 
+  lazy val awaitPostgresUp: Unit = Thread.sleep(4000)
+
   lazy val sqlServer: DatabaseContainer[SqlServerDatabase] = {
     val containerName = "e2e_sql_server"
     val port = 5499
@@ -33,4 +35,7 @@ object SharedTestContainers {
 
     new SqlServerContainer(containerName, db)
   }
+
+  lazy val awaitSqlServerUp: Unit = Thread.sleep(5000)
+
 }

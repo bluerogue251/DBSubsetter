@@ -17,6 +17,7 @@ class CrossSchemaTestMySql extends AbstractMysqlEndToEndTest with CrossSchemaTes
     MysqlEndToEndTestUtil.createDb(containers.origin.name, "schema_1")
     MysqlEndToEndTestUtil.createDb(containers.origin.name, "schema_2")
     MysqlEndToEndTestUtil.createDb(containers.origin.name, "schema_3")
+    super.createOriginDatabase()
   }
 
   override def prepareTargetDDL(): Unit = {
