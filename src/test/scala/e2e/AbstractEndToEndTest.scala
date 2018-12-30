@@ -3,7 +3,6 @@ package e2e
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 import slick.jdbc.JdbcBackend
 import util.db.{Database, DatabaseContainerSet}
-import util.docker.ContainerUtil
 import util.runner.TestSubsetRunner
 
 abstract class AbstractEndToEndTest[T <: Database] extends FunSuite with BeforeAndAfterAll {
@@ -42,14 +41,9 @@ abstract class AbstractEndToEndTest[T <: Database] extends FunSuite with BeforeA
 
   protected def postSubset(): Unit
 
-  protected def teardownOriginContainer(): Unit = {
-    ContainerUtil.rm(containers.origin.name)
-  }
+  protected def teardownOriginContainer(): Unit = {} // No-op by default
 
-  protected def teardownTargetContainers(): Unit = {
-    ContainerUtil.rm(containers.targetSingleThreaded.name)
-    ContainerUtil.rm(containers.targetAkkaStreams.name)
-  }
+  protected def teardownTargetContainers(): Unit = {} // No-op by default
 
   /*
    * Slick testing utility connections (do not override)
@@ -125,5 +119,11 @@ abstract class AbstractEndToEndTest[T <: Database] extends FunSuite with BeforeA
     originSlick.close()
     targetSingleThreadedSlick.close()
     targetAkkaStreamsSlick.close()
+
+    /*
+     * Remove any containers as necessary
+     */
+    teardownOriginContainer()
+    teardownTargetContainers()
   }
 }

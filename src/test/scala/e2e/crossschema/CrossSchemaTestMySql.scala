@@ -2,6 +2,7 @@ package e2e.crossschema
 
 import e2e.{AbstractMysqlEndToEndTest, MysqlEndToEndTestUtil}
 import util.db.{DatabaseContainer, DatabaseContainerSet, MySqlDatabase}
+import util.docker.ContainerUtil
 
 import scala.sys.process._
 
@@ -58,5 +59,14 @@ class CrossSchemaTestMySql extends AbstractMysqlEndToEndTest with CrossSchemaTes
     s"./src/test/util/sync_mysql_origin_to_target.sh ${containers.origin.name} schema_1 ${containers.targetAkkaStreams.name} schema_1 ".!!
     s"./src/test/util/sync_mysql_origin_to_target.sh ${containers.origin.name} schema_2 ${containers.targetAkkaStreams.name} schema_2 ".!!
     s"./src/test/util/sync_mysql_origin_to_target.sh ${containers.origin.name} schema_3 ${containers.targetAkkaStreams.name} schema_3 ".!!
+  }
+
+  override def teardownOriginContainer(): Unit = {
+    ContainerUtil.rm(containers.origin.name)
+  }
+
+  override def teardownTargetContainers(): Unit = {
+    ContainerUtil.rm(containers.targetSingleThreaded.name)
+    ContainerUtil.rm(containers.targetAkkaStreams.name)
   }
 }
