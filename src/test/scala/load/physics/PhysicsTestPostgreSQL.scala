@@ -1,10 +1,16 @@
 package load.physics
 
 import e2e.AbstractPostgresqlEndToEndTest
+import load.LoadTest
+import util.db.PostgreSQLDatabase
 
 import scala.sys.process._
 
-class PhysicsTestPostgreSQL extends AbstractPostgresqlEndToEndTest with PhysicsTest {
+class PhysicsTestPostgreSQL extends AbstractPostgresqlEndToEndTest with LoadTest[PostgreSQLDatabase] with PhysicsTest {
+  override val singleThreadedRuntimeLimitMillis: Long = 40000
+
+  override val akkaStreamsRuntimeLimitMillis: Long = 2600000
+
   override protected val originPort = 5573
 
   override protected val programArgs = Array(
@@ -26,9 +32,4 @@ class PhysicsTestPostgreSQL extends AbstractPostgresqlEndToEndTest with PhysicsT
     super.prepareTargetDDL()
     "./src/test/scala/load/physics/copy_domain_data_postgres.sh".!
   }
-
-// TODO: put back when we reintroduce load tests
-//  override val singleThreadedRuntimeThreshold: Long = 400000
-//
-//  override val akkaStreamsRuntimeThreshold: Long = 2600000
 }

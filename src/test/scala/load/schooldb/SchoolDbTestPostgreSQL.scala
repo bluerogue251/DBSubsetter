@@ -1,13 +1,20 @@
 package load.schooldb
 
 import e2e.AbstractPostgresqlEndToEndTest
+import load.LoadTest
 import slick.dbio.DBIO
 import slick.jdbc.PostgresProfile.api._
+import util.db.PostgreSQLDatabase
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
-class SchoolDbTestPostgreSQL extends AbstractPostgresqlEndToEndTest with SchoolDbTest {
+class SchoolDbTestPostgreSQL extends AbstractPostgresqlEndToEndTest with LoadTest[PostgreSQLDatabase] with SchoolDbTest {
+
+  override val singleThreadedRuntimeLimitMillis: Long = 220000
+
+  override val akkaStreamsRuntimeLimitMillis: Long = 25000
+
   override protected val originPort = 5453
 
   override protected val programArgs = Array(
@@ -27,9 +34,4 @@ class SchoolDbTestPostgreSQL extends AbstractPostgresqlEndToEndTest with SchoolD
     Await.ready(originSlick.run(createSchemaStatements), Duration.Inf)
     super.prepareOriginDML()
   }
-
-// TODO: put back when we reintroduce load tests
-//  override val singleThreadedRuntimeThreshold: Long = 220000
-//
-//  override val akkaStreamsRuntimeThreshold: Long = 25000
 }
