@@ -1,22 +1,33 @@
 package load
 
-import org.scalatest.FunSuite
+import e2e.AbstractEndToEndTest
+import util.db.Database
+import util.runner.TestSubsetRunner
 
 
-trait LoadTest extends FunSuite {
-  def singleThreadedRuntimeMillis: Long
+trait LoadTest[T <: Database] { this: AbstractEndToEndTest[T] =>
 
-  def akkStreamsRuntimeMillis: Long
+  protected def singleThreadedRuntimeLimitMillis: Long
 
-  def singleThreadedRuntimeThreshold: Long
+  protected def akkaStreamsRuntimeLimitMillis: Long
 
-  def akkaStreamsRuntimeThreshold: Long
+  private var singleThreadedRuntimeMillis: Long = _
 
-  test("Single threaded Runtime did not significantly increase") {
-    assert(singleThreadedRuntimeMillis < singleThreadedRuntimeThreshold)
+  private var akkaStreamsRuntimeMillis: Long = _
+
+  override protected def runSubsetInSingleThreadedMode(): Unit = {
+    singleThreadedRuntimeMillis = TestSubsetRunner.runSubsetInSingleThreadedMode(containers, programArgs)
+  }
+
+  override protected def runSubsetInAkkaStreamsMode(): Unit = {
+    akkaStreamsRuntimeMillis = TestSubsetRunner.runSubsetInAkkaStreamsMode(containers, programArgs)
+  }
+
+  test("Single threaded runtime did not significantly increase") {
+    assert(singleThreadedRuntimeMillis < singleThreadedRuntimeLimitMillis)
   }
 
   test("Akka Streams runtime did not significantly increase") {
-    assert(akkStreamsRuntimeMillis < akkaStreamsRuntimeThreshold)
+    assert(akkaStreamsRuntimeMillis < akkaStreamsRuntimeLimitMillis)
   }
 }

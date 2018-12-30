@@ -7,7 +7,6 @@ import util.slick.SlickUtil
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
-// TODO: Add back in with LoadTest
 trait PhysicsTest extends FunSuiteLike with AssertionUtil {
   protected val testName = "physics"
 

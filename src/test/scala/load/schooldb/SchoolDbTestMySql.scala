@@ -1,10 +1,17 @@
 package load.schooldb
 
 import e2e.AbstractMysqlEndToEndTest
+import load.LoadTest
+import util.db.MySqlDatabase
 
 import scala.sys.process._
 
-class SchoolDbTestMySql extends AbstractMysqlEndToEndTest with SchoolDbTest {
+class SchoolDbTestMySql extends AbstractMysqlEndToEndTest with LoadTest[MySqlDatabase] with SchoolDbTest {
+
+  override val singleThreadedRuntimeLimitMillis: Long = 1150000
+
+  override val akkaStreamsRuntimeLimitMillis: Long = 120000
+
   override protected val originPort = 5450
 
   override protected val programArgs = Array(
@@ -28,9 +35,4 @@ class SchoolDbTestMySql extends AbstractMysqlEndToEndTest with SchoolDbTest {
     s"./src/test/util/sync_mysql_origin_to_target.sh Audit ${containers.origin.name} ${containers.targetSingleThreaded.name}".!!
     s"./src/test/util/sync_mysql_origin_to_target.sh Audit ${containers.origin.name} ${containers.targetAkkaStreams.name}".!!
   }
-
-// TODO: put back when we reintroduce load tests
-//  override val singleThreadedRuntimeThreshold: Long = 1150000
-//
-//  override val akkaStreamsRuntimeThreshold: Long = 120000
 }

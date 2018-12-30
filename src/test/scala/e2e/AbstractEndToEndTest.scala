@@ -2,15 +2,9 @@ package e2e
 
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 import slick.jdbc.JdbcBackend
-import trw.dbsubsetter.config.{CommandLineParser, Config}
-import trw.dbsubsetter.db.{SchemaInfo, SchemaInfoRetrieval}
-import trw.dbsubsetter.workflow.BaseQueries
-import trw.dbsubsetter.{ApplicationAkkaStreams, ApplicationSingleThreaded}
 import util.db.{Database, DatabaseContainerSet}
 import util.docker.ContainerUtil
-
-import scala.concurrent.Await
-import scala.concurrent.duration.Duration
+import util.runner.TestSubsetRunner
 
 abstract class AbstractEndToEndTest[T <: Database] extends FunSuite with BeforeAndAfterAll {
   /*
@@ -29,6 +23,14 @@ abstract class AbstractEndToEndTest[T <: Database] extends FunSuite with BeforeA
   protected def prepareTargetDDL(): Unit
 
   protected def programArgs: Array[String]
+
+  protected def runSubsetInSingleThreadedMode(): Unit = {
+    TestSubsetRunner.runSubsetInSingleThreadedMode(containers, programArgs)
+  }
+
+  protected def runSubsetInAkkaStreamsMode(): Unit = {
+    TestSubsetRunner.runSubsetInAkkaStreamsMode(containers, programArgs)
+  }
 
   protected def postSubset(): Unit
 
@@ -115,42 +117,5 @@ abstract class AbstractEndToEndTest[T <: Database] extends FunSuite with BeforeA
     ContainerUtil.rm(containers.origin.name)
     ContainerUtil.rm(containers.targetSingleThreaded.name)
     ContainerUtil.rm(containers.targetAkkaStreams.name)
-  }
-
-  private def runSubsetInSingleThreadedMode(): Unit = {
-    val defaultArgs: Array[String] = Array(
-      "--originDbConnStr", containers.origin.db.connectionString,
-      "--targetDbConnStr", containers.targetSingleThreaded.db.connectionString
-    )
-    val finalArgs: Array[String] = defaultArgs ++ programArgs
-
-    val config: Config = CommandLineParser.parser.parse(finalArgs, Config()).get
-    val schemaInfo: SchemaInfo = SchemaInfoRetrieval.getSchemaInfo(config)
-    val baseQueries = BaseQueries.get(config, schemaInfo)
-
-    val startSingleThreaded = System.nanoTime()
-    ApplicationSingleThreaded.run(config, schemaInfo, baseQueries)
-    val singleThreadedRuntimeMillis = (System.nanoTime() - startSingleThreaded) / 1000000
-    println(s"Single Threaded Took $singleThreadedRuntimeMillis milliseconds")
-  }
-
-  private def runSubsetInAkkaStreamsMode(): Unit = {
-    val defaultArgs: Array[String] = Array(
-      "--originDbConnStr", containers.origin.db.connectionString,
-      "--originDbParallelism", "10",
-      "--targetDbParallelism", "10",
-      "--targetDbConnStr", containers.targetAkkaStreams.db.connectionString
-    )
-    val finalArgs: Array[String] = defaultArgs ++ programArgs
-
-    val config: Config = CommandLineParser.parser.parse(finalArgs, Config()).get
-    val schemaInfo: SchemaInfo = SchemaInfoRetrieval.getSchemaInfo(config)
-    val baseQueries = BaseQueries.get(config, schemaInfo)
-
-    val startAkkaStreams = System.nanoTime()
-    val futureResult = ApplicationAkkaStreams.run(config, schemaInfo, baseQueries)
-    Await.result(futureResult, Duration.Inf)
-    val akkStreamsRuntimeMillis = (System.nanoTime() - startAkkaStreams) / 1000000
-    println(s"Akka Streams Took $akkStreamsRuntimeMillis milliseconds")
   }
 }

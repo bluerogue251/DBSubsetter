@@ -1,10 +1,17 @@
 package load.schooldb
 
 import e2e.AbstractSqlServerEndToEndTest
+import load.LoadTest
+import util.db.SqlServerDatabase
 
 import scala.sys.process._
 
-class SchoolDbTestSqlServer extends AbstractSqlServerEndToEndTest with SchoolDbTest {
+class SchoolDbTestSqlServer extends AbstractSqlServerEndToEndTest with LoadTest[SqlServerDatabase] with SchoolDbTest {
+
+  override val singleThreadedRuntimeLimitMillis: Long = 110000
+
+  override val akkaStreamsRuntimeLimitMillis: Long = 25000
+
   override protected val port = 5456
 
   override protected val programArgs = Array(
@@ -17,13 +24,8 @@ class SchoolDbTestSqlServer extends AbstractSqlServerEndToEndTest with SchoolDbT
   )
 
   override protected def prepareOriginDDL(): Unit = {
-    s"./src/test/util/create_schema_sqlserver.sh ${containers.origin.name} $testName school_db".!!
-    s"./src/test/util/create_schema_sqlserver.sh ${containers.origin.name} $testName Audit".!!
+    s"./src/test/util/create_schema_sqlserver.sh ${containers.origin.name} ${containers.origin.db.name} school_db".!!
+    s"./src/test/util/create_schema_sqlserver.sh ${containers.origin.name} ${containers.origin.db.name} Audit".!!
     super.prepareOriginDDL()
   }
-
-// TODO: put back when we reintroduce load tests
-//  override val singleThreadedRuntimeThreshold: Long = 110000
-//
-//  override val akkaStreamsRuntimeThreshold: Long = 25000
 }
