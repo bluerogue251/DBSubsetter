@@ -10,38 +10,31 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest[MySqlDatab
 
   protected def originPort: Int
 
-  private def originContainerName = s"${testName}_origin_mysql"
-
-  private def targetSingleThreadedContainerName = s"${testName}_target_single_threaded_mysql"
-
-  private def targetAkkaStreamsContainerName = s"${testName}_target_akka_streams_mysql"
-
-  private def targetSingleThreadedPort = originPort + 1
-
-  private def targetAkkaStreamsPort = originPort + 2
-
   override protected def startOriginContainer():Unit = {
-    DatabaseContainer.startMySql(originContainerName, originPort)
+    DatabaseContainer.startMySql(containers.origin.name, originPort)
   }
 
   override protected def startTargetContainers(): Unit = {
-    DatabaseContainer.startMySql(targetSingleThreadedContainerName, targetSingleThreadedPort)
-    DatabaseContainer.startMySql(targetAkkaStreamsContainerName, targetAkkaStreamsPort)
+    DatabaseContainer.startMySql(containers.targetSingleThreaded.name, containers.targetSingleThreaded.db.port)
+    DatabaseContainer.startMySql(containers.targetAkkaStreams.name, containers.targetAkkaStreams.db.port)
   }
 
   override protected def createOriginDatabase(): Unit = {
-    println("Creating Origin DB")
     createMySqlDatabase(containers.origin.name, containers.origin.db.name)
   }
 
   override protected def createTargetDatabases(): Unit = {
-    println("Creating Single Threaded Target DB")
     createMySqlDatabase(containers.targetSingleThreaded.name, containers.targetSingleThreaded.db.name)
-    println("Creating Akka Streams Target DB")
     createMySqlDatabase(containers.targetAkkaStreams.name, containers.targetAkkaStreams.db.name)
   }
 
   override protected def containers: DatabaseContainerSet[MySqlDatabase] = {
+    val originContainerName = s"${testName}_origin_mysql"
+    val targetSingleThreadedContainerName = s"${testName}_target_single_threaded_mysql"
+    val targetAkkaStreamsContainerName = s"${testName}_target_akka_streams_mysql"
+    val targetSingleThreadedPort = originPort + 1
+    val targetAkkaStreamsPort = originPort + 2
+
     new DatabaseContainerSet[MySqlDatabase](
       buildContainer(originContainerName, testName, originPort),
       buildContainer(targetSingleThreadedContainerName, testName, targetSingleThreadedPort),
