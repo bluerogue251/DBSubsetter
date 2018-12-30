@@ -23,8 +23,8 @@ class SchoolDbTestMySql extends AbstractMysqlEndToEndTest with LoadTest[MySqlDat
     "--preTargetBufferSize", "10000"
   )
 
-  override protected def prepareOriginDDL(): Unit = {
-    super.prepareOriginDDL()
+  override protected def createOriginDatabase(): Unit = {
+    super.createOriginDatabase()
     s"./src/test/util/create_mysql_db.sh Audit ${containers.origin.name}".!!
   }
 
