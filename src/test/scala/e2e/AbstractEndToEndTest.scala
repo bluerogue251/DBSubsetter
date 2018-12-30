@@ -68,9 +68,9 @@ abstract class AbstractEndToEndTest[T <: Database] extends FunSuite with BeforeA
      */
     startOriginContainer()
     startTargetContainers()
+    awaitContainersReady()
     createOriginDatabase()
     createTargetDatabases()
-    awaitContainersReady()
 
     /*
      * Create slick connections to the origin and target DBs. These connections are utilities for testing

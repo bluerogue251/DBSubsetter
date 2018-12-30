@@ -20,6 +20,8 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest[MySqlDatab
     DatabaseContainer.startMySql(containers.targetAkkaStreams.name, containers.targetAkkaStreams.db.port)
   }
 
+  override protected def awaitContainersReady(): Unit = Thread.sleep(13000)
+
   override protected def createOriginDatabase(): Unit = {
     createMySqlDatabase(containers.origin.name, containers.origin.db.name)
   }

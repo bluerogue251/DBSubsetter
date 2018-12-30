@@ -20,6 +20,8 @@ abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest[Postg
     DatabaseContainer.startPostgreSQL(containers.targetAkkaStreams.name, containers.targetAkkaStreams.db.port)
   }
 
+  override protected def awaitContainersReady(): Unit = Thread.sleep(4000)
+
   override protected def createOriginDatabase(): Unit = {
     createDb(containers.origin.name, containers.origin.db.name)
   }
