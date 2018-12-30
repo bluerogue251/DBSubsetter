@@ -1,7 +1,8 @@
 package e2e
 
 import util.db._
-import util.retry.RetryUtil
+
+import scala.sys.process._
 
 abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest[MySqlDatabase] {
   override protected val profile = slick.jdbc.MySQLProfile
@@ -26,7 +27,6 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest[MySqlDatab
   override protected def createTargetDatabases(): Unit = {
     createMySqlDatabase(containers.targetSingleThreaded.name, containers.targetSingleThreaded.db.name)
     createMySqlDatabase(containers.targetAkkaStreams.name, containers.targetAkkaStreams.db.name)
-    Thread.sleep(10000)
   }
 
   override protected def containers: DatabaseContainerSet[MySqlDatabase] = {
@@ -48,12 +48,8 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest[MySqlDatab
   override protected def prepareOriginDML(): Unit
 
   override protected def prepareTargetDDL(): Unit = {
-    def sync(targetContainer: String): Unit = {
-      val cmd = s"./src/test/util/sync_mysql_origin_to_target.sh ${containers.origin.db.name} ${containers.origin.name} $targetContainer"
-      RetryUtil.withRetry(cmd)
-    }
-    sync(containers.targetSingleThreaded.name)
-    sync(containers.targetAkkaStreams.name)
+    s"./src/test/util/sync_mysql_origin_to_target.sh ${containers.origin.db.name} ${containers.origin.name} ${containers.targetSingleThreaded.name}".!!
+    s"./src/test/util/sync_mysql_origin_to_target.sh ${containers.origin.db.name} ${containers.origin.name} ${containers.targetAkkaStreams.name}".!!
   }
 
   override protected def postSubset(): Unit = {} // No-op
@@ -64,7 +60,6 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest[MySqlDatab
   }
 
   private def createMySqlDatabase(container: String, db: String): Unit = {
-    val command = s"./src/test/util/create_mysql_db.sh $db $container"
-    RetryUtil.withRetry(command)
+    s"./src/test/util/create_mysql_db.sh $db $container".!!
   }
 }

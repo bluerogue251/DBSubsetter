@@ -16,6 +16,8 @@ abstract class AbstractEndToEndTest[T <: Database] extends FunSuite with BeforeA
 
   protected def startTargetContainers(): Unit
 
+  protected def awaitContainersReady(): Unit
+
   protected def createOriginDatabase(): Unit
 
   protected def createTargetDatabases(): Unit
@@ -68,6 +70,7 @@ abstract class AbstractEndToEndTest[T <: Database] extends FunSuite with BeforeA
     startTargetContainers()
     createOriginDatabase()
     createTargetDatabases()
+    awaitContainersReady()
 
     /*
      * Create slick connections to the origin and target DBs. These connections are utilities for testing

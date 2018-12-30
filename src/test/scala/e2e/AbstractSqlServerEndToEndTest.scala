@@ -1,7 +1,6 @@
 package e2e
 
 import util.db._
-import util.retry.RetryUtil
 
 import scala.sys.process._
 
@@ -58,7 +57,7 @@ abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest[SqlSer
   }
 
   private def createEmptyDb(containerName: String, dbName: String): Unit = {
-    RetryUtil.withRetry(s"./src/test/util/create_sqlserver_db.sh $containerName $dbName")
+    s"./src/test/util/create_sqlserver_db.sh $containerName $dbName".!!
   }
 
   private def buildContainer(containerName: String, dbName: String, dbPort: Int): SqlServerContainer = {
