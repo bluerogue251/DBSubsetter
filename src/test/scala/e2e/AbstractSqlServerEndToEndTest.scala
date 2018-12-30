@@ -1,6 +1,7 @@
 package e2e
 
 import util.db._
+import util.retry.RetryUtil
 
 import scala.sys.process._
 
@@ -29,7 +30,7 @@ abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest[SqlSer
     createEmptyDb(containers.origin.name, containers.targetAkkaStreams.db.name)
   }
 
-  override protected val containers: DatabaseContainerSet[SqlServerDatabase] = {
+  override protected def containers: DatabaseContainerSet[SqlServerDatabase] = {
     val containerName = s"${testName}_sqlserver"
     val originDbName = s"${testName}_origin"
     val targetSingleThreadedDbName = s"${testName}_target_single_threaded"
@@ -57,7 +58,7 @@ abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest[SqlSer
   }
 
   private def createEmptyDb(containerName: String, dbName: String): Unit = {
-    s"./src/test/util/create_sqlserver_db.sh $containerName $dbName".!!
+    RetryUtil.withRetry(s"./src/test/util/create_sqlserver_db.sh $containerName $dbName")
   }
 
   private def buildContainer(containerName: String, dbName: String, dbPort: Int): SqlServerContainer = {
