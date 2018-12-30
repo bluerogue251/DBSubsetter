@@ -3,7 +3,6 @@ package e2e.basequeries
 import e2e.AbstractMysqlEndToEndTest
 
 class BaseQueriesTestMySql extends AbstractMysqlEndToEndTest with BaseQueriesTest {
-  override protected val originPort = 5510
 
   override protected val programArgs = Array(
     "--schemas", "base_queries",

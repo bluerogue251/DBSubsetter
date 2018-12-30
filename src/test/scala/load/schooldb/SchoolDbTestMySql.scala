@@ -12,8 +12,6 @@ class SchoolDbTestMySql extends AbstractMysqlEndToEndTest with LoadTest[MySqlDat
 
   override val akkaStreamsRuntimeLimitMillis: Long = 120000
 
-  override protected val originPort = 5450
-
   override protected val programArgs = Array(
     "--schemas", "school_db,Audit",
     "--baseQuery", "school_db.Students ::: student_id % 100 = 0 ::: includeChildren",

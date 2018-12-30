@@ -3,7 +3,7 @@ package e2e.missingfk
 import e2e.AbstractMysqlEndToEndTest
 
 class MissingFkTestMySql extends AbstractMysqlEndToEndTest with MissingFkTest {
-  override val originPort = 5490
+
   override val programArgs = Array(
     "--schemas", "missing_fk",
     "--baseQuery", "missing_fk.table_1 ::: id = 2 ::: includeChildren",
