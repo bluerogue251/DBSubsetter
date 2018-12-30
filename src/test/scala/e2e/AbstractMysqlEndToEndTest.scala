@@ -11,37 +11,32 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest[MySqlDatab
 
   protected def originPort: Int
 
-  override protected def startOriginContainer():Unit = {
-    DatabaseContainer.startMySql(containers.origin.name, originPort)
-  }
+  override protected def startOriginContainer():Unit = SharedTestContainers.mysql
 
-  override protected def startTargetContainers(): Unit = {
-    DatabaseContainer.startMySql(containers.targetSingleThreaded.name, containers.targetSingleThreaded.db.port)
-    DatabaseContainer.startMySql(containers.targetAkkaStreams.name, containers.targetAkkaStreams.db.port)
-  }
+  override protected def startTargetContainers(): Unit = {} // No-op (shares container with origin)
 
   override protected def awaitContainersReady(): Unit = Thread.sleep(13000)
 
   override protected def createOriginDatabase(): Unit = {
-    createMySqlDatabase(containers.origin.name, containers.origin.db.name)
+    MysqlEndToEndTestUtil.createDb(containers.origin.name, containers.origin.db.name)
   }
 
   override protected def createTargetDatabases(): Unit = {
-    createMySqlDatabase(containers.targetSingleThreaded.name, containers.targetSingleThreaded.db.name)
-    createMySqlDatabase(containers.targetAkkaStreams.name, containers.targetAkkaStreams.db.name)
+    MysqlEndToEndTestUtil.createDb(containers.targetSingleThreaded.name, containers.targetSingleThreaded.db.name)
+    MysqlEndToEndTestUtil.createDb(containers.targetAkkaStreams.name, containers.targetAkkaStreams.db.name)
   }
 
   override protected def containers: DatabaseContainerSet[MySqlDatabase] = {
-    val originContainerName = s"${testName}_origin_mysql"
-    val targetSingleThreadedContainerName = s"${testName}_target_single_threaded_mysql"
-    val targetAkkaStreamsContainerName = s"${testName}_target_akka_streams_mysql"
-    val targetSingleThreadedPort = originPort + 1
-    val targetAkkaStreamsPort = originPort + 2
+    val containerName = SharedTestContainers.mysql.name
+    val port = SharedTestContainers.mysql.db.port
+    val originDbName = s"${testName}_origin_mysql"
+    val targetSingleThreadedDbName = s"${testName}_target_single_threaded_mysql"
+    val targetAkkaStreamsDbName = s"${testName}_target_akka_streams_mysql"
 
     new DatabaseContainerSet[MySqlDatabase](
-      buildContainer(originContainerName, testName, originPort),
-      buildContainer(targetSingleThreadedContainerName, testName, targetSingleThreadedPort),
-      buildContainer(targetAkkaStreamsContainerName, testName, targetAkkaStreamsPort)
+      MysqlEndToEndTestUtil.buildContainer(containerName, originDbName, port),
+      MysqlEndToEndTestUtil.buildContainer(containerName, targetSingleThreadedDbName, port),
+      MysqlEndToEndTestUtil.buildContainer(containerName, targetAkkaStreamsDbName, port)
     )
   }
 
@@ -55,13 +50,15 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest[MySqlDatab
   }
 
   override protected def postSubset(): Unit = {} // No-op
+}
 
-  private def buildContainer(containerName: String, dbName: String, dbPort: Int): MySqlContainer = {
+object MysqlEndToEndTestUtil {
+  def buildContainer(containerName: String, dbName: String, dbPort: Int): MySqlContainer = {
     val db: MySqlDatabase = new MySqlDatabase(dbName, dbPort)
     new MySqlContainer(containerName, db)
   }
 
-  private def createMySqlDatabase(container: String, db: String): Unit = {
-    s"./src/test/util/create_mysql_db.sh $db $container".!!
+  def createDb(container: String, db: String): Unit = {
+    s"./src/test/util/create_mysql_db.sh $container $db".!!
   }
 }

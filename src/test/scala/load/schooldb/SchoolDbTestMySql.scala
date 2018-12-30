@@ -1,6 +1,6 @@
 package load.schooldb
 
-import e2e.AbstractMysqlEndToEndTest
+import e2e.{AbstractMysqlEndToEndTest, MysqlEndToEndTestUtil}
 import load.LoadTest
 import util.db.MySqlDatabase
 
@@ -25,7 +25,7 @@ class SchoolDbTestMySql extends AbstractMysqlEndToEndTest with LoadTest[MySqlDat
 
   override protected def createOriginDatabase(): Unit = {
     super.createOriginDatabase()
-    s"./src/test/util/create_mysql_db.sh Audit ${containers.origin.name}".!!
+    MysqlEndToEndTestUtil.createDb(containers.origin.name, "Audit_Origin")
   }
 
   override protected def prepareTargetDDL(): Unit = {

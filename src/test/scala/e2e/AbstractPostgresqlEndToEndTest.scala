@@ -11,11 +11,9 @@ abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest[Postg
 
   protected def originPort: Int
 
-  override protected def startOriginContainer():Unit = {
-    SharedPostgreSQLContainer.container // Ensure shared container has been started
-  }
+  override protected def startOriginContainer():Unit = SharedTestContainers.postgres
 
-  override protected def startTargetContainers(): Unit = {} // No-op (same as origin containers)
+  override protected def startTargetContainers(): Unit = {} // No-op (shares container with origin)
 
   override protected def awaitContainersReady(): Unit = Thread.sleep(4000)
 
@@ -29,8 +27,8 @@ abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest[Postg
   }
 
   override protected def containers: DatabaseContainerSet[PostgreSQLDatabase] = {
-    val containerName = SharedPostgreSQLContainer.container.name
-    val port = SharedPostgreSQLContainer.container.db.port
+    val containerName = SharedTestContainers.postgres.name
+    val port = SharedTestContainers.postgres.db.port
 
     val originDb = s"${testName}_origin"
     val targetSingleThreadedDb = s"${testName}_target_single_threaded"
