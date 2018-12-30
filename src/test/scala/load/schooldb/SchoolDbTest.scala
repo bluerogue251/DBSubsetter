@@ -7,7 +7,6 @@ import util.slick.SlickUtil
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
-// TODO add back in LoadTest
 trait SchoolDbTest extends FunSuiteLike with AssertionUtil {
   protected val testName = "school_db"
 
