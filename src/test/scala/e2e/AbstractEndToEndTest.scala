@@ -12,9 +12,17 @@ abstract class AbstractEndToEndTest[T <: Database] extends FunSuite with BeforeA
    */
   protected def profile: slick.jdbc.JdbcProfile
 
-  protected def startContainers(): DatabaseContainerSet[T]
+  protected def startOriginContainer(): Unit
 
-  protected def createEmptyDatabases(): Unit
+  protected def startTargetContainers(): Unit
+
+  protected def awaitContainersReady(): Unit
+
+  protected def createOriginDatabase(): Unit
+
+  protected def createTargetDatabases(): Unit
+
+  protected def containers: DatabaseContainerSet[T]
 
   protected def prepareOriginDDL(): Unit
 
@@ -34,10 +42,14 @@ abstract class AbstractEndToEndTest[T <: Database] extends FunSuite with BeforeA
 
   protected def postSubset(): Unit
 
-  /*
-   * Docker containers holding the origin and target DBs (do not override)
-   */
-  protected var containers: DatabaseContainerSet[T] = _
+  protected def teardownOriginContainer(): Unit = {
+    ContainerUtil.rm(containers.origin.name)
+  }
+
+  protected def teardownTargetContainers(): Unit = {
+    ContainerUtil.rm(containers.targetSingleThreaded.name)
+    ContainerUtil.rm(containers.targetAkkaStreams.name)
+  }
 
   /*
    * Slick testing utility connections (do not override)
@@ -52,14 +64,17 @@ abstract class AbstractEndToEndTest[T <: Database] extends FunSuite with BeforeA
     super.beforeAll()
 
     /*
-     * Spin up docker containers for the origin and target DBs
+     * Spin up containers
      */
-    containers = startContainers()
+    startOriginContainer()
+    startTargetContainers()
+    awaitContainersReady()
 
     /*
-     * Create empty origin and target databases with correct database names
+     * Create origin and target databases
      */
-    createEmptyDatabases()
+    createOriginDatabase()
+    createTargetDatabases()
 
     /*
      * Create slick connections to the origin and target DBs. These connections are utilities for testing
@@ -112,10 +127,9 @@ abstract class AbstractEndToEndTest[T <: Database] extends FunSuite with BeforeA
     targetAkkaStreamsSlick.close()
 
     /*
-     * Remove all containers
+     * Remove any containers as necessary
      */
-    ContainerUtil.rm(containers.origin.name)
-    ContainerUtil.rm(containers.targetSingleThreaded.name)
-    ContainerUtil.rm(containers.targetAkkaStreams.name)
+    teardownOriginContainer()
+    teardownTargetContainers()
   }
 }

@@ -23,11 +23,9 @@ class SchoolDbTestMySql extends AbstractMysqlEndToEndTest with LoadTest[MySqlDat
     "--preTargetBufferSize", "10000"
   )
 
-  override protected def createEmptyDatabases(): Unit = {
-    super.createEmptyDatabases()
+  override protected def createOriginDatabase(): Unit = {
+    super.createOriginDatabase()
     s"./src/test/util/create_mysql_db.sh Audit ${containers.origin.name}".!!
-    s"./src/test/util/create_mysql_db.sh Audit ${containers.targetSingleThreaded.name}".!!
-    s"./src/test/util/create_mysql_db.sh Audit ${containers.targetAkkaStreams.name}".!!
   }
 
   override protected def prepareTargetDDL(): Unit = {

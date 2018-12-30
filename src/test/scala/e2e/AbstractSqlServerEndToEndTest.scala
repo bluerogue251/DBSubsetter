@@ -4,6 +4,9 @@ import util.db._
 
 import scala.sys.process._
 
+/*
+ * Purposely shares a single container between origin and target DBs
+*/
 abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest[SqlServerDatabase] {
   override protected val profile = slick.jdbc.SQLServerProfile
 
@@ -11,24 +14,34 @@ abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest[SqlSer
 
   protected def port: Int
 
-  override protected def startContainers(): DatabaseContainerSet[SqlServerDatabase] = {
-    val containerName = s"${testName}_sqlserver"
-    DatabaseContainer.startSqlServer(containerName, port)
-    Thread.sleep(6000)
+  override protected def startOriginContainer():Unit = {
+    DatabaseContainer.startSqlServer(containers.origin.name, port)
+  }
 
+  override protected def startTargetContainers(): Unit = {} // No-op (container is shared with origin)
+
+  override protected def awaitContainersReady(): Unit = Thread.sleep(5000)
+
+  override protected def createOriginDatabase(): Unit = {
+    createEmptyDb(containers.origin.name, containers.origin.db.name)
+  }
+
+  override protected def createTargetDatabases(): Unit = {
+    createEmptyDb(containers.origin.name, containers.targetSingleThreaded.db.name)
+    createEmptyDb(containers.origin.name, containers.targetAkkaStreams.db.name)
+  }
+
+  override protected def containers: DatabaseContainerSet[SqlServerDatabase] = {
+    val containerName = s"${testName}_sqlserver"
     val originDbName = s"${testName}_origin"
     val targetSingleThreadedDbName = s"${testName}_target_single_threaded"
     val targetAkkaStreamsDbName = s"${testName}_target_akka_streams"
 
-    val originContainer = buildContainer(containerName, originDbName, port)
-    val targetSingleThreadedContainer = buildContainer(containerName, targetSingleThreadedDbName, port)
-    val targetAkkaStreamsContainer = buildContainer(containerName, targetAkkaStreamsDbName, port)
-
-    new DatabaseContainerSet(originContainer, targetSingleThreadedContainer, targetAkkaStreamsContainer)
-  }
-
-  override protected def createEmptyDatabases(): Unit = {
-    s"./src/test/util/create_sqlserver_db.sh ${containers.origin.name} ${containers.origin.db.name}".!!
+    new DatabaseContainerSet(
+      buildContainer(containerName, originDbName, port),
+      buildContainer(containerName, targetSingleThreadedDbName, port),
+      buildContainer(containerName, targetAkkaStreamsDbName, port)
+    )
   }
 
   override protected def prepareOriginDDL(): Unit
@@ -45,9 +58,12 @@ abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest[SqlSer
     s"./src/test/util/sqlserver_post_subset.sh ${containers.origin.name} ${containers.targetAkkaStreams.db.name}".!!
   }
 
+  private def createEmptyDb(containerName: String, dbName: String): Unit = {
+    s"./src/test/util/create_sqlserver_db.sh $containerName $dbName".!!
+  }
+
   private def buildContainer(containerName: String, dbName: String, dbPort: Int): SqlServerContainer = {
     val db: SqlServerDatabase = new SqlServerDatabase(dbName, dbPort)
     new SqlServerContainer(containerName, db)
   }
-
 }
