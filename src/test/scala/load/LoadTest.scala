@@ -5,7 +5,7 @@ import util.db.Database
 import util.runner.TestSubsetRunner
 
 
-trait LoadTest[T <: Database] extends AbstractEndToEndTest[T] {
+trait LoadTest[T <: Database] { this: AbstractEndToEndTest[T] =>
 
   protected def singleThreadedRuntimeLimitMillis: Long
 
