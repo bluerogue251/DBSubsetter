@@ -15,8 +15,6 @@ class SchoolDbTestPostgreSQL extends AbstractPostgresqlEndToEndTest with LoadTes
 
   override val akkaStreamsRuntimeLimitMillis: Long = 25000
 
-  override protected val originPort = 5453
-
   override protected def prepareOriginDDL(): Unit = {
     val createSchemaStatements: DBIO[Unit] = DBIO.seq(
       sqlu"create schema school_db",

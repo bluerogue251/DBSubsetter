@@ -12,8 +12,6 @@ class SchoolDbTestSqlServer extends AbstractSqlServerEndToEndTest with LoadTest[
 
   override val akkaStreamsRuntimeLimitMillis: Long = 25000
 
-  override protected val port = 5456
-
   override protected val programArgs = Array(
     "--schemas", "school_db,Audit",
     "--baseQuery", "school_db.Students ::: student_id % 100 = 0 ::: includeChildren",

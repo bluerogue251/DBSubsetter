@@ -3,7 +3,6 @@ package e2e.basequeries
 import e2e.AbstractSqlServerEndToEndTest
 
 class BaseQueriesTestSqlServer extends AbstractSqlServerEndToEndTest with BaseQueriesTest {
-  override protected val port = 5516
 
   override protected val programArgs = Array(
     "--schemas", "dbo",

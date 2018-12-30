@@ -9,8 +9,6 @@ import scala.sys.process._
 class PostgreSQLDataTypesTest extends AbstractPostgresqlEndToEndTest {
   override protected val testName = "pg_data_types"
 
-  override protected val originPort = 5500
-
   override protected val programArgs = Array(
     "--schemas", "public",
     "--baseQuery", "public.arrays_table ::: true ::: includeChildren",

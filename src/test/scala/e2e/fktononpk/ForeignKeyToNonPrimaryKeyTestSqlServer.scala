@@ -3,7 +3,6 @@ package e2e.fktononpk
 import e2e.AbstractSqlServerEndToEndTest
 
 class ForeignKeyToNonPrimaryKeyTestSqlServer extends AbstractSqlServerEndToEndTest with ForeignKeyToNonPrimaryKeyTest {
-  override protected val port = 5566
 
   override protected val programArgs = Array(
     "--schemas", "dbo",
