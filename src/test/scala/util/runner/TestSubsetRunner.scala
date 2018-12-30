@@ -27,14 +27,14 @@ object TestSubsetRunner {
     val singleThreadedRuntimeMillis = (System.nanoTime() - startSingleThreaded) / 1000000
     println(s"Single Threaded Took $singleThreadedRuntimeMillis milliseconds")
 
-    return singleThreadedRuntimeMillis
+    singleThreadedRuntimeMillis
   }
 
   def runSubsetInAkkaStreamsMode[T <: Database](containers: DatabaseContainerSet[T], programArgs: Array[String]): Long = {
     val defaultArgs: Array[String] = Array(
       "--originDbConnStr", containers.origin.db.connectionString,
-      "--originDbParallelism", "10",
-      "--targetDbParallelism", "10",
+      "--originDbParallelism", "2",
+      "--targetDbParallelism", "2",
       "--targetDbConnStr", containers.targetAkkaStreams.db.connectionString
     )
     val finalArgs: Array[String] = defaultArgs ++ programArgs
@@ -49,6 +49,6 @@ object TestSubsetRunner {
     val akkStreamsRuntimeMillis = (System.nanoTime() - startAkkaStreams) / 1000000
     println(s"Akka Streams Took $akkStreamsRuntimeMillis milliseconds")
 
-    return akkStreamsRuntimeMillis
+    akkStreamsRuntimeMillis
   }
 }
