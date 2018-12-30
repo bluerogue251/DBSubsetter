@@ -45,27 +45,18 @@ class CrossSchemaTestMySql extends AbstractMysqlEndToEndTest with CrossSchemaTes
     )
   }
 
-  override def prepareOriginDDL(): Unit = {
+  override def createOriginDatabase(): Unit = {
     MysqlEndToEndTestUtil.createDb(containers.origin.name, "schema_1")
     MysqlEndToEndTestUtil.createDb(containers.origin.name, "schema_2")
     MysqlEndToEndTestUtil.createDb(containers.origin.name, "schema_3")
-    super.prepareOriginDDL()
   }
 
   override def prepareTargetDDL(): Unit = {
-    MysqlEndToEndTestUtil.createDb(containers.targetSingleThreaded.name, "schema_1")
-    MysqlEndToEndTestUtil.createDb(containers.targetSingleThreaded.name, "schema_2")
-    MysqlEndToEndTestUtil.createDb(containers.targetSingleThreaded.name, "schema_3")
-    s"./src/test/util/sync_mysql_origin_to_target.sh schema_1 ${containers.origin.name} ${containers.targetSingleThreaded.name}".!!
-    s"./src/test/util/sync_mysql_origin_to_target.sh schema_2 ${containers.origin.name} ${containers.targetSingleThreaded.name}".!!
-    s"./src/test/util/sync_mysql_origin_to_target.sh schema_3 ${containers.origin.name} ${containers.targetSingleThreaded.name}".!!
-
-    MysqlEndToEndTestUtil.createDb(containers.targetAkkaStreams.name, "schema_1")
-    MysqlEndToEndTestUtil.createDb(containers.targetAkkaStreams.name, "schema_2")
-    MysqlEndToEndTestUtil.createDb(containers.targetAkkaStreams.name, "schema_3")
-    s"./src/test/util/sync_mysql_origin_to_target.sh schema_1 ${containers.origin.name} ${containers.targetAkkaStreams.name}".!!
-    s"./src/test/util/sync_mysql_origin_to_target.sh schema_2 ${containers.origin.name} ${containers.targetAkkaStreams.name}".!!
-    s"./src/test/util/sync_mysql_origin_to_target.sh schema_3 ${containers.origin.name} ${containers.targetAkkaStreams.name}".!!
+    s"./src/test/util/sync_mysql_origin_to_target.sh ${containers.origin.name} schema_1 ${containers.targetSingleThreaded.name} schema_1 ".!!
+    s"./src/test/util/sync_mysql_origin_to_target.sh ${containers.origin.name} schema_2 ${containers.targetSingleThreaded.name} schema_2 ".!!
+    s"./src/test/util/sync_mysql_origin_to_target.sh ${containers.origin.name} schema_3 ${containers.targetSingleThreaded.name} schema_3 ".!!
+    s"./src/test/util/sync_mysql_origin_to_target.sh ${containers.origin.name} schema_1 ${containers.targetAkkaStreams.name} schema_1 ".!!
+    s"./src/test/util/sync_mysql_origin_to_target.sh ${containers.origin.name} schema_2 ${containers.targetAkkaStreams.name} schema_2 ".!!
+    s"./src/test/util/sync_mysql_origin_to_target.sh ${containers.origin.name} schema_3 ${containers.targetAkkaStreams.name} schema_3 ".!!
   }
-
 }
