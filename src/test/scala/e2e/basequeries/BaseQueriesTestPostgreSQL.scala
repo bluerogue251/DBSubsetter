@@ -3,7 +3,6 @@ package e2e.basequeries
 import e2e.AbstractPostgresqlEndToEndTest
 
 class BaseQueriesTestPostgreSQL extends AbstractPostgresqlEndToEndTest with BaseQueriesTest {
-  override protected val originPort = 5513
 
   override protected val programArgs = Array(
     "--schemas", "public",

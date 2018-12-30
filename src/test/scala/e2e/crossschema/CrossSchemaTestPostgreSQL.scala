@@ -8,7 +8,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 class CrossSchemaTestPostgreSQL extends AbstractPostgresqlEndToEndTest with CrossSchemaTest {
-  override val originPort = 5543
+
   override val programArgs = Array(
     "--schemas", "schema_1, schema_2, schema_3",
     "--baseQuery", "schema_1.schema_1_table ::: id = 2 ::: includeChildren"

@@ -9,8 +9,6 @@ abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest[Postg
 
   protected def testName: String
 
-  protected def originPort: Int
-
   override protected def startOriginContainer():Unit = SharedTestContainers.postgres
 
   override protected def startTargetContainers(): Unit = {} // No-op (shares container with origin)

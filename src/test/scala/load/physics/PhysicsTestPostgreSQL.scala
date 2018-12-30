@@ -11,8 +11,6 @@ class PhysicsTestPostgreSQL extends AbstractPostgresqlEndToEndTest with LoadTest
 
   override val akkaStreamsRuntimeLimitMillis: Long = 2600000
 
-  override protected val originPort = 5573
-
   override protected val programArgs = Array(
     "--schemas", "public",
     "--baseQuery", "public.scientists ::: id in (2) ::: includeChildren",
