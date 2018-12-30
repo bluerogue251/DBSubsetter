@@ -9,8 +9,6 @@ abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest[SqlSer
 
   protected def testName: String
 
-  protected def port: Int
-
   override protected def startOriginContainer():Unit = SharedTestContainers.sqlServer
 
   override protected def startTargetContainers(): Unit = {} // No-op (container is shared with origin)
@@ -28,6 +26,7 @@ abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest[SqlSer
 
   override protected def containers: DatabaseContainerSet[SqlServerDatabase] = {
     val containerName = SharedTestContainers.sqlServer.name
+    val port = SharedTestContainers.sqlServer.db.port
     val originDbName = s"${testName}_origin"
     val targetSingleThreadedDbName = s"${testName}_target_single_threaded"
     val targetAkkaStreamsDbName = s"${testName}_target_akka_streams"
