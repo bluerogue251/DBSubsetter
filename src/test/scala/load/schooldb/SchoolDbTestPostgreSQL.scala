@@ -2,7 +2,12 @@ package load.schooldb
 
 import e2e.AbstractPostgresqlEndToEndTest
 import load.LoadTest
+import slick.dbio.DBIO
+import slick.jdbc.PostgresProfile.api._
 import util.db.PostgreSQLDatabase
+
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 class SchoolDbTestPostgreSQL extends AbstractPostgresqlEndToEndTest with LoadTest[PostgreSQLDatabase] with SchoolDbTest {
 
@@ -13,12 +18,12 @@ class SchoolDbTestPostgreSQL extends AbstractPostgresqlEndToEndTest with LoadTes
   override protected val originPort = 5453
 
   override protected def prepareOriginDDL(): Unit = {
-//    val createSchemaStatements: DBIO[Unit] = DBIO.seq(
-//      sqlu"create schema school_db",
-//      sqlu"""create schema "Audit""""
-//    )
-//    Await.ready(originSlick.run(createSchemaStatements), Duration.Inf)
-    super.prepareOriginDML()
+    val createSchemaStatements: DBIO[Unit] = DBIO.seq(
+      sqlu"create schema school_db",
+      sqlu"""create schema "Audit""""
+    )
+    Await.ready(originSlick.run(createSchemaStatements), Duration.Inf)
+    super.prepareOriginDDL()
   }
 
   override protected val programArgs = Array(
