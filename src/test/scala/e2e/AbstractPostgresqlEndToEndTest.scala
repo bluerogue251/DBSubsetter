@@ -12,13 +12,10 @@ abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest[Postg
   protected def originPort: Int
 
   override protected def startOriginContainer():Unit = {
-    DatabaseContainer.startPostgreSQL(containers.origin.name, originPort)
+    SharedPostgreSQLContainer.container // Ensure shared container has been started
   }
 
-  override protected def startTargetContainers(): Unit = {
-    DatabaseContainer.startPostgreSQL(containers.targetSingleThreaded.name, containers.targetSingleThreaded.db.port)
-    DatabaseContainer.startPostgreSQL(containers.targetAkkaStreams.name, containers.targetAkkaStreams.db.port)
-  }
+  override protected def startTargetContainers(): Unit = {} // No-op (same as origin containers)
 
   override protected def awaitContainersReady(): Unit = Thread.sleep(4000)
 
@@ -32,16 +29,17 @@ abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest[Postg
   }
 
   override protected def containers: DatabaseContainerSet[PostgreSQLDatabase] = {
-    val originContainerName = s"${testName}_origin_postgres"
-    val targetSingleThreadedContainerName = s"${testName}_target_sith_postgres"
-    val targetAkkaStreamsContainerName = s"${testName}_target_akst_postgres"
-    val targetSingleThreadedPort: Int = originPort + 1
-    val targetAkkaStreamsPort: Int = originPort + 2
+    val containerName = SharedPostgreSQLContainer.container.name
+    val port = SharedPostgreSQLContainer.container.db.port
+
+    val originDb = s"${testName}_origin"
+    val targetSingleThreadedDb = s"${testName}_target_single_threaded"
+    val targetAkkaStreamsDb = s"${testName}_target_akka_streams"
 
     new DatabaseContainerSet(
-      buildContainer(originContainerName, testName, originPort),
-      buildContainer(targetSingleThreadedContainerName, testName, targetSingleThreadedPort),
-      buildContainer(targetAkkaStreamsContainerName, testName, targetAkkaStreamsPort)
+      buildContainer(containerName, port, originDb),
+      buildContainer(containerName, port, targetSingleThreadedDb),
+      buildContainer(containerName, port, targetAkkaStreamsDb)
     )
   }
 
@@ -50,16 +48,16 @@ abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest[Postg
   override protected def prepareOriginDML(): Unit
 
   override protected def prepareTargetDDL(): Unit = {
-    s"./src/test/util/sync_postgres_origin_to_target.sh ${containers.origin.db.name} ${containers.origin.name} ${containers.targetSingleThreaded.name}".!!
-    s"./src/test/util/sync_postgres_origin_to_target.sh ${containers.origin.db.name} ${containers.origin.name} ${containers.targetAkkaStreams.name}".!!
+    s"./src/test/util/sync_postgres_origin_to_target.sh ${containers.origin.name} ${containers.origin.db.name} ${containers.targetSingleThreaded.name} ${containers.targetSingleThreaded.db.name}".!!
+    s"./src/test/util/sync_postgres_origin_to_target.sh ${containers.origin.name} ${containers.origin.db.name} ${containers.targetAkkaStreams.name} ${containers.targetAkkaStreams.db.name}".!!
   }
 
   override protected def postSubset(): Unit = {
-    s"./src/test/util/postgres_post_subset.sh ${containers.origin.db.name} ${containers.origin.name} ${containers.targetSingleThreaded.name}".!!
-    s"./src/test/util/postgres_post_subset.sh ${containers.origin.db.name} ${containers.origin.name} ${containers.targetAkkaStreams.name}".!!
+    s"./src/test/util/postgres_post_subset.sh ${containers.origin.name} ${containers.origin.db.name} ${containers.targetSingleThreaded.name} ${containers.targetSingleThreaded.db.name}".!!
+    s"./src/test/util/postgres_post_subset.sh ${containers.origin.name} ${containers.origin.db.name} ${containers.targetAkkaStreams.name} ${containers.targetAkkaStreams.db.name}".!!
   }
 
-  private def buildContainer(containerName: String, dbName: String, dbPort: Int): PostgreSQLContainer = {
+  private def buildContainer(containerName: String, dbPort: Int, dbName: String): PostgreSQLContainer = {
     val db: PostgreSQLDatabase = new PostgreSQLDatabase(dbName, dbPort)
     new PostgreSQLContainer(containerName, db)
   }

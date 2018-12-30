@@ -125,11 +125,5 @@ abstract class AbstractEndToEndTest[T <: Database] extends FunSuite with BeforeA
     originSlick.close()
     targetSingleThreadedSlick.close()
     targetAkkaStreamsSlick.close()
-
-    /*
-     * Remove any containers as necessary
-     */
-    teardownOriginContainer()
-    teardownTargetContainers()
   }
 }
