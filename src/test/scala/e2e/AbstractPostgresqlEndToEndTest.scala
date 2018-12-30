@@ -32,12 +32,12 @@ abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest[Postg
   }
 
   override protected def createOriginDatabase(): Unit = {
-    createDb(containers.origin.name)
+    createDb(containers.origin.name, containers.origin.db.name)
   }
 
   override protected def createTargetDatabases(): Unit = {
-    createDb(containers.targetSingleThreaded.name)
-    createDb(containers.targetAkkaStreams.name)
+    createDb(containers.targetSingleThreaded.name, containers.targetSingleThreaded.db.name)
+    createDb(containers.targetAkkaStreams.name, containers.targetAkkaStreams.db.name)
   }
 
   override protected def containers: DatabaseContainerSet[PostgreSQLDatabase] = {
@@ -53,8 +53,11 @@ abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest[Postg
   override protected def prepareOriginDML(): Unit
 
   override protected def prepareTargetDDL(): Unit = {
-    s"./src/test/util/sync_postgres_origin_to_target.sh ${containers.origin.db.name} ${containers.origin.name} ${containers.targetSingleThreaded.name}".!!
-    s"./src/test/util/sync_postgres_origin_to_target.sh ${containers.origin.db.name} ${containers.origin.name} ${containers.targetAkkaStreams.name}".!!
+    def sync(target: String): Unit = {
+      s"./src/test/util/sync_postgres_origin_to_target.sh ${containers.origin.db.name} ${containers.origin.name} $target".!!
+    }
+    sync(containers.targetSingleThreaded.name)
+    sync(containers.targetAkkaStreams.name)
   }
 
   override protected def postSubset(): Unit = {
@@ -67,8 +70,8 @@ abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest[Postg
     new PostgreSQLContainer(containerName, db)
   }
 
-  private def createDb(dockerContainer: String): Unit = {
-    val command = s"docker exec $dockerContainer createdb --user postgres $testName"
+  private def createDb(containerName: String, dbName: String): Unit = {
+    val command = s"docker exec $containerName createdb --user postgres $dbName"
     RetryUtil.withRetry(command)
   }
 }
