@@ -12,9 +12,13 @@ abstract class AbstractEndToEndTest[T <: Database] extends FunSuite with BeforeA
    */
   protected def profile: slick.jdbc.JdbcProfile
 
-  protected def startOriginDatabase(): Unit
+  protected def startOriginContainer(): Unit
 
-  protected def startTargetDatabases(): Unit
+  protected def startTargetContainers(): Unit
+
+  protected def createOriginDatabase(): Unit
+
+  protected def createTargetDatabases(): Unit
 
   protected def containers: DatabaseContainerSet[T]
 
@@ -36,11 +40,11 @@ abstract class AbstractEndToEndTest[T <: Database] extends FunSuite with BeforeA
 
   protected def postSubset(): Unit
 
-  protected def teardownOriginDatabase(): Unit = {
+  protected def teardownOriginContainer(): Unit = {
     ContainerUtil.rm(containers.origin.name)
   }
 
-  protected def teardownTargetDatabases(): Unit = {
+  protected def teardownTargetContainers(): Unit = {
     ContainerUtil.rm(containers.targetSingleThreaded.name)
     ContainerUtil.rm(containers.targetAkkaStreams.name)
   }
@@ -60,8 +64,10 @@ abstract class AbstractEndToEndTest[T <: Database] extends FunSuite with BeforeA
     /*
      * Spin up containerized databases for the origin and targets
      */
-    startOriginDatabase()
-    startTargetDatabases()
+    startOriginContainer()
+    startTargetContainers()
+    createOriginDatabase()
+    createTargetDatabases()
 
     /*
      * Create slick connections to the origin and target DBs. These connections are utilities for testing
@@ -114,9 +120,9 @@ abstract class AbstractEndToEndTest[T <: Database] extends FunSuite with BeforeA
     targetAkkaStreamsSlick.close()
 
     /*
-     * Remove any containers which need to be cleaned up
+     * Remove any containers as necessary
      */
-    teardownOriginDatabase()
-    teardownTargetDatabases()
+    teardownOriginContainer()
+    teardownTargetContainers()
   }
 }
