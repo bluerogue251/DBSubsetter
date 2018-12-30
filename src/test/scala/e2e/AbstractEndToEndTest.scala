@@ -64,11 +64,15 @@ abstract class AbstractEndToEndTest[T <: Database] extends FunSuite with BeforeA
     super.beforeAll()
 
     /*
-     * Spin up containerized databases for the origin and targets
+     * Spin up containers
      */
     startOriginContainer()
     startTargetContainers()
     awaitContainersReady()
+
+    /*
+     * Create origin and target databases
+     */
     createOriginDatabase()
     createTargetDatabases()
 
