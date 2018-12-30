@@ -24,8 +24,8 @@ class SchoolDbTestSqlServer extends AbstractSqlServerEndToEndTest with LoadTest[
   )
 
   override protected def prepareOriginDDL(): Unit = {
-    s"./src/test/util/create_schema_sqlserver.sh ${containers.origin.name} $testName school_db".!!
-    s"./src/test/util/create_schema_sqlserver.sh ${containers.origin.name} $testName Audit".!!
+    s"./src/test/util/create_schema_sqlserver.sh ${containers.origin.name} ${containers.origin.db.name} school_db".!!
+    s"./src/test/util/create_schema_sqlserver.sh ${containers.origin.name} ${containers.origin.db.name} Audit".!!
     super.prepareOriginDDL()
   }
 }
