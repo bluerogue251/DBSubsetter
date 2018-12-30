@@ -37,5 +37,4 @@ object SharedTestContainers {
   }
 
   lazy val awaitSqlServerUp: Unit = Thread.sleep(5000)
-
 }
