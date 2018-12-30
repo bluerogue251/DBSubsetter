@@ -122,7 +122,7 @@ abstract class AbstractEndToEndTest[T <: Database] extends FunSuite with BeforeA
     /*
      * Remove any containers as necessary
      */
-    teardownOriginContainer()
-    teardownTargetContainers()
+//    teardownOriginContainer()
+//    teardownTargetContainers()
   }
 }
