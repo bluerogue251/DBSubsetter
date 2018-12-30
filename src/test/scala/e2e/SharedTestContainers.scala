@@ -9,7 +9,7 @@ object SharedTestContainers {
   lazy val postgres: PostgreSQLContainer = {
     val containerName = "e2e_postgres"
     val port = 5495
-    DatabaseContainer.startPostgreSQL(containerName, port)
+    DatabaseContainer.recreatePostgreSQL(containerName, port)
     val db = new PostgreSQLDatabase(dbName, port)
 
     /*
@@ -25,7 +25,7 @@ object SharedTestContainers {
   lazy val sqlServer: SqlServerContainer = {
     val containerName = "e2e_sql_server"
     val port = 5496
-    DatabaseContainer.startSqlServer(containerName, port)
+    DatabaseContainer.recreateSqlServer(containerName, port)
     val db = new SqlServerDatabase(dbName, port)
 
     /*
@@ -45,7 +45,7 @@ object SharedTestContainers {
   lazy val awaitMysqlUp: Unit = Thread.sleep(13000)
 
   private def startMysql(containerName: String, port: Int): MySqlContainer = {
-    DatabaseContainer.startMySql(containerName, port)
+    DatabaseContainer.recreateMySql(containerName, port)
     val db = new MySqlDatabase(dbName, port)
 
     /*
