@@ -1,7 +1,5 @@
 package load.schooldb
 
-import java.net.URL
-
 import e2e.{AbstractPostgresqlEndToEndTest, PostgresqlEndToEndTestUtil}
 import load.LoadTest
 import util.Ports
@@ -52,8 +50,9 @@ class SchoolDbTestPostgreSQL extends AbstractPostgresqlEndToEndTest with LoadTes
 
   override protected def prepareOriginDDL(): Unit = {
     if (mustReCreateOriginDb) {
-      val dumpUrl: URL = new URL("https://s3.amazonaws.com/db-subsetter/load-test/school-db/pgdump.sql.gz")
-      (dumpUrl #> "gunzip" #| s"docker exec -i ${containers.origin.name} psql --user postgres").!!
+      val dumpUrl = "https://s3.amazonaws.com/db-subsetter/load-test/school-db/pgdump.sql.gz"
+      s"./src/test/util/blarghy_mc_blargh_face.sh $dumpUrl ${containers.origin.name} ${containers.origin.db.name}".!!
+//      (dumpUrl #> "gunzip" #| s"docker exec -it ${containers.origin.name} psql --user postgres").!!
 //      val createSchemaStatements: DBIO[Unit] = DBIO.seq(
 //        sqlu"create schema school_db",
 //        sqlu"""create schema "Audit""""
