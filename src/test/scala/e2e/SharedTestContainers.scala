@@ -20,20 +20,6 @@ object SharedTestContainers {
     new PostgreSQLContainer(containerName, db)
   }
 
-  lazy val mysql: DatabaseContainer[MySqlDatabase] = {
-    val containerName = "e2e_mysql"
-    val port = 5498
-    DatabaseContainer.startMySql(containerName, port)
-    val db = new MySqlDatabase(dbName, port)
-
-    /*
-     * Remove container on JVM shutdown
-     */
-    sys.addShutdownHook(ContainerUtil.rm(containerName))
-
-    new MySqlContainer(containerName, db)
-  }
-
   lazy val sqlServer: DatabaseContainer[SqlServerDatabase] = {
     val containerName = "e2e_sql_server"
     val port = 5499
