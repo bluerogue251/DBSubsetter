@@ -1,6 +1,7 @@
 package e2e
 
-import util.db.{DatabaseContainer, DatabaseContainerSet, MySqlContainer, MySqlDatabase}
+import util.db._
+import util.retry.RetryUtil
 
 import scala.sys.process._
 
@@ -11,31 +12,43 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest[MySqlDatab
 
   protected def originPort: Int
 
-  override protected def startContainers(): DatabaseContainerSet[MySqlDatabase] = {
-    val originContainerName = s"${testName}_origin_mysql"
-    val targetSingleThreadedContainerName = s"${testName}_target_single_threaded_mysql"
-    val targetAkkaStreamsContainerName = s"${testName}_target_akka_streams_mysql"
+  private def originContainerName = s"${testName}_origin_mysql"
 
-    val targetSingleThreadedPort = originPort + 1
-    val targetAkkaStreamsPort = originPort + 2
+  private def targetSingleThreadedContainerName = s"${testName}_target_single_threaded_mysql"
 
+  private def targetAkkaStreamsContainerName = s"${testName}_target_akka_streams_mysql"
+
+  private def targetSingleThreadedPort = originPort + 1
+
+  private def targetAkkaStreamsPort = originPort + 2
+
+  override protected def startOriginContainer():Unit = {
     DatabaseContainer.startMySql(originContainerName, originPort)
-    DatabaseContainer.startMySql(targetSingleThreadedContainerName, targetSingleThreadedPort)
-    DatabaseContainer.startMySql(targetAkkaStreamsContainerName, targetAkkaStreamsPort)
-
-    Thread.sleep(13000)
-
-    val originContainer = buildContainer(originContainerName, testName, originPort)
-    val targetSingleThreadedContainer = buildContainer(targetSingleThreadedContainerName, testName, targetSingleThreadedPort)
-    val targetAkkaStreamsContainer = buildContainer(targetAkkaStreamsContainerName, testName, targetAkkaStreamsPort)
-
-    new DatabaseContainerSet(originContainer, targetSingleThreadedContainer, targetAkkaStreamsContainer)
   }
 
-  override protected def createEmptyDatabases(): Unit = {
+  override protected def startTargetContainers(): Unit = {
+    DatabaseContainer.startMySql(targetSingleThreadedContainerName, targetSingleThreadedPort)
+    DatabaseContainer.startMySql(targetAkkaStreamsContainerName, targetAkkaStreamsPort)
+  }
+
+  override protected def createOriginDatabase(): Unit = {
+    println("Creating Origin DB")
     createMySqlDatabase(containers.origin.name)
+  }
+
+  override protected def createTargetDatabases(): Unit = {
+    println("Creating Single Threaded Target DB")
     createMySqlDatabase(containers.targetSingleThreaded.name)
+    println("Creating Akka Streams Target DB")
     createMySqlDatabase(containers.targetAkkaStreams.name)
+  }
+
+  override protected def containers: DatabaseContainerSet[MySqlDatabase] = {
+    new DatabaseContainerSet[MySqlDatabase](
+      buildContainer(originContainerName, testName, originPort),
+      buildContainer(targetSingleThreadedContainerName, testName, targetSingleThreadedPort),
+      buildContainer(targetAkkaStreamsContainerName, testName, targetAkkaStreamsPort)
+    )
   }
 
   override protected def prepareOriginDDL(): Unit
@@ -43,8 +56,8 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest[MySqlDatab
   override protected def prepareOriginDML(): Unit
 
   override protected def prepareTargetDDL(): Unit = {
-    s"./src/test/util/sync_mysql_origin_to_target.sh $testName ${containers.origin.name} ${containers.targetSingleThreaded.name}".!!
-    s"./src/test/util/sync_mysql_origin_to_target.sh $testName ${containers.origin.name} ${containers.targetAkkaStreams.name}".!!
+    s"./src/test/util/sync_mysql_origin_to_target.sh ${containers.origin.db.name} ${containers.origin.name} ${containers.targetSingleThreaded.name}".!!
+    s"./src/test/util/sync_mysql_origin_to_target.sh ${containers.origin.db.name} ${containers.origin.name} ${containers.targetAkkaStreams.name}".!!
   }
 
   override protected def postSubset(): Unit = {} // No-op
@@ -55,6 +68,7 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest[MySqlDatab
   }
 
   private def createMySqlDatabase(container: String): Unit = {
-    s"./src/test/util/create_mysql_db.sh $testName $container".!!
+    val command = s"./src/test/util/create_mysql_db.sh $testName $container"
+    RetryUtil.withRetry(command)
   }
 }
