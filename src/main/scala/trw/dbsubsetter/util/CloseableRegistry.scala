@@ -7,6 +7,9 @@ import scala.collection.mutable
  */
 class CloseableRegistry {
 
+  /*
+   * Records all open connections so that we can remember to call `close()` on them when we are finished
+   */
   private val registry: mutable.Set[Closeable] = mutable.Set.empty[Closeable]
 
   def register(closeable: Closeable): Unit = {
