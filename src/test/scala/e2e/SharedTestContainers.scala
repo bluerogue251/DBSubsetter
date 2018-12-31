@@ -1,5 +1,6 @@
 package e2e
 
+import util.Ports
 import util.db._
 import util.docker.ContainerUtil
 
@@ -8,7 +9,7 @@ object SharedTestContainers {
 
   lazy val postgres: PostgreSQLContainer = {
     val containerName = "e2e_postgres"
-    val port = 5495
+    val port = Ports.sharedPostgresPort
     DatabaseContainer.recreatePostgreSQL(containerName, port)
     val db = new PostgreSQLDatabase(dbName, port)
 
@@ -24,7 +25,7 @@ object SharedTestContainers {
 
   lazy val sqlServer: SqlServerContainer = {
     val containerName = "e2e_sql_server"
-    val port = 5496
+    val port = Ports.sharedSqlServerPort
     DatabaseContainer.recreateSqlServer(containerName, port)
     val db = new SqlServerDatabase(dbName, port)
 
@@ -38,9 +39,9 @@ object SharedTestContainers {
 
   lazy val awaitSqlServerUp: Unit = Thread.sleep(6000)
 
-  lazy val mysqlOrigin: DatabaseContainer[MySqlDatabase] = startMysql("e2e_mysql_origin", 5497)
-  lazy val mysqlTargetSingleThreaded: DatabaseContainer[MySqlDatabase] = startMysql("e2e_mysql_target_single_threaded", 5498)
-  lazy val mysqlTargetAkkaStreams: DatabaseContainer[MySqlDatabase] = startMysql("e2e_mysql_target_akka_streams", 5499)
+  lazy val mysqlOrigin: DatabaseContainer[MySqlDatabase] = startMysql("e2e_mysql_origin", Ports.sharedMySqlOriginPort)
+  lazy val mysqlTargetSingleThreaded: DatabaseContainer[MySqlDatabase] = startMysql("e2e_mysql_target_single_threaded", Ports.sharedMySqlTargetSingleThreadedPort)
+  lazy val mysqlTargetAkkaStreams: DatabaseContainer[MySqlDatabase] = startMysql("e2e_mysql_target_akka_streams", Ports.sharedMySqlTargetAkkaStreamsPort)
 
   lazy val awaitMysqlUp: Unit = Thread.sleep(13000)
 
