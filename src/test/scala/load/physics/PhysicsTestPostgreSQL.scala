@@ -13,7 +13,7 @@ class PhysicsTestPostgreSQL extends AbstractPostgresqlEndToEndTest with LoadTest
 
   override val akkaStreamsRuntimeLimitMillis: Long = 2600000
 
-  private lazy val mustReCreateOriginDb: Boolean = true // TODODOODO !ContainerUtil.exists(containers.origin.name)
+  private lazy val mustReCreateOriginDb: Boolean = !ContainerUtil.exists(containers.origin.name)
 
   /*
     * Only to be used when manually changing the origin db definition. In this case, the origin DB needs
