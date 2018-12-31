@@ -1,6 +1,6 @@
 package load.schooldb
 
-import e2e.{AbstractPostgresqlEndToEndTest, PostgresqlEndToEndTestUtil}
+import e2e.{AbstractPostgresqlEndToEndTest, PostgresqlEndToEndTestUtil, SharedTestContainers}
 import load.LoadTest
 import slick.dbio.DBIO
 import slick.jdbc.PostgresProfile.api._
@@ -35,6 +35,8 @@ class SchoolDbTestPostgreSQL extends AbstractPostgresqlEndToEndTest with LoadTes
       ContainerUtil.start(containers.origin.name)
     }
   }
+
+  override protected def startTargetContainers(): Unit = SharedTestContainers.postgres
 
   override protected def createOriginDatabase(): Unit = {
     if (mustReCreateOriginDb) {

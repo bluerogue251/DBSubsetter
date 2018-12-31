@@ -1,6 +1,6 @@
 package load.physics
 
-import e2e.{AbstractPostgresqlEndToEndTest, PostgresqlEndToEndTestUtil}
+import e2e.{AbstractPostgresqlEndToEndTest, PostgresqlEndToEndTestUtil, SharedTestContainers}
 import load.LoadTest
 import util.Ports
 import util.db.{DatabaseContainer, DatabaseContainerSet, PostgreSQLContainer, PostgreSQLDatabase}
@@ -13,7 +13,6 @@ class PhysicsTestPostgreSQL extends AbstractPostgresqlEndToEndTest with LoadTest
 
   override val akkaStreamsRuntimeLimitMillis: Long = 2600000
 
-
   private lazy val mustReCreateOriginDb: Boolean = true // TODODOODO !ContainerUtil.exists(containers.origin.name)
 
   /*
@@ -22,9 +21,7 @@ class PhysicsTestPostgreSQL extends AbstractPostgresqlEndToEndTest with LoadTest
     * loaded from an existing dump file. Only set this to `true` if you really know what you are doing, and
     * if you are prepared to make sure the dump file stored in S3 gets updated to your latest version.
     */
-
-  // TODODODOTOTOTODODODO change to `false`
-  private val skipOriginDbPerformanceOptimization: Boolean = true
+  private val skipOriginDbPerformanceOptimization: Boolean = false
 
   override protected def startOriginContainer(): Unit = {
     if (mustReCreateOriginDb) {
@@ -33,6 +30,8 @@ class PhysicsTestPostgreSQL extends AbstractPostgresqlEndToEndTest with LoadTest
       ContainerUtil.start(containers.origin.name)
     }
   }
+
+  override protected def startTargetContainers(): Unit = SharedTestContainers.postgres
 
   override protected def createOriginDatabase(): Unit = {
     if (mustReCreateOriginDb) {
@@ -57,7 +56,7 @@ class PhysicsTestPostgreSQL extends AbstractPostgresqlEndToEndTest with LoadTest
     (mustReCreateOriginDb, skipOriginDbPerformanceOptimization) match {
       case (false, _) => // No action necessary
       case (true, false) => // Load origin DB from dump file stored in S3
-        val dumpUrl = ???
+        val dumpUrl = "https://s3.amazonaws.com/db-subsetter/load-test/physics-db/pgdump.sql.gz"
         s"./src/test/util/load_postgres_db_from_s3.sh $dumpUrl ${containers.origin.name} ${containers.origin.db.name}".!!
       case (true, true) => // Recreate origin DB from original slick definitions
         super.prepareOriginDDL()

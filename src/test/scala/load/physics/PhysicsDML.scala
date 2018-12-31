@@ -166,52 +166,57 @@ class PhysicsDML(ddl: PhysicsDDL) {
     }
   }
 
-  def particleColliderNotesInserts(parentId: Long) = {
+  def particleColliderNotesInserts(startingParentId: Long, batchSize: Int) = {
     val factor = particleColliderNotesFactor
-    DatumNotes ++= (1 to factor).map { i =>
-      val pk = i + ((parentId - 1) * factor)
-      DatumNote(
-        pk,
-        Some((pk % (numParticleColliderData - 1)) + 1),
-        None,
-        None,
-        s"$pk This $pk is $pk a $pk particle $pk collider $pk datum $pk note $pk: ${pk.toString * 1000}",
-        Timestamp.valueOf("2010-12-31 14:32:59.283134")
-      )
-    }
+    DatumNotes ++= (startingParentId to startingParentId + batchSize - 1).flatMap(parentId => {
+      (1 to factor).map { i =>
+        val pk = i + ((parentId - 1) * factor)
+        DatumNote(
+          pk,
+          Some((pk % (numParticleColliderData - 1)) + 1),
+          None,
+          None,
+          s"$pk This $pk is $pk a $pk particle $pk collider $pk datum $pk note $pk: ${pk.toString * 1000}",
+          Timestamp.valueOf("2010-12-31 14:32:59.283134")
+        )
+      }
+    })
   }
 
-  def quantumNotesInserts(parentId: Long) = {
+  def quantumNotesInserts(startingParentId: Long, batchSize: Int) = {
     val factor = quantumNotesFactor
     val startingPk = numParticleColliderData * particleColliderNotesFactor + 1
-    DatumNotes ++= (1 to factor).map { i =>
-      val pk = startingPk + i + ((parentId - 1) * factor)
-      DatumNote(
-        pk,
-        None,
-        Some((pk % (numQuantumData - 1)) + 1),
-        None,
-        s"$pk This $pk is $pk a $pk quantum $pk datum $pk note $pk: ${pk.toString * 500}",
-        Timestamp.valueOf("2011-06-31 14:18:23.783834")
-      )
-    }
-
+    DatumNotes ++= (startingParentId to startingParentId + batchSize - 1).flatMap(parentId => {
+      (1 to factor).map { i =>
+        val pk = startingPk + i + ((parentId - 1) * factor)
+        DatumNote(
+          pk,
+          None,
+          Some((pk % (numQuantumData - 1)) + 1),
+          None,
+          s"$pk This $pk is $pk a $pk quantum $pk datum $pk note $pk: ${pk.toString * 500}",
+          Timestamp.valueOf("2011-06-31 14:18:23.783834")
+        )
+      }
+    })
   }
 
-  def gravitationWaveNotesInserts(parentId: Long) = {
+  def gravitationWaveNotesInserts(startingParentId: Long, batchSize: Int) = {
     val factor = gravitationalWaveNotesFactor
     val startingPk = (numParticleColliderData * particleColliderNotesFactor) + (numQuantumData * quantumNotesFactor) + 1
-    DatumNotes ++= (1 to factor).map { i =>
-      val pk = startingPk + i + ((parentId - 1) * factor)
-      DatumNote(
-        pk,
-        None,
-        None,
-        Some((pk % (numGravitationalWaveData - 1)) + 1),
-        s"$pk This $pk is $pk a $pk gravitational $pk wave $pk datum $pk note $pk: ${pk.toString * 200}",
-        Timestamp.valueOf("1987-02-01 00:00:01.723434")
-      )
-    }
+    DatumNotes ++= (startingParentId to startingParentId + batchSize - 1).flatMap(parentId => {
+      (1 to factor).map { i =>
+        val pk = startingPk + i + ((parentId - 1) * factor)
+        DatumNote(
+          pk,
+          None,
+          None,
+          Some((pk % (numGravitationalWaveData - 1)) + 1),
+          s"$pk This $pk is $pk a $pk gravitational $pk wave $pk datum $pk note $pk: ${pk.toString * 200}",
+          Timestamp.valueOf("1987-02-01 00:00:01.723434")
+        )
+      }
+    })
   }
 }
 
