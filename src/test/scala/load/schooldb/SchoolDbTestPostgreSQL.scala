@@ -21,9 +21,11 @@ class SchoolDbTestPostgreSQL extends AbstractPostgresqlEndToEndTest with LoadTes
   private lazy val mustReCreateOriginDb: Boolean = !ContainerUtil.exists(containers.origin.name)
 
   /*
-   * Only to be used when changing the origin db definition, where the origin DB needs to be competely rebuilt from scratch.
-   * Otherwise we can just load the existing dump from S3
-   */
+    * Only to be used when manually changing the origin db definition. In this case, the origin DB needs
+    * to be completely rebuilt from scratch using Slick definitions, as opposed to being efficiently
+    * loaded from an existing dump file. Only set this to `true` if you really know what you are doing, and
+    * if you are prepared to make sure the dump file stored in S3 gets updated to your latest version.
+    */
   private val skipOriginDbPerformanceOptimization: Boolean = false
 
   override protected def startOriginContainer(): Unit = {

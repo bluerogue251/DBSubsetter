@@ -7,4 +7,5 @@ object Ports {
   val sharedMySqlTargetSingleThreadedPort: Int = 5498
   val sharedMySqlTargetAkkaStreamsPort: Int = 5499
   val postgresSchoolDbOrigin: Int = 5500
+  val postgresPhysicsDbOrigin: Int = 5501
 }

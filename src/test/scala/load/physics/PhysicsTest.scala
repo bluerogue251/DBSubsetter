@@ -27,18 +27,31 @@ trait PhysicsTest extends FunSuiteLike with AssertionUtil {
 
     val dmlFut1 = originSlick.run(customDml.initialInserts)
     Await.result(dmlFut1, Duration.Inf)
+    println("Done with fut1" + System.currentTimeMillis())
+
     val fut2 = originSlick.run(DBIO.seq(customDml.particleDomainInserts: _*))
     Await.result(fut2, Duration.Inf)
+    println("Done with fut2" + System.currentTimeMillis())
+
     val fut3 = originSlick.run(DBIO.seq(customDml.quantumDomainInserts: _*))
     Await.result(fut3, Duration.Inf)
+    println("Done with fut3" + System.currentTimeMillis())
+
     val fut4 = originSlick.run(DBIO.seq(customDml.gravitationalWaveDomainInserts: _*))
     Await.result(fut4, Duration.Inf)
+    println("Done with fut4" + System.currentTimeMillis())
+
     val fut5 = originSlick.run(DBIO.seq(customDml.particleColliderDataInserts: _*))
     Await.result(fut5, Duration.Inf)
+    println("Done with fut5" + System.currentTimeMillis())
+
     val fut6 = originSlick.run(DBIO.seq(customDml.quantumDataInserts: _*))
     Await.result(fut6, Duration.Inf)
+    println("Done with fut6" + System.currentTimeMillis())
+
     val fut7 = originSlick.run(DBIO.seq(customDml.gravitationalWaveDataInserts: _*))
     Await.result(fut7, Duration.Inf)
+    println("Done with fut7" + System.currentTimeMillis())
 
     import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -70,8 +83,11 @@ trait PhysicsTest extends FunSuiteLike with AssertionUtil {
     }
 
     Await.result(pcFut, Duration.Inf)
+    println("Done with pcFut" + System.currentTimeMillis())
     Await.result(qdFut, Duration.Inf)
+    println("Done with qdFut" + System.currentTimeMillis())
     Await.result(gwFut, Duration.Inf)
+    println("Done with gwFut" + System.currentTimeMillis())
   }
 
   test("Correct research_institutions were included") {
