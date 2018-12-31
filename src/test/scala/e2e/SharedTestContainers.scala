@@ -43,7 +43,7 @@ object SharedTestContainers {
   lazy val mysqlTargetSingleThreaded: DatabaseContainer[MySqlDatabase] = startMysql("e2e_mysql_target_single_threaded", Ports.sharedMySqlTargetSingleThreadedPort)
   lazy val mysqlTargetAkkaStreams: DatabaseContainer[MySqlDatabase] = startMysql("e2e_mysql_target_akka_streams", Ports.sharedMySqlTargetAkkaStreamsPort)
 
-  lazy val awaitMysqlUp: Unit = Thread.sleep(13000)
+  lazy val awaitMysqlUp: Unit = Thread.sleep(15000)
 
   private def startMysql(containerName: String, port: Int): MySqlContainer = {
     DatabaseContainer.recreateMySql(containerName, port)
