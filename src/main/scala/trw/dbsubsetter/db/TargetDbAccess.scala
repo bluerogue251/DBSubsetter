@@ -4,7 +4,7 @@ import java.sql.Connection
 
 class TargetDbAccess(connStr: String, sch: SchemaInfo, connectionFactory: ConnectionFactory) {
 
-  private val conn: Connection = connectionFactory.getConnection(connStr)
+  private val conn: Connection = connectionFactory.getConnectionWithWritePrivileges(connStr)
 
   private val statements = Sql.preparedInsertStatementStrings(sch).map { case (table, sqlStr) =>
     table -> conn.prepareStatement(sqlStr)

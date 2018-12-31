@@ -24,7 +24,7 @@ class ConnectionFactory {
     conn
   }
 
-  def getConnection(connectionString: String): Connection = {
+  def getConnectionWithWritePrivileges(connectionString: String): Connection = {
     val conn: Connection = createAndRegisterConnection(connectionString)
     if (conn.isMysql) conn.createStatement().execute("SET SESSION FOREIGN_KEY_CHECKS = 0")
     conn
