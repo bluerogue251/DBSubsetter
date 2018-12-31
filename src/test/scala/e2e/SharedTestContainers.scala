@@ -20,7 +20,7 @@ object SharedTestContainers {
     new PostgreSQLContainer(containerName, db)
   }
 
-  lazy val awaitPostgresUp: Unit = Thread.sleep(4000)
+  lazy val awaitPostgresUp: Unit = Thread.sleep(5000)
 
   lazy val sqlServer: SqlServerContainer = {
     val containerName = "e2e_sql_server"
@@ -36,7 +36,7 @@ object SharedTestContainers {
     new SqlServerContainer(containerName, db)
   }
 
-  lazy val awaitSqlServerUp: Unit = Thread.sleep(5000)
+  lazy val awaitSqlServerUp: Unit = Thread.sleep(6000)
 
   lazy val mysqlOrigin: DatabaseContainer[MySqlDatabase] = startMysql("e2e_mysql_origin", 5497)
   lazy val mysqlTargetSingleThreaded: DatabaseContainer[MySqlDatabase] = startMysql("e2e_mysql_target_single_threaded", 5498)

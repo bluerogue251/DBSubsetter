@@ -2,9 +2,7 @@ package trw.dbsubsetter.db
 
 import java.sql.DriverManager
 
-import scala.sys.process.processInternal.Closeable
-
-class TargetDbAccess(connStr: String, sch: SchemaInfo) extends Closeable {
+class TargetDbAccess(connStr: String, sch: SchemaInfo) {
 
   private val conn = DriverManager.getConnection(connStr)
   if (conn.isMysql) {
