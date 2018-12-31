@@ -5,7 +5,7 @@ import trw.dbsubsetter.db.{ConnectionFactory, OriginDbAccess, SchemaInfo}
 
 
 class OriginDbWorkflow(config: Config, schemaInfo: SchemaInfo, connectionFactory: ConnectionFactory) {
-  private val db = new OriginDbAccess(config.originDbConnectionString, schemaInfo, connectionFactory)
+  private[this] val db = new OriginDbAccess(config.originDbConnectionString, schemaInfo, connectionFactory)
 
   def process(request: OriginDbRequest): OriginDbResult = {
     request match {

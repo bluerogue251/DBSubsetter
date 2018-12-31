@@ -1,8 +1,10 @@
 package trw.dbsubsetter.db
 
+import java.sql.Connection
+
 class TargetDbAccess(connStr: String, sch: SchemaInfo, connectionFactory: ConnectionFactory) {
 
-  private val conn = connectionFactory.getReadOnlyConnection()
+  private val conn: Connection = connectionFactory.getReadOnlyConnection(connStr)
 
   private val statements = Sql.preparedInsertStatementStrings(sch).map { case (table, sqlStr) =>
     table -> conn.prepareStatement(sqlStr)
@@ -20,6 +22,4 @@ class TargetDbAccess(connStr: String, sch: SchemaInfo, connectionFactory: Connec
     stmt.executeBatch()
     1
   }
-
-  def close(): Unit = conn.close()
 }
