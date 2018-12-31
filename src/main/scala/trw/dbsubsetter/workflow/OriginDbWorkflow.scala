@@ -1,12 +1,11 @@
 package trw.dbsubsetter.workflow
 
 import trw.dbsubsetter.config.Config
-import trw.dbsubsetter.db.{OriginDbAccess, SchemaInfo}
-import trw.dbsubsetter.util.Closeable
+import trw.dbsubsetter.db.{ConnectionFactory, OriginDbAccess, SchemaInfo}
 
 
-class OriginDbWorkflow(config: Config, schemaInfo: SchemaInfo) extends Closeable {
-  private val db = new OriginDbAccess(config.originDbConnectionString, schemaInfo)
+class OriginDbWorkflow(config: Config, schemaInfo: SchemaInfo, connectionFactory: ConnectionFactory) {
+  private val db = new OriginDbAccess(config.originDbConnectionString, schemaInfo, connectionFactory)
 
   def process(request: OriginDbRequest): OriginDbResult = {
     request match {
@@ -19,6 +18,4 @@ class OriginDbWorkflow(config: Config, schemaInfo: SchemaInfo) extends Closeable
         OriginDbResult(table, rows, None, fetchChildren)
     }
   }
-
-  override def close(): Unit = db.close()
 }

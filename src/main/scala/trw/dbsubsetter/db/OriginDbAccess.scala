@@ -1,16 +1,12 @@
 package trw.dbsubsetter.db
 
-import java.sql.{DriverManager, ResultSet}
+import java.sql.ResultSet
 
 import scala.collection.mutable.ArrayBuffer
 
-class OriginDbAccess(connStr: String, sch: SchemaInfo) {
+class OriginDbAccess(connStr: String, sch: SchemaInfo, connectionFactory: ConnectionFactory) {
 
-  private val conn = DriverManager.getConnection(connStr)
-  if (conn.isMysql) {
-    conn.createStatement().execute("SET SESSION SQL_MODE = ANSI_QUOTES")
-  }
-  conn.setReadOnly(true)
+  private val conn = connectionFactory.getReadOnlyConnection(connStr)
 
   private val statements = Sql.preparedQueryStatementStrings(sch).map { case ((fk, table), sqlStr) =>
     (fk, table) -> conn.prepareStatement(sqlStr)

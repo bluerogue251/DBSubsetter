@@ -1,14 +1,8 @@
 package trw.dbsubsetter.db
 
-import java.sql.DriverManager
+class TargetDbAccess(connStr: String, sch: SchemaInfo, connectionFactory: ConnectionFactory) {
 
-class TargetDbAccess(connStr: String, sch: SchemaInfo) {
-
-  private val conn = DriverManager.getConnection(connStr)
-  if (conn.isMysql) {
-    conn.createStatement().execute("SET SESSION SQL_MODE = ANSI_QUOTES")
-    conn.createStatement().execute("SET SESSION FOREIGN_KEY_CHECKS = 0")
-  }
+  private val conn = connectionFactory.getReadOnlyConnection()
 
   private val statements = Sql.preparedInsertStatementStrings(sch).map { case (table, sqlStr) =>
     table -> conn.prepareStatement(sqlStr)

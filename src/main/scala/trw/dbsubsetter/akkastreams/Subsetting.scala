@@ -8,15 +8,14 @@ import akka.stream.scaladsl.{Balance, Broadcast, Flow, GraphDSL, Merge, Partitio
 import akka.stream.{OverflowStrategy, SourceShape}
 import akka.util.Timeout
 import trw.dbsubsetter.config.Config
-import trw.dbsubsetter.db.SchemaInfo
-import trw.dbsubsetter.util.CloseableRegistry
+import trw.dbsubsetter.db.{ConnectionFactory, SchemaInfo}
 import trw.dbsubsetter.workflow._
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 object Subsetting {
-  def source(config: Config, schemaInfo: SchemaInfo, baseQueries: List[SqlStrQuery], pkStore: ActorRef, closeableRegistry: CloseableRegistry)(implicit ec: ExecutionContext): Source[TargetDbInsertResult, NotUsed] = Source.fromGraph(GraphDSL.create() { implicit b =>
+  def source(config: Config, schemaInfo: SchemaInfo, baseQueries: List[SqlStrQuery], pkStore: ActorRef, connectionFactory: ConnectionFactory)(implicit ec: ExecutionContext): Source[TargetDbInsertResult, NotUsed] = Source.fromGraph(GraphDSL.create() { implicit b =>
     // Infrastructure: Timeouts, Merges, and Broadcasts
     implicit val askTimeout: Timeout = Timeout(48.hours)
     val mergeOriginDbRequests = b.add(Merge[OriginDbRequest](3))
@@ -39,12 +38,12 @@ object Subsetting {
     // Process Origin DB Queries in Parallel
     mergeOriginDbRequests.out ~> balanceOriginDb
     for (_ <- 0 until config.originDbParallelism) {
-      balanceOriginDb ~> OriginDb.query(config, schemaInfo, closeableRegistry).async ~> mergeOriginDbResults
+      balanceOriginDb ~> OriginDb.query(config, schemaInfo, connectionFactory).async ~> mergeOriginDbResults
     }
 
     // Process Target DB Inserts in Parallel
     for (_ <- 0 until config.targetDbParallelism) {
-      balanceTargetDb ~> TargetDb.insert(config, schemaInfo, closeableRegistry).async ~> mergeTargetDbResults
+      balanceTargetDb ~> TargetDb.insert(config, schemaInfo, connectionFactory).async ~> mergeTargetDbResults
     }
 
     // Origin DB Results ~> PkStoreAdd  ~> |merge| ~> NewTasks
