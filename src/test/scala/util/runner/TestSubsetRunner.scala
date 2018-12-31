@@ -33,8 +33,8 @@ object TestSubsetRunner {
   def runSubsetInAkkaStreamsMode[T <: Database](containers: DatabaseContainerSet[T], programArgs: Array[String]): Long = {
     val defaultArgs: Array[String] = Array(
       "--originDbConnStr", containers.origin.db.connectionString,
-      "--originDbParallelism", "2",
-      "--targetDbParallelism", "2",
+      "--originDbParallelism", "10",
+      "--targetDbParallelism", "10",
       "--targetDbConnStr", containers.targetAkkaStreams.db.connectionString
     )
     val finalArgs: Array[String] = defaultArgs ++ programArgs

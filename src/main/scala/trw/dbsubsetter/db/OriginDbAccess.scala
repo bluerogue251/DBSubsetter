@@ -5,11 +5,13 @@ import java.sql.{DriverManager, ResultSet}
 import scala.collection.mutable.ArrayBuffer
 
 class OriginDbAccess(connStr: String, sch: SchemaInfo) {
+
   private val conn = DriverManager.getConnection(connStr)
   if (conn.isMysql) {
     conn.createStatement().execute("SET SESSION SQL_MODE = ANSI_QUOTES")
   }
   conn.setReadOnly(true)
+
   private val statements = Sql.preparedQueryStatementStrings(sch).map { case ((fk, table), sqlStr) =>
     (fk, table) -> conn.prepareStatement(sqlStr)
   }
@@ -33,6 +35,8 @@ class OriginDbAccess(connStr: String, sch: SchemaInfo) {
     val jdbcResult = conn.createStatement().executeQuery(query)
     jdbcResultToRows(jdbcResult, table)
   }
+
+  def close(): Unit = conn.close()
 
   private def jdbcResultToRows(res: ResultSet, table: Table): Vector[Row] = {
     val cols = sch.colsByTableOrdered(table).size

@@ -37,5 +37,8 @@ object ApplicationSingleThreaded {
         }
       }
     }
+
+    originDbWorkflow.close()
+    targetDbWorkflow.closeConnection()
   }
 }

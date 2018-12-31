@@ -5,7 +5,7 @@ import trw.dbsubsetter.db.{OriginDbAccess, SchemaInfo}
 
 
 class OriginDbWorkflow(config: Config, schemaInfo: SchemaInfo) {
-  val db = new OriginDbAccess(config.originDbConnectionString, schemaInfo)
+  private val db = new OriginDbAccess(config.originDbConnectionString, schemaInfo)
 
   def process(request: OriginDbRequest): OriginDbResult = {
     request match {
@@ -18,4 +18,6 @@ class OriginDbWorkflow(config: Config, schemaInfo: SchemaInfo) {
         OriginDbResult(table, rows, None, fetchChildren)
     }
   }
+
+  def closeConnection(): Unit = db.close()
 }
