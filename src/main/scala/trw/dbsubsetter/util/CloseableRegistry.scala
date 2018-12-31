@@ -10,7 +10,7 @@ class CloseableRegistry {
   private val registry: mutable.Set[Closeable] = mutable.Set.empty[Closeable]
 
   def register(closeable: Closeable): Unit = {
-    registry + closeable
+    registry.add(closeable)
   }
 
   def closeAll(): Unit = {
