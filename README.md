@@ -20,10 +20,10 @@ _Do one thing well_: A tiny codebase with a highly focused and well-tested set o
 
 DBSubsetter has been tested against recent versions of PostgreSQL, MySQL, and Microsoft SQL Server.
 
-Feel free to open a GitHub ticket if you would like support for a different database vendor.
+Please reach out by opening a GitHub ticket if you would like support for a different database vendor.
 
 
-## Download / Installation / Usage
+## Download and Usage Instructions
 
 1. Load an empty schema from your "origin" database into your "target" database. See vendor-specific instructions for [Postgres](docs/pre_subset_postgres.md), [MySQL](docs/pre_subset_mysql.md), and [Microsoft SQL Server](docs/pre_subset_ms_sql_server.md).
  
@@ -51,7 +51,7 @@ $ java -jar /path/to/DBSubsetter.jar \
 3. After DBSubsetter exits, do any last steps as necessary. See vendor-specific instructions for [Postgres](docs/post_subset_postgres.md), [MySQL](docs/post_subset_mysql.md), and [Microsoft SQL Server](docs/post_subset_ms_sql_server.md).
 
 
-## Resource consumption
+## Resource Consumption
 
 Memory usage in the worst case will be proportional to the sum of:
 
@@ -72,7 +72,7 @@ Whether it is to fix a typo, improve the documentation, report or fix a bug, add
 The only condition for contributing to this project is to follow our [code of conduct](CODE_OF_CONDUCT.md) so that everyone is treated with respect.
 
 
-## Related projects
+## Related Projects
 
 DBSubsetter was inspired by
 [Jailer](http://jailer.sourceforge.net/home.htm) and
