@@ -6,7 +6,7 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
 import trw.dbsubsetter.akkastreams.{PkStore, Subsetting}
 import trw.dbsubsetter.config.Config
-import trw.dbsubsetter.db.SchemaInfo
+import trw.dbsubsetter.db.{ConnectionFactory, SchemaInfo}
 import trw.dbsubsetter.workflow._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -16,12 +16,15 @@ object ApplicationAkkaStreams {
     implicit val system: ActorSystem = ActorSystem("DbSubsetter")
     implicit val materializer: ActorMaterializer = ActorMaterializer()
     implicit val ec: ExecutionContext = system.dispatcher
+
     val pkStore: ActorRef = system.actorOf(PkStore.props(schemaInfo))
+    val connectionFactory: ConnectionFactory = new ConnectionFactory
 
     Subsetting
-      .source(config, schemaInfo, baseQueries, pkStore)
+      .source(config, schemaInfo, baseQueries, pkStore, connectionFactory)
       .runWith(Sink.ignore)
       .map { success =>
+        connectionFactory.closeAllConnections()
         system.terminate()
         success
       }

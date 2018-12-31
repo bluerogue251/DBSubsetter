@@ -1,11 +1,11 @@
 package trw.dbsubsetter.workflow
 
 import trw.dbsubsetter.config.Config
-import trw.dbsubsetter.db.{OriginDbAccess, SchemaInfo}
+import trw.dbsubsetter.db.{ConnectionFactory, OriginDbAccess, SchemaInfo}
 
 
-class OriginDbWorkflow(config: Config, schemaInfo: SchemaInfo) {
-  val db = new OriginDbAccess(config.originDbConnectionString, schemaInfo)
+class OriginDbWorkflow(config: Config, schemaInfo: SchemaInfo, connectionFactory: ConnectionFactory) {
+  private[this] val db = new OriginDbAccess(config.originDbConnectionString, schemaInfo, connectionFactory)
 
   def process(request: OriginDbRequest): OriginDbResult = {
     request match {
