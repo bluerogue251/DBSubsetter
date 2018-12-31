@@ -15,7 +15,9 @@ class PhysicsDDL(val profile: slick.jdbc.JdbcProfile) {
     GravitationalWaveDomain.schema,
     ParticleColliderData.schema,
     QuantumData.schema,
-    GravitationalWaveData.schema
+    GravitationalWaveData.schema,
+    DatumNotes.schema,
+    DatumNoteResponses.schema
   ).reduceLeft(_ ++ _)
 
   case class ResearchInstitution(id: Int, name: String, createdAt: java.sql.Timestamp)

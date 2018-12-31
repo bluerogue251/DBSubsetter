@@ -4,8 +4,8 @@ import org.scalatest.FunSuiteLike
 import util.assertion.AssertionUtil
 import util.slick.SlickUtil
 
+import scala.concurrent.Await
 import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, Future}
 
 trait PhysicsTest extends FunSuiteLike with AssertionUtil {
   protected val testName = "physics"
@@ -27,51 +27,54 @@ trait PhysicsTest extends FunSuiteLike with AssertionUtil {
 
     val dmlFut1 = originSlick.run(customDml.initialInserts)
     Await.result(dmlFut1, Duration.Inf)
+    println("Done with fut1" + System.currentTimeMillis())
+
     val fut2 = originSlick.run(DBIO.seq(customDml.particleDomainInserts: _*))
     Await.result(fut2, Duration.Inf)
+    println("Done with fut2" + System.currentTimeMillis())
+
     val fut3 = originSlick.run(DBIO.seq(customDml.quantumDomainInserts: _*))
     Await.result(fut3, Duration.Inf)
+    println("Done with fut3" + System.currentTimeMillis())
+
     val fut4 = originSlick.run(DBIO.seq(customDml.gravitationalWaveDomainInserts: _*))
     Await.result(fut4, Duration.Inf)
+    println("Done with fut4" + System.currentTimeMillis())
+
     val fut5 = originSlick.run(DBIO.seq(customDml.particleColliderDataInserts: _*))
     Await.result(fut5, Duration.Inf)
+    println("Done with fut5" + System.currentTimeMillis())
+
     val fut6 = originSlick.run(DBIO.seq(customDml.quantumDataInserts: _*))
     Await.result(fut6, Duration.Inf)
+    println("Done with fut6" + System.currentTimeMillis())
+
     val fut7 = originSlick.run(DBIO.seq(customDml.gravitationalWaveDataInserts: _*))
     Await.result(fut7, Duration.Inf)
+    println("Done with fut7" + System.currentTimeMillis())
 
-    import scala.concurrent.ExecutionContext.Implicits.global
+    val batchSize = 10000
 
-    val pcFut = Future {
-      (1 to customDml.numParticleColliderData by 50).foreach { i =>
-        if ((i - 1) % 100000 == 0) println(s"ParticleCollider-$i")
-        val inserts = (i to i + 49).map(i => customDml.particleColliderNotesInserts(i))
-        val f = originSlick.run(DBIO.seq(inserts: _*))
-        Await.result(f, Duration.Inf)
-      }
+    (1 to customDml.numParticleColliderData by batchSize).foreach { i =>
+      println(s"ParticleCollider-$i-" + System.currentTimeMillis())
+      val inserts = customDml.particleColliderNotesInserts(i, batchSize)
+      val f = originSlick.run(DBIO.seq(inserts))
+      Await.result(f, Duration.Inf)
     }
 
-    val qdFut = Future {
-      (1 to customDml.numQuantumData by 50).foreach { i =>
-        if ((i - 1) % 100000 == 0) println(s"Quantum-$i")
-        val inserts = (i to i + 49).map(i => customDml.quantumNotesInserts(i))
-        val f = originSlick.run(DBIO.seq(inserts: _*))
-        Await.result(f, Duration.Inf)
-      }
+    (1 to customDml.numQuantumData by batchSize).foreach { i =>
+      println(s"Quantum-$i-" + System.currentTimeMillis())
+      val inserts = customDml.quantumNotesInserts(i, batchSize)
+      val f = originSlick.run(DBIO.seq(inserts))
+      Await.result(f, Duration.Inf)
     }
 
-    val gwFut = Future {
-      (1 to customDml.numGravitationalWaveData by 50).foreach { i =>
-        if ((i - 1) % 100000 == 0) println(s"GravitationalWave-$i")
-        val inserts = (i to i + 49).map(i => customDml.gravitationWaveNotesInserts(i))
-        val f = originSlick.run(DBIO.seq(inserts: _*))
-        Await.result(f, Duration.Inf)
-      }
-    }
-
-    Await.result(pcFut, Duration.Inf)
-    Await.result(qdFut, Duration.Inf)
-    Await.result(gwFut, Duration.Inf)
+   (1 to customDml.numGravitationalWaveData by batchSize).foreach { i =>
+     println(s"GravitationalWave-$i-" + System.currentTimeMillis())
+     val inserts = customDml.gravitationWaveNotesInserts(i, batchSize)
+     val f = originSlick.run(DBIO.seq(inserts))
+     Await.result(f, Duration.Inf)
+   }
   }
 
   test("Correct research_institutions were included") {
