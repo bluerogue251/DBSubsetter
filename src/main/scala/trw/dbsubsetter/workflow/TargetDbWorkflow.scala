@@ -2,9 +2,10 @@ package trw.dbsubsetter.workflow
 
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.{SchemaInfo, TargetDbAccess}
+import trw.dbsubsetter.util.Closeable
 
 
-class TargetDbWorkflow(config: Config, schemaInfo: SchemaInfo) {
+class TargetDbWorkflow(config: Config, schemaInfo: SchemaInfo) extends Closeable {
   private val db = new TargetDbAccess(config.targetDbConnectionString, schemaInfo)
 
   // The fact that a row still needs parent tasks means this is the first time we've seen it
@@ -14,5 +15,5 @@ class TargetDbWorkflow(config: Config, schemaInfo: SchemaInfo) {
     TargetDbInsertResult(request.table, rowsInserted)
   }
 
-  def closeConnection(): Unit = db.close()
+  override def close(): Unit = db.close()
 }

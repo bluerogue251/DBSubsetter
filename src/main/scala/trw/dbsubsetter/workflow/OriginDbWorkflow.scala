@@ -2,9 +2,10 @@ package trw.dbsubsetter.workflow
 
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.{OriginDbAccess, SchemaInfo}
+import trw.dbsubsetter.util.Closeable
 
 
-class OriginDbWorkflow(config: Config, schemaInfo: SchemaInfo) {
+class OriginDbWorkflow(config: Config, schemaInfo: SchemaInfo) extends Closeable {
   private val db = new OriginDbAccess(config.originDbConnectionString, schemaInfo)
 
   def process(request: OriginDbRequest): OriginDbResult = {
@@ -19,5 +20,5 @@ class OriginDbWorkflow(config: Config, schemaInfo: SchemaInfo) {
     }
   }
 
-  def closeConnection(): Unit = db.close()
+  override def close(): Unit = db.close()
 }

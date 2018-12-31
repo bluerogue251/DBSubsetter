@@ -2,6 +2,7 @@ package trw.dbsubsetter
 
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.SchemaInfo
+import trw.dbsubsetter.util.CloseableRegistry
 import trw.dbsubsetter.workflow._
 
 import scala.collection.mutable
@@ -11,6 +12,9 @@ object ApplicationSingleThreaded {
     // Set up workflow objects
     val originDbWorkflow = new OriginDbWorkflow(config, schemaInfo)
     val targetDbWorkflow = new TargetDbWorkflow(config, schemaInfo)
+    val closeableRegistry = new CloseableRegistry
+    closeableRegistry.register(originDbWorkflow)
+    closeableRegistry.register(targetDbWorkflow)
     val pkWorkflow = new PkStoreWorkflow(schemaInfo)
 
     // Set up task queue
@@ -38,7 +42,7 @@ object ApplicationSingleThreaded {
       }
     }
 
-    originDbWorkflow.closeConnection()
-    targetDbWorkflow.closeConnection()
+    // Ensure all SQL connections get closed
+    closeableRegistry.closeAll()
   }
 }

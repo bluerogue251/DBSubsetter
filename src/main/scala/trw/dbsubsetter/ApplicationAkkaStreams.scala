@@ -7,6 +7,7 @@ import akka.stream.scaladsl.Sink
 import trw.dbsubsetter.akkastreams.{PkStore, Subsetting}
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.SchemaInfo
+import trw.dbsubsetter.util.CloseableRegistry
 import trw.dbsubsetter.workflow._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -17,11 +18,13 @@ object ApplicationAkkaStreams {
     implicit val materializer: ActorMaterializer = ActorMaterializer()
     implicit val ec: ExecutionContext = system.dispatcher
     val pkStore: ActorRef = system.actorOf(PkStore.props(schemaInfo))
+    val closeableRegistry: CloseableRegistry = new CloseableRegistry
 
     Subsetting
-      .source(config, schemaInfo, baseQueries, pkStore)
+      .source(config, schemaInfo, baseQueries, pkStore, closeableRegistry)
       .runWith(Sink.ignore)
       .map { success =>
+        closeableRegistry.closeAll()
         system.terminate()
         success
       }
