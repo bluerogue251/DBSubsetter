@@ -139,6 +139,10 @@ trait PhysicsTest extends FunSuiteLike with AssertionUtil {
 
   test("Correct datum_notes were included") {
     assertCount(ddl.DatumNotes, 21010000)
-    assertThatLong(ddl.DatumNotes.map(_.id).sum.result, 2006021074421801l)
+    assertThatLong(ddl.DatumNotes.map(_.id).sum.result, 2219314170745000l)
+  }
+
+  test("Correct datum_note_responses were included") {
+    assertCount(ddl.DatumNoteResponses, 0)
   }
 }

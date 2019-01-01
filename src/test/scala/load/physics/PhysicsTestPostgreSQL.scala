@@ -9,7 +9,7 @@ import util.docker.ContainerUtil
 import scala.sys.process._
 
 class PhysicsTestPostgreSQL extends AbstractPostgresqlEndToEndTest with LoadTest[PostgreSQLDatabase] with PhysicsTest {
-  override val singleThreadedRuntimeLimitMillis: Long = 0 // We skip single threaded mode
+  override val singleThreadedRuntimeLimitMillis: Long = 13000000 // 3.6 hours
 
   override val akkaStreamsRuntimeLimitMillis: Long = 2700000 // 45 minutes
 
@@ -67,9 +67,13 @@ class PhysicsTestPostgreSQL extends AbstractPostgresqlEndToEndTest with LoadTest
     (mustReCreateOriginDb, skipOriginDbPerformanceOptimization) match {
       case (false, _) => // No action necessary
       case (true, false) => // No action necessary (already done in prepareOriginDDL)
-      case (true, true) => super.prepareOriginDML() // We have to populate it from scratch
+      case (true, true) =>
+        super.prepareOriginDML() // We have to populate it from scratch then dump it out and store in S3
+        // Command to dump it out (this is inside a docker container so you will need to hack around the volume mounting to get the files out)
+        // $ docker exec physics_origin_postgres pg_dump --format directory --jobs 8 --compress 9 --dbname physics_db --user postgres --file /var/lib/postgresql/data/physics-db-dump
+        // $ # Move files from docker volume location into host machine-accessible area
+        // $ tar -c -v -f physics-db-dump.tar physics-db-dump
     }
-    println("Done with prepareOriginDML")
   }
 
   override protected def prepareTargetDDL(): Unit = {
@@ -77,8 +81,8 @@ class PhysicsTestPostgreSQL extends AbstractPostgresqlEndToEndTest with LoadTest
     /*
      * Copying domain data to compliment the --excludeTable option
      */
-    s"./src/test/scala/load/physics/copy_domain_data_postgres.sh ${containers.origin.name} ${containers.targetSingleThreaded.name}".!!
-    s"./src/test/scala/load/physics/copy_domain_data_postgres.sh ${containers.origin.name} ${containers.targetAkkaStreams.name}".!!
+    s"./src/test/scala/load/physics/copy_domain_data_postgres.sh ${containers.origin.name} ${containers.origin.db.name} ${containers.targetSingleThreaded.name} ${containers.targetSingleThreaded.db.name}".!!
+    s"./src/test/scala/load/physics/copy_domain_data_postgres.sh ${containers.origin.name} ${containers.origin.db.name} ${containers.targetAkkaStreams.name} ${containers.targetAkkaStreams.db.name}".!!
   }
 
   override protected val programArgs = Array(
@@ -95,8 +99,4 @@ class PhysicsTestPostgreSQL extends AbstractPostgresqlEndToEndTest with LoadTest
     "--skipPkStore", "public.particle_collider_data",
     "--skipPkStore", "public.quantum_data"
   )
-
-  override protected def runSubsetInSingleThreadedMode(): Unit = {
-    println("Skipping single threaded mode due to large dataset size")
-  }
 }
