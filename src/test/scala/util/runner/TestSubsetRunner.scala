@@ -1,30 +1,20 @@
 package util.runner
 
-import trw.dbsubsetter.config.{CommandLineParser, Config}
-import trw.dbsubsetter.db.{SchemaInfo, SchemaInfoRetrieval}
-import trw.dbsubsetter.workflow.BaseQueries
-import trw.dbsubsetter.{ApplicationAkkaStreams, ApplicationSingleThreaded}
+import trw.dbsubsetter.Application
 import util.db.{Database, DatabaseContainerSet}
-
-import scala.concurrent.Await
-import scala.concurrent.duration.Duration
 
 object TestSubsetRunner {
 
   def runSubsetInSingleThreadedMode[T <: Database](containers: DatabaseContainerSet[T], programArgs: Array[String]): Long = {
     val defaultArgs: Array[String] = Array(
       "--originDbConnStr", containers.origin.db.connectionString,
-      "--targetDbConnStr", containers.targetSingleThreaded.db.connectionString
+      "--targetDbConnStr", containers.targetSingleThreaded.db.connectionString,
+      "--singleThreadedDebugMode"
+
     )
     val finalArgs: Array[String] = defaultArgs ++ programArgs
 
-    val config: Config = CommandLineParser.parser.parse(finalArgs, Config()).get
-    val schemaInfo: SchemaInfo = SchemaInfoRetrieval.getSchemaInfo(config)
-    val baseQueries = BaseQueries.get(config, schemaInfo)
-
-    val startSingleThreaded = System.nanoTime()
-    ApplicationSingleThreaded.run(config, schemaInfo, baseQueries)
-    val singleThreadedRuntimeMillis = (System.nanoTime() - startSingleThreaded) / 1000000
+    val singleThreadedRuntimeMillis = timedSubsetMilliseconds(finalArgs)
     println(s"Single Threaded Took $singleThreadedRuntimeMillis milliseconds")
 
     singleThreadedRuntimeMillis
@@ -39,16 +29,17 @@ object TestSubsetRunner {
     )
     val finalArgs: Array[String] = defaultArgs ++ programArgs
 
-    val config: Config = CommandLineParser.parser.parse(finalArgs, Config()).get
-    val schemaInfo: SchemaInfo = SchemaInfoRetrieval.getSchemaInfo(config)
-    val baseQueries = BaseQueries.get(config, schemaInfo)
+    val runtimeMillis: Long = timedSubsetMilliseconds(finalArgs)
+    println(s"Akka Streams Took $runtimeMillis milliseconds")
 
-    val startAkkaStreams = System.nanoTime()
-    val futureResult = ApplicationAkkaStreams.run(config, schemaInfo, baseQueries)
-    Await.result(futureResult, Duration.Inf)
-    val akkStreamsRuntimeMillis = (System.nanoTime() - startAkkaStreams) / 1000000
-    println(s"Akka Streams Took $akkStreamsRuntimeMillis milliseconds")
+    runtimeMillis
+  }
 
-    akkStreamsRuntimeMillis
+  // TODO: refactor to re-use the timing logic already present in production code
+  private def timedSubsetMilliseconds(args: Array[String]): Long = {
+    val start = System.nanoTime()
+    Application.main(args)
+    val end = System.nanoTime()
+    (end - start) / 1000000
   }
 }

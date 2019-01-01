@@ -11,7 +11,7 @@ libraryDependencies ++= Seq(
   // Akka stream processing
   "com.typesafe.akka" %% "akka-stream" % "2.5.8",
 
-  // JDBC Drivers
+  // JDBC drivers
   "org.postgresql" % "postgresql" % "42.1.4",
   "mysql" % "mysql-connector-java" % "8.0.8-dmr",
   "com.microsoft.sqlserver" % "mssql-jdbc" % "6.2.1.jre8",
@@ -22,9 +22,12 @@ libraryDependencies ++= Seq(
   // No-op logger to silence slf4j warnings
   "org.slf4j" % "slf4j-nop" % "1.7.25",
 
+  // Observability tools
+  "io.prometheus" % "simpleclient" % "0.6.0",
+  "io.prometheus" % "simpleclient_httpserver" % "0.6.0",
+
   // For testing only
   "org.scalatest" %% "scalatest" % "3.0.4" % "test",
   "com.typesafe.slick" %% "slick" % "3.2.1" % "test",
-  "com.typesafe.slick" %% "slick-hikaricp" % "3.2.1" % "test",
-  "org.slf4j" % "slf4j-nop" % "1.6.4" % "test"
+  "com.typesafe.slick" %% "slick-hikaricp" % "3.2.1" % "test"
 )
