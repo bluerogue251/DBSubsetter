@@ -35,3 +35,14 @@ curl \
   admin:admin@localhost:3000/api/dashboards/db
 
 echo ""
+
+curl \
+  -X PUT \
+  -H 'Content-Type: application/json' \
+  --data '{ "homeDashboardId": 1 }' \
+  admin:admin@localhost:3000/api/user/preferences
+
+echo ""
+echo ""
+
+echo "You can now view your DBSubsetter metrics at http://localhost:3000 (user: admin, password: admin)"
