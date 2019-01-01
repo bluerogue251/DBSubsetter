@@ -9,7 +9,7 @@ import util.docker.ContainerUtil
 import scala.sys.process._
 
 class PhysicsTestPostgreSQL extends AbstractPostgresqlEndToEndTest with LoadTest[PostgreSQLDatabase] with PhysicsTest {
-  override val singleThreadedRuntimeLimitMillis: Long = 0 // We skip single threaded mode
+  override val singleThreadedRuntimeLimitMillis: Long = 13000000 // 3.6 hours
 
   override val akkaStreamsRuntimeLimitMillis: Long = 2700000 // 45 minutes
 
@@ -99,8 +99,4 @@ class PhysicsTestPostgreSQL extends AbstractPostgresqlEndToEndTest with LoadTest
     "--skipPkStore", "public.particle_collider_data",
     "--skipPkStore", "public.quantum_data"
   )
-
-  override protected def runSubsetInSingleThreadedMode(): Unit = {
-    println("Skipping single threaded mode due to large dataset size")
-  }
 }
