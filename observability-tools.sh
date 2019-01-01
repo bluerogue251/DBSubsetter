@@ -4,11 +4,10 @@ set -ou pipefail
 
 docker rm --force --volumes db_subsetter_grafana
 docker rm --force --volumes db_subsetter_prometheus
-#docker rm --force --volumes db_subsetter_prometheus_pushgateway
 
 docker run \
   --detach \
-  --publish 3000:3000 \
+  --network host \
   --name db_subsetter_grafana \
   grafana/grafana:5.4.2
 
@@ -18,3 +17,21 @@ docker run \
   --name db_subsetter_prometheus \
   --volume $(pwd)/prometheus-config.yml:/etc/prometheus/prometheus.yml \
   prom/prometheus:v2.6.0
+
+sleep 5
+
+curl \
+  -X POST \
+  -H 'Content-Type: application/json' \
+  --data '{"name": "prometheus", "type": "prometheus", "url": "http://localhost:9090", "access": "browser", "jsonData": { "timeInterval": "500ms" } }' \
+  admin:admin@localhost:3000/api/datasources
+
+echo ""
+
+curl \
+  -X POST \
+  -H 'Content-Type: application/json' \
+  --data @grafana-dashboard.json \
+  admin:admin@localhost:3000/api/dashboards/db
+
+echo ""
