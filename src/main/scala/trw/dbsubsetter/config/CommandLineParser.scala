@@ -210,7 +210,7 @@ object CommandLineParser {
           |                           The resulting subset should be exactly the same as in regular mode
           |""".stripMargin)
 
-    opt[Boolean]("exposeMetrics")
+    opt[Unit]("exposeMetrics")
       .action((_, c) => c.copy(exposeMetrics = true))
       .text(
         """Exposes performance metrics at localhost:9092/metrics
