@@ -1,6 +1,6 @@
 package trw.dbsubsetter.metrics
 
-import io.prometheus.client.Histogram
+import io.prometheus.client.{Gauge, Histogram}
 
 object Metrics {
   val OriginDbSelectsHistogram: Histogram =
@@ -21,6 +21,13 @@ object Metrics {
     Histogram
       .build()
       .name("TargetDbInserts")
+      .help("n/a")
+      .register()
+
+  val OutstandingTasksGauge: Gauge =
+    Gauge
+      .build()
+      .name("OutstandingTasks")
       .help("n/a")
       .register()
 }
