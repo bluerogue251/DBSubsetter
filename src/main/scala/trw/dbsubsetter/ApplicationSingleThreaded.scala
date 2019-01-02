@@ -1,7 +1,7 @@
 package trw.dbsubsetter
 
 import trw.dbsubsetter.config.Config
-import trw.dbsubsetter.db.{ConnectionFactory, SchemaInfo}
+import trw.dbsubsetter.db.{DbAccessFactory, SchemaInfo}
 import trw.dbsubsetter.workflow._
 
 import scala.collection.mutable
@@ -9,9 +9,9 @@ import scala.collection.mutable
 object ApplicationSingleThreaded {
   def run(config: Config, schemaInfo: SchemaInfo, baseQueries: Iterable[SqlStrQuery]): Unit = {
     // Set up workflow objects
-    val connectionFactory = new ConnectionFactory
-    val originDbWorkflow = new OriginDbWorkflow(config, schemaInfo, connectionFactory)
-    val targetDbWorkflow = new TargetDbWorkflow(config, schemaInfo, connectionFactory)
+    val dbAccessFactory = new DbAccessFactory(config, schemaInfo)
+    val originDbWorkflow = new OriginDbWorkflow(config, schemaInfo, dbAccessFactory)
+    val targetDbWorkflow = new TargetDbWorkflow(config, schemaInfo, dbAccessFactory)
     val pkWorkflow = new PkStoreWorkflow(schemaInfo)
 
     // Set up task queue
@@ -40,6 +40,6 @@ object ApplicationSingleThreaded {
     }
 
     // Ensure all SQL connections get closed
-    connectionFactory.closeAllConnections()
+    dbAccessFactory.closeAllConnections()
   }
 }
