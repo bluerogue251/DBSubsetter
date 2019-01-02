@@ -12,7 +12,7 @@ private[db] class TargetDbAccessImpl(connStr: String, sch: SchemaInfo, connectio
     table -> conn.prepareStatement(sqlStr)
   }
 
-  def insertRows(table: Table, rows: Vector[Row]): Int = {
+  override def insertRows(table: Table, rows: Vector[Row]): Int = {
     val stmt = statements(table)
     val cols = sch.colsByTableOrdered(table).size
 

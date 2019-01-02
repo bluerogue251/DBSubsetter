@@ -1,11 +1,11 @@
 package trw.dbsubsetter.db.impl
 
-import io.prometheus.client.Histogram
 import trw.dbsubsetter.db.{ForeignKey, OriginDbAccess, Row, SqlQuery, Table}
+import trw.dbsubsetter.metrics.Metrics
 
 private[db] class OriginDbAccessTimed(delegatee: OriginDbAccess) extends OriginDbAccess {
 
-  private val metrics = OriginDbAccessTimed.Metrics
+  private[this] val metrics = Metrics.OriginDbSelectsHistogram
 
   override def getRowsFromTemplate(fk: ForeignKey, table: Table, fkValue: Any): Vector[Row] = {
     metrics.time(() =>  delegatee.getRowsFromTemplate(fk, table, fkValue))
@@ -14,12 +14,5 @@ private[db] class OriginDbAccessTimed(delegatee: OriginDbAccess) extends OriginD
   override def getRows(query: SqlQuery, table: Table): Vector[Row] = {
     metrics.time(() => delegatee.getRows(query, table))
   }
-}
 
-private object OriginDbAccessTimed {
-  private val Metrics: Histogram = Histogram
-    .build()
-    .name("OriginDbSelects")
-    .help("n/a")
-    .register()
 }

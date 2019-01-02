@@ -6,16 +6,16 @@ import trw.dbsubsetter.db.{DbAccessFactory, SchemaInfo}
 
 class OriginDbWorkflow(config: Config, schemaInfo: SchemaInfo, dbAccessFactory: DbAccessFactory) {
 
-  private[this] val db = dbAccessFactory.buildOriginDbAccess()
+  private[this] val dbAccess = dbAccessFactory.buildOriginDbAccess()
 
   def process(request: OriginDbRequest): OriginDbResult = {
     val result = request match {
       case FkTask(table, foreignKey, fkValue, fetchChildren) =>
-        val rows = db.getRowsFromTemplate(foreignKey, table, fkValue)
+        val rows = dbAccess.getRowsFromTemplate(foreignKey, table, fkValue)
         val viaTableOpt = if (fetchChildren) Some(foreignKey.toTable) else None
         OriginDbResult(table, rows, viaTableOpt, fetchChildren)
       case SqlStrQuery(table, sql, fetchChildren) =>
-        val rows = db.getRows(sql, table)
+        val rows = dbAccess.getRows(sql, table)
         OriginDbResult(table, rows, None, fetchChildren)
     }
     result

@@ -14,7 +14,7 @@ private[db] class OriginDbAccessImpl(connStr: String, sch: SchemaInfo, connectio
     (fk, table) -> conn.prepareStatement(sqlStr)
   }
 
-  def getRowsFromTemplate(fk: ForeignKey, table: Table, fkValue: Any): Vector[Row] = {
+  override def getRowsFromTemplate(fk: ForeignKey, table: Table, fkValue: Any): Vector[Row] = {
     val stmt = statements(fk, table)
     stmt.clearParameters()
     if (fk.isSingleCol) {
@@ -29,7 +29,7 @@ private[db] class OriginDbAccessImpl(connStr: String, sch: SchemaInfo, connectio
     jdbcResultToRows(jdbcResult, table)
   }
 
-  def getRows(query: SqlQuery, table: Table): Vector[Row] = {
+  override def getRows(query: SqlQuery, table: Table): Vector[Row] = {
     val jdbcResult = conn.createStatement().executeQuery(query)
     jdbcResultToRows(jdbcResult, table)
   }
