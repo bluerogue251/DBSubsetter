@@ -11,7 +11,6 @@ class DbAccessFactory(config: Config, schemaInfo: SchemaInfo) {
   private[this] val connectionFactory = new ConnectionFactory()
 
   def buildOriginDbAccess(): OriginDbAccess = {
-
     var mapper: JdbcResultConverter =
       new JdbcResultConverterImpl(schemaInfo)
 
