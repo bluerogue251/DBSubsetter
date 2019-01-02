@@ -38,7 +38,7 @@
           "current": false,
           "max": false,
           "min": false,
-          "show": true,
+          "show": false,
           "total": false,
           "values": false
         },
@@ -123,7 +123,7 @@
           "current": false,
           "max": false,
           "min": false,
-          "show": true,
+          "show": false,
           "total": false,
           "values": false
         },
@@ -208,7 +208,7 @@
           "current": false,
           "max": false,
           "min": false,
-          "show": true,
+          "show": false,
           "total": false,
           "values": false
         },
@@ -293,7 +293,7 @@
           "current": false,
           "max": false,
           "min": false,
-          "show": true,
+          "show": false,
           "total": false,
           "values": false
         },
@@ -378,7 +378,7 @@
           "current": false,
           "max": false,
           "min": false,
-          "show": true,
+          "show": false,
           "total": false,
           "values": false
         },
