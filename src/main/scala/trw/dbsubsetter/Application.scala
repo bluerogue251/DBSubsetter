@@ -19,9 +19,12 @@ object Application extends App {
       val schemaInfo = SchemaInfoRetrieval.getSchemaInfo(config)
       val baseQueries = BaseQueries.get(config, schemaInfo)
 
-      val prometheusExportPort = 9092
-      val prometheusServerRunsInBackground = true
-      val httpServer: HTTPServer = new HTTPServer(prometheusExportPort, prometheusServerRunsInBackground)
+      val optionalMetricsEndpoint: Option[HTTPServer] =
+        if (config.exposeMetrics) {
+          Some(new HTTPServer(9092, true))
+        } else {
+          None
+        }
 
       if (config.isSingleThreadedDebugMode) {
         ApplicationSingleThreaded.run(config, schemaInfo, baseQueries)
@@ -30,6 +33,6 @@ object Application extends App {
         Await.ready(futureResult, Duration.Inf)
       }
       Util.printRuntime(startingTime)
-      httpServer.stop()
+      optionalMetricsEndpoint.foreach(_.stop())
   }
 }

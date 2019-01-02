@@ -27,7 +27,7 @@
         "datasource": "prometheus",
         "fill": 1,
         "gridPos": {
-          "h": 6,
+          "h": 5,
           "w": 24,
           "x": 0,
           "y": 0
@@ -38,7 +38,7 @@
           "current": false,
           "max": false,
           "min": false,
-          "show": true,
+          "show": false,
           "total": false,
           "values": false
         },
@@ -56,10 +56,10 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "rate(OriginDbWorkflow_count[1s])",
+            "expr": "rate(OriginDbSelects_count[1s])",
             "format": "time_series",
             "intervalFactor": 1,
-            "legendFormat": "Rate Per Second",
+            "legendFormat": "Origin DB SELECT Statement Per-Second Rate",
             "refId": "A"
           }
         ],
@@ -67,7 +67,7 @@
         "timeFrom": null,
         "timeRegions": [],
         "timeShift": null,
-        "title": "Origin DB Selects",
+        "title": "Origin DB Query Frequency",
         "tooltip": {
           "shared": true,
           "sort": 0,
@@ -84,6 +84,346 @@
         "yaxes": [
           {
             "format": "short",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+          },
+          {
+            "format": "short",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": false
+          }
+        ],
+        "yaxis": {
+          "align": false,
+          "alignLevel": null
+        }
+      },
+      {
+        "aliasColors": {},
+        "bars": false,
+        "dashLength": 10,
+        "dashes": false,
+        "datasource": "prometheus",
+        "fill": 1,
+        "gridPos": {
+          "h": 5,
+          "w": 24,
+          "x": 0,
+          "y": 5
+        },
+        "id": 4,
+        "legend": {
+          "avg": false,
+          "current": false,
+          "max": false,
+          "min": false,
+          "show": false,
+          "total": false,
+          "values": false
+        },
+        "lines": true,
+        "linewidth": 1,
+        "links": [],
+        "nullPointMode": "null",
+        "percentage": false,
+        "pointradius": 5,
+        "points": false,
+        "renderer": "flot",
+        "seriesOverrides": [],
+        "spaceLength": 10,
+        "stack": false,
+        "steppedLine": false,
+        "targets": [
+          {
+            "expr": "rate(OriginDbSelects_sum[1s]) / rate(OriginDbSelects_count[1s])",
+            "format": "time_series",
+            "intervalFactor": 1,
+            "legendFormat": "Origin DB SELECT Statement Average Duration",
+            "refId": "A"
+          }
+        ],
+        "thresholds": [],
+        "timeFrom": null,
+        "timeRegions": [],
+        "timeShift": null,
+        "title": "Origin DB Query Performance",
+        "tooltip": {
+          "shared": true,
+          "sort": 0,
+          "value_type": "individual"
+        },
+        "type": "graph",
+        "xaxis": {
+          "buckets": null,
+          "mode": "time",
+          "name": null,
+          "show": true,
+          "values": []
+        },
+        "yaxes": [
+          {
+            "format": "s",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+          },
+          {
+            "format": "short",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": false
+          }
+        ],
+        "yaxis": {
+          "align": false,
+          "alignLevel": null
+        }
+      },
+      {
+        "aliasColors": {},
+        "bars": false,
+        "dashLength": 10,
+        "dashes": false,
+        "datasource": "prometheus",
+        "fill": 1,
+        "gridPos": {
+          "h": 5,
+          "w": 24,
+          "x": 0,
+          "y": 10
+        },
+        "id": 6,
+        "legend": {
+          "avg": false,
+          "current": false,
+          "max": false,
+          "min": false,
+          "show": false,
+          "total": false,
+          "values": false
+        },
+        "lines": true,
+        "linewidth": 1,
+        "links": [],
+        "nullPointMode": "null",
+        "percentage": false,
+        "pointradius": 5,
+        "points": false,
+        "renderer": "flot",
+        "seriesOverrides": [],
+        "spaceLength": 10,
+        "stack": false,
+        "steppedLine": false,
+        "targets": [
+          {
+            "expr": "rate(OriginDbJdbcResultToObjectMapper_sum[1s]) / rate(OriginDbJdbcResultToObjectMapper_count[1s])",
+            "format": "time_series",
+            "intervalFactor": 1,
+            "legendFormat": "JDBC Result to Scala Object Conversion Average Duration",
+            "refId": "A"
+          }
+        ],
+        "thresholds": [],
+        "timeFrom": null,
+        "timeRegions": [],
+        "timeShift": null,
+        "title": "Origin DB Query JDBC Result to Scala Object Conversion Performance",
+        "tooltip": {
+          "shared": true,
+          "sort": 0,
+          "value_type": "individual"
+        },
+        "type": "graph",
+        "xaxis": {
+          "buckets": null,
+          "mode": "time",
+          "name": null,
+          "show": true,
+          "values": []
+        },
+        "yaxes": [
+          {
+            "format": "s",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+          },
+          {
+            "format": "short",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": false
+          }
+        ],
+        "yaxis": {
+          "align": false,
+          "alignLevel": null
+        }
+      },
+      {
+        "aliasColors": {},
+        "bars": false,
+        "dashLength": 10,
+        "dashes": false,
+        "datasource": "prometheus",
+        "fill": 1,
+        "gridPos": {
+          "h": 5,
+          "w": 24,
+          "x": 0,
+          "y": 15
+        },
+        "id": 3,
+        "legend": {
+          "avg": false,
+          "current": false,
+          "max": false,
+          "min": false,
+          "show": false,
+          "total": false,
+          "values": false
+        },
+        "lines": true,
+        "linewidth": 1,
+        "links": [],
+        "nullPointMode": "null",
+        "percentage": false,
+        "pointradius": 5,
+        "points": false,
+        "renderer": "flot",
+        "seriesOverrides": [],
+        "spaceLength": 10,
+        "stack": false,
+        "steppedLine": false,
+        "targets": [
+          {
+            "expr": "rate(TargetDbInserts_count[1s])",
+            "format": "time_series",
+            "intervalFactor": 1,
+            "legendFormat": "Target DB INSERT Statement Per-Second Rate",
+            "refId": "A"
+          }
+        ],
+        "thresholds": [],
+        "timeFrom": null,
+        "timeRegions": [],
+        "timeShift": null,
+        "title": "Target DB Write Frequency",
+        "tooltip": {
+          "shared": true,
+          "sort": 0,
+          "value_type": "individual"
+        },
+        "type": "graph",
+        "xaxis": {
+          "buckets": null,
+          "mode": "time",
+          "name": null,
+          "show": true,
+          "values": []
+        },
+        "yaxes": [
+          {
+            "format": "short",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+          },
+          {
+            "format": "short",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": false
+          }
+        ],
+        "yaxis": {
+          "align": false,
+          "alignLevel": null
+        }
+      },
+      {
+        "aliasColors": {},
+        "bars": false,
+        "dashLength": 10,
+        "dashes": false,
+        "datasource": "prometheus",
+        "fill": 1,
+        "gridPos": {
+          "h": 5,
+          "w": 24,
+          "x": 0,
+          "y": 20
+        },
+        "id": 5,
+        "legend": {
+          "avg": false,
+          "current": false,
+          "max": false,
+          "min": false,
+          "show": false,
+          "total": false,
+          "values": false
+        },
+        "lines": true,
+        "linewidth": 1,
+        "links": [],
+        "nullPointMode": "null",
+        "percentage": false,
+        "pointradius": 5,
+        "points": false,
+        "renderer": "flot",
+        "seriesOverrides": [],
+        "spaceLength": 10,
+        "stack": false,
+        "steppedLine": false,
+        "targets": [
+          {
+            "expr": "rate(TargetDbInserts_sum[1s]) / rate(TargetDbInserts_count[1s])",
+            "format": "time_series",
+            "intervalFactor": 1,
+            "legendFormat": "Target DB INSERT Statement Average Duration",
+            "refId": "A"
+          }
+        ],
+        "thresholds": [],
+        "timeFrom": null,
+        "timeRegions": [],
+        "timeShift": null,
+        "title": "Target DB Write Performance",
+        "tooltip": {
+          "shared": true,
+          "sort": 0,
+          "value_type": "individual"
+        },
+        "type": "graph",
+        "xaxis": {
+          "buckets": null,
+          "mode": "time",
+          "name": null,
+          "show": true,
+          "values": []
+        },
+        "yaxes": [
+          {
+            "format": "s",
             "label": null,
             "logBase": 1,
             "max": null,
@@ -135,7 +475,7 @@
     },
     "timezone": "",
     "title": "DBSubsetter Metrics",
-    "uid": null,
+    "uid": "XuQKmDUmk",
     "version": 0
   }
 }

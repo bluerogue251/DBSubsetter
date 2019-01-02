@@ -1,4 +1,4 @@
-package trw.dbsubsetter.db
+package trw.dbsubsetter.db.impl.connection
 
 import java.sql.{Connection, DriverManager}
 
@@ -7,7 +7,7 @@ import scala.collection.mutable
 /*
  * CAREFUL: NOT THREADSAFE
  */
-class ConnectionFactory {
+private[db] class ConnectionFactory {
 
   /*
    * Records all open connections so that we can remember to call `close()` on them when we are finished
@@ -26,12 +26,14 @@ class ConnectionFactory {
 
   def getConnectionWithWritePrivileges(connectionString: String): Connection = {
     val conn: Connection = createAndRegisterConnection(connectionString)
+    import trw.dbsubsetter.db._
     if (conn.isMysql) conn.createStatement().execute("SET SESSION FOREIGN_KEY_CHECKS = 0")
     conn
   }
 
   private[this] def createAndRegisterConnection(connectionString: String): Connection = {
     val conn: Connection = DriverManager.getConnection(connectionString)
+    import trw.dbsubsetter.db._
     if (conn.isMysql) conn.createStatement().execute("SET SESSION SQL_MODE = ANSI_QUOTES")
     conn
   }
