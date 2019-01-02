@@ -7,6 +7,7 @@ docker rm --force --volumes db_subsetter_grafana
 
 set -e
 
+# TODO try to avoid using --network host
 docker run \
   --detach \
   --network host \
@@ -14,6 +15,7 @@ docker run \
   --volume $(pwd)/prometheus-config.yml:/etc/prometheus/prometheus.yml \
   prom/prometheus:v2.6.0
 
+# TODO try to avoid using --network host
 docker run \
   --detach \
   --network host \
