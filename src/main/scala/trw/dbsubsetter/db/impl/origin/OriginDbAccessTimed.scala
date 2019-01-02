@@ -1,4 +1,4 @@
-package trw.dbsubsetter.db.impl
+package trw.dbsubsetter.db.impl.origin
 
 import trw.dbsubsetter.db.{ForeignKey, OriginDbAccess, Row, SqlQuery, Table}
 import trw.dbsubsetter.metrics.Metrics

@@ -10,6 +10,13 @@ object Metrics {
       .help("n/a")
       .register()
 
+  val JdbcResultConverterHistogram: Histogram =
+    Histogram
+      .build()
+      .name("OriginDbJdbcResultToObjectMapper")
+      .help("n/a")
+      .register()
+
   val TargetDbInsertsHistogram: Histogram =
     Histogram
       .build()

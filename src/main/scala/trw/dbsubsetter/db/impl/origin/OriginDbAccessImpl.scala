@@ -1,12 +1,10 @@
-package trw.dbsubsetter.db.impl
+package trw.dbsubsetter.db.impl.origin
 
-import java.sql.ResultSet
-
+import trw.dbsubsetter.db.impl.connection.ConnectionFactory
+import trw.dbsubsetter.db.impl.mapper.JdbcResultConverter
 import trw.dbsubsetter.db.{ForeignKey, OriginDbAccess, Row, SchemaInfo, Sql, SqlQuery, Table}
 
-import scala.collection.mutable.ArrayBuffer
-
-private[db] class OriginDbAccessImpl(connStr: String, sch: SchemaInfo, connectionFactory: ConnectionFactory) extends OriginDbAccess {
+private[db] class OriginDbAccessImpl(connStr: String, sch: SchemaInfo, connectionFactory: ConnectionFactory, mapper: JdbcResultConverter) extends OriginDbAccess {
 
   private val conn = connectionFactory.getReadOnlyConnection(connStr)
 
@@ -26,22 +24,11 @@ private[db] class OriginDbAccessImpl(connStr: String, sch: SchemaInfo, connectio
     }
 
     val jdbcResult = stmt.executeQuery()
-    jdbcResultToRows(jdbcResult, table)
+    mapper.convert(jdbcResult, table)
   }
 
   override def getRows(query: SqlQuery, table: Table): Vector[Row] = {
     val jdbcResult = conn.createStatement().executeQuery(query)
-    jdbcResultToRows(jdbcResult, table)
-  }
-
-  private def jdbcResultToRows(res: ResultSet, table: Table): Vector[Row] = {
-    val cols = sch.colsByTableOrdered(table).size
-    val rows = ArrayBuffer.empty[Row]
-    while (res.next()) {
-      val row = new Row(cols)
-      (1 to cols).foreach(i => row(i - 1) = res.getObject(i))
-      rows += row
-    }
-    rows.toVector
+    mapper.convert(jdbcResult, table)
   }
 }

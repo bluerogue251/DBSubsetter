@@ -1,4 +1,4 @@
-package trw.dbsubsetter.db.impl
+package trw.dbsubsetter.db.impl.connection
 
 import java.sql.{Connection, DriverManager}
 
