@@ -15,14 +15,14 @@ class DbAccessFactory(config: Config, schemaInfo: SchemaInfo) {
     var mapper: JdbcResultConverter =
       new JdbcResultConverterImpl(schemaInfo)
 
-    if (config.exposePrometheusMetrics) {
+    if (config.exposeMetrics) {
       mapper = new JdbcResultConverterTimed(mapper)
     }
 
     var originDbAccess: OriginDbAccess =
       new OriginDbAccessImpl(config.originDbConnectionString, schemaInfo, connectionFactory, mapper)
 
-    if (config.exposePrometheusMetrics) {
+    if (config.exposeMetrics) {
       originDbAccess = new OriginDbAccessTimed(originDbAccess)
     }
 
@@ -33,7 +33,7 @@ class DbAccessFactory(config: Config, schemaInfo: SchemaInfo) {
     var targetDbAccess: TargetDbAccess =
       new TargetDbAccessImpl(config.targetDbConnectionString, schemaInfo, connectionFactory)
 
-    if (config.exposePrometheusMetrics) {
+    if (config.exposeMetrics) {
        targetDbAccess = new TargetDbAccessTimed(targetDbAccess)
     }
 

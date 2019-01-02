@@ -10,7 +10,7 @@ object TestSubsetRunner {
       "--originDbConnStr", containers.origin.db.connectionString,
       "--targetDbConnStr", containers.targetSingleThreaded.db.connectionString,
       "--singleThreadedDebugMode",
-      "--exposePrometheusMetrics"
+      "--exposeMetrics"
 
     )
     val finalArgs: Array[String] = defaultArgs ++ programArgs
@@ -27,7 +27,7 @@ object TestSubsetRunner {
       "--originDbParallelism", "10",
       "--targetDbParallelism", "10",
       "--targetDbConnStr", containers.targetAkkaStreams.db.connectionString,
-      "--exposePrometheusMetrics"
+      "--exposeMetrics"
     )
     val finalArgs: Array[String] = defaultArgs ++ programArgs
 

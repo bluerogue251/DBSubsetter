@@ -19,5 +19,5 @@ case class Config(
   preTargetBufferSize: Int = 100,
   taskQueueDirOpt: Option[File] = None,
   isSingleThreadedDebugMode: Boolean = false,
-  exposePrometheusMetrics: Boolean = false
+  exposeMetrics: Boolean = false
 )

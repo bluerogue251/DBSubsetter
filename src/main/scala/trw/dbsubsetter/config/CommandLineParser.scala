@@ -210,6 +210,15 @@ object CommandLineParser {
           |                           The resulting subset should be exactly the same as in regular mode
           |""".stripMargin)
 
+    opt[Boolean]("exposeMetrics")
+      .action((_, c) => c.copy(exposeMetrics = true))
+      .text(
+        """Exposes performance metrics at localhost:9092/metrics
+          |                           (Mainly for debugging purposes)
+          |                           Designed for use with Prometheus (https://prometheus.io/) and Grafana (https://grafana.com/)
+          |                           See the `observability-tools.sh` shell script in the project root for an example of how to visualize these metrics
+          |""".stripMargin)
+
     private val usageExamples =
       """
         |Examples:
