@@ -7,12 +7,12 @@ import scala.collection.mutable
 /*
  * CAREFUL: NOT THREADSAFE
  */
-private[db] class ConnectionFactory {
+private[db] object ConnectionFactory {
 
   /*
    * Records all open connections so that we can remember to call `close()` on them when we are finished
    */
-  private[this] val registry: mutable.Set[Connection] = mutable.Set.empty[Connection]
+  private val registry: mutable.Set[Connection] = mutable.Set.empty[Connection]
 
   def closeAllConnections(): Unit = {
     registry.foreach(_.close())
@@ -31,7 +31,7 @@ private[db] class ConnectionFactory {
     conn
   }
 
-  private[this] def createAndRegisterConnection(connectionString: String): Connection = {
+  private def createAndRegisterConnection(connectionString: String): Connection = {
     val conn: Connection = DriverManager.getConnection(connectionString)
     import trw.dbsubsetter.db._
     if (conn.isMysql) conn.createStatement().execute("SET SESSION SQL_MODE = ANSI_QUOTES")
