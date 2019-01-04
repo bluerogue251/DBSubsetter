@@ -28,7 +28,8 @@ object ApplicationSingleThreaded {
       // TODO -- think about and write comment about why this only applies to `FetchParentTask` and not `FetchChildrenTask`
       // Could we just call pkStore.exists() here rather than pkWorkflow.exists?
       val canSkip: Boolean = task match {
-        case t: FetchParentTask => TaskPreCheck.shouldPrecheck(t) && pkWorkflow.exists(t) != DuplicateTask
+        case t @ FetchParentTask(foreignKey, value) =>
+          TaskPreCheck.shouldPrecheck(t) && !pkStore.alreadySeen(foreignKey.toTable, value)
         case _ => false
       }
 

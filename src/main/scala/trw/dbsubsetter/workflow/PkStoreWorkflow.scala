@@ -7,6 +7,14 @@ import trw.dbsubsetter.primarykeystore.PrimaryKeyStore
 class PkStoreWorkflow(pkStore: PrimaryKeyStore) {
 
   // Calling this exists() seems not quite accurate
+  // Also -- we should now be calling this solely from Akka-Streams
+  // Consider converting into a filtering Flow and living directly in Akka-Streams?
+  // And maybe that would allow us to remove the `PkResult` trait from `ForeignKeyTask`?
+  // Thinking about it more -- if anything, this should be of type `def exists(task: FetchParentTask)`
+  // since I believe at one point I was certain there should never be a reason to query this for a `FetchChildrenTask`
+  // If the only reason we need this method to return the PkResult (as opposed to a boolean) was to get around
+  // the non-Threadsafe nature of the PkStore itself, maybe we could decorate the PkStore with some locks
+  // to make a Concurrent/threadsafe version we would use only from Akka-Streams, and then just use that directly for the exists() call?
   def exists(task: ForeignKeyTask): PkResult = {
     val alreadyProcessed: Boolean = task match {
       case FetchParentTask(foreignKey, value) => pkStore.alreadySeen(foreignKey.toTable, value)
