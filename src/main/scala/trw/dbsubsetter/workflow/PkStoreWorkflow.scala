@@ -15,6 +15,7 @@ class PkStoreWorkflow(pkStore: PrimaryKeyStore) {
   // If the only reason we need this method to return the PkResult (as opposed to a boolean) was to get around
   // the non-Threadsafe nature of the PkStore itself, maybe we could decorate the PkStore with some locks
   // to make a Concurrent/threadsafe version we would use only from Akka-Streams, and then just use that directly for the exists() call?
+  // Or, do we even need a threadsafe version of it? Isn't it enough to just have it be in one Flow, and we'll be guaranteed it'll only be called once at a time?
   def exists(task: ForeignKeyTask): PkResult = {
     val alreadyProcessed: Boolean = task match {
       case FetchParentTask(foreignKey, value) => pkStore.alreadySeen(foreignKey.toTable, value)
