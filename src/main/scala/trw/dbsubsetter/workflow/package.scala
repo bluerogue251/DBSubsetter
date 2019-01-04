@@ -8,7 +8,7 @@ package object workflow {
 
   sealed trait OriginDbRequest
 
-  case class SqlStrQuery(table: Table, sql: SqlQuery, fetchChildren: Boolean) extends OriginDbRequest
+  case class BaseQuery(table: Table, sql: SqlQuery, fetchChildren: Boolean) extends OriginDbRequest
 
   case class OriginDbResult(table: Table, rows: Vector[Row], viaTableOpt: Option[Table], fetchChildren: Boolean)
 

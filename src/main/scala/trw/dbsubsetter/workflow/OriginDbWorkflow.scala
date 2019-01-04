@@ -14,7 +14,7 @@ class OriginDbWorkflow(config: Config, schemaInfo: SchemaInfo, dbAccessFactory: 
         val rows = dbAccess.getRowsFromTemplate(foreignKey, table, fkValue)
         val viaTableOpt = if (fetchChildren) Some(foreignKey.toTable) else None
         OriginDbResult(table, rows, viaTableOpt, fetchChildren)
-      case SqlStrQuery(table, sql, fetchChildren) =>
+      case BaseQuery(table, sql, fetchChildren) =>
         val rows = dbAccess.getRows(sql, table)
         OriginDbResult(table, rows, None, fetchChildren)
     }
