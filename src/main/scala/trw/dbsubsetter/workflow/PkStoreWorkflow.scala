@@ -6,6 +6,7 @@ import trw.dbsubsetter.primarykeystore.PrimaryKeyStore
 
 class PkStoreWorkflow(pkStore: PrimaryKeyStore) {
 
+  // Calling this exists() seems not quite accurate
   def exists(task: ForeignKeyTask): PkResult = {
     val alreadyProcessed: Boolean = task match {
       case FetchParentTask(foreignKey, value) => pkStore.alreadySeen(foreignKey.toTable, value)

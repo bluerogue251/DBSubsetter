@@ -12,9 +12,7 @@ private[primarykeystore] class InMemoryPrimaryKeyStore(schemaInfo: SchemaInfo) e
 
   // If `seenWithChildrenStorage` contains a PK, then both its children AND its parents have been fetched.
   // If `seenWithoutChildrenStorage` contains a PK, then only its parents have been fetched.
-
   // There is no such thing as having fetched a row's children but not having fetched its parents.
-
   // If a PK is in there at all, then at any given time, it is either in `seenWithoutChildrenStorage` or
   // in `seenWithChildrenStorage` -- it will never be in both at once.
   private[this] val seenWithoutChildrenStorage: Map[Table, mutable.HashSet[Any]] =

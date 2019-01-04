@@ -47,7 +47,6 @@ object ApplicationSingleThreaded {
           taskTracker.enqueueTasks(tasks)
         }
       }
-
     }
 
     // Ensure all SQL connections get closed
