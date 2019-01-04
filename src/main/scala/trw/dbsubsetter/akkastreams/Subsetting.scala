@@ -22,7 +22,10 @@ object Subsetting {
     val balanceOriginDb = b.add(Balance[OriginDbRequest](config.originDbParallelism, waitForAllDownstreams = true))
     val mergeOriginDbResults = b.add(Merge[OriginDbResult](config.originDbParallelism))
     val partitionOriginDbResults = b.add(Partition[OriginDbResult](2, res => if (res.table.storePks) 1 else 0))
-    val partitionFkTasks = b.add(Partition[FkTask](2, t => if (TaskPreCheck.shouldPrecheck(t)) 1 else 0))
+    val partitionFkTasks = b.add(Partition[OriginDbRequest](2, {
+      case t @ FetchParentTask(_, _) if TaskPreCheck.shouldPrecheck(t) => 1
+      case _ => 0
+    }))
     val broadcastPkExistResult = b.add(Broadcast[PkResult](2))
     val mergePksAdded = b.add(Merge[PksAdded](2))
     val broadcastPksAdded = b.add(Broadcast[PksAdded](2))
@@ -79,12 +82,13 @@ object Subsetting {
     partitionFkTasks.out(0) ~>
       mergeOriginDbRequests
 
+    // TODO make Flow[OriginDbRequest] more type specific -- it could actually be Flow[FetchParentTask]
     partitionFkTasks.out(1) ~>
-      Flow[FkTask].mapAsyncUnordered(10)(req => (pkStore ? req).mapTo[PkResult]) ~>
+      Flow[OriginDbRequest].mapAsyncUnordered(10)(req => (pkStore ? req).mapTo[PkResult]) ~>
       broadcastPkExistResult
 
     broadcastPkExistResult ~>
-      Flow[PkResult].collect { case f: FkTask => f } ~>
+      Flow[PkResult].collect { case f: ForeignKeyTask => f } ~>
       mergeOriginDbRequests
 
     broadcastPkExistResult ~>

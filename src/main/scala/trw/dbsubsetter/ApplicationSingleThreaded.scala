@@ -2,6 +2,7 @@ package trw.dbsubsetter
 
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.{DbAccessFactory, SchemaInfo}
+import trw.dbsubsetter.primarykeystore.{PrimaryKeyStore, PrimaryKeyStoreFactory}
 import trw.dbsubsetter.singlethreaded.{TaskTracker, TaskTrackerFactory}
 import trw.dbsubsetter.workflow._
 
@@ -11,7 +12,8 @@ object ApplicationSingleThreaded {
     val dbAccessFactory = new DbAccessFactory(config, schemaInfo)
     val originDbWorkflow = new OriginDbWorkflow(config, schemaInfo, dbAccessFactory)
     val targetDbWorkflow = new TargetDbWorkflow(config, schemaInfo, dbAccessFactory)
-    val pkWorkflow = new PkStoreWorkflow(schemaInfo)
+    val pkStore: PrimaryKeyStore = PrimaryKeyStoreFactory.getPrimaryKeyStore(schemaInfo)
+    val pkWorkflow: PkStoreWorkflow = new PkStoreWorkflow(pkStore)
 
     // Set up task queue
     val taskTracker: TaskTracker = TaskTrackerFactory.buildTaskTracker(config)
