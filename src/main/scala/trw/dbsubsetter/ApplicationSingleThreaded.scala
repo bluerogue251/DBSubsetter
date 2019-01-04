@@ -27,12 +27,11 @@ object ApplicationSingleThreaded {
       // Check if we can skip this task since we've already seen this row already (if applicable)
       // TODO -- think about and write comment about why this only applies to `FetchParentTask` and not `FetchChildrenTask`
       val canSkip: Boolean = task match {
-        case fetchParentTask @ FetchParentTask(_, _) =>
-          TaskPreCheck.shouldPrecheck(fetchParentTask) &&
-            pkWorkflow.exists(fetchParentTask) != DuplicateTask
+        case t: FetchParentTask => TaskPreCheck.shouldPrecheck(t) && pkWorkflow.exists(t) != DuplicateTask
         case _ => false
       }
 
+      // Do the bulk of the actual work for the task
       if (!canSkip) {
         val dbResult = originDbWorkflow.process(task)
         val pksAdded = if (dbResult.table.storePks) pkWorkflow.add(dbResult) else SkipPkStore.process(dbResult)

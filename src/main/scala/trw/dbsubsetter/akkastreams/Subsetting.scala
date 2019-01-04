@@ -23,7 +23,7 @@ object Subsetting {
     val mergeOriginDbResults = b.add(Merge[OriginDbResult](config.originDbParallelism))
     val partitionOriginDbResults = b.add(Partition[OriginDbResult](2, res => if (res.table.storePks) 1 else 0))
     val partitionFkTasks = b.add(Partition[OriginDbRequest](2, {
-      case t @ FetchParentTask(_, _) if TaskPreCheck.shouldPrecheck(t) => 1
+      case t: FetchParentTask if TaskPreCheck.shouldPrecheck(t) => 1
       case _ => 0
     }))
     val broadcastPkExistResult = b.add(Broadcast[PkResult](2))
