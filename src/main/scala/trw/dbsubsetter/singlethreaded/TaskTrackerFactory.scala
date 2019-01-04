@@ -5,12 +5,12 @@ import trw.dbsubsetter.singlethreaded.impl.{TaskTrackerImpl, TaskTrackerInstrume
 
 object TaskTrackerFactory {
   def buildTaskTracker(config: Config): TaskTracker = {
-    var taskQueue: TaskTracker = new TaskTrackerImpl()
+    var taskTracker: TaskTracker = new TaskTrackerImpl()
 
     if (config.exposeMetrics) {
-      taskQueue = new TaskTrackerInstrumented(taskQueue)
+      taskTracker = new TaskTrackerInstrumented(taskTracker)
     }
 
-    taskQueue
+    taskTracker
   }
 }

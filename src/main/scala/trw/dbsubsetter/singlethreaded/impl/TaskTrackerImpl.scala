@@ -5,10 +5,6 @@ import trw.dbsubsetter.workflow.OriginDbRequest
 
 import scala.collection.mutable
 
-/*
- * TODO -- maybe differentiate between "In-progress" tasks and "Pending" tasks
- * to make the count more accurate?
- */
 private[singlethreaded] class TaskTrackerImpl extends TaskTracker {
 
   private[this] val queue = mutable.Queue.empty[OriginDbRequest]
