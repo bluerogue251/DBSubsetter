@@ -48,7 +48,7 @@ object CommandLineParser {
         bq match {
           case r(schema, table, whereClause, fetchChildren) =>
             val fc = fetchChildren == "includeChildren"
-            c.copy(baseQueries = ((schema.trim, table.trim), whereClause.trim, fc) :: c.baseQueries)
+            c.copy(baseQueries = c.baseQueries :+ ((schema.trim, table.trim), whereClause.trim, fc))
           case _ => throw new RuntimeException()
         }
       }

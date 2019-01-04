@@ -2,12 +2,11 @@ package trw.dbsubsetter
 
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.{DbAccessFactory, SchemaInfo}
+import trw.dbsubsetter.singlethreaded.{TaskTracker, TaskTrackerFactory}
 import trw.dbsubsetter.workflow._
 
-import scala.collection.mutable
-
 object ApplicationSingleThreaded {
-  def run(config: Config, schemaInfo: SchemaInfo, baseQueries: Iterable[SqlStrQuery]): Unit = {
+  def run(config: Config, schemaInfo: SchemaInfo, baseQueries: Vector[BaseQuery]): Unit = {
     // Set up workflow objects
     val dbAccessFactory = new DbAccessFactory(config, schemaInfo)
     val originDbWorkflow = new OriginDbWorkflow(config, schemaInfo, dbAccessFactory)
@@ -15,12 +14,12 @@ object ApplicationSingleThreaded {
     val pkWorkflow = new PkStoreWorkflow(schemaInfo)
 
     // Set up task queue
-    val queue = mutable.Queue.empty[OriginDbRequest]
-    baseQueries.foreach(t => queue.enqueue(t))
+    val taskTracker: TaskTracker = TaskTrackerFactory.buildTaskTracker(config)
+    taskTracker.enqueueTasks(baseQueries)
 
     // Run task queue until empty
-    while (queue.nonEmpty) {
-      val taskOpt: List[OriginDbRequest] = queue.dequeue() match {
+    while (taskTracker.nonEmpty) {
+      val taskOpt: List[OriginDbRequest] = taskTracker.dequeueTask() match {
         case t: FkTask if FkTaskPreCheck.shouldPrecheck(t) => List(pkWorkflow.exists(t)).collect { case t: FkTask => t }
         case t => List(t)
       }
@@ -34,7 +33,7 @@ object ApplicationSingleThreaded {
             val table = if (fetchChildren) fk.fromTable else fk.toTable
             FkTask(table, fk, v, fetchChildren)
           }
-          queue.enqueue(tasks: _*)
+          taskTracker.enqueueTasks(tasks)
         }
       }
     }

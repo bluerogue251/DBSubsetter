@@ -8,7 +8,7 @@ case class Config(
   schemas: Seq[String] = Seq.empty,
   originDbConnectionString: String = "",
   targetDbConnectionString: String = "",
-  baseQueries: List[((SchemaName, TableName), WhereClause, Boolean)] = List.empty,
+  baseQueries: Vector[((SchemaName, TableName), WhereClause, Boolean)] = Vector.empty,
   originDbParallelism: Int = 1,
   targetDbParallelism: Int = 1,
   cmdLineForeignKeys: List[CmdLineForeignKey] = List.empty,
