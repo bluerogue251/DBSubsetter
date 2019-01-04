@@ -15,11 +15,11 @@ object ApplicationSingleThreaded {
 
     // Set up task queue
     val taskTracker: TaskTracker = TaskTrackerFactory.buildTaskTracker(config)
-    taskTracker.enqueueNewTasks(baseQueries)
+    taskTracker.enqueueTasks(baseQueries)
 
     // Run task queue until empty
-    while (taskTracker.hasNextTask) {
-      val taskOpt: List[OriginDbRequest] = taskTracker.dequeueNextTask() match {
+    while (taskTracker.nonEmpty) {
+      val taskOpt: List[OriginDbRequest] = taskTracker.dequeueTask() match {
         case t: FkTask if FkTaskPreCheck.shouldPrecheck(t) => List(pkWorkflow.exists(t)).collect { case t: FkTask => t }
         case t => List(t)
       }
@@ -33,7 +33,7 @@ object ApplicationSingleThreaded {
             val table = if (fetchChildren) fk.fromTable else fk.toTable
             FkTask(table, fk, v, fetchChildren)
           }
-          taskTracker.enqueueNewTasks(tasks)
+          taskTracker.enqueueTasks(tasks)
         }
       }
     }

@@ -8,15 +8,15 @@ private[singlethreaded] class TaskTrackerInstrumented(delegatee: TaskTracker) ex
 
   private[this] val metrics = Metrics.PendingTasksGauge
 
-  override def hasNextTask: Boolean = delegatee.hasNextTask
+  override def nonEmpty: Boolean = delegatee.nonEmpty
 
-  override def enqueueNewTasks(tasks: IndexedSeq[OriginDbRequest]): Unit = {
+  override def enqueueTasks(tasks: IndexedSeq[OriginDbRequest]): Unit = {
     metrics.inc(tasks.length)
-    delegatee.enqueueNewTasks(tasks)
+    delegatee.enqueueTasks(tasks)
   }
 
-  override def dequeueNextTask(): OriginDbRequest = {
+  override def dequeueTask(): OriginDbRequest = {
     metrics.dec()
-    delegatee.dequeueNextTask()
+    delegatee.dequeueTask()
   }
 }

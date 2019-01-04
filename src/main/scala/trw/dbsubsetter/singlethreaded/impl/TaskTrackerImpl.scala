@@ -13,9 +13,9 @@ private[singlethreaded] class TaskTrackerImpl extends TaskTracker {
 
   private[this] val queue = mutable.Queue.empty[OriginDbRequest]
 
-  override def hasNextTask: Boolean = queue.nonEmpty
+  override def nonEmpty: Boolean = queue.nonEmpty
 
-  override def enqueueNewTasks(tasks: IndexedSeq[OriginDbRequest]): Unit = queue.enqueue(tasks:_*)
+  override def enqueueTasks(tasks: IndexedSeq[OriginDbRequest]): Unit = queue.enqueue(tasks:_*)
 
-  override def dequeueNextTask(): OriginDbRequest = queue.dequeue()
+  override def dequeueTask(): OriginDbRequest = queue.dequeue()
 }
