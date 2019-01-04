@@ -7,7 +7,7 @@ import scala.collection.mutable
 /*
  * CAREFUL: NOT THREADSAFE
  */
-private[db] object ConnectionFactory {
+private[impl] object ConnectionFactory {
 
   /*
    * Records all open connections so that we can remember to call `close()` on them when we are finished
