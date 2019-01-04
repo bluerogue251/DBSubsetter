@@ -22,7 +22,7 @@ object Subsetting {
     val balanceOriginDb = b.add(Balance[OriginDbRequest](config.originDbParallelism, waitForAllDownstreams = true))
     val mergeOriginDbResults = b.add(Merge[OriginDbResult](config.originDbParallelism))
     val partitionOriginDbResults = b.add(Partition[OriginDbResult](2, res => if (res.table.storePks) 1 else 0))
-    val partitionFkTasks = b.add(Partition[FkTask](2, t => if (FkTaskPreCheck.shouldPrecheck(t)) 1 else 0))
+    val partitionFkTasks = b.add(Partition[FkTask](2, t => if (TaskPreCheck.shouldPrecheck(t)) 1 else 0))
     val broadcastPkExistResult = b.add(Broadcast[PkResult](2))
     val mergePksAdded = b.add(Merge[PksAdded](2))
     val broadcastPksAdded = b.add(Broadcast[PksAdded](2))
