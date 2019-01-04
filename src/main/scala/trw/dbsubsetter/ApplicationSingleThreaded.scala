@@ -6,7 +6,7 @@ import trw.dbsubsetter.singlethreaded.{TaskTracker, TaskTrackerFactory}
 import trw.dbsubsetter.workflow._
 
 object ApplicationSingleThreaded {
-  def run(config: Config, schemaInfo: SchemaInfo, baseQueries: IndexedSeq[SqlStrQuery]): Unit = {
+  def run(config: Config, schemaInfo: SchemaInfo, baseQueries: Vector[SqlStrQuery]): Unit = {
     // Set up workflow objects
     val dbAccessFactory = new DbAccessFactory(config, schemaInfo)
     val originDbWorkflow = new OriginDbWorkflow(config, schemaInfo, dbAccessFactory)

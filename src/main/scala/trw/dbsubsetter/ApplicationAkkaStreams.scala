@@ -12,7 +12,7 @@ import trw.dbsubsetter.workflow._
 import scala.concurrent.{ExecutionContext, Future}
 
 object ApplicationAkkaStreams {
-  def run(config: Config, schemaInfo: SchemaInfo, baseQueries: List[SqlStrQuery]): Future[Done] = {
+  def run(config: Config, schemaInfo: SchemaInfo, baseQueries: Vector[SqlStrQuery]): Future[Done] = {
     implicit val system: ActorSystem = ActorSystem("DbSubsetter")
     implicit val materializer: ActorMaterializer = ActorMaterializer()
     implicit val ec: ExecutionContext = system.dispatcher
