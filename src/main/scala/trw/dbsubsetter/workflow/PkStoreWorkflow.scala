@@ -20,7 +20,6 @@ class PkStoreWorkflow(pkStore: PrimaryKeyStore) {
 
   def add(req: OriginDbResult): PksAdded = {
     val OriginDbResult(table, rows, viaTableOpt, fetchChildren) = req
-    val (parentStore, childStore) = getStorage(table)
 
     val pkOrdinals = sch.pksByTableOrdered(table).map(_.ordinalPosition)
     val pkOrdinal = pkOrdinals.head
@@ -28,14 +27,13 @@ class PkStoreWorkflow(pkStore: PrimaryKeyStore) {
     val getPkValue: Row => Any = if (isSingleColPk) row => row(pkOrdinal) else row => pkOrdinals.map(row)
 
     if (fetchChildren) {
-      val childrenNotYetFetched = rows.filter(row => childStore.add(getPkValue(row)))
+      // May need to make the return value of pkStore.markSEenWithChildren richer to represent if we had already fetched the parents
+      // So that we don't do too much extra work here
       val parentsNotYetFetched = childrenNotYetFetched.filterNot(row => parentStore.remove(getPkValue(row)))
+      val childrenNotYetFetched = rows.filter(row => pkStore.markSeenWithChildren(getPkValue(row)))
       PksAdded(table, parentsNotYetFetched, childrenNotYetFetched, viaTableOpt)
     } else {
-      val newRows = rows.filter { row =>
-        val pkValue = getPkValue(row)
-        !childStore.contains(pkValue) && parentStore.add(pkValue)
-      }
+      val newRows = rows.filter(row => pkStore.markSeen(table, getPkValue(row)))
       PksAdded(table, newRows, Vector.empty, viaTableOpt)
     }
   }
