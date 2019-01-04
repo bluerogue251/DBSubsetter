@@ -19,31 +19,33 @@ object ApplicationSingleThreaded {
 
     // Run task queue until empty
     while (taskTracker.nonEmpty) {
+      // Get a new task to work on
       val task: OriginDbRequest = taskTracker.dequeueTask()
-      val mightBeAbleToSkipTask: Boolean = TaskPreCheck.shouldPrecheck(task)
-      val optionalTask: Option[OriginDbRequest] = {
-        if (mightBeAbleToSkipTask)
-          pkWorkflow.exists(task).
-        Some(task)
-        else
+
+      // Check if we can skip this task since we've already seen this row already (if applicable)
+      // TODO -- think about and write comment about why this only applies to `FetchParentTask` and not `FetchChildrenTask`
+      val canSkip: Boolean = task match {
+        case fetchParentTask @ FetchParentTask(_, _) =>
+          TaskPreCheck.shouldPrecheck(fetchParentTask) &&
+            pkWorkflow.exists(fetchParentTask) != DuplicateTask
+        case _ => false
       }
 
-
-        case t => Some(t)
-      }
-      taskOpt.foreach { task =>
+      if (!canSkip) {
         val dbResult = originDbWorkflow.process(task)
         val pksAdded = if (dbResult.table.storePks) pkWorkflow.add(dbResult) else SkipPkStore.process(dbResult)
         targetDbWorkflow.process(pksAdded)
         val newTasks = NewFkTaskWorkflow.process(pksAdded, schemaInfo)
-        newTasks.foreach { case ((fk, fetchChildren), fkValues) =>
-          val tasks = fkValues.map { v =>
-            val table = if (fetchChildren) fk.fromTable else fk.toTable
-            FkTask(table, fk, v, fetchChildren)
+        newTasks.foreach { case ((foreignKey, fetchChildren), fkValues) =>
+          val tasks = if (fetchChildren) {
+            fkValues.map(value => FetchChildrenTask(foreignKey, value))
+          } else {
+            fkValues.map(value => FetchParentTask(foreignKey, value))
           }
           taskTracker.enqueueTasks(tasks)
         }
       }
+
     }
 
     // Ensure all SQL connections get closed
