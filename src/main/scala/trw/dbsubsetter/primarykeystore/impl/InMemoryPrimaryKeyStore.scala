@@ -10,7 +10,7 @@ import scala.collection.mutable
  */
 private[primarykeystore] class InMemoryPrimaryKeyStore(schemaInfo: SchemaInfo) extends PrimaryKeyStore {
 
-  private[this] val tables = schemaInfo.pksByTableOrdered.keys.filter(_.storePks)
+  private[this] val tables: Iterable[Table] = schemaInfo.pksByTableOrdered.keys.filter(_.storePks)
 
   // If `seenWithChildrenStorage` contains a PK, then both its children AND its parents have been fetched.
   // If `seenWithoutChildrenStorage` contains a PK, then only its parents have been fetched.
@@ -19,13 +19,11 @@ private[primarykeystore] class InMemoryPrimaryKeyStore(schemaInfo: SchemaInfo) e
 
   // If a PK is in there at all, then at any given time, it is either in `seenWithoutChildrenStorage` or
   // in `seenWithChildrenStorage` -- it will never be in both at once.
-  private[this] val seenWithoutChildrenStorage: Map[Table, mutable.HashSet[Any]] = tables.map { t =>
-    t -> mutable.HashSet.empty[Any]
-  }.toMap
+  private[this] val seenWithoutChildrenStorage: Map[Table, mutable.HashSet[Any]] =
+    InMemoryPrimaryKeyStore.buildInMemoryStorage(tables)
 
-  private[this] val seenWithChildrenStorage: Map[Table, mutable.HashSet[Any]] = tables.map { t =>
-    t -> mutable.HashSet.empty[Any]
-  }.toMap
+  private[this] val seenWithChildrenStorage: Map[Table, mutable.HashSet[Any]] =
+    InMemoryPrimaryKeyStore.buildInMemoryStorage(tables)
 
   override def markSeen(table: Table, primaryKeyValue: Any): Boolean = {
     val alreadySeenWithChildren: Boolean =
@@ -49,5 +47,11 @@ private[primarykeystore] class InMemoryPrimaryKeyStore(schemaInfo: SchemaInfo) e
 
   override def alreadySeenWithChildren(table: Table, primaryKeyValue: Any): Boolean = {
     seenWithChildrenStorage(table).contains(primaryKeyValue)
+  }
+}
+
+private object InMemoryPrimaryKeyStore {
+  private def buildInMemoryStorage(tables: Iterable[Table]): Map[Table, mutable.HashSet[Any]] = {
+    tables.map { t => t -> mutable.HashSet.empty[Any] }.toMap
   }
 }

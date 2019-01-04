@@ -5,12 +5,12 @@ import trw.dbsubsetter.primarykeystore.impl.InMemoryPrimaryKeyStore
 
 object PrimaryKeyStoreFactory {
 
-  private[this] var lazyInitializedPrimaryKeyStoreSingleton: PrimaryKeyStore = _
+  private[this] var lazyPrimaryKeyStoreSingleton: PrimaryKeyStore = _
 
   def getPrimaryKeyStore(schemaInfo: SchemaInfo): PrimaryKeyStore = {
-    if (lazyInitializedPrimaryKeyStoreSingleton == null) {
-      lazyInitializedPrimaryKeyStoreSingleton = new InMemoryPrimaryKeyStore(schemaInfo)
+    if (lazyPrimaryKeyStoreSingleton == null) {
+      lazyPrimaryKeyStoreSingleton = new InMemoryPrimaryKeyStore(schemaInfo)
     }
-    lazyInitializedPrimaryKeyStoreSingleton
+    lazyPrimaryKeyStoreSingleton
   }
 }
