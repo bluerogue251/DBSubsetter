@@ -6,7 +6,7 @@ import trw.dbsubsetter.workflow.OriginDbRequest
 
 private[singlethreaded] class TaskTrackerInstrumented(delegatee: TaskTracker) extends TaskTracker {
 
-  private[this] val metrics = Metrics.OutstandingTasksGauge
+  private[this] val metrics = Metrics.PendingTasksGauge
 
   override def hasNextTask: Boolean = delegatee.hasNextTask
 

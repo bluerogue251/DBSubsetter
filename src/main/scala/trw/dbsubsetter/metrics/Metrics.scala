@@ -24,10 +24,10 @@ object Metrics {
       .help("n/a")
       .register()
 
-  val OutstandingTasksGauge: Gauge =
+  val PendingTasksGauge: Gauge =
     Gauge
     .build()
-    .name("OustandingTasks")
+    .name("PendingTasks")
     .help("n/a")
     .register()
 }
