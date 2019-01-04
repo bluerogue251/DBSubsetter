@@ -8,7 +8,7 @@ import scala.collection.mutable
 /*
  * CAREFUL -- NOT THREADSAFE
  */
-class InMemoryPrimaryKeyStore(schemaInfo: SchemaInfo) extends PrimaryKeyStore {
+private[primarykeystore] class InMemoryPrimaryKeyStore(schemaInfo: SchemaInfo) extends PrimaryKeyStore {
 
   private[this] val tables = schemaInfo.pksByTableOrdered.keys.filter(_.storePks)
 
