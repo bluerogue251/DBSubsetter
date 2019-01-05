@@ -4,8 +4,8 @@ import akka.NotUsed
 import akka.stream.scaladsl.Flow
 import trw.dbsubsetter.workflow._
 
-object FkTaskCreationFlow {
+object FkTaskCreation {
   def flow(fkTaskCreationWorkflow: FkTaskCreationWorkflow): Flow[PksAdded, NewTasks, NotUsed] = {
-    Flow[PksAdded].map(pksAdded => fkTaskCreationWorkflow.createFkTasks(pksAdded))
+    Flow[PksAdded].map(fkTaskCreationWorkflow.createFkTasks)
   }
 }

@@ -64,7 +64,7 @@ object Subsetting {
       broadcastPksAdded
 
     broadcastPksAdded ~>
-      FkTaskCreationFlow.flow(fkTaskCreationWorkflow) ~>
+      FkTaskCreation.flow(fkTaskCreationWorkflow) ~>
       mergeToOustandingTaskCounter
 
     mergeToOustandingTaskCounter ~>

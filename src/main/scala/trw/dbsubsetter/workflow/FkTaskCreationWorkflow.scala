@@ -2,6 +2,8 @@ package trw.dbsubsetter.workflow
 
 import trw.dbsubsetter.db._
 
+// TODO reconsider name (or the way this works) since this does not actually create any `FkTask`s. (It creates `NewTasks`).
+// TODO do the same reconsideration for the Akka Streams Flow that calls this.
 class FkTaskCreationWorkflow(schemaInfo: SchemaInfo) {
 
   def createFkTasks(pksAdded: PksAdded): NewTasks = {
@@ -26,7 +28,7 @@ class FkTaskCreationWorkflow(schemaInfo: SchemaInfo) {
     val allFks = schemaInfo.fksFromTable(table)
     val useFks = viaTableOpt.fold(allFks)(viaTable => allFks.filterNot(fk => fk.toTable == viaTable))
     val newTasksInfo: Map[(ForeignKey, Boolean), Array[Any]] = useFks.map { fk =>
-      val getFkValue: Row => Any = FkTaskCreationWorkflow.buildFunctionToExtractFkValue(fk, fk.toCols)
+      val getFkValue: Row => Any = FkTaskCreationWorkflow.fkValueExtractionFunction(fk, fk.fromCols)
       val fkValues: Array[Any] = rows.map(getFkValue).toArray
       val distinctFkValues: Array[Any] = fkValues.distinct.filterNot(_ == null)
       (fk, false) -> distinctFkValues
@@ -36,7 +38,7 @@ class FkTaskCreationWorkflow(schemaInfo: SchemaInfo) {
 
   private def calcChildTasks(table: Table, rows: Vector[Row]): NewTasks = {
     val newTasksInfo: Map[(ForeignKey, Boolean), Array[Any]] = schemaInfo.fksToTable(table).map { fk =>
-      val getFkValue: Row => Any = FkTaskCreationWorkflow.buildFunctionToExtractFkValue(fk, fk.fromCols)
+      val getFkValue: Row => Any = FkTaskCreationWorkflow.fkValueExtractionFunction(fk, fk.toCols)
       val fkValues: Array[Any] = rows.map(getFkValue).toArray
       (fk, true) -> fkValues
     }.toMap
@@ -48,8 +50,11 @@ class FkTaskCreationWorkflow(schemaInfo: SchemaInfo) {
 
 private[this] object FkTaskCreationWorkflow {
 
-  private def buildFunctionToExtractFkValue(foreignKey: ForeignKey, columns: Vector[Column]): Row => Any = {
-    if (foreignKey.isSingleCol) {
+  // Require IndexedSeq to ensure O(1) access for calls to `length`
+  private def fkValueExtractionFunction(columns: IndexedSeq[Column]): Row => Any = {
+    val isSingleColumnForeignKey: Boolean = columns.length == 1
+
+    if (isSingleColumnForeignKey) {
       val ordinalPosition = columns.head.ordinalPosition
       val function: Row => Any = row => row(ordinalPosition)
       function
