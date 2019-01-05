@@ -8,6 +8,8 @@ import trw.dbsubsetter.db.impl.target.{TargetDbAccessImpl, TargetDbAccessTimed}
 
 class DbAccessFactory(config: Config, schemaInfo: SchemaInfo) {
 
+  private[this] val connectionFactory: ConnectionFactory = new ConnectionFactory
+
   def buildOriginDbAccess(): OriginDbAccess = {
     var mapper: JdbcResultConverter =
       new JdbcResultConverterImpl(schemaInfo)
@@ -17,7 +19,7 @@ class DbAccessFactory(config: Config, schemaInfo: SchemaInfo) {
     }
 
     var originDbAccess: OriginDbAccess =
-      new OriginDbAccessImpl(config.originDbConnectionString, schemaInfo, mapper)
+      new OriginDbAccessImpl(config.originDbConnectionString, schemaInfo, mapper, connectionFactory)
 
     if (config.exposeMetrics) {
       originDbAccess = new OriginDbAccessTimed(originDbAccess)
@@ -28,7 +30,7 @@ class DbAccessFactory(config: Config, schemaInfo: SchemaInfo) {
 
   def buildTargetDbAccess(): TargetDbAccess = {
     var targetDbAccess: TargetDbAccess =
-      new TargetDbAccessImpl(config.targetDbConnectionString, schemaInfo)
+      new TargetDbAccessImpl(config.targetDbConnectionString, schemaInfo, connectionFactory)
 
     if (config.exposeMetrics) {
        targetDbAccess = new TargetDbAccessTimed(targetDbAccess)
@@ -38,6 +40,6 @@ class DbAccessFactory(config: Config, schemaInfo: SchemaInfo) {
   }
 
   def closeAllConnections(): Unit = {
-    ConnectionFactory.closeAllConnections()
+    connectionFactory.closeAllConnections()
   }
 }
