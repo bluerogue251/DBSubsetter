@@ -23,6 +23,7 @@ object Subsetting {
     val mergeOriginDbResults = b.add(Merge[OriginDbResult](config.originDbParallelism))
     val partitionOriginDbResults = b.add(Partition[OriginDbResult](2, res => if (res.table.storePks) 1 else 0))
     val partitionFkTasks = b.add(Partition[FkTask](2, t => if (FkTaskPreCheck.shouldPrecheck(t)) 1 else 0))
+    // TODO try to turn this broadcast into a typesafe Partition stage with two output ports, each output port with a different type
     val broadcastPkExistResult = b.add(Broadcast[PkQueryResult](2))
     val mergePksAdded = b.add(Merge[PksAdded](2))
     val broadcastPksAdded = b.add(Broadcast[PksAdded](2))
