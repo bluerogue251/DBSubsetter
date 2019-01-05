@@ -8,6 +8,6 @@ class MixedCaseTestPostgreSQL extends AbstractPostgresqlEndToEndTest with MixedC
     "--schemas", "public",
     "--baseQuery", "public.mixed_CASE_table_1 ::: \"ID\" = 2 ::: includeChildren",
     "--skipPkStore", "public.mixed_CASE_table_1",
-    "--skipPkStore", "public.mixed_CASE_table_2"
+    "--skipPkStore", "public.mixed_CASE_table_2" // TODO fix to be all upper case, including for other DB Vendors...
   )
 }
