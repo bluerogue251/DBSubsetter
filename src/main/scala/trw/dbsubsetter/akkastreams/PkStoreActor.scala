@@ -16,7 +16,7 @@ private[this] class PkStoreActor(schemaInfo: SchemaInfo) extends Actor {
     // If it's a FkTask, then we are being asked to pre-check to make sure we haven't done it already
     case task: FkTask =>
       val alreadySeen: Boolean = pkStore.alreadySeen(task.table, task.fkValue)
-      val response: PkResult = if (alreadySeen) DuplicateTask else task
+      val response: PkQueryResult = if (alreadySeen) AlreadySeen else NotAlreadySeen(task)
       sender() ! response
     // If it's an OriginDbResult, then we are being asked to add the new primary key values to the PkStore
     case req: OriginDbResult =>

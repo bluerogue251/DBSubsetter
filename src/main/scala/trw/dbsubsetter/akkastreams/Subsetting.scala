@@ -9,7 +9,7 @@ import akka.stream.{OverflowStrategy, SourceShape}
 import akka.util.Timeout
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.{DbAccessFactory, SchemaInfo}
-import trw.dbsubsetter.workflow._
+import trw.dbsubsetter.workflow.{AlreadySeen, _}
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
@@ -23,13 +23,13 @@ object Subsetting {
     val mergeOriginDbResults = b.add(Merge[OriginDbResult](config.originDbParallelism))
     val partitionOriginDbResults = b.add(Partition[OriginDbResult](2, res => if (res.table.storePks) 1 else 0))
     val partitionFkTasks = b.add(Partition[FkTask](2, t => if (FkTaskPreCheck.shouldPrecheck(t)) 1 else 0))
-    val broadcastPkExistResult = b.add(Broadcast[PkResult](2))
+    val broadcastPkExistResult = b.add(Broadcast[PkQueryResult](2))
     val mergePksAdded = b.add(Merge[PksAdded](2))
     val broadcastPksAdded = b.add(Broadcast[PksAdded](2))
-    val mergeNewTaskRequests = b.add(Merge[PkResult](2))
     val balanceTargetDb = b.add(Balance[PksAdded](config.targetDbParallelism, waitForAllDownstreams = true))
     val mergeTargetDbResults = b.add(Merge[TargetDbInsertResult](config.targetDbParallelism))
     val fkTaskBufferFlow = b.add(new FkTaskBufferFlow(config, schemaInfo).async)
+    val mergeToOustandingTaskCounter = b.add(Merge[NewTasks](2))
 
     // Start everything off
     Source(baseQueries) ~>
@@ -63,8 +63,10 @@ object Subsetting {
       broadcastPksAdded
 
     broadcastPksAdded ~>
-      mergeNewTaskRequests ~>
       NewTasks.flow(schemaInfo) ~>
+      mergeToOustandingTaskCounter
+
+    mergeToOustandingTaskCounter ~>
       OutstandingTaskCounter.counter(baseQueries.size) ~>
       fkTaskBufferFlow
 
@@ -82,16 +84,17 @@ object Subsetting {
       mergeOriginDbRequests
 
     partitionFkTasks.out(1) ~>
-      Flow[FkTask].mapAsyncUnordered(10)(req => (pkStore ? req).mapTo[PkResult]) ~>
+      Flow[FkTask].mapAsyncUnordered(10)(req => (pkStore ? req).mapTo[PkQueryResult]) ~>
       broadcastPkExistResult
 
     broadcastPkExistResult ~>
-      Flow[PkResult].collect { case f: FkTask => f } ~>
+      Flow[PkQueryResult].collect { case NotAlreadySeen(fkTask) => fkTask } ~>
       mergeOriginDbRequests
 
     broadcastPkExistResult ~>
-      Flow[PkResult].collect { case DuplicateTask => DuplicateTask } ~>
-      mergeNewTaskRequests
+      Flow[PkQueryResult].collect { case AlreadySeen => AlreadySeen } ~>
+      Flow[PkQueryResult].map(_ => EmptyNewTasks) ~>     // TODO make type more specific
+      mergeToOustandingTaskCounter
 
     SourceShape(mergeTargetDbResults.out)
   })
