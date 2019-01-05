@@ -50,7 +50,12 @@ class FkTaskCreationWorkflow(schemaInfo: SchemaInfo) {
 
 private[this] object FkTaskCreationWorkflow {
 
-  // Require IndexedSeq to ensure O(1) access for calls to `length`
+  /*
+   * Require IndexedSeq to ensure O(1) access for calls to `length`
+   * TODO -- consider somehow moving this function onto the class itself rather than calculating it here (might
+   * need to create the class, it would be called `TargetColumns` or something, representing the columns pointed
+   * to from a foreign key)
+   */
   private def fkValueExtractionFunction(columns: IndexedSeq[Column]): Row => Any = {
     val isSingleColumnForeignKey: Boolean = columns.length == 1
 
