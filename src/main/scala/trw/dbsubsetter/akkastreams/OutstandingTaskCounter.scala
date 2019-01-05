@@ -4,7 +4,6 @@ import akka.NotUsed
 import akka.stream.scaladsl.Flow
 import trw.dbsubsetter.workflow.NewTasks
 
-// TODO try to make the Array[Any] type more specific
 object OutstandingTaskCounter {
   def counter(numBaseQueries: Int): Flow[NewTasks, NewTasks, NotUsed] = {
     val counterFlow = Flow[NewTasks].statefulMapConcat { () =>
