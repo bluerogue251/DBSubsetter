@@ -7,7 +7,7 @@ import scala.collection.mutable
 /*
  * CAREFUL: NOT THREADSAFE
  */
-private[db] object ConnectionFactory {
+private[db] class ConnectionFactory {
 
   /*
    * Records all open connections so that we can remember to call `close()` on them when we are finished
@@ -19,22 +19,23 @@ private[db] object ConnectionFactory {
   }
 
   def getReadOnlyConnection(connectionString: String): Connection = {
-    val conn: Connection = createAndRegisterConnection(connectionString)
-    conn.setReadOnly(true)
-    conn
+    val connection: Connection = createAndRegisterConnection(connectionString)
+    connection.setReadOnly(true)
+    connection
   }
 
   def getConnectionWithWritePrivileges(connectionString: String): Connection = {
-    val conn: Connection = createAndRegisterConnection(connectionString)
+    val connection: Connection = createAndRegisterConnection(connectionString)
     import trw.dbsubsetter.db._
-    if (conn.isMysql) conn.createStatement().execute("SET SESSION FOREIGN_KEY_CHECKS = 0")
-    conn
+    if (connection.isMysql) connection.createStatement().execute("SET SESSION FOREIGN_KEY_CHECKS = 0")
+    connection
   }
 
   private[this] def createAndRegisterConnection(connectionString: String): Connection = {
-    val conn: Connection = DriverManager.getConnection(connectionString)
+    val connection: Connection = DriverManager.getConnection(connectionString)
     import trw.dbsubsetter.db._
-    if (conn.isMysql) conn.createStatement().execute("SET SESSION SQL_MODE = ANSI_QUOTES")
-    conn
+    if (connection.isMysql) connection.createStatement().execute("SET SESSION SQL_MODE = ANSI_QUOTES")
+    registry.add(connection)
+    connection
   }
 }
