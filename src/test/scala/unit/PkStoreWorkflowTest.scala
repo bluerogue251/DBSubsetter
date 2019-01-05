@@ -51,7 +51,7 @@ class PkStoreWorkflowTest extends FunSuite {
     val rows: Vector[Row] = Vector(row)
 
     // Add the PK to the pkStore, noting that we have NOT yet fetched children
-    val pkAddRequest1 = OriginDbResult(table, rows, None, fetchChildren = true)
+    val pkAddRequest1 = OriginDbResult(table, rows, viaTableOpt = None, fetchChildren = true)
     val actual = pkStoreWorkflow.add(pkAddRequest1)
     val expected: PksAdded = PksAdded(
       table = table,

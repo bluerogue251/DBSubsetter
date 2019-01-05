@@ -48,6 +48,7 @@ class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
 }
 
 private[this] object PkStoreWorkflow {
+  // Consider putting this logic as a field inside the `Table` class itself
   private def buildFunctionsToExtractPkValue(schemaInfo: SchemaInfo): Map[Table, Row => Any] = {
     schemaInfo.pksByTableOrdered.map { case (table, pkColumns) =>
         val pkOrdinals: Vector[Int] = pkColumns.map(_.ordinalPosition)

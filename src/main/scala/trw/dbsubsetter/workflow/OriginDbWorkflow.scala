@@ -16,7 +16,7 @@ class OriginDbWorkflow(config: Config, schemaInfo: SchemaInfo, dbAccessFactory: 
         OriginDbResult(table, rows, viaTableOpt, fetchChildren)
       case BaseQuery(table, sql, fetchChildren) =>
         val rows = dbAccess.getRows(sql, table)
-        OriginDbResult(table, rows, viaTableOpt = None, fetchChildren)
+        OriginDbResult(table, rows, None, fetchChildren)
     }
     result
   }
