@@ -36,7 +36,12 @@ class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
 
       PksAdded(table, parentsNotYetFetched, childrenNotYetFetched, viaTableOpt)
     } else {
-      val newRows = rows.filter(row => pkStore.markSeen(table, extractPkValue(row)))
+      val newRows = rows.filter(row => {
+        pkStore.markSeen(table, extractPkValue(row)) match {
+          case FirstTimeSeen => true
+          case _ => false
+        }
+      })
       PksAdded(table, newRows, Vector.empty, viaTableOpt)
     }
   }

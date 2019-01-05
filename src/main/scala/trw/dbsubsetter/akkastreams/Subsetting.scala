@@ -72,8 +72,8 @@ object Subsetting {
       Flow[PksAdded].buffer(config.preTargetBufferSize, OverflowStrategy.backpressure) ~>
       balanceTargetDb
 
-    // ForeignKeyTasks ~> cannotBePrechecked       ~>        OriginDbRequest
-    // ForeignKeyTasks ~> canBePrechecked ~> PkStoreQuery ~> OriginDbRequest
+    // FkTasks ~> cannotBePrechecked       ~>        OriginDbRequest
+    // FkTasks ~> canBePrechecked ~> PkStoreQuery ~> OriginDbRequest
     //                                            ~> DuplicateTask
     fkTaskBufferFlow ~>
       partitionFkTasks

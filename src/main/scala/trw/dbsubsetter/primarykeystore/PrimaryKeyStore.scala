@@ -3,7 +3,7 @@ package trw.dbsubsetter.primarykeystore
 import trw.dbsubsetter.db.Table
 
 trait PrimaryKeyStore {
-  def markSeen(table: Table, primaryKeyValue: Any): Boolean
+  def markSeen(table: Table, primaryKeyValue: Any): WriteOutcome
   def markSeenWithChildren(table: Table, primaryKeyValue: Any): WriteOutcome
   def alreadySeen(table: Table, primaryKeyValue: Any): Boolean
 }

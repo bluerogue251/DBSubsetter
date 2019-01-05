@@ -24,19 +24,30 @@ private[primarykeystore] class InMemoryPrimaryKeyStore(schemaInfo: SchemaInfo) e
   private[this] val seenWithChildrenStorage: Map[Table, mutable.HashSet[Any]] =
     InMemoryPrimaryKeyStore.buildInMemoryStorage(schemaInfo)
 
-  override def markSeen(table: Table, primaryKeyValue: Any): Boolean = {
+  override def markSeen(table: Table, primaryKeyValue: Any): WriteOutcome = {
     val alreadySeenWithChildren: Boolean =
       seenWithChildrenStorage(table).contains(primaryKeyValue)
 
-    if (alreadySeenWithChildren)
-      false
-    else
-      seenWithoutChildrenStorage(table).add(primaryKeyValue)
+    // Purposely lazy -- only do this extra work if logically necessary
+    lazy val alreadySeenWithoutChildren =
+      !seenWithoutChildrenStorage(table).add(primaryKeyValue)
+
+    if (alreadySeenWithChildren) {
+      AlreadySeenWithChildren
+    } else if (alreadySeenWithoutChildren) {
+      AlreadySeenWithoutChildren
+    } else {
+      FirstTimeSeen
+    }
   }
 
   override def markSeenWithChildren(table: Table, primaryKeyValue: Any): WriteOutcome = {
-    val alreadySeenWithChildren: Boolean = !seenWithChildrenStorage(table).add(primaryKeyValue)
-    lazy val alreadySeenWithoutChildren: Boolean = seenWithoutChildrenStorage(table).remove(primaryKeyValue)
+    val alreadySeenWithChildren: Boolean =
+      !seenWithChildrenStorage(table).add(primaryKeyValue)
+
+    // Purposely lazy -- only do this extra work if logically necessary
+    lazy val alreadySeenWithoutChildren: Boolean =
+      seenWithoutChildrenStorage(table).remove(primaryKeyValue)
 
     if (alreadySeenWithChildren)
       AlreadySeenWithChildren
