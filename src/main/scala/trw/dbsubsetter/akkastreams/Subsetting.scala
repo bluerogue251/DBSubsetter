@@ -22,7 +22,7 @@ object Subsetting {
     val balanceOriginDb = b.add(Balance[OriginDbRequest](config.originDbParallelism, waitForAllDownstreams = true))
     val mergeOriginDbResults = b.add(Merge[OriginDbResult](config.originDbParallelism))
     val partitionOriginDbResults = b.add(Partition[OriginDbResult](2, res => if (res.table.storePks) 1 else 0))
-    val partitionFkTasks = b.add(Partition[OriginDbRequest](2, {
+    val partitionFkTasks = b.add(Partition[ForeignKeyTask](2, {
       case t: FetchParentTask if TaskPreCheck.shouldPrecheck(t) => 1
       case _ => 0
     }))
@@ -51,7 +51,8 @@ object Subsetting {
 
     // Origin DB Results ~> PkStoreAdd  ~> |merge| ~> NewTasks
     //                   ~> SkipPkStore ~> |merge| ~> TargetDbInserts
-    mergeOriginDbResults ~> partitionOriginDbResults
+    mergeOriginDbResults ~>
+      partitionOriginDbResults
 
     partitionOriginDbResults.out(0) ~>
       Flow[OriginDbResult].map(SkipPkStore.process) ~>
@@ -61,7 +62,8 @@ object Subsetting {
       Flow[OriginDbResult].mapAsyncUnordered(10)(dbResult => (pkStore ? dbResult).mapTo[PksAdded]) ~>
       mergePksAdded
 
-    mergePksAdded ~> broadcastPksAdded
+    mergePksAdded ~>
+      broadcastPksAdded
 
     broadcastPksAdded ~>
       mergeNewTaskRequests ~>
@@ -73,8 +75,8 @@ object Subsetting {
       Flow[PksAdded].buffer(config.preTargetBufferSize, OverflowStrategy.backpressure) ~>
       balanceTargetDb
 
-    // FkTasks ~> cannotBePrechecked       ~>        OriginDbRequest
-    // FkTasks ~> canBePrechecked ~> PkStoreQuery ~> OriginDbRequest
+    // ForeignKeyTasks ~> cannotBePrechecked       ~>        OriginDbRequest
+    // ForeignKeyTasks ~> canBePrechecked ~> PkStoreQuery ~> OriginDbRequest
     //                                            ~> DuplicateTask
     fkTaskBufferFlow ~>
       partitionFkTasks

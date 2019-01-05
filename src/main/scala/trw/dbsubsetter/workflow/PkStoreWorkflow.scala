@@ -4,6 +4,9 @@ import trw.dbsubsetter.db.{Row, SchemaInfo, Table}
 import trw.dbsubsetter.primarykeystore.{AlreadySeenWithoutChildren, FirstTimeSeen, PrimaryKeyStore, WriteOutcome}
 
 
+/*
+ * TODO consider renaming to "PrimaryKeyAdder" or something of the sort
+ */
 class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
 
   private[this] val functionsToExtractPkValue: Map[Table, Row => Any] =
@@ -11,7 +14,6 @@ class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
 
   def add(req: OriginDbResult): PksAdded = {
     val OriginDbResult(table, rows, viaTableOpt, fetchChildren) = req
-
     val extractPkValue: Row => Any = functionsToExtractPkValue(table)
 
     if (fetchChildren) {

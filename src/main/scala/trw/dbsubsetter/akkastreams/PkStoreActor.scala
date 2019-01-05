@@ -7,8 +7,10 @@ import trw.dbsubsetter.workflow._
 
 // Only accessing the PrimaryKeyStore from inside an actor allows us to not need the PrimaryKeyStore to be threadsafe
 private[this] class PkStoreActor(schemaInfo: SchemaInfo) extends Actor {
+
   private[this] val pkStore: PrimaryKeyStore = PrimaryKeyStoreFactory.getPrimaryKeyStore(schemaInfo)
-  private[this] val pkStoreWorkflow = new PkStoreWorkflow(pkStore)
+
+  private[this] val pkStoreWorkflow = new PkStoreWorkflow(pkStore, schemaInfo)
 
   override def receive: Receive = {
     // If it's a FetchParentTask, then we are being asked to pre-check to make sure we haven't done it already
