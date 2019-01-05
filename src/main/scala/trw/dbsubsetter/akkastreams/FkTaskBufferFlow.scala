@@ -11,10 +11,10 @@ import trw.dbsubsetter.db.{ForeignKey, SchemaInfo}
 import trw.dbsubsetter.workflow._
 
 // Adapted from https://github.com/torodb/akka-chronicle-queue
-class FkTaskBufferFlow(config: Config, sch: SchemaInfo) extends GraphStage[FlowShape[Map[(ForeignKey, Boolean), Array[Any]], FkTask]] {
-  val in: Inlet[Map[(ForeignKey, Boolean), Array[Any]]] = Inlet.create[Map[(ForeignKey, Boolean), Array[Any]]]("FkTaskBufferFlow.in")
+class FkTaskBufferFlow(config: Config, sch: SchemaInfo) extends GraphStage[FlowShape[NewTasks, FkTask]] {
+  val in: Inlet[NewTasks] = Inlet.create[NewTasks]("FkTaskBufferFlow.in")
   val out: Outlet[FkTask] = Outlet.create[FkTask]("FkTaskBufferFlow.out")
-  override val shape: FlowShape[Map[(ForeignKey, Boolean), Array[Any]], FkTask] = FlowShape.of(in, out)
+  override val shape: FlowShape[NewTasks, FkTask] = FlowShape.of(in, out)
 
   override def createLogic(inheritedAttributes: Attributes): GraphStageLogic = new GraphStageLogic(shape) {
     private val storageDir = config.taskQueueDirOpt match {
@@ -31,7 +31,8 @@ class FkTaskBufferFlow(config: Config, sch: SchemaInfo) extends GraphStage[FlowS
 
     setHandler(in, new InHandler {
       override def onPush(): Unit = {
-        val newTaskMap = grab(in)
+        val newTasks: NewTasks = grab(in)
+        val newTaskMap: Map[(ForeignKey, Boolean), Array[Any]] = newTasks.taskInfo
         newTaskMap.foreach { case ((fk, fetchChildren), fkValues) =>
           val writer = if (fetchChildren) childFkWriters(fk.i) else parentFkWriters(fk.i)
           fkValues.foreach { fkValue =>

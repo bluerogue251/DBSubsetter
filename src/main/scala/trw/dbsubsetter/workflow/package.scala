@@ -4,19 +4,20 @@ import trw.dbsubsetter.db._
 
 package object workflow {
 
-  case class FkTask(table: Table, fk: ForeignKey, fkValue: Any, fetchChildren: Boolean) extends OriginDbRequest with PkResult
-
   sealed trait OriginDbRequest
-
+  case class FkTask(table: Table, fk: ForeignKey, fkValue: Any, fetchChildren: Boolean) extends OriginDbRequest
   case class BaseQuery(table: Table, sql: SqlQuery, fetchChildren: Boolean) extends OriginDbRequest
 
   case class OriginDbResult(table: Table, rows: Vector[Row], viaTableOpt: Option[Table], fetchChildren: Boolean)
 
   case class TargetDbInsertResult(table: Table, numRowsInserted: Long)
 
-  sealed trait PkResult
+  case class PksAdded(table: Table, rowsNeedingParentTasks: Vector[Row], rowsNeedingChildTasks: Vector[Row], viaTableOpt: Option[Table])
 
-  case class PksAdded(table: Table, rowsNeedingParentTasks: Vector[Row], rowsNeedingChildTasks: Vector[Row], viaTableOpt: Option[Table]) extends PkResult
+  sealed trait PkQueryResult
+  case object AlreadySeen extends PkQueryResult
+  case class NotAlreadySeen(task: FkTask) extends PkQueryResult
 
-  case object DuplicateTask extends PkResult
+  case class NewTasks(taskInfo: Map[(ForeignKey, Boolean), Array[Any]])
+  val EmptyNewTasks = NewTasks(Map.empty)
 }

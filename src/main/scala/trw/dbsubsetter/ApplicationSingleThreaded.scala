@@ -32,7 +32,7 @@ object ApplicationSingleThreaded {
         val pksAdded = if (dbResult.table.storePks) pkWorkflow.add(dbResult) else SkipPkStore.process(dbResult)
         targetDbWorkflow.process(pksAdded)
         val newTasks = NewFkTaskWorkflow.process(pksAdded, schemaInfo)
-        newTasks.foreach { case ((fk, fetchChildren), fkValues) =>
+        newTasks.taskInfo.foreach { case ((fk, fetchChildren), fkValues) =>
           val tasks = fkValues.map { v =>
             val table = if (fetchChildren) fk.fromTable else fk.toTable
             FkTask(table, fk, v, fetchChildren)
