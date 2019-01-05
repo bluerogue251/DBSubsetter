@@ -3,9 +3,7 @@ package trw.dbsubsetter.workflow
 import trw.dbsubsetter.db.{Row, SchemaInfo, Table}
 import trw.dbsubsetter.primarykeystore.{AlreadySeenWithoutChildren, FirstTimeSeen, PrimaryKeyStore, WriteOutcome}
 
-/*
- * TODO consider renaming to "PrimaryKeyAdder" or something of the sort
- */
+
 class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
 
   private[this] val functionsToExtractPkValue: Map[Table, Row => Any] =
@@ -22,12 +20,8 @@ class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
         outcome -> row
       })
 
-      val emptyMap: Map[WriteOutcome, Vector[Row]] =
-        Map.empty[WriteOutcome, Vector[Row]]
-          .withDefaultValue(Vector.empty[Row])
-
       val outcomeMap: Map[WriteOutcome, Vector[Row]] =
-        outcomes.foldLeft(emptyMap) { case (map, (outcome, row)) =>
+        outcomes.foldLeft(PkStoreWorkflow.EmptyMap) { case (map, (outcome, row)) =>
           map.updated(outcome, map(outcome) :+ row)
         }
 
@@ -37,7 +31,8 @@ class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
       PksAdded(table, parentsNotYetFetched, childrenNotYetFetched, viaTableOpt)
     } else {
       val newRows = rows.filter(row => {
-        pkStore.markSeen(table, extractPkValue(row)) match {
+        val pkValue: Any = extractPkValue(row)
+        pkStore.markSeen(table, pkValue) match {
           case FirstTimeSeen => true
           case _ => false
         }
@@ -48,6 +43,11 @@ class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
 }
 
 private[this] object PkStoreWorkflow {
+
+  private val EmptyMap: Map[WriteOutcome, Vector[Row]] =
+    Map.empty[WriteOutcome, Vector[Row]]
+      .withDefaultValue(Vector.empty[Row])
+
   // Consider putting this logic as a field inside the `Table` class itself
   private def buildFunctionsToExtractPkValue(schemaInfo: SchemaInfo): Map[Table, Row => Any] = {
     schemaInfo.pksByTableOrdered.map { case (table, pkColumns) =>

@@ -19,10 +19,10 @@ private[primarykeystore] class InMemoryPrimaryKeyStore(schemaInfo: SchemaInfo) e
    * `seenWithChildrenStorage` -- it will never be in both at once.
    */
   private[this] val seenWithoutChildrenStorage: Map[Table, mutable.HashSet[Any]] =
-    InMemoryPrimaryKeyStore.buildInMemoryStorage(schemaInfo)
+    InMemoryPrimaryKeyStore.buildStorage(schemaInfo)
 
   private[this] val seenWithChildrenStorage: Map[Table, mutable.HashSet[Any]] =
-    InMemoryPrimaryKeyStore.buildInMemoryStorage(schemaInfo)
+    InMemoryPrimaryKeyStore.buildStorage(schemaInfo)
 
   override def markSeen(table: Table, primaryKeyValue: Any): WriteOutcome = {
     val alreadySeenWithChildren: Boolean =
@@ -64,7 +64,7 @@ private[primarykeystore] class InMemoryPrimaryKeyStore(schemaInfo: SchemaInfo) e
 }
 
 private object InMemoryPrimaryKeyStore {
-  private def buildInMemoryStorage(schemaInfo: SchemaInfo): Map[Table, mutable.HashSet[Any]] = {
+  private def buildStorage(schemaInfo: SchemaInfo): Map[Table, mutable.HashSet[Any]] = {
     val tables: Iterable[Table] = schemaInfo.pksByTableOrdered.keys.filter(_.storePks)
     tables.map { t => t -> mutable.HashSet.empty[Any] }.toMap
   }
