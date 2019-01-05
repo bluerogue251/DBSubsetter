@@ -2,9 +2,9 @@ package trw.dbsubsetter.workflow
 
 import trw.dbsubsetter.db._
 
-class NewFkTasksWorkflow(schemaInfo: SchemaInfo) {
+class FkTaskCreationWorkflow(schemaInfo: SchemaInfo) {
 
-  def process(pksAdded: PksAdded): NewTasks = {
+  def createFkTasks(pksAdded: PksAdded): NewTasks = {
     val PksAdded(table, rowsNeedingParentTasks, rowsNeedingChildTasks, viaTableOpt) = pksAdded
     val parentTasks = calcParentTasks(table, rowsNeedingParentTasks, viaTableOpt)
     val childTasks = calcChildTasks(table, rowsNeedingChildTasks)
@@ -26,7 +26,7 @@ class NewFkTasksWorkflow(schemaInfo: SchemaInfo) {
     val allFks = schemaInfo.fksFromTable(table)
     val useFks = viaTableOpt.fold(allFks)(viaTable => allFks.filterNot(fk => fk.toTable == viaTable))
     val newTasksInfo: Map[(ForeignKey, Boolean), Array[Any]] = useFks.map { fk =>
-      val getFkValue: Row => Any = NewFkTasksWorkflow.buildFunctionToExtractFkValue(fk, fk.toCols)
+      val getFkValue: Row => Any = FkTaskCreationWorkflow.buildFunctionToExtractFkValue(fk, fk.toCols)
       val fkValues: Array[Any] = rows.map(getFkValue).toArray
       val distinctFkValues: Array[Any] = fkValues.distinct.filterNot(_ == null)
       (fk, false) -> distinctFkValues
@@ -36,7 +36,7 @@ class NewFkTasksWorkflow(schemaInfo: SchemaInfo) {
 
   private def calcChildTasks(table: Table, rows: Vector[Row]): NewTasks = {
     val newTasksInfo: Map[(ForeignKey, Boolean), Array[Any]] = schemaInfo.fksToTable(table).map { fk =>
-      val getFkValue: Row => Any = NewFkTasksWorkflow.buildFunctionToExtractFkValue(fk, fk.fromCols)
+      val getFkValue: Row => Any = FkTaskCreationWorkflow.buildFunctionToExtractFkValue(fk, fk.fromCols)
       val fkValues: Array[Any] = rows.map(getFkValue).toArray
       (fk, true) -> fkValues
     }.toMap
@@ -46,7 +46,7 @@ class NewFkTasksWorkflow(schemaInfo: SchemaInfo) {
 
 }
 
-private[this] object NewFkTasksWorkflow {
+private[this] object FkTaskCreationWorkflow {
 
   private def buildFunctionToExtractFkValue(foreignKey: ForeignKey, columns: Vector[Column]): Row => Any = {
     if (foreignKey.isSingleCol) {

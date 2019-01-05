@@ -15,7 +15,7 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 object Subsetting {
-  def source(config: Config, schemaInfo: SchemaInfo, baseQueries: Vector[BaseQuery], pkStore: ActorRef, dbAccessFactory: DbAccessFactory)(implicit ec: ExecutionContext): Source[TargetDbInsertResult, NotUsed] = Source.fromGraph(GraphDSL.create() { implicit b =>
+  def source(config: Config, schemaInfo: SchemaInfo, baseQueries: Vector[BaseQuery], pkStore: ActorRef, dbAccessFactory: DbAccessFactory, fkTaskCreationWorkflow: FkTaskCreationWorkflow)(implicit ec: ExecutionContext): Source[TargetDbInsertResult, NotUsed] = Source.fromGraph(GraphDSL.create() { implicit b =>
     // Infrastructure: Timeouts, Merges, and Broadcasts
     implicit val askTimeout: Timeout = Timeout(48.hours)
     val mergeOriginDbRequests = b.add(Merge[OriginDbRequest](3))
@@ -64,7 +64,7 @@ object Subsetting {
       broadcastPksAdded
 
     broadcastPksAdded ~>
-      NewTasks.flow(new NewFkTasksWorkflow(schemaInfo)) ~>
+      FkTaskCreationFlow.flow(fkTaskCreationWorkflow) ~>
       mergeToOustandingTaskCounter
 
     mergeToOustandingTaskCounter ~>
