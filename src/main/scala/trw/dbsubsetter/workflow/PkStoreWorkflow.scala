@@ -7,7 +7,7 @@ import trw.dbsubsetter.primarykeystore.{AlreadySeenWithoutChildren, FirstTimeSee
 class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
 
   private[this] val pkValueExtractionFunctions: Map[Table, Row => Any] =
-    PkStoreWorkflow.buildPkExtrationFunctions(schemaInfo)
+    PkStoreWorkflow.buildPkValueExtractionFunctions(schemaInfo)
 
   def add(req: OriginDbResult): PksAdded = {
     val OriginDbResult(table, rows, viaTableOpt, fetchChildren) = req
@@ -49,7 +49,7 @@ private[this] object PkStoreWorkflow {
       .withDefaultValue(Vector.empty[Row])
 
   // Consider putting this logic as a field inside the `Table` class itself
-  private def buildPkExtrationFunctions(schemaInfo: SchemaInfo): Map[Table, Row => Any] = {
+  private def buildPkValueExtractionFunctions(schemaInfo: SchemaInfo): Map[Table, Row => Any] = {
     schemaInfo.pksByTableOrdered.map { case (table, pkColumns) =>
         val pkOrdinals: Vector[Int] = pkColumns.map(_.ordinalPosition)
         val isSingleColPk: Boolean = pkOrdinals.lengthCompare(1) == 0
