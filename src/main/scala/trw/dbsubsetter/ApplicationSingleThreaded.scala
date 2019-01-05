@@ -21,26 +21,19 @@ object ApplicationSingleThreaded {
 
     // Run task queue until empty
     while (taskTracker.nonEmpty) {
-      // Get a new task to work on
-      val task: OriginDbRequest = taskTracker.dequeueTask()
-
-      val canSkip: Boolean = task match {
-        case t @ FetchParentTask(foreignKey, value) =>
-          TaskPreCheck.shouldPrecheck(t) && !pkStore.alreadySeen(foreignKey.toTable, value)
-        case _ => false
+      val taskOpt: List[OriginDbRequest] = taskTracker.dequeueTask() match {
+        case t: FkTask if FkTaskPreCheck.shouldPrecheck(t) => List(pkStore.alreadySeen(t)).collect { case t: FkTask => t }
+        case t => List(t)
       }
-
-      // Do the bulk of the actual work for the task
-      if (!canSkip) {
+      taskOpt.foreach { task =>
         val dbResult = originDbWorkflow.process(task)
         val pksAdded = if (dbResult.table.storePks) pkWorkflow.add(dbResult) else SkipPkStore.process(dbResult)
         targetDbWorkflow.process(pksAdded)
         val newTasks = NewFkTaskWorkflow.process(pksAdded, schemaInfo)
-        newTasks.foreach { case ((foreignKey, fetchChildren), fkValues) =>
-          val tasks = if (fetchChildren) {
-            fkValues.map(value => FetchChildrenTask(foreignKey, value))
-          } else {
-            fkValues.map(value => FetchParentTask(foreignKey, value))
+        newTasks.foreach { case ((fk, fetchChildren), fkValues) =>
+          val tasks = fkValues.map { v =>
+            val table = if (fetchChildren) fk.fromTable else fk.toTable
+            FkTask(table, fk, v, fetchChildren)
           }
           taskTracker.enqueueTasks(tasks)
         }
