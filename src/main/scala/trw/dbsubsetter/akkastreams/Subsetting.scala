@@ -48,7 +48,8 @@ object Subsetting {
 
     // Origin DB Results ~> PkStoreAdd  ~> |merge| ~> NewTasks
     //                   ~> SkipPkStore ~> |merge| ~> TargetDbInserts
-    mergeOriginDbResults ~> partitionOriginDbResults
+    mergeOriginDbResults ~>
+      partitionOriginDbResults
 
     partitionOriginDbResults.out(0) ~>
       Flow[OriginDbResult].map(SkipPkStore.process) ~>
@@ -58,7 +59,8 @@ object Subsetting {
       Flow[OriginDbResult].mapAsyncUnordered(10)(dbResult => (pkStore ? dbResult).mapTo[PksAdded]) ~>
       mergePksAdded
 
-    mergePksAdded ~> broadcastPksAdded
+    mergePksAdded ~>
+      broadcastPksAdded
 
     broadcastPksAdded ~>
       mergeNewTaskRequests ~>

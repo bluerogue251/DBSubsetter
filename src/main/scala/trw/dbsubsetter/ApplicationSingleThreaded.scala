@@ -2,6 +2,7 @@ package trw.dbsubsetter
 
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.{DbAccessFactory, SchemaInfo}
+import trw.dbsubsetter.primarykeystore.{PrimaryKeyStore, PrimaryKeyStoreFactory}
 import trw.dbsubsetter.singlethreaded.{TaskTracker, TaskTrackerFactory}
 import trw.dbsubsetter.workflow._
 
@@ -11,7 +12,8 @@ object ApplicationSingleThreaded {
     val dbAccessFactory = new DbAccessFactory(config, schemaInfo)
     val originDbWorkflow = new OriginDbWorkflow(config, schemaInfo, dbAccessFactory)
     val targetDbWorkflow = new TargetDbWorkflow(config, schemaInfo, dbAccessFactory)
-    val pkWorkflow = new PkStoreWorkflow(schemaInfo)
+    val pkStore: PrimaryKeyStore = PrimaryKeyStoreFactory.buildPrimaryKeyStore(schemaInfo)
+    val pkWorkflow: PkStoreWorkflow = new PkStoreWorkflow(pkStore, schemaInfo)
 
     // Set up task queue
     val taskTracker: TaskTracker = TaskTrackerFactory.buildTaskTracker(config)
@@ -19,9 +21,11 @@ object ApplicationSingleThreaded {
 
     // Run task queue until empty
     while (taskTracker.nonEmpty) {
-      val taskOpt: List[OriginDbRequest] = taskTracker.dequeueTask() match {
-        case t: FkTask if FkTaskPreCheck.shouldPrecheck(t) => List(pkWorkflow.exists(t)).collect { case t: FkTask => t }
-        case t => List(t)
+      val taskOpt: Option[OriginDbRequest] = taskTracker.dequeueTask() match {
+        case t: FkTask if FkTaskPreCheck.shouldPrecheck(t) =>
+          if (pkStore.alreadySeen(t.table, t.fkValue)) None else Some(t)
+        case t =>
+          Some(t)
       }
       taskOpt.foreach { task =>
         val dbResult = originDbWorkflow.process(task)

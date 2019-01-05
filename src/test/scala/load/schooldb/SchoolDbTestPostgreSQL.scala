@@ -14,9 +14,9 @@ import scala.sys.process._
 
 class SchoolDbTestPostgreSQL extends AbstractPostgresqlEndToEndTest with LoadTest[PostgreSQLDatabase] with SchoolDbTest {
 
-  override val singleThreadedRuntimeLimitMillis: Long = 220000
+  override val singleThreadedRuntimeLimitMillis: Long = 210000 // 210 seconds
 
-  override val akkaStreamsRuntimeLimitMillis: Long = 25000
+  override val akkaStreamsRuntimeLimitMillis: Long = 25000 // 25 seconds
 
   private lazy val mustReCreateOriginDb: Boolean = !ContainerUtil.exists(containers.origin.name)
 
