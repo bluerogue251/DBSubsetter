@@ -10,10 +10,16 @@ class OriginDbWorkflow(config: Config, schemaInfo: SchemaInfo, dbAccessFactory: 
 
   def process(request: OriginDbRequest): OriginDbResult = {
     val result = request match {
-      case FkTask(table, foreignKey, fkValue, fetchChildren) =>
-        val rows = dbAccess.getRowsFromTemplate(foreignKey, table, fkValue)
-        val viaTableOpt = if (fetchChildren) Some(foreignKey.toTable) else None
-        OriginDbResult(table, rows, viaTableOpt, fetchChildren)
+      case FetchParentTask(foreignKey, value) =>
+        val table = foreignKey.toTable
+        val rows = dbAccess.getRowsFromTemplate(foreignKey, table, value)
+        val viaTableOpt = None
+        OriginDbResult(table, rows, viaTableOpt, fetchChildren = false)
+      case FetchChildrenTask(foreignKey, value) =>
+        val table = foreignKey.fromTable
+        val rows = dbAccess.getRowsFromTemplate(foreignKey, table, value)
+        val viaTableOpt = Some(table)
+        OriginDbResult(table, rows, viaTableOpt, fetchChildren = true)
       case BaseQuery(table, sql, fetchChildren) =>
         val rows = dbAccess.getRows(sql, table)
         OriginDbResult(table, rows, None, fetchChildren)
