@@ -6,16 +6,16 @@ import trw.dbsubsetter.primarykeystore.{AlreadySeenWithoutChildren, FirstTimeSee
 
 class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
 
-  private[this] val functionsToExtractPkValue: Map[Table, Row => Any] =
-    PkStoreWorkflow.buildFunctionsToExtractPkValue(schemaInfo)
+  private[this] val pkValueExtractionFunctions: Map[Table, Row => Any] =
+    PkStoreWorkflow.buildPkExtrationFunctions(schemaInfo)
 
   def add(req: OriginDbResult): PksAdded = {
     val OriginDbResult(table, rows, viaTableOpt, fetchChildren) = req
-    val extractPkValue: Row => Any = functionsToExtractPkValue(table)
+    val pkValueExtractionFunction: Row => Any = pkValueExtractionFunctions(table)
 
     if (fetchChildren) {
       val outcomes: Vector[(WriteOutcome, Row)] = rows.map(row => {
-        val pkValue: Any = extractPkValue(row)
+        val pkValue: Any = pkValueExtractionFunction(row)
         val outcome: WriteOutcome = pkStore.markSeenWithChildren(table, pkValue)
         outcome -> row
       })
@@ -31,7 +31,7 @@ class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
       PksAdded(table, parentsNotYetFetched, childrenNotYetFetched, viaTableOpt)
     } else {
       val newRows = rows.filter(row => {
-        val pkValue: Any = extractPkValue(row)
+        val pkValue: Any = pkValueExtractionFunction(row)
         pkStore.markSeen(table, pkValue) match {
           case FirstTimeSeen => true
           case _ => false
@@ -49,7 +49,7 @@ private[this] object PkStoreWorkflow {
       .withDefaultValue(Vector.empty[Row])
 
   // Consider putting this logic as a field inside the `Table` class itself
-  private def buildFunctionsToExtractPkValue(schemaInfo: SchemaInfo): Map[Table, Row => Any] = {
+  private def buildPkExtrationFunctions(schemaInfo: SchemaInfo): Map[Table, Row => Any] = {
     schemaInfo.pksByTableOrdered.map { case (table, pkColumns) =>
         val pkOrdinals: Vector[Int] = pkColumns.map(_.ordinalPosition)
         val isSingleColPk: Boolean = pkOrdinals.lengthCompare(1) == 0
