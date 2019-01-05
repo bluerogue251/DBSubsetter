@@ -13,7 +13,7 @@ object ApplicationSingleThreaded {
     val originDbWorkflow = new OriginDbWorkflow(config, schemaInfo, dbAccessFactory)
     val targetDbWorkflow = new TargetDbWorkflow(config, schemaInfo, dbAccessFactory)
     val pkStore: PrimaryKeyStore = PrimaryKeyStoreFactory.getPrimaryKeyStore(schemaInfo)
-    val pkWorkflow: PkStoreWorkflow = new PkStoreWorkflow(pkStore)
+    val pkWorkflow: PkStoreWorkflow = new PkStoreWorkflow(pkStore, schemaInfo)
 
     // Set up task queue
     val taskTracker: TaskTracker = TaskTrackerFactory.buildTaskTracker(config)
@@ -24,11 +24,6 @@ object ApplicationSingleThreaded {
       // Get a new task to work on
       val task: OriginDbRequest = taskTracker.dequeueTask()
 
-      // Check if we can skip this task since we've already seen this row already (if applicable)
-      // TODO -- think about and write comment about why this only applies to `FetchParentTask` and not `FetchChildrenTask`
-      // Maybe there _is_ a use case for checking for a `FetchChildrenTask` --> if it's a one-to-one relationship and the child table shares the same PK value
-      // with the parent table, it seems in that case it might work to do a Precheck? (In most cases, the child table's value will _not_ be it's PK, so in most
-      // cases the PKStore can't help us... but in the one-to-one case where the child column happens to be its PrimaryKey, it might work
       val canSkip: Boolean = task match {
         case t @ FetchParentTask(foreignKey, value) =>
           TaskPreCheck.shouldPrecheck(t) && !pkStore.alreadySeen(foreignKey.toTable, value)

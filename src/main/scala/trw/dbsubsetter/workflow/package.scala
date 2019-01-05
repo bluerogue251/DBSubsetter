@@ -6,11 +6,11 @@ package object workflow {
 
   sealed trait OriginDbRequest
 
-  sealed trait ForeignKeyTask extends PkResult
+  sealed trait ForeignKeyTask
 
   case class BaseQuery(table: Table, sql: SqlQuery, fetchChildren: Boolean) extends OriginDbRequest
 
-  case class FetchParentTask(foreignKey: ForeignKey, value: Any) extends OriginDbRequest with ForeignKeyTask
+  case class FetchParentTask(foreignKey: ForeignKey, value: Any) extends OriginDbRequest with ForeignKeyTask with PkResult
 
   case class FetchChildrenTask(foreignKey: ForeignKey, value: Any) extends OriginDbRequest with ForeignKeyTask
 

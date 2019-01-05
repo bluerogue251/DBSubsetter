@@ -4,7 +4,7 @@ import akka.Done
 import akka.actor.{ActorRef, ActorSystem}
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
-import trw.dbsubsetter.akkastreams.{PkStore, Subsetting}
+import trw.dbsubsetter.akkastreams.{PkStoreActor, Subsetting}
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.{DbAccessFactory, SchemaInfo}
 import trw.dbsubsetter.workflow._
@@ -17,7 +17,7 @@ object ApplicationAkkaStreams {
     implicit val materializer: ActorMaterializer = ActorMaterializer()
     implicit val ec: ExecutionContext = system.dispatcher
 
-    val pkStore: ActorRef = system.actorOf(PkStore.props(schemaInfo))
+    val pkStore: ActorRef = system.actorOf(PkStoreActor.props(schemaInfo))
     val dbAccessFactory: DbAccessFactory = new DbAccessFactory(config, schemaInfo)
 
     Subsetting

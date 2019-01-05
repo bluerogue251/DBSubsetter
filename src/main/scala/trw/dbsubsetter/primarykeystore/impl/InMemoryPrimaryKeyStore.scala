@@ -1,7 +1,7 @@
 package trw.dbsubsetter.primarykeystore.impl
 
 import trw.dbsubsetter.db.{SchemaInfo, Table}
-import trw.dbsubsetter.primarykeystore.PrimaryKeyStore
+import trw.dbsubsetter.primarykeystore._
 
 import scala.collection.mutable
 
@@ -31,9 +31,16 @@ private[primarykeystore] class InMemoryPrimaryKeyStore(schemaInfo: SchemaInfo) e
       seenWithoutChildrenStorage(table).add(primaryKeyValue)
   }
 
-  override def markSeenWithChildren(table: Table, primaryKeyValue: Any): Boolean = {
-    seenWithoutChildrenStorage(table).remove(primaryKeyValue)
-    !seenWithChildrenStorage(table).add(primaryKeyValue)
+  override def markSeenWithChildren(table: Table, primaryKeyValue: Any): WriteOutcome = {
+    val alreadySeenWithChildren: Boolean = !seenWithChildrenStorage(table).add(primaryKeyValue)
+    lazy val alreadySeenWithoutChildren: Boolean = seenWithoutChildrenStorage(table).remove(primaryKeyValue)
+
+    if (alreadySeenWithChildren)
+      AlreadySeenWithChildren
+    else if (alreadySeenWithoutChildren)
+      AlreadySeenWithoutChildren
+    else
+      FirstTimeSeen
   }
 
   override def alreadySeen(table: Table, primaryKeyValue: Any): Boolean = {
