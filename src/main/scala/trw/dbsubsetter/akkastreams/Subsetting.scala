@@ -84,9 +84,9 @@ object Subsetting {
     partitionFkTasks.out(0) ~>
       mergeOriginDbRequests
 
-    // TODO make Flow[OriginDbRequest] more type specific -- it could actually be Flow[FetchParentTask]
+    // TODO make Flow[ForeignKeyTask] more type specific -- it could actually be Flow[FetchParentTask]
     partitionFkTasks.out(1) ~>
-      Flow[OriginDbRequest].mapAsyncUnordered(10)(req => (pkStore ? req).mapTo[PkResult]) ~>
+      Flow[ForeignKeyTask].mapAsyncUnordered(10)(req => (pkStore ? req).mapTo[PkResult]) ~>
       broadcastPkExistResult
 
     broadcastPkExistResult ~>

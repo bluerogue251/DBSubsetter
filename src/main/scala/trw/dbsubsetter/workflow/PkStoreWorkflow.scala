@@ -3,7 +3,6 @@ package trw.dbsubsetter.workflow
 import trw.dbsubsetter.db.{Row, SchemaInfo, Table}
 import trw.dbsubsetter.primarykeystore.{AlreadySeenWithoutChildren, FirstTimeSeen, PrimaryKeyStore, WriteOutcome}
 
-
 /*
  * TODO consider renaming to "PrimaryKeyAdder" or something of the sort
  */
@@ -24,7 +23,8 @@ class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
       })
 
       val emptyMap: Map[WriteOutcome, Vector[Row]] =
-        Map.empty[WriteOutcome, Vector[Row]].withDefaultValue(Vector.empty[Row])
+        Map.empty[WriteOutcome, Vector[Row]]
+          .withDefaultValue(Vector.empty[Row])
 
       val outcomeMap: Map[WriteOutcome, Vector[Row]] =
         outcomes.foldLeft(emptyMap) { case (map, (outcome, row)) =>

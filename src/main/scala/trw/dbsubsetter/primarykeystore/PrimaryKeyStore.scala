@@ -6,7 +6,6 @@ trait PrimaryKeyStore {
   def markSeen(table: Table, primaryKeyValue: Any): Boolean
   def markSeenWithChildren(table: Table, primaryKeyValue: Any): WriteOutcome
   def alreadySeen(table: Table, primaryKeyValue: Any): Boolean
-  def alreadySeenWithChildren(table: Table, primaryKeyValue: Any): Boolean
 }
 
 sealed trait WriteOutcome
