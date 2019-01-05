@@ -39,4 +39,26 @@ class PkStoreWorkflowTest extends FunSuite {
     // (This query only returns info about having fetched parent records, but it should remain true even though the last thing we did was fetch children)
     assert(pkStore.alreadySeen(table, fkValue) === true)
   }
+
+  test("PkStoreWorkflow is conscious of fetchChildren part2") {
+    val table = Table("public", "users", hasSqlServerAutoIncrement = true, storePks = true)
+    val primaryKeyColumn = Column(table, null, 0, null, null)
+    val schemaInfo: SchemaInfo = SchemaInfo(Map.empty, Map.empty, Map(table -> Vector(primaryKeyColumn)), Array.empty, Map.empty, Map.empty, null)
+    val pkStore: PrimaryKeyStore = PrimaryKeyStoreFactory.buildPrimaryKeyStore(schemaInfo)
+    val pkStoreWorkflow: PkStoreWorkflow = new PkStoreWorkflow(pkStore, schemaInfo)
+    val fkValue: String = "fkValue"
+    val row: Row = Array(fkValue)
+    val rows: Vector[Row] = Vector(row)
+
+    // Add the PK to the pkStore, noting that we have NOT yet fetched children
+    val pkAddRequest1 = OriginDbResult(table, rows, None, fetchChildren = true)
+    val actual = pkStoreWorkflow.add(pkAddRequest1)
+    val expected: PksAdded = PksAdded(
+      table = table,
+      rowsNeedingParentTasks = rows,
+      rowsNeedingChildTasks = rows,
+      viaTableOpt = None
+    )
+    assert(actual === expected)
+  }
 }

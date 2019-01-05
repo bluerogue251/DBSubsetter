@@ -32,7 +32,7 @@ class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
         }
 
       val parentsNotYetFetched: Vector[Row] = outcomeMap(FirstTimeSeen)
-      val childrenNotYetFetched: Vector[Row] = outcomeMap(AlreadySeenWithoutChildren)
+      val childrenNotYetFetched: Vector[Row] = parentsNotYetFetched ++ outcomeMap(AlreadySeenWithoutChildren)
 
       PksAdded(table, parentsNotYetFetched, childrenNotYetFetched, viaTableOpt)
     } else {
