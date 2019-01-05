@@ -14,6 +14,7 @@ object ApplicationSingleThreaded {
     val targetDbWorkflow = new TargetDbWorkflow(config, schemaInfo, dbAccessFactory)
     val pkStore: PrimaryKeyStore = PrimaryKeyStoreFactory.buildPrimaryKeyStore(schemaInfo)
     val pkWorkflow: PkStoreWorkflow = new PkStoreWorkflow(pkStore, schemaInfo)
+    val fkTaskCreationWorkflow: FkTaskCreationWorkflow = new FkTaskCreationWorkflow(schemaInfo)
 
     // Set up task queue
     val taskTracker: TaskTracker = TaskTrackerFactory.buildTaskTracker(config)
@@ -31,7 +32,7 @@ object ApplicationSingleThreaded {
         val dbResult = originDbWorkflow.process(task)
         val pksAdded = if (dbResult.table.storePks) pkWorkflow.add(dbResult) else SkipPkStore.process(dbResult)
         targetDbWorkflow.process(pksAdded)
-        val newTasks = NewFkTaskWorkflow.process(pksAdded, schemaInfo)
+        val newTasks = fkTaskCreationWorkflow.createFkTasks(pksAdded)
         newTasks.taskInfo.foreach { case ((fk, fetchChildren), fkValues) =>
           val tasks = fkValues.map { v =>
             val table = if (fetchChildren) fk.fromTable else fk.toTable

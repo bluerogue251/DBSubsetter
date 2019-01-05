@@ -19,9 +19,10 @@ object ApplicationAkkaStreams {
 
     val pkStore: ActorRef = system.actorOf(PkStoreActor.props(schemaInfo))
     val dbAccessFactory: DbAccessFactory = new DbAccessFactory(config, schemaInfo)
+    val fkTaskCreationWorkflow: FkTaskCreationWorkflow = new FkTaskCreationWorkflow(schemaInfo)
 
     Subsetting
-      .source(config, schemaInfo, baseQueries, pkStore, dbAccessFactory)
+      .source(config, schemaInfo, baseQueries, pkStore, dbAccessFactory, fkTaskCreationWorkflow)
       .runWith(Sink.ignore)
       .map { success =>
         dbAccessFactory.closeAllConnections()
