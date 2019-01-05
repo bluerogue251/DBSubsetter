@@ -92,8 +92,7 @@ object Subsetting {
       mergeOriginDbRequests
 
     broadcastPkExistResult ~>
-      Flow[PkQueryResult].collect { case AlreadySeen => AlreadySeen } ~>
-      Flow[PkQueryResult].map(_ => EmptyNewTasks) ~>     // TODO make type more specific
+      Flow[PkQueryResult].collect { case AlreadySeen => EmptyNewTasks } ~>
       mergeToOustandingTaskCounter
 
     SourceShape(mergeTargetDbResults.out)
