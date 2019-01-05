@@ -10,7 +10,7 @@ class PkStoreWorkflowTest extends FunSuite {
     val table = Table("public", "users", hasSqlServerAutoIncrement = true, storePks = true)
     val pkCol = Column(table, null, 0, null, null)
     val schemaInfo = SchemaInfo(Map.empty, Map.empty, Map(table -> Vector(pkCol)), Array.empty, Map.empty, Map.empty, null)
-    val pkStore: PrimaryKeyStore = PrimaryKeyStoreFactory.getPrimaryKeyStore(schemaInfo)
+    val pkStore: PrimaryKeyStore = PrimaryKeyStoreFactory.buildPrimaryKeyStore(schemaInfo)
     val pkStoreWorkflow = new PkStoreWorkflow(pkStore, schemaInfo)
     val fkValue = "fkValue"
     val row: Row = Array(fkValue)

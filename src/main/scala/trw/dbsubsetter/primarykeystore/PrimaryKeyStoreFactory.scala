@@ -3,17 +3,12 @@ package trw.dbsubsetter.primarykeystore
 import trw.dbsubsetter.db.SchemaInfo
 import trw.dbsubsetter.primarykeystore.impl.InMemoryPrimaryKeyStore
 
-/*
- * Will this being a singleton mess up e2e test suite where multiple subsets happen in the same process?
- */
 object PrimaryKeyStoreFactory {
 
-  private[this] var lazyPrimaryKeyStoreSingleton: PrimaryKeyStore = _
-
-  def getPrimaryKeyStore(schemaInfo: SchemaInfo): PrimaryKeyStore = {
-    if (lazyPrimaryKeyStoreSingleton == null) {
-      lazyPrimaryKeyStoreSingleton = new InMemoryPrimaryKeyStore(schemaInfo)
-    }
-    lazyPrimaryKeyStoreSingleton
+  /*
+   * Only call this once per subset (it needs to be a singleton per subsetting run because it holds state)
+   */
+  def buildPrimaryKeyStore(schemaInfo: SchemaInfo): PrimaryKeyStore = {
+    new InMemoryPrimaryKeyStore(schemaInfo)
   }
 }
