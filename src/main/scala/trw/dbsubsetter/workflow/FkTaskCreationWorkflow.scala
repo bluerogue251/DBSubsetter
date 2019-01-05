@@ -28,7 +28,7 @@ class FkTaskCreationWorkflow(schemaInfo: SchemaInfo) {
     val allFks = schemaInfo.fksFromTable(table)
     val useFks = viaTableOpt.fold(allFks)(viaTable => allFks.filterNot(fk => fk.toTable == viaTable))
     val newTasksInfo: Map[(ForeignKey, Boolean), Array[Any]] = useFks.map { fk =>
-      val getFkValue: Row => Any = FkTaskCreationWorkflow.fkValueExtractionFunction(fk, fk.fromCols)
+      val getFkValue: Row => Any = FkTaskCreationWorkflow.fkValueExtractionFunction(fk.fromCols)
       val fkValues: Array[Any] = rows.map(getFkValue).toArray
       val distinctFkValues: Array[Any] = fkValues.distinct.filterNot(_ == null)
       (fk, false) -> distinctFkValues
@@ -38,7 +38,7 @@ class FkTaskCreationWorkflow(schemaInfo: SchemaInfo) {
 
   private def calcChildTasks(table: Table, rows: Vector[Row]): NewTasks = {
     val newTasksInfo: Map[(ForeignKey, Boolean), Array[Any]] = schemaInfo.fksToTable(table).map { fk =>
-      val getFkValue: Row => Any = FkTaskCreationWorkflow.fkValueExtractionFunction(fk, fk.toCols)
+      val getFkValue: Row => Any = FkTaskCreationWorkflow.fkValueExtractionFunction(fk.toCols)
       val fkValues: Array[Any] = rows.map(getFkValue).toArray
       (fk, true) -> fkValues
     }.toMap
@@ -56,15 +56,15 @@ private[this] object FkTaskCreationWorkflow {
    * need to create the class, it would be called `TargetColumns` or something, representing the columns pointed
    * to from a foreign key)
    */
-  private def fkValueExtractionFunction(columns: IndexedSeq[Column]): Row => Any = {
-    val isSingleColumnForeignKey: Boolean = columns.length == 1
+  private def fkValueExtractionFunction(foreignKeyColumns: IndexedSeq[Column]): Row => Any = {
+    val isSingleColumnForeignKey: Boolean = foreignKeyColumns.length == 1
 
     if (isSingleColumnForeignKey) {
-      val ordinalPosition = columns.head.ordinalPosition
+      val ordinalPosition = foreignKeyColumns.head.ordinalPosition
       val function: Row => Any = row => row(ordinalPosition)
       function
     } else {
-      val ordinalPositions = columns.map(_.ordinalPosition)
+      val ordinalPositions = foreignKeyColumns.map(_.ordinalPosition)
       val function: Row => Array[Any] = row => ordinalPositions.map(row).toArray
       function
     }
