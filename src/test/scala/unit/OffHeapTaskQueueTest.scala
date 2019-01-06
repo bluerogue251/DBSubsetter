@@ -8,7 +8,15 @@ import trw.dbsubsetter.db.{Column, ForeignKey, SchemaInfo, Table}
 import trw.dbsubsetter.workflow.offheap.OffHeapFkTaskQueueFactory
 import trw.dbsubsetter.workflow.{FkTask, NewTasks}
 
-
+/*
+ * TODO add more test cases covering various combinations of:
+ *   - DB Vendors
+ *   - foreignKeyValue types (int, bigint, varchar, uuid, etc)
+ *   - Single-col foreign keys, multi-col foreign keys
+ *   - Schemas with just one table (self-referential foreign key)
+ *   - Schemas with multiple foreign keys
+ *   - etc.
+ */
 class OffHeapTaskQueueTest extends FunSuite {
 
   test("OffHeapTaskQueue returns an Option#None with no exception thrown when there is no data to read") {
