@@ -11,7 +11,7 @@ private[taskqueue] class TaskQueueImpl extends TaskQueue {
 
   override def nonEmpty: Boolean = queue.nonEmpty
 
-  override def enqueueTasks(tasks: IndexedSeq[OriginDbRequest]): Unit = queue.enqueue(tasks:_*)
+  override def enqueue(tasks: IndexedSeq[OriginDbRequest]): Unit = queue.enqueue(tasks:_*)
 
-  override def dequeueTask(): OriginDbRequest = queue.dequeue()
+  override def dequeue(): OriginDbRequest = queue.dequeue()
 }
