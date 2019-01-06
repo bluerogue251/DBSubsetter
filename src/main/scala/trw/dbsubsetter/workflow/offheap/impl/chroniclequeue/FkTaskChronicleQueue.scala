@@ -12,14 +12,15 @@ import trw.dbsubsetter.workflow.{FkTask, NewTasks}
 private[offheap] class FkTaskChronicleQueue(config: Config, schemaInfo: SchemaInfo) extends OffHeapFkTaskQueue {
 
   private[this] val storageDir = config.taskQueueDirOpt match {
-    case None => Files.createTempDirectory("DBSubsetter-")
     case Some(dir) => dir.toPath
+    case None => Files.createTempDirectory("DBSubsetter-")
   }
 
   private[this] val queue =
     SingleChronicleQueueBuilder
       .binary(storageDir)
-      .rollCycle(RollCycles.MINUTELY).build()
+      .rollCycle(RollCycles.MINUTELY)
+      .build()
 
   private[this] val appender =
     queue.acquireAppender()
