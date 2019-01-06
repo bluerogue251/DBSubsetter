@@ -9,6 +9,7 @@ import trw.dbsubsetter.db.{ForeignKey, SchemaInfo}
 import trw.dbsubsetter.workflow.offheap.OffHeapFkTaskQueue
 import trw.dbsubsetter.workflow.{FkTask, NewTasks}
 
+
 private[offheap] class FkTaskChronicleQueue(config: Config, schemaInfo: SchemaInfo) extends OffHeapFkTaskQueue {
 
   private[this] val storageDir = config.taskQueueDirOpt match {
@@ -50,10 +51,14 @@ private[offheap] class FkTaskChronicleQueue(config: Config, schemaInfo: SchemaIn
     }
   }
 
-  override def dequeue(): FkTask = {
+  override def dequeue(): Option[FkTask] = {
     var task: FkTask = null
 
-    val wasReadSuccessful: Boolean = tailer.readDocument { r =>
+    /*
+     * `tailer.readDocument` can early return `false` if there is no new data on-disk to read.
+     * In this case, `var task` stays `null` and we therefore return a `Option#None` from this method.
+     */
+    tailer.readDocument { r =>
       val in = r.getValueIn
       val fetchChildren = in.bool()
       val fkOrdinal = in.int16()
@@ -63,8 +68,7 @@ private[offheap] class FkTaskChronicleQueue(config: Config, schemaInfo: SchemaIn
       val table = if (fetchChildren) fk.fromTable else fk.toTable
       task = FkTask(table, fk, fkValue, fetchChildren)
     }
-    assert(wasReadSuccessful, "Reading from ChronicleQueue failed")
 
-    task
+    Option(task)
   }
 }

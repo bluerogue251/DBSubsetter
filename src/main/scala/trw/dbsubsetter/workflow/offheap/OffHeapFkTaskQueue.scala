@@ -4,5 +4,5 @@ import trw.dbsubsetter.workflow.{FkTask, NewTasks}
 
 trait OffHeapFkTaskQueue {
   def enqueue(rawTasks: NewTasks): Unit
-  def dequeue(): FkTask
+  def dequeue(): Option[FkTask]
 }

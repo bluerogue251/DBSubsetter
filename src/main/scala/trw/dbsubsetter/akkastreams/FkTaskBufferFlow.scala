@@ -39,8 +39,8 @@ class FkTaskBufferFlow(config: Config, schemaInfo: SchemaInfo) extends GraphStag
     }
 
     private[this] def doPull(): Unit = {
-      val task: FkTask = offHeapFkTaskQueue.dequeue()
-      push[FkTask](out, task)
+      val optionalTask: Option[FkTask] = offHeapFkTaskQueue.dequeue()
+      optionalTask.foreach(task => push[FkTask](out, task))
     }
   }
 }
