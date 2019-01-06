@@ -4,6 +4,7 @@ import java.nio.file.Files
 
 import net.openhft.chronicle.queue.RollCycles
 import net.openhft.chronicle.queue.impl.single.SingleChronicleQueueBuilder
+import net.openhft.chronicle.wire.WriteMarshallable
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.{ForeignKey, SchemaInfo}
 import trw.dbsubsetter.workflow.offheap.OffHeapFkTaskQueue
@@ -46,7 +47,8 @@ private[offheap] class FkTaskChronicleQueue(config: Config, schemaInfo: SchemaIn
     newTaskMap.foreach { case ((fk, fetchChildren), fkValues) =>
       val writer = if (fetchChildren) childFkWriters(fk.i) else parentFkWriters(fk.i)
       fkValues.foreach { fkValue =>
-        appender.writeDocument(writer.writeHandler(fetchChildren, fkValue))
+        val writeMarshallable: WriteMarshallable = writer.writeHandler(fetchChildren, fkValue)
+        appender.writeDocument(writeMarshallable)
       }
     }
   }

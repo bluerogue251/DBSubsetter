@@ -38,9 +38,9 @@ private[offheap] class TaskQueueReader(typeList: Seq[(JDBCType, TypeName)], dbVe
     val headFunc: ValueIn => Any = funcs.head
 
     if (typeList.lengthCompare(1) == 0) {
-      (in: ValueIn) => headFunc(in)
+      in: ValueIn => headFunc(in)
     } else {
-      (in: ValueIn) => funcs.toArray.map(f => f(in))
+      in: ValueIn => funcs.toArray.map(f => f(in))
     }
   }
 }
