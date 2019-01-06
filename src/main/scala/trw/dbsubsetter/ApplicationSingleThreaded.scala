@@ -3,7 +3,7 @@ package trw.dbsubsetter
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.{DbAccessFactory, SchemaInfo}
 import trw.dbsubsetter.primarykeystore.{PrimaryKeyStore, PrimaryKeyStoreFactory}
-import trw.dbsubsetter.singlethreaded.{TaskTracker, TaskTrackerFactory}
+import trw.dbsubsetter.taskqueue.{TaskQueue, TaskQueueFactory}
 import trw.dbsubsetter.workflow._
 
 object ApplicationSingleThreaded {
@@ -17,12 +17,12 @@ object ApplicationSingleThreaded {
     val fkTaskCreationWorkflow: FkTaskCreationWorkflow = new FkTaskCreationWorkflow(schemaInfo)
 
     // Set up task queue
-    val taskTracker: TaskTracker = TaskTrackerFactory.buildTaskTracker(config)
-    taskTracker.enqueueTasks(baseQueries)
+    val taskQueue: TaskQueue = TaskQueueFactory.buildTaskQueue(config)
+    taskQueue.enqueue(baseQueries)
 
     // Run task queue until empty
-    while (taskTracker.nonEmpty) {
-      val taskOpt: Option[OriginDbRequest] = taskTracker.dequeueTask() match {
+    while (taskQueue.nonEmpty) {
+      val taskOpt: Option[OriginDbRequest] = taskQueue.dequeue() match {
         case t: FkTask if FkTaskPreCheck.shouldPrecheck(t) =>
           if (pkStore.alreadySeen(t.table, t.fkValue)) None else Some(t)
         case t =>
@@ -38,7 +38,7 @@ object ApplicationSingleThreaded {
             val table = if (fetchChildren) fk.fromTable else fk.toTable
             FkTask(table, fk, v, fetchChildren)
           }
-          taskTracker.enqueueTasks(tasks)
+          taskQueue.enqueue(tasks)
         }
       }
     }
