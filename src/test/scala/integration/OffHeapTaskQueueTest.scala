@@ -5,8 +5,8 @@ import java.sql.JDBCType
 import org.scalatest.FunSuite
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.{Column, ForeignKey, SchemaInfo, Table}
-import trw.dbsubsetter.workflow.NewTasks
 import trw.dbsubsetter.workflow.offheap.OffHeapFkTaskQueueFactory
+import trw.dbsubsetter.workflow.{FetchParentTask, NewTasks}
 
 /*
  * TODO add more test cases covering various combinations of:
@@ -42,17 +42,16 @@ class OffHeapTaskQueueTest extends FunSuite {
       Map((OffHeapTaskQueueTest.foreignKey, false) -> Array[Any](fkValue1, fkValue2, fkValue3))
 
     queue.enqueue(NewTasks(rawTaskInfo))
-    val baseTask: FkTask = FkTask(
-      table = OffHeapTaskQueueTest.parentTable,
+    val baseTask: FetchParentTask = FetchParentTask(
+      parentTable = OffHeapTaskQueueTest.parentTable,
       fk = OffHeapTaskQueueTest.foreignKey,
-      fkValue = "placeholder",
-      fetchChildren = false
+      fkValueFromChild = "placeholder",
     )
 
     // Dequeue the three FkTasks
-    assert(queue.dequeue() === Some(baseTask.copy(fkValue = 7)))
-    assert(queue.dequeue() === Some(baseTask.copy(fkValue = 10)))
-    assert(queue.dequeue() === Some(baseTask.copy(fkValue = 23)))
+    assert(queue.dequeue() === Some(baseTask.copy(fkValueFromChild = 7)))
+    assert(queue.dequeue() === Some(baseTask.copy(fkValueFromChild = 10)))
+    assert(queue.dequeue() === Some(baseTask.copy(fkValueFromChild = 23)))
     // All the data has been drained from the queue -- now we get `None`
     assert(queue.dequeue() === None)
   }
