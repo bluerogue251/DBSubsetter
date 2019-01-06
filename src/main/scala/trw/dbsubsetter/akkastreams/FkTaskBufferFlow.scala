@@ -8,13 +8,13 @@ import trw.dbsubsetter.workflow._
 import trw.dbsubsetter.workflow.offheap.OffHeapFkTaskQueueFactory
 
 // Adapted from https://github.com/torodb/akka-chronicle-queue
-class FkTaskBufferFlow(config: Config, schemaInfo: SchemaInfo) extends GraphStage[FlowShape[NewTasks, FkTask]] {
+class FkTaskBufferFlow(config: Config, schemaInfo: SchemaInfo) extends GraphStage[FlowShape[NewTasks, ForeignKeyTask]] {
 
   private[this] val in: Inlet[NewTasks] = Inlet.create[NewTasks]("FkTaskBufferFlow.in")
 
-  private[this] val out: Outlet[FkTask] = Outlet.create[FkTask]("FkTaskBufferFlow.out")
+  private[this] val out: Outlet[ForeignKeyTask] = Outlet.create[ForeignKeyTask]("FkTaskBufferFlow.out")
 
-  override val shape: FlowShape[NewTasks, FkTask] = FlowShape.of(in, out)
+  override val shape: FlowShape[NewTasks, ForeignKeyTask] = FlowShape.of(in, out)
 
   override def createLogic(inheritedAttributes: Attributes): GraphStageLogic = new GraphStageLogic(shape) {
 
@@ -39,8 +39,8 @@ class FkTaskBufferFlow(config: Config, schemaInfo: SchemaInfo) extends GraphStag
     }
 
     private[this] def doPull(): Unit = {
-      val optionalTask: Option[FkTask] = offHeapFkTaskQueue.dequeue()
-      optionalTask.foreach(task => push[FkTask](out, task))
+      val optionalTask: Option[ForeignKeyTask] = offHeapFkTaskQueue.dequeue()
+      optionalTask.foreach(task => push[ForeignKeyTask](out, task))
     }
   }
 }

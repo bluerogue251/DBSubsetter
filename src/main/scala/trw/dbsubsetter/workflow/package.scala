@@ -5,8 +5,12 @@ import trw.dbsubsetter.db._
 package object workflow {
 
   sealed trait OriginDbRequest
-  case class FkTask(table: Table, fk: ForeignKey, fkValue: Any, fetchChildren: Boolean) extends OriginDbRequest
+
   case class BaseQuery(table: Table, sql: SqlQuery, fetchChildren: Boolean) extends OriginDbRequest
+
+  sealed trait ForeignKeyTask extends OriginDbRequest
+  case class FetchParentTask(parentTable: Table, fk: ForeignKey, fkValueFromChild: Any) extends ForeignKeyTask
+  case class FetchChildrenTask(childTable: Table, viaParentTable: Table, fk: ForeignKey, fkValueFromParent: Any) extends ForeignKeyTask
 
   case class OriginDbResult(table: Table, rows: Vector[Row], viaTableOpt: Option[Table], fetchChildren: Boolean)
 
@@ -16,7 +20,7 @@ package object workflow {
 
   sealed trait PkQueryResult
   case object AlreadySeen extends PkQueryResult
-  case class NotAlreadySeen(task: FkTask) extends PkQueryResult
+  case class NotAlreadySeen(task: FetchParentTask) extends PkQueryResult
 
   // Consider Array vs. Vector type
   case class NewTasks(taskInfo: Map[(ForeignKey, Boolean), Array[Any]])

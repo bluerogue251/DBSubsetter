@@ -8,7 +8,7 @@ import net.openhft.chronicle.wire.WriteMarshallable
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.{ForeignKey, SchemaInfo}
 import trw.dbsubsetter.workflow.offheap.OffHeapFkTaskQueue
-import trw.dbsubsetter.workflow.{FkTask, NewTasks}
+import trw.dbsubsetter.workflow.{ForeignKeyTask, NewTasks, RawTaskToForeignKeyTaskMapper}
 
 
 private[offheap] class ChronicleQueueFkTaskQueue(config: Config, schemaInfo: SchemaInfo) extends OffHeapFkTaskQueue {
@@ -53,8 +53,8 @@ private[offheap] class ChronicleQueueFkTaskQueue(config: Config, schemaInfo: Sch
     }
   }
 
-  override def dequeue(): Option[FkTask] = {
-    var task: FkTask = null
+  override def dequeue(): Option[ForeignKeyTask] = {
+    var task: ForeignKeyTask = null
 
     /*
      * `tailer.readDocument` can early return `false` if there is no new data on-disk to read.
@@ -62,13 +62,14 @@ private[offheap] class ChronicleQueueFkTaskQueue(config: Config, schemaInfo: Sch
      */
     tailer.readDocument { r =>
       val in = r.getValueIn
+
       val fetchChildren = in.bool()
       val fkOrdinal = in.int16()
       val reader = if (fetchChildren) childReaders(fkOrdinal) else parentReaders(fkOrdinal)
       val fkValue = reader.read(in)
       val fk = schemaInfo.fksOrdered(fkOrdinal)
-      val table = if (fetchChildren) fk.fromTable else fk.toTable
-      task = FkTask(table, fk, fkValue, fetchChildren)
+
+      task = RawTaskToForeignKeyTaskMapper.map(fk, fetchChildren, fkValue)
     }
 
     Option(task)

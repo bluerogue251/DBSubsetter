@@ -23,8 +23,8 @@ object ApplicationSingleThreaded {
     // Run task queue until empty
     while (taskQueue.nonEmpty) {
       val taskOpt: Option[OriginDbRequest] = taskQueue.dequeue() match {
-        case t: FkTask if FkTaskPreCheck.shouldPrecheck(t) =>
-          if (pkStore.alreadySeen(t.table, t.fkValue)) None else Some(t)
+        case t: FetchParentTask if FkTaskPreCheck.shouldPrecheck(t) =>
+          if (pkStore.alreadySeen(t.parentTable, t.fkValueFromChild)) None else Some(t)
         case t =>
           Some(t)
       }
@@ -33,10 +33,9 @@ object ApplicationSingleThreaded {
         val pksAdded = if (dbResult.table.storePks) pkWorkflow.add(dbResult) else SkipPkStore.process(dbResult)
         targetDbWorkflow.process(pksAdded)
         val newTasks = fkTaskCreationWorkflow.createFkTasks(pksAdded)
-        newTasks.taskInfo.foreach { case ((fk, fetchChildren), fkValues) =>
-          val tasks = fkValues.map { v =>
-            val table = if (fetchChildren) fk.fromTable else fk.toTable
-            FkTask(table, fk, v, fetchChildren)
+        newTasks.taskInfo.foreach { case ((foreignKey, fetchChildren), fkValues) =>
+          val tasks = fkValues.map { fkValue =>
+            RawTaskToForeignKeyTaskMapper.map(foreignKey, fetchChildren, fkValue)
           }
           taskQueue.enqueue(tasks)
         }
