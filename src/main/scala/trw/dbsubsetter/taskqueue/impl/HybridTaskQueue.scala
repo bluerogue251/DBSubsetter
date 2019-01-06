@@ -8,7 +8,7 @@ import trw.dbsubsetter.workflow.{BaseQuery, OriginDbRequest}
 
 import scala.collection.mutable
 
-private[taskqueue] final class TaskQueueImpl(config: Config, schemaInfo: SchemaInfo) extends TaskQueue {
+private[taskqueue] final class HybridTaskQueue(config: Config, schemaInfo: SchemaInfo) extends TaskQueue {
 
   private[this] val baseQueryQueue: mutable.Queue[BaseQuery] =
     mutable.Queue.empty[BaseQuery]
@@ -16,15 +16,14 @@ private[taskqueue] final class TaskQueueImpl(config: Config, schemaInfo: SchemaI
   private[this] val fkTaskQueue: OffHeapFkTaskQueue =
     OffHeapFkTaskQueueFactory.buildOffHeapFkTaskQueue(config, schemaInfo)
 
-  private[this] var dequeueFunction: () => OriginDbRequest =
-    () => {
-      baseQueryQueue.dequeue()
-      if (baseQueryQueue.isEmpty) dequeueFunction = () => fkTaskQueue.dequeue()
-    }
+  override def enqueue(tasks: IndexedSeq[OriginDbRequest]): Unit = {
+    tasks.foreach({
+      case baseQuery @ BaseQuery => baseQueryQueue.enqueue(baseQuery)
+      case foreignKeyTask @ RawTasks => fkTaskQueue.enqueue()
+    })
 
-  override def nonEmpty: Boolean = baseQueryQueue.nonEmpty
-
-  override def enqueue(tasks: IndexedSeq[OriginDbRequest]): Unit = baseQueryQueue.enqueue(tasks: _*)
+    baseQueryQueue.enqueue(tasks: _*)
+  }
 
   override def dequeue(): OriginDbRequest = dequeueFunction.apply()
 }
