@@ -6,7 +6,7 @@ import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.{DbAccessFactory, SchemaInfo}
 import trw.dbsubsetter.workflow._
 
-object TargetDb {
+private[akkastreams] object TargetDb {
   def insert(config: Config, schemaInfo: SchemaInfo, dbAccessFactory: DbAccessFactory): Flow[PksAdded, TargetDbInsertResult, NotUsed] = {
     Flow[PksAdded].statefulMapConcat { () =>
       val dbWorkflow = new TargetDbWorkflow(config, schemaInfo, dbAccessFactory)

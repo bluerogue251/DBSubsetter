@@ -4,7 +4,7 @@ import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.{DbAccessFactory, SchemaInfo}
 
 
-class TargetDbWorkflow(config: Config, schemaInfo: SchemaInfo, dbAccessFactory: DbAccessFactory) {
+final class TargetDbWorkflow(config: Config, schemaInfo: SchemaInfo, dbAccessFactory: DbAccessFactory) {
   private[this] val dbAccess = dbAccessFactory.buildTargetDbAccess()
 
   // The fact that a row still needs parent tasks means this is the first time we've seen it

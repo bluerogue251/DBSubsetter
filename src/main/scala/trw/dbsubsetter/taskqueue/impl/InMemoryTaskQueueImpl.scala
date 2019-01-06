@@ -5,7 +5,7 @@ import trw.dbsubsetter.workflow.OriginDbRequest
 
 import scala.collection.mutable
 
-private[taskqueue] class InMemoryTaskQueueImpl extends TaskQueue {
+private[taskqueue] final class InMemoryTaskQueueImpl extends TaskQueue {
 
   private[this] val queue = mutable.Queue.empty[OriginDbRequest]
 

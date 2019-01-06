@@ -4,7 +4,7 @@ import trw.dbsubsetter.db._
 
 // TODO reconsider name (or the way this works) since this does not actually create any `FkTask`s. (It creates `NewTasks`).
 // TODO do the same reconsideration for the Akka Streams Flow that calls this.
-class FkTaskCreationWorkflow(schemaInfo: SchemaInfo) {
+final class FkTaskCreationWorkflow(schemaInfo: SchemaInfo) {
 
   def createFkTasks(pksAdded: PksAdded): NewTasks = {
     val PksAdded(table, rowsNeedingParentTasks, rowsNeedingChildTasks, viaTableOpt) = pksAdded

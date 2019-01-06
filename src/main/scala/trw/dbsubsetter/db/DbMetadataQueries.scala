@@ -6,7 +6,7 @@ import trw.dbsubsetter.config.Config
 
 import scala.collection.mutable.ArrayBuffer
 
-object DbMetadataQueries {
+private[db] object DbMetadataQueries {
   def queryDb(config: Config): DbMetadataQueryResult = {
     val conn = DriverManager.getConnection(config.originDbConnectionString)
     conn.setReadOnly(true)

@@ -1,6 +1,6 @@
 package trw.dbsubsetter.db
 
-object Sql {
+private[db] object Sql {
   def preparedQueryStatementStrings(sch: SchemaInfo): SqlTemplates = {
     val allCombos = for {
       fk <- sch.fksOrdered

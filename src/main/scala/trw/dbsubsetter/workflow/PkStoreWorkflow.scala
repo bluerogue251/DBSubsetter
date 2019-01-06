@@ -4,7 +4,7 @@ import trw.dbsubsetter.db.{Row, SchemaInfo, Table}
 import trw.dbsubsetter.primarykeystore.{AlreadySeenWithoutChildren, FirstTimeSeen, PrimaryKeyStore, WriteOutcome}
 
 
-class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
+final class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
 
   private[this] val pkValueExtractionFunctions: Map[Table, Row => Any] =
     PkStoreWorkflow.buildPkValueExtractionFunctions(schemaInfo)

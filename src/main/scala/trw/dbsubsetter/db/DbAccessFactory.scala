@@ -6,7 +6,7 @@ import trw.dbsubsetter.db.impl.mapper.{JdbcResultConverter, JdbcResultConverterI
 import trw.dbsubsetter.db.impl.origin.{OriginDbAccessImpl, OriginDbAccessTimed}
 import trw.dbsubsetter.db.impl.target.{TargetDbAccessImpl, TargetDbAccessTimed}
 
-class DbAccessFactory(config: Config, schemaInfo: SchemaInfo) {
+final class DbAccessFactory(config: Config, schemaInfo: SchemaInfo) {
 
   private[this] val connectionFactory: ConnectionFactory = new ConnectionFactory
 

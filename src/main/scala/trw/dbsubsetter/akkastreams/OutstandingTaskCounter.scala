@@ -4,7 +4,7 @@ import akka.NotUsed
 import akka.stream.scaladsl.Flow
 import trw.dbsubsetter.workflow.NewTasks
 
-object OutstandingTaskCounter {
+private[akkastreams] object OutstandingTaskCounter {
   def counter(numBaseQueries: Int): Flow[NewTasks, NewTasks, NotUsed] = {
     val counterFlow = Flow[NewTasks].statefulMapConcat { () =>
       var statefulCounter: Long = numBaseQueries
