@@ -3,7 +3,7 @@ package trw.dbsubsetter
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.{DbAccessFactory, SchemaInfo}
 import trw.dbsubsetter.primarykeystore.{PrimaryKeyStore, PrimaryKeyStoreFactory}
-import trw.dbsubsetter.tasktracker.{TaskTracker, TaskTrackerFactory}
+import trw.dbsubsetter.singlethreaded.{TaskTracker, TaskTrackerFactory}
 import trw.dbsubsetter.workflow._
 
 object ApplicationSingleThreaded {

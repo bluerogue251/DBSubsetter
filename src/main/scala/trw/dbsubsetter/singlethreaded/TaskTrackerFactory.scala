@@ -1,7 +1,7 @@
-package trw.dbsubsetter.tasktracker
+package trw.dbsubsetter.singlethreaded
 
 import trw.dbsubsetter.config.Config
-import trw.dbsubsetter.tasktracker.impl.{TaskTrackerImpl, TaskTrackerInstrumented}
+import trw.dbsubsetter.singlethreaded.impl.{TaskTrackerImpl, TaskTrackerInstrumented}
 
 object TaskTrackerFactory {
   def buildTaskTracker(config: Config): TaskTracker = {
