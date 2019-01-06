@@ -35,11 +35,7 @@ object ApplicationSingleThreaded {
         val newTasks = fkTaskCreationWorkflow.createFkTasks(pksAdded)
         newTasks.taskInfo.foreach { case ((foreignKey, fetchChildren), fkValues) =>
           val tasks = fkValues.map { fkValue =>
-            if (fetchChildren) {
-              FetchChildrenTask(foreignKey.fromTable, foreignKey, fkValue)
-            } else {
-              FetchParentTask(foreignKey.toTable, foreignKey, fkValue)
-            }
+            RawTaskToForeignKeyTaskMapper.map(foreignKey, fetchChildren, fkValue)
           }
           taskTracker.enqueueTasks(tasks)
         }

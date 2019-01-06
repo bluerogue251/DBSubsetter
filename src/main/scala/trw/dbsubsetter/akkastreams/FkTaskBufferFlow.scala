@@ -63,11 +63,7 @@ class FkTaskBufferFlow(config: Config, sch: SchemaInfo) extends GraphStage[FlowS
         val reader = if (fetchChildren) childReaders(fkOrdinal) else parentReaders(fkOrdinal)
         val fkValue = reader.read(in)
         val foreignKey = sch.fksOrdered(fkOrdinal)
-        val task: ForeignKeyTask = if (fetchChildren) {
-          FetchChildrenTask(foreignKey.fromTable, foreignKey, fkValue)
-        } else {
-          FetchParentTask(foreignKey.toTable, foreignKey, fkValue)
-        }
+        val task: ForeignKeyTask = RawTaskToForeignKeyTaskMapper.map(foreignKey, fetchChildren, fkValue)
         push[ForeignKeyTask](out, task)
       }
     }
