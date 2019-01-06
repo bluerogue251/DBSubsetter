@@ -1,10 +1,10 @@
-package trw.dbsubsetter.singlethreaded.impl
+package trw.dbsubsetter.tasktracker.impl
 
 import trw.dbsubsetter.metrics.Metrics
-import trw.dbsubsetter.singlethreaded.TaskTracker
+import trw.dbsubsetter.tasktracker.TaskTracker
 import trw.dbsubsetter.workflow.OriginDbRequest
 
-private[singlethreaded] class TaskTrackerInstrumented(delegatee: TaskTracker) extends TaskTracker {
+private[tasktracker] class TaskTrackerInstrumented(delegatee: TaskTracker) extends TaskTracker {
 
   private[this] val metrics = Metrics.PendingTasksGauge
 

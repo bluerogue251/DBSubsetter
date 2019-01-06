@@ -1,11 +1,11 @@
-package trw.dbsubsetter.singlethreaded.impl
+package trw.dbsubsetter.tasktracker.impl
 
-import trw.dbsubsetter.singlethreaded.TaskTracker
+import trw.dbsubsetter.tasktracker.TaskTracker
 import trw.dbsubsetter.workflow.OriginDbRequest
 
 import scala.collection.mutable
 
-private[singlethreaded] class TaskTrackerImpl extends TaskTracker {
+private[tasktracker] class TaskTrackerImpl extends TaskTracker {
 
   private[this] val queue = mutable.Queue.empty[OriginDbRequest]
 
