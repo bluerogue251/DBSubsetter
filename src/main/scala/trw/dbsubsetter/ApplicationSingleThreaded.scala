@@ -3,7 +3,7 @@ package trw.dbsubsetter
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.{DbAccessFactory, SchemaInfo}
 import trw.dbsubsetter.primarykeystore.{PrimaryKeyStore, PrimaryKeyStoreFactory}
-import trw.dbsubsetter.singlethreaded.{TaskTracker, TaskTrackerFactory}
+import trw.dbsubsetter.taskqueue.{TaskQueue, TaskQueueFactory}
 import trw.dbsubsetter.workflow._
 
 object ApplicationSingleThreaded {
@@ -17,7 +17,7 @@ object ApplicationSingleThreaded {
     val fkTaskCreationWorkflow: FkTaskCreationWorkflow = new FkTaskCreationWorkflow(schemaInfo)
 
     // Set up task queue
-    val taskTracker: TaskTracker = TaskTrackerFactory.buildTaskTracker(config)
+    val taskTracker: TaskQueue = TaskQueueFactory.buildTaskTracker(config)
     taskTracker.enqueueTasks(baseQueries)
 
     // Run task queue until empty
