@@ -4,13 +4,14 @@ import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.taskqueue.impl.{TaskQueueImpl, TaskQueueInstrumented}
 
 object TaskQueueFactory {
-  def buildTaskTracker(config: Config): TaskQueue = {
-    var taskTracker: TaskQueue = new TaskQueueImpl()
+
+  def buildTaskQueue(config: Config): TaskQueue = {
+    var taskQueue: TaskQueue = new TaskQueueImpl()
 
     if (config.exposeMetrics) {
-      taskTracker = new TaskQueueInstrumented(taskTracker)
+      taskQueue = new TaskQueueInstrumented(taskQueue)
     }
 
-    taskTracker
+    taskQueue
   }
 }
