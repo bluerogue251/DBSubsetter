@@ -24,7 +24,7 @@ object ApplicationSingleThreaded {
     while (taskTracker.nonEmpty) {
       val taskOpt: Option[OriginDbRequest] = taskTracker.dequeueTask() match {
         case t: FetchParentTask if FkTaskPreCheck.shouldPrecheck(t) =>
-          if (pkStore.alreadySeen(t.table, t.fkValue)) None else Some(t)
+          if (pkStore.alreadySeen(t.parentTable, t.fkValueFromChild)) None else Some(t)
         case t =>
           Some(t)
       }

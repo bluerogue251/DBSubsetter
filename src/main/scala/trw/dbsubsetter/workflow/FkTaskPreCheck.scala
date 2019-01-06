@@ -7,6 +7,6 @@ object FkTaskPreCheck {
   // with the parent table, it seems in that case it might work to do a Precheck? (In most cases, the child table's value will _not_ be it's PK, so in most
   // cases the PKStore can't help us... but in the one-to-one case where the child column happens to be its PrimaryKey, it might work
   def shouldPrecheck(task: FetchParentTask): Boolean = {
-    task.fk.pointsToPk && task.table.storePks
+    task.fk.pointsToPk && task.parentTable.storePks
   }
 }
