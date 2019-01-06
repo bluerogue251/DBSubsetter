@@ -1,4 +1,4 @@
-package trw.dbsubsetter.workflow
+package trw.dbsubsetter.workflow.offheap.impl.chroniclequeue
 
 import java.math.BigInteger
 import java.sql.JDBCType
@@ -7,7 +7,7 @@ import java.util.UUID
 import net.openhft.chronicle.wire.{ValueOut, WireOut, WriteMarshallable}
 import trw.dbsubsetter.db.{DbVendor, TypeName}
 
-class TaskQueueWriter(fkOrdinal: Short, typeList: Seq[(JDBCType, TypeName)], dbVendor: DbVendor) {
+private[offheap] class TaskQueueWriter(fkOrdinal: Short, typeList: Seq[(JDBCType, TypeName)], dbVendor: DbVendor) {
   def writeHandler(fetchChildren: Boolean, fkValue: Any): WriteMarshallable = {
     wireOut => {
       val out = wireOut.getValueOut
