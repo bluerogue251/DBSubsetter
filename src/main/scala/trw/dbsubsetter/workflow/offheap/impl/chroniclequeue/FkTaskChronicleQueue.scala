@@ -1,4 +1,4 @@
-package trw.dbsubsetter.workflow.offheap.impl
+package trw.dbsubsetter.workflow.offheap.impl.chroniclequeue
 
 import java.nio.file.Files
 
@@ -7,9 +7,9 @@ import net.openhft.chronicle.queue.impl.single.SingleChronicleQueueBuilder
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.{ForeignKey, SchemaInfo}
 import trw.dbsubsetter.workflow.offheap.OffHeapFkTaskQueue
-import trw.dbsubsetter.workflow.{FkTask, NewTasks, TaskQueueReader, TaskQueueWriter}
+import trw.dbsubsetter.workflow.{FkTask, NewTasks}
 
-class FkTaskChronicleQueue(config: Config, schemaInfo: SchemaInfo) extends OffHeapFkTaskQueue {
+private[offheap] class FkTaskChronicleQueue(config: Config, schemaInfo: SchemaInfo) extends OffHeapFkTaskQueue {
 
   private[this] val storageDir = config.taskQueueDirOpt match {
     case None => Files.createTempDirectory("DBSubsetter-")

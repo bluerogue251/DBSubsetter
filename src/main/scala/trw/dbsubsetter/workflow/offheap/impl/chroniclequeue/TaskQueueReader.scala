@@ -1,4 +1,4 @@
-package trw.dbsubsetter.workflow
+package trw.dbsubsetter.workflow.offheap.impl.chroniclequeue
 
 import java.sql.JDBCType
 import java.util.UUID
@@ -6,7 +6,7 @@ import java.util.UUID
 import net.openhft.chronicle.wire.ValueIn
 import trw.dbsubsetter.db.{DbVendor, TypeName}
 
-class TaskQueueReader(typeList: Seq[(JDBCType, TypeName)], dbVendor: DbVendor) {
+private[offheap] class TaskQueueReader(typeList: Seq[(JDBCType, TypeName)], dbVendor: DbVendor) {
   def read(in: ValueIn): Any = handlerFunc(in)
 
   private val handlerFunc: ValueIn => Any = {
