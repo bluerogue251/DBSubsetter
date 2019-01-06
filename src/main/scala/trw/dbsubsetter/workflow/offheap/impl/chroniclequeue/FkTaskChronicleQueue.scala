@@ -17,7 +17,9 @@ private[offheap] class FkTaskChronicleQueue(config: Config, schemaInfo: SchemaIn
   }
 
   private[this] val queue =
-    SingleChronicleQueueBuilder.binary(storageDir).rollCycle(RollCycles.MINUTELY).build()
+    SingleChronicleQueueBuilder
+      .binary(storageDir)
+      .rollCycle(RollCycles.MINUTELY).build()
 
   private[this] val appender =
     queue.acquireAppender()
@@ -50,7 +52,7 @@ private[offheap] class FkTaskChronicleQueue(config: Config, schemaInfo: SchemaIn
   override def dequeue(): FkTask = {
     var task: FkTask = null
 
-    tailer.readDocument { r =>
+    val wasReadSuccessful: Boolean = tailer.readDocument { r =>
       val in = r.getValueIn
       val fetchChildren = in.bool()
       val fkOrdinal = in.int16()
@@ -60,6 +62,7 @@ private[offheap] class FkTaskChronicleQueue(config: Config, schemaInfo: SchemaIn
       val table = if (fetchChildren) fk.fromTable else fk.toTable
       task = FkTask(table, fk, fkValue, fetchChildren)
     }
+    assert(wasReadSuccessful, "Reading from ChronicleQueue failed")
 
     task
   }
