@@ -11,7 +11,7 @@ import trw.dbsubsetter.workflow.offheap.OffHeapFkTaskQueue
 import trw.dbsubsetter.workflow.{FkTask, NewTasks}
 
 
-private[offheap] class FkTaskChronicleQueue(config: Config, schemaInfo: SchemaInfo) extends OffHeapFkTaskQueue {
+private[offheap] class ChronicleQueueFkTaskQueue(config: Config, schemaInfo: SchemaInfo) extends OffHeapFkTaskQueue {
 
   private[this] val storageDir = config.taskQueueDirOpt match {
     case Some(dir) => dir.toPath

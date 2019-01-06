@@ -26,8 +26,12 @@ class OffHeapTaskQueueTest extends FunSuite {
     val schemaInfo: SchemaInfo = OffHeapTaskQueueTest.schemaInfo
     val queue = OffHeapFkTaskQueueFactory.buildOffHeapFkTaskQueue(config, schemaInfo)
 
+    val fkValue1: Long = 7
+    val fkValue2: Long = 10
+    val fkValue3: Long = 23
+
     val rawTaskInfo: Map[(ForeignKey, Boolean), Array[Any]] =
-      Map((OffHeapTaskQueueTest.foreignKey, false) -> Array[Any](7, 10, 23))
+      Map((OffHeapTaskQueueTest.foreignKey, false) -> Array[Any](fkValue1, fkValue2, fkValue3))
 
     queue.enqueue(NewTasks(rawTaskInfo))
     val baseTask: FkTask = FkTask(
@@ -36,9 +40,13 @@ class OffHeapTaskQueueTest extends FunSuite {
       fkValue = "placeholder",
       fetchChildren = false
     )
+
+    // Dequeue the three FkTasks
     assert(queue.dequeue() === Some(baseTask.copy(fkValue = 7)))
     assert(queue.dequeue() === Some(baseTask.copy(fkValue = 10)))
     assert(queue.dequeue() === Some(baseTask.copy(fkValue = 23)))
+    // All the data has been drained from the queue -- now we get `None`
+    assert(queue.dequeue() === None)
   }
 }
 
