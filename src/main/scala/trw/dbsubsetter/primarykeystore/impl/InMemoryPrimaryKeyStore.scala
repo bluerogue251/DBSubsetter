@@ -8,7 +8,7 @@ import scala.collection.mutable
 /*
  * CAREFUL -- NOT THREADSAFE
  */
-private[primarykeystore] class InMemoryPrimaryKeyStore(schemaInfo: SchemaInfo) extends PrimaryKeyStore {
+private[primarykeystore] final class InMemoryPrimaryKeyStore(schemaInfo: SchemaInfo) extends PrimaryKeyStore {
 
   /*
    * If `seenWithChildrenStorage` contains a PK, then both its children AND its parents have been fetched.

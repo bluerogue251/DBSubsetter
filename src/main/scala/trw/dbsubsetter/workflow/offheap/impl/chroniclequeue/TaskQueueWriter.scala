@@ -7,7 +7,7 @@ import java.util.UUID
 import net.openhft.chronicle.wire.{ValueOut, WireOut, WriteMarshallable}
 import trw.dbsubsetter.db.{DbVendor, TypeName}
 
-private[offheap] class TaskQueueWriter(fkOrdinal: Short, typeList: Seq[(JDBCType, TypeName)], dbVendor: DbVendor) {
+private[offheap] final class TaskQueueWriter(fkOrdinal: Short, typeList: Seq[(JDBCType, TypeName)], dbVendor: DbVendor) {
   def writeHandler(fetchChildren: Boolean, fkValue: Any): WriteMarshallable = {
     wireOut => {
       val out = wireOut.getValueOut

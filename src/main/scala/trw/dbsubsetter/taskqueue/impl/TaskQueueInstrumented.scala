@@ -4,7 +4,7 @@ import trw.dbsubsetter.metrics.Metrics
 import trw.dbsubsetter.taskqueue.TaskQueue
 import trw.dbsubsetter.workflow.OriginDbRequest
 
-private[taskqueue] class TaskQueueInstrumented(delegatee: TaskQueue) extends TaskQueue {
+private[taskqueue] final class TaskQueueInstrumented(delegatee: TaskQueue) extends TaskQueue {
 
   private[this] val metrics = Metrics.PendingTasksGauge
 
