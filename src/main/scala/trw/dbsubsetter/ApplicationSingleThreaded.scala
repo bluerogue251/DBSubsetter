@@ -17,7 +17,7 @@ object ApplicationSingleThreaded {
     val fkTaskCreationWorkflow: FkTaskCreationWorkflow = new FkTaskCreationWorkflow(schemaInfo)
 
     // Set up task queue
-    val taskQueue: TaskQueue = TaskQueueFactory.buildTaskQueue(config)
+    val taskQueue: TaskQueue = TaskQueueFactory.buildInMemoryTaskQueue(config)
     taskQueue.enqueue(baseQueries)
 
     // Run task queue until empty

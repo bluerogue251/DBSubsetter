@@ -7,6 +7,7 @@ import akka.stream.scaladsl.Sink
 import trw.dbsubsetter.akkastreams.{PkStoreActor, Subsetting}
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.{DbAccessFactory, SchemaInfo}
+import trw.dbsubsetter.taskqueue.{TaskQueue, TaskQueueFactory}
 import trw.dbsubsetter.workflow._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -20,6 +21,7 @@ object ApplicationAkkaStreams {
     val pkStore: ActorRef = system.actorOf(PkStoreActor.props(schemaInfo))
     val dbAccessFactory: DbAccessFactory = new DbAccessFactory(config, schemaInfo)
     val fkTaskCreationWorkflow: FkTaskCreationWorkflow = new FkTaskCreationWorkflow(schemaInfo)
+    val taskQueue: TaskQueue = TaskQueueFactory.buildInMemoryTaskQueue()
 
     Subsetting
       .source(config, schemaInfo, baseQueries, pkStore, dbAccessFactory, fkTaskCreationWorkflow)
