@@ -2,13 +2,11 @@ package trw.dbsubsetter.akkastreams
 
 import akka.stream._
 import akka.stream.stage._
-import trw.dbsubsetter.config.Config
-import trw.dbsubsetter.db.SchemaInfo
 import trw.dbsubsetter.workflow._
-import trw.dbsubsetter.workflow.offheap.OffHeapFkTaskQueueFactory
+import trw.dbsubsetter.workflow.offheap.OffHeapFkTaskQueue
 
 // Adapted from https://github.com/torodb/akka-chronicle-queue
-class FkTaskBufferFlow(config: Config, schemaInfo: SchemaInfo) extends GraphStage[FlowShape[NewTasks, ForeignKeyTask]] {
+class FkTaskBufferFlow(taskQueue: OffHeapFkTaskQueue) extends GraphStage[FlowShape[NewTasks, ForeignKeyTask]] {
 
   private[this] val in: Inlet[NewTasks] = Inlet.create[NewTasks]("FkTaskBufferFlow.in")
 
@@ -18,13 +16,10 @@ class FkTaskBufferFlow(config: Config, schemaInfo: SchemaInfo) extends GraphStag
 
   override def createLogic(inheritedAttributes: Attributes): GraphStageLogic = new GraphStageLogic(shape) {
 
-    private[this] val offHeapFkTaskQueue =
-      OffHeapFkTaskQueueFactory.buildOffHeapFkTaskQueue(config, schemaInfo)
-
     setHandler(in, new InHandler {
       override def onPush(): Unit = {
         val newTasks: NewTasks = grab(in)
-        offHeapFkTaskQueue.enqueue(newTasks)
+        taskQueue.enqueue(newTasks)
         if (isAvailable(out)) doPull()
         pull(in)
       }
@@ -39,7 +34,7 @@ class FkTaskBufferFlow(config: Config, schemaInfo: SchemaInfo) extends GraphStag
     }
 
     private[this] def doPull(): Unit = {
-      val optionalTask: Option[ForeignKeyTask] = offHeapFkTaskQueue.dequeue()
+      val optionalTask: Option[ForeignKeyTask] = taskQueue.dequeue()
       optionalTask.foreach(task => push[ForeignKeyTask](out, task))
     }
   }
