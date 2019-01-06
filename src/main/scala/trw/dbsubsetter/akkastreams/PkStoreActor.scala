@@ -21,6 +21,8 @@ private[this] class PkStoreActor(schemaInfo: SchemaInfo) extends Actor {
     // If it's an OriginDbResult, then we are being asked to add the new primary key values to the PkStore
     case req: OriginDbResult =>
       sender() ! pkStoreWorkflow.add(req)
+    case other =>
+      throw new RuntimeException(s"Cannot handle $other")
   }
 }
 
