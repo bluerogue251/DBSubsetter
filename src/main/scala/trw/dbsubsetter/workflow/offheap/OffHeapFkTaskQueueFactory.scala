@@ -7,13 +7,13 @@ import trw.dbsubsetter.workflow.offheap.impl.chroniclequeue.ChronicleQueueFkTask
 
 object OffHeapFkTaskQueueFactory {
   def buildOffHeapFkTaskQueue(config: Config, schemaInfo: SchemaInfo): OffHeapFkTaskQueue = {
-    var taskQueue: OffHeapFkTaskQueue =
+    var fkTaskQueue: OffHeapFkTaskQueue =
       new ChronicleQueueFkTaskQueue(config, schemaInfo)
 
     if (config.exposeMetrics) {
-      taskQueue = new OffHeapFkTaskQueueInstrumented(taskQueue)
+      fkTaskQueue = new OffHeapFkTaskQueueInstrumented(fkTaskQueue)
     }
 
-    taskQueue
+    fkTaskQueue
   }
 }

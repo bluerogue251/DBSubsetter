@@ -14,7 +14,9 @@ private[offheap] final class OffHeapFkTaskQueueInstrumented(delegatee: OffHeapFk
   }
 
   override def dequeue(): Option[ForeignKeyTask] = {
-    metrics.dec()
-    delegatee.dequeue()
+    delegatee.dequeue().map(fkTask => {
+      metrics.dec()
+      fkTask
+    })
   }
 }
