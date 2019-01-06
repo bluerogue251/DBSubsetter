@@ -14,7 +14,7 @@ private[this] class PkStoreActor(schemaInfo: SchemaInfo) extends Actor {
 
   override def receive: Receive = {
     // If it's a FkTask, then we are being asked to pre-check to make sure we haven't done it already
-    case task: FkTask =>
+    case task: FetchParentTask =>
       val alreadySeen: Boolean = pkStore.alreadySeen(task.table, task.fkValue)
       val response: PkQueryResult = if (alreadySeen) AlreadySeen else NotAlreadySeen(task)
       sender() ! response

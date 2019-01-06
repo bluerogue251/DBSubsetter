@@ -11,10 +11,10 @@ import trw.dbsubsetter.db.{ForeignKey, SchemaInfo}
 import trw.dbsubsetter.workflow._
 
 // Adapted from https://github.com/torodb/akka-chronicle-queue
-class FkTaskBufferFlow(config: Config, sch: SchemaInfo) extends GraphStage[FlowShape[NewTasks, FkTask]] {
+class FkTaskBufferFlow(config: Config, sch: SchemaInfo) extends GraphStage[FlowShape[NewTasks, ForeignKeyTask]] {
   val in: Inlet[NewTasks] = Inlet.create[NewTasks]("FkTaskBufferFlow.in")
-  val out: Outlet[FkTask] = Outlet.create[FkTask]("FkTaskBufferFlow.out")
-  override val shape: FlowShape[NewTasks, FkTask] = FlowShape.of(in, out)
+  val out: Outlet[ForeignKeyTask] = Outlet.create[ForeignKeyTask]("FkTaskBufferFlow.out")
+  override val shape: FlowShape[NewTasks, ForeignKeyTask] = FlowShape.of(in, out)
 
   override def createLogic(inheritedAttributes: Attributes): GraphStageLogic = new GraphStageLogic(shape) {
     private val storageDir = config.taskQueueDirOpt match {
@@ -62,9 +62,13 @@ class FkTaskBufferFlow(config: Config, sch: SchemaInfo) extends GraphStage[FlowS
         val fkOrdinal = in.int16()
         val reader = if (fetchChildren) childReaders(fkOrdinal) else parentReaders(fkOrdinal)
         val fkValue = reader.read(in)
-        val fk = sch.fksOrdered(fkOrdinal)
-        val table = if (fetchChildren) fk.fromTable else fk.toTable
-        push[FkTask](out, FkTask(table, fk, fkValue, fetchChildren))
+        val foreignKey = sch.fksOrdered(fkOrdinal)
+        val task: ForeignKeyTask = if (fetchChildren) {
+          FetchChildrenTask(foreignKey.fromTable, foreignKey, fkValue)
+        } else {
+          FetchParentTask(foreignKey.toTable, foreignKey, fkValue)
+        }
+        push[ForeignKeyTask](out, task)
       }
     }
   }
