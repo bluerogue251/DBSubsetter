@@ -17,12 +17,12 @@ object ApplicationSingleThreaded {
     val fkTaskCreationWorkflow: FkTaskCreationWorkflow = new FkTaskCreationWorkflow(schemaInfo)
 
     // Set up task queue
-    val taskTracker: TaskQueue = TaskQueueFactory.buildTaskTracker(config)
-    taskTracker.enqueueTasks(baseQueries)
+    val taskQueue: TaskQueue = TaskQueueFactory.buildTaskTracker(config)
+    taskQueue.enqueueTasks(baseQueries)
 
     // Run task queue until empty
-    while (taskTracker.nonEmpty) {
-      val taskOpt: Option[OriginDbRequest] = taskTracker.dequeueTask() match {
+    while (taskQueue.nonEmpty) {
+      val taskOpt: Option[OriginDbRequest] = taskQueue.dequeueTask() match {
         case t: FkTask if FkTaskPreCheck.shouldPrecheck(t) =>
           if (pkStore.alreadySeen(t.table, t.fkValue)) None else Some(t)
         case t =>
@@ -38,7 +38,7 @@ object ApplicationSingleThreaded {
             val table = if (fetchChildren) fk.fromTable else fk.toTable
             FkTask(table, fk, v, fetchChildren)
           }
-          taskTracker.enqueueTasks(tasks)
+          taskQueue.enqueueTasks(tasks)
         }
       }
     }
