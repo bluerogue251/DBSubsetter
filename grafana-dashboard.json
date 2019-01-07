@@ -75,13 +75,20 @@
             "intervalFactor": 1,
             "legendFormat": "Duplicate Origin DB Rows Discarded Per Second",
             "refId": "C"
+          },
+          {
+            "expr": "rate(DuplicateFkTasksDiscarded[1s])",
+            "format": "time_series",
+            "intervalFactor": 1,
+            "legendFormat": "Duplicate ForeignKeyTasks Discarded Per Second",
+            "refId": "D"
           }
         ],
         "thresholds": [],
         "timeFrom": null,
         "timeRegions": [],
         "timeShift": null,
-        "title": "DB Row Rates",
+        "title": "Notable Event Rates",
         "tooltip": {
           "shared": true,
           "sort": 0,
