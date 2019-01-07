@@ -19,7 +19,7 @@ object ApplicationAkkaStreams {
     implicit val materializer: ActorMaterializer = ActorMaterializer()
     implicit val ec: ExecutionContext = system.dispatcher
 
-    val pkStore: ActorRef = system.actorOf(PkStoreActor.props(schemaInfo))
+    val pkStore: ActorRef = system.actorOf(PkStoreActor.props(config, schemaInfo))
     val dbAccessFactory: DbAccessFactory = new DbAccessFactory(config, schemaInfo)
     val fkTaskCreationWorkflow: FkTaskCreationWorkflow = new FkTaskCreationWorkflow(schemaInfo)
     val fkTaskQueue: OffHeapFkTaskQueue = OffHeapFkTaskQueueFactory.buildOffHeapFkTaskQueue(config, schemaInfo)

@@ -1,6 +1,7 @@
 package unit
 
 import org.scalatest.FunSuite
+import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.{Column, Row, SchemaInfo, Table}
 import trw.dbsubsetter.primarykeystore.{PrimaryKeyStore, PrimaryKeyStoreFactory}
 import trw.dbsubsetter.workflow._
@@ -10,7 +11,7 @@ class PkStoreWorkflowTest extends FunSuite {
     val table = Table("public", "users", hasSqlServerAutoIncrement = true, storePks = true)
     val pkCol = Column(table, null, 0, null, null)
     val schemaInfo = SchemaInfo(Map.empty, Map.empty, Map(table -> Vector(pkCol)), Array.empty, Map.empty, Map.empty, null)
-    val pkStore: PrimaryKeyStore = PrimaryKeyStoreFactory.buildPrimaryKeyStore(schemaInfo)
+    val pkStore: PrimaryKeyStore = PrimaryKeyStoreFactory.buildPrimaryKeyStore(Config(), schemaInfo)
     val pkStoreWorkflow = new PkStoreWorkflow(pkStore, schemaInfo)
     val fkValue = "fkValue"
     val row: Row = Array(fkValue)
@@ -44,7 +45,7 @@ class PkStoreWorkflowTest extends FunSuite {
     val table = Table("public", "users", hasSqlServerAutoIncrement = true, storePks = true)
     val primaryKeyColumn = Column(table, null, 0, null, null)
     val schemaInfo: SchemaInfo = SchemaInfo(Map.empty, Map.empty, Map(table -> Vector(primaryKeyColumn)), Array.empty, Map.empty, Map.empty, null)
-    val pkStore: PrimaryKeyStore = PrimaryKeyStoreFactory.buildPrimaryKeyStore(schemaInfo)
+    val pkStore: PrimaryKeyStore = PrimaryKeyStoreFactory.buildPrimaryKeyStore(Config(), schemaInfo)
     val pkStoreWorkflow: PkStoreWorkflow = new PkStoreWorkflow(pkStore, schemaInfo)
     val fkValue: String = "fkValue"
     val row: Row = Array(fkValue)

@@ -1,14 +1,15 @@
 package trw.dbsubsetter.akkastreams
 
 import akka.actor.{Actor, Props}
+import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.SchemaInfo
 import trw.dbsubsetter.primarykeystore.{PrimaryKeyStore, PrimaryKeyStoreFactory}
 import trw.dbsubsetter.workflow._
 
 // Only accessing the PrimaryKeyStore from inside this actor allows the PrimaryKeyStore to be non-threadsafe
-private[this] class PkStoreActor(schemaInfo: SchemaInfo) extends Actor {
+private[this] class PkStoreActor(config: Config, schemaInfo: SchemaInfo) extends Actor {
 
-  private[this] val pkStore: PrimaryKeyStore = PrimaryKeyStoreFactory.buildPrimaryKeyStore(schemaInfo)
+  private[this] val pkStore: PrimaryKeyStore = PrimaryKeyStoreFactory.buildPrimaryKeyStore(config, schemaInfo)
 
   private[this] val pkStoreWorkflow = new PkStoreWorkflow(pkStore, schemaInfo)
 
@@ -27,7 +28,7 @@ private[this] class PkStoreActor(schemaInfo: SchemaInfo) extends Actor {
 }
 
 object PkStoreActor {
-  def props(schemaInfo: SchemaInfo): Props = {
-    Props(new PkStoreActor(schemaInfo))
+  def props(config: Config, schemaInfo: SchemaInfo): Props = {
+    Props(new PkStoreActor(config, schemaInfo))
   }
 }
