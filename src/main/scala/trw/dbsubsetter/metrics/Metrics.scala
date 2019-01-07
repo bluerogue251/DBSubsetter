@@ -10,6 +10,13 @@ object Metrics {
       .help("n/a")
       .register()
 
+  val OriginDbRowsFetched: Counter =
+    Counter
+      .build()
+      .name("OriginDbRowsFetched")
+      .help("n/a")
+      .register()
+
   val JdbcResultConverterHistogram: Histogram =
     Histogram
       .build()
@@ -21,6 +28,13 @@ object Metrics {
     Histogram
       .build()
       .name("TargetDbInserts")
+      .help("n/a")
+      .register()
+
+  val TargetDbRowsInserted: Counter =
+    Counter
+      .build()
+      .name("TargetDbRowsInserted")
       .help("n/a")
       .register()
 
