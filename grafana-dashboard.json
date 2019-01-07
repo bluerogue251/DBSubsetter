@@ -70,10 +70,10 @@
             "refId": "B"
           },
           {
-            "expr": "rate(DuplicateRecordDiscarded[1s])",
+            "expr": "rate(DuplicateOriginDbRowsDiscarded[1s])",
             "format": "time_series",
             "intervalFactor": 1,
-            "legendFormat": "Duplicate Rows Discarded Per Second",
+            "legendFormat": "Duplicate Origin DB Rows Discarded Per Second",
             "refId": "C"
           }
         ],
@@ -155,7 +155,7 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "OriginDbRowsFetched - DuplicateRecordDiscarded",
+            "expr": "OriginDbRowsFetched - DuplicateOriginDbRowsDiscarded",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "Total Unique Rows Fetched from Origin DB",
@@ -167,13 +167,6 @@
             "intervalFactor": 1,
             "legendFormat": "Total Rows Inserted into Target DB",
             "refId": "B"
-          },
-          {
-            "expr": "DuplicateRecordDiscarded",
-            "format": "time_series",
-            "intervalFactor": 1,
-            "legendFormat": "Total Duplicate Rows Discarded",
-            "refId": "C"
           }
         ],
         "thresholds": [],
