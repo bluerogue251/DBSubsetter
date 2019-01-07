@@ -12,7 +12,7 @@ object ApplicationSingleThreaded {
     val dbAccessFactory = new DbAccessFactory(config, schemaInfo)
     val originDbWorkflow = new OriginDbWorkflow(config, schemaInfo, dbAccessFactory)
     val targetDbWorkflow = new TargetDbWorkflow(config, schemaInfo, dbAccessFactory)
-    val pkStore: PrimaryKeyStore = PrimaryKeyStoreFactory.buildPrimaryKeyStore(schemaInfo)
+    val pkStore: PrimaryKeyStore = PrimaryKeyStoreFactory.buildPrimaryKeyStore(config, schemaInfo)
     val pkWorkflow: PkStoreWorkflow = new PkStoreWorkflow(pkStore, schemaInfo)
     val fkTaskCreationWorkflow: FkTaskCreationWorkflow = new FkTaskCreationWorkflow(schemaInfo)
 
