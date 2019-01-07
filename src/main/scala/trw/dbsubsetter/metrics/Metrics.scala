@@ -1,6 +1,6 @@
 package trw.dbsubsetter.metrics
 
-import io.prometheus.client.{Gauge, Histogram}
+import io.prometheus.client.{Counter, Gauge, Histogram}
 
 object Metrics {
   val OriginDbSelectsHistogram: Histogram =
@@ -28,6 +28,13 @@ object Metrics {
     Gauge
     .build()
     .name("PendingTasks")
+    .help("n/a")
+    .register()
+
+  val DuplicateRecordDiscarded: Counter =
+    Counter
+    .build()
+    .name("DuplicateRecordDiscarded")
     .help("n/a")
     .register()
 }
