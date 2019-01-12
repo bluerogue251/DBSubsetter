@@ -1,12 +1,16 @@
 package load.physics
 
+import java.sql.{Connection, DriverManager, PreparedStatement, ResultSet}
+
 import e2e.AbstractPostgresqlEndToEndTest
 import slick.jdbc.PostgresProfile.api._
 import slick.sql.SqlAction
+import trw.dbsubsetter.db.Row
 import util.Ports
 import util.db.{DatabaseContainerSet, PostgreSQLContainer, PostgreSQLDatabase}
 import util.docker.ContainerUtil
 
+import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
@@ -42,6 +46,7 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
   override protected def prepareTargetDDL(): Unit = {
     super.prepareTargetDDL()
 
+    // TODO all of these are single connection at a time. What about multiple connections at a time?
     val jdbcBatch100 = createTargetTableSql("jdbcBatch100")
     val jdbcBatch1000 = createTargetTableSql("jdbcBatch1000")
     val jdbcBatch10000 = createTargetTableSql("jdbcBatch10000")
@@ -73,8 +78,9 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
   override protected def postSubset(): Unit = {}
 
   test("JDBC Batch Insert 100 Rows At A Time") {
-    System.out.println("woot")
-    assert(1 === 2)
+    val batchSize = 100
+    val timeMillis: Long = jdbcBatchFullFlow(batchSize)
+    System.out.println(s"JDBC Batch Insert 100 Rows At A Time Runtime: $timeMillis Seconds")
   }
 
   test("JDBC Batch Insert 1000 Rows At A Time") {
@@ -109,7 +115,24 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
 
   }
 
-  private[this] def timeMillis(f: () => Unit): Long = ???
+  private[this] def jdbcBatchFullFlow(table: String, batchSize: Int): Long = {
+    val insertStatement: PreparedStatement = buildInsertStatement(table)
+    runWithTimerSeconds(() => {
+      (0 to 6000005 by batchSize).foreach(startOfBatchId => {
+        val rows: Vector[Row] = fetchRows(startOfBatchId, startOfBatchId + batchSize - 1)
+        jdbcBatchInsert(insertStatement, rows)
+      })
+    })
+  }
+
+  private[this] def runWithTimerSeconds(f: () => Unit): Long = {
+    val start: Long = System.nanoTime()
+    f.apply()
+    val end: Long = System.nanoTime()
+    val durationNanos = end - start
+    val durationSeconds = durationNanos / 1000000000
+    durationSeconds
+  }
 
   private[this] def createTargetTableSql(suffix: String): SqlAction[Int, NoStream, Effect] = {
     sqlu"""create table quantum_data_#$suffix(
@@ -121,5 +144,70 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
              data_3 varchar not null,
              created_at timestamp without time zone not null
           )"""
+  }
+
+  private[this] lazy val selectStatement = {
+    originJdbcConnection.prepareStatement("select * from quantum_data where id between ? and ?")
+  }
+
+  private[this] def fetchRows(start: Int, end: Int): Vector[Row] = {
+    selectStatement.clearParameters()
+    selectStatement.setObject(1, start)
+    selectStatement.setObject(2, end)
+    val resultSet: ResultSet = selectStatement.executeQuery()
+
+    val rows = ArrayBuffer.empty[Row]
+    while (resultSet.next()) {
+      val row: Row = Array(
+        resultSet.getObject(1),
+        resultSet.getObject(2),
+        resultSet.getObject(3),
+        resultSet.getObject(4),
+        resultSet.getObject(5),
+        resultSet.getObject(6),
+        resultSet.getObject(7)
+      )
+      rows += row
+    }
+    rows.toVector
+  }
+
+  private[this] def buildInsertStatement(table: String): PreparedStatement = {
+    val insertSql =
+      s"""insert into $table
+          |  (id, experiment_id, quantum_domain_data_id, data_1, data_2, data_3, created_at)
+          |  values
+          |  (?, ?, ?, ?, ?, ?, ?)
+       """.stripMargin
+    targetJdbcConnection.prepareStatement(insertSql)
+  }
+
+  private[this] def jdbcBatchInsert(insertStatement: PreparedStatement, rows: Vector[Row]): Unit = {
+    insertStatement.clearParameters()
+
+    rows.foreach { row =>
+      insertStatement.setObject(1, row(0))
+      insertStatement.setObject(2, row(1))
+      insertStatement.setObject(3, row(2))
+      insertStatement.setObject(4, row(3))
+      insertStatement.setObject(5, row(4))
+      insertStatement.setObject(6, row(5))
+      insertStatement.setObject(7, row(6))
+      insertStatement.addBatch()
+    }
+
+    insertStatement.executeBatch()
+  }
+
+  private[this] lazy val originJdbcConnection: Connection = {
+    val connectionString = s"jdbc:postgresql://localhost:${containers.origin.db.port}/${containers.origin.db.name}?user=postgres"
+    val connection: Connection = DriverManager.getConnection(connectionString)
+    connection.setReadOnly(true)
+    connection
+  }
+
+  private[this] lazy val targetJdbcConnection: Connection = {
+    val connectionString = s"jdbc:postgresql://localhost:${containers.targetSingleThreaded.db.port}/${containers.targetSingleThreaded.db.name}?user=postgres"
+    DriverManager.getConnection(connectionString)
   }
 }
