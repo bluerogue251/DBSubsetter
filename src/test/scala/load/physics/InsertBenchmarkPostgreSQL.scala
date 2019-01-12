@@ -19,6 +19,9 @@ import scala.concurrent.{Await, Future}
 
 
 // Assumes physics DB is completely set up already
+// By far the fastest is when we use Bulk Copy with a small SQL Query String
+// But doing a Bulk Copy with a large SQL query string with many IDs in it is almost just as slow as the single SQL Statement Solution
+// (But, it is nice not to have to load all those rows into memory...)
 class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
 
   override protected def testName: String = "insert_benchmark"
@@ -55,9 +58,10 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
     val jdbcBatch10000 = createTargetTableSql("jdbc_batch_10000")
     val singleStatement100 = createTargetTableSql("single_statement_100")
     val singleStatement1000 = createTargetTableSql("single_statement_1000")
-    val singleStatement10000 = createTargetTableSql("single_statement_10000")
+    val singleStatement4681 = createTargetTableSql("single_statement_4681")
     val bulkCopy100 = createTargetTableSql("bulk_copy_100")
     val bulkCopy1000 = createTargetTableSql("bulk_copy_1000")
+    val bulkCopy4681 = createTargetTableSql("bulk_copy_4681")
     val bulkCopy10000 = createTargetTableSql("bulk_copy_10000")
     val bulkCopy50000 = createTargetTableSql("bulk_copy_50000")
     val createTableStatements = DBIO.seq(
@@ -66,9 +70,10 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
       jdbcBatch10000,
       singleStatement100,
       singleStatement1000,
-      singleStatement10000,
+      singleStatement4681,
       bulkCopy100,
       bulkCopy1000,
+      bulkCopy4681,
       bulkCopy10000,
       bulkCopy50000
     )
@@ -103,8 +108,15 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
     singleStatementFullFlow("single_statement_1000", 1000)
   }
 
-  test("Single Statement Insert 10000 Rows At A Time") {
-    singleStatementFullFlow("single_statement_10000", 10000)
+  /*
+   * Prepared Statement uses the positive half of a signed 2-byte integer so that max is:
+   * 2 bytes = 16 bits
+   * 16 bits signed = 15 bits of positive numbers
+   * 2^15 possible placeholders = 32768 possible placeholders
+   * 7 values per row so 32768 / 7 = A Max of 4681 rows at a time
+   */
+  test("Single Statement Insert 4681 Rows At A Time") {
+    singleStatementFullFlow("single_statement_4681", 4681)
   }
 
   test("Bulk Copy 100 Rows At A Time") {
@@ -113,6 +125,10 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
 
   test("Bulk Copy 1000 Rows At A Time") {
     bulkCopyFullFlow("bulk_copy_1000", 1000)
+  }
+
+  test("Bulk Copy 4681 Rows At A Time") {
+    bulkCopyFullFlow("bulk_copy_4681", 4681)
   }
 
   test("Bulk Copy 10000 Rows At A Time") {
@@ -162,8 +178,8 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
   }
 
   private[this] def singleStatementFullFlow(tableSuffix: String, batchSize: Int): Unit = {
-    def buildInsertStatement(tableSuffix: String, batchSize: Int): PreparedStatement = {
-      val questionMarks = (0 until batchSize).map(_ => "(?, ?, ?, ?, ?, ?, ?)").mkString(",\n")
+    def buildInsertStatement(batchSizeInternal: Int): PreparedStatement = {
+      val questionMarks = (0 until batchSizeInternal).map(_ => "(?, ?, ?, ?, ?, ?, ?)").mkString(",\n")
       val insertSql =
         s"""insert into quantum_data_$tableSuffix
            |  (id, experiment_id, quantum_domain_data_id, data_1, data_2, data_3, created_at)
@@ -185,11 +201,9 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
         insertStatement.setObject(rowIndex * 7 + 6, row(5))
         insertStatement.setObject(rowIndex * 7 + 7, row(6))
       }
-
-      insertStatement.execute()
     }
 
-    val defaultInsertStatement: PreparedStatement = buildInsertStatement(tableSuffix, batchSize)
+    val defaultInsertStatement: PreparedStatement = buildInsertStatement(batchSize)
     val runtimeSeconds: Long = runWithTimerSeconds(() => {
       (1 to 6000000 by batchSize).foreach(startOfBatchId => {
         val rows: Vector[Row] = fetchRows(startOfBatchId, startOfBatchId + batchSize - 1)
@@ -199,7 +213,7 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
           } else {
             // This should only happen for the last batch
             System.out.println(s"Building single insert statement for nonstandard batch size ${rows.length}")
-            buildInsertStatement(tableSuffix, batchSize)
+            buildInsertStatement(rows.length)
           }
         insertRows(insertStatement, rows)
       })
@@ -211,6 +225,15 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
     val originCopyManager: CopyManager = new CopyManager(originJdbcConnection.asInstanceOf[BaseConnection])
     val targetCopyManager: CopyManager = new CopyManager(targetJdbcConnection.asInstanceOf[BaseConnection])
 
+
+    def makeBulkCopyIdString(fromIdInclusive: Int, endIdInclusive: Int): String = {
+//      val idValues = (fromIdInclusive to endIdInclusive).map(i => s"($i)").mkString(",")
+//      s"COPY (select * from quantum_data where id in (VALUES $idValues)) TO STDOUT (FORMAT BINARY)"
+
+      val idValues = (fromIdInclusive to endIdInclusive).mkString(",")
+      s"COPY (select * from quantum_data where id in ($idValues)) TO STDOUT (FORMAT BINARY)"
+    }
+
     def doPostgresBulkCopy(fromIdInclusive: Int, toIdInclusive: Int): Unit = {
       // The targetWriteStream should read its input from the originReadStream
       // See https://stackoverflow.com/a/23874232
@@ -219,7 +242,7 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
 
       import scala.concurrent.ExecutionContext.Implicits.global
       Future {
-        val copyFromOriginSql = s"COPY (select * from quantum_data where id between $fromIdInclusive and $toIdInclusive) TO STDOUT (FORMAT BINARY)"
+        val copyFromOriginSql = makeBulkCopyIdString(fromIdInclusive, toIdInclusive)
         originCopyManager.copyOut(copyFromOriginSql, originReadStream)
         originReadStream.close()
       }
