@@ -1,8 +1,11 @@
 package load.physics
 
+import java.io._
 import java.sql.{Connection, DriverManager, PreparedStatement, ResultSet}
 
 import e2e.AbstractPostgresqlEndToEndTest
+import org.postgresql.copy.CopyManager
+import org.postgresql.core.BaseConnection
 import slick.jdbc.PostgresProfile.api._
 import slick.sql.SqlAction
 import trw.dbsubsetter.db.Row
@@ -11,8 +14,8 @@ import util.db.{DatabaseContainerSet, PostgreSQLContainer, PostgreSQLDatabase}
 import util.docker.ContainerUtil
 
 import scala.collection.mutable.ArrayBuffer
-import scala.concurrent.Await
 import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 
 
 // Assumes physics DB is completely set up already
@@ -56,6 +59,7 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
     val bulkCopy100 = createTargetTableSql("bulk_copy_100")
     val bulkCopy1000 = createTargetTableSql("bulk_copy_1000")
     val bulkCopy10000 = createTargetTableSql("bulk_copy_10000")
+    val bulkCopy50000 = createTargetTableSql("bulk_copy_50000")
     val createTableStatements = DBIO.seq(
       jdbcBatch100,
       jdbcBatch1000,
@@ -65,7 +69,8 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
       singleStatement10000,
       bulkCopy100,
       bulkCopy1000,
-      bulkCopy10000
+      bulkCopy10000,
+      bulkCopy50000
     )
 
     Await.ready(targetSingleThreadedSlick.run(createTableStatements), Duration.Inf)
@@ -102,16 +107,20 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
     singleStatementFullFlow("single_statement_10000", 10000)
   }
 
-  test("Bulk Copy Insert 100 Rows At A Time") {
-
+  test("Bulk Copy 100 Rows At A Time") {
+    bulkCopyFullFlow("bulk_copy_100", 100)
   }
 
-  test("Bulk Copy Insert 1000 Rows At A Time") {
-
+  test("Bulk Copy 1000 Rows At A Time") {
+    bulkCopyFullFlow("bulk_copy_1000", 1000)
   }
 
-  test("Bulk Copy Insert 10000 Rows At A Time") {
+  test("Bulk Copy 10000 Rows At A Time") {
+    bulkCopyFullFlow("bulk_copy_10000", 10000)
+  }
 
+  test("Bulk Copy 50000 Rows At A Time") {
+    bulkCopyFullFlow("bulk_copy_50000", 50000)
   }
 
   private[this] def jdbcBatchFullFlow(tableSuffix: String, batchSize: Int): Unit = {
@@ -142,6 +151,36 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
       })
     })
     System.out.println(s"Single Insert Statement $batchSize Rows At A Time Runtime: $runtimeSeconds Seconds")
+  }
+
+  private[this] def bulkCopyFullFlow(tableSuffix: String, batchSize: Int): Unit = {
+    val originCopyManager: CopyManager = new CopyManager(originJdbcConnection.asInstanceOf[BaseConnection])
+    val targetCopyManager: CopyManager = new CopyManager(targetJdbcConnection.asInstanceOf[BaseConnection])
+
+    def doPostgresBulkCopy(fromIdInclusive: Int, toIdInclusive: Int): Unit = {
+      // The targetWriteStream should read its input from the originReadStream
+      // See https://stackoverflow.com/a/23874232
+      val originReadStream: java.io.PipedOutputStream = new PipedOutputStream()
+      val targetWriteStream: java.io.PipedInputStream = new PipedInputStream(originReadStream)
+
+      import scala.concurrent.ExecutionContext.Implicits.global
+      Future {
+        val copyFromOriginSql = s"COPY (select * from quantum_data where id between $fromIdInclusive and $toIdInclusive) TO STDOUT (FORMAT BINARY)"
+        originCopyManager.copyOut(copyFromOriginSql, originReadStream)
+        originReadStream.close()
+      }
+
+      val copyToTargetSql = s"COPY quantum_data_$tableSuffix FROM STDIN (FORMAT BINARY)"
+      targetCopyManager.copyIn(copyToTargetSql, targetWriteStream)
+      targetWriteStream.close()
+    }
+
+    val runtimeSeconds: Long = runWithTimerSeconds(() => {
+      (1 to 6000000 by batchSize).foreach(startOfBatchId => {
+        doPostgresBulkCopy(startOfBatchId, startOfBatchId + batchSize - 1)
+      })
+    })
+    System.out.println(s"Bulk Copy $batchSize Rows At A Time Runtime: $runtimeSeconds Seconds")
   }
 
   private[this] def runWithTimerSeconds(f: () => Unit): Long = {
