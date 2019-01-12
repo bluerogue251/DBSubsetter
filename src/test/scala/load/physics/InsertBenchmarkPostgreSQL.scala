@@ -112,10 +112,10 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
   private[this] def timeMillis(f: () => Unit): Long = ???
 
   private[this] def createTargetTableSql(suffix: String): SqlAction[Int, NoStream, Effect] = {
-    sqlu"""create table quantum_data_$suffix(
+    sqlu"""create table quantum_data_#$suffix(
              id bigserial primary key,
-             experiment_id integer not null references experiments(id),
-             quantum_domain_data_id bigint not null references quantum_domain(id),
+             experiment_id integer not null,
+             quantum_domain_data_id bigint not null,
              data_1 varchar not null,
              data_2 varchar not null,
              data_3 varchar not null,
