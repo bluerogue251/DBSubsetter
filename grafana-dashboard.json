@@ -56,18 +56,39 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "rate(DuplicateRecordDiscarded[1s])",
+            "expr": "rate(OriginDbRowsFetched[1s])",
             "format": "time_series",
             "intervalFactor": 1,
-            "legendFormat": "Duplicate Rows Discarded Per Second",
+            "legendFormat": "Rows Fetched from Origin DB Per Second",
             "refId": "A"
+          },
+          {
+            "expr": "rate(TargetDbRowsInserted[1s])",
+            "format": "time_series",
+            "intervalFactor": 1,
+            "legendFormat": "Rows Inserted into Target DB Per Second",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(DuplicateOriginDbRowsDiscarded[1s])",
+            "format": "time_series",
+            "intervalFactor": 1,
+            "legendFormat": "Duplicate Origin DB Rows Discarded Per Second",
+            "refId": "C"
+          },
+          {
+            "expr": "rate(DuplicateFkTasksDiscarded[1s])",
+            "format": "time_series",
+            "intervalFactor": 1,
+            "legendFormat": "Duplicate ForeignKeyTasks Discarded Per Second",
+            "refId": "D"
           }
         ],
         "thresholds": [],
         "timeFrom": null,
         "timeRegions": [],
         "timeShift": null,
-        "title": "DB Rows Rate",
+        "title": "Notable Event Rates",
         "tooltip": {
           "shared": true,
           "sort": 0,
@@ -116,6 +137,98 @@
           "w": 24,
           "x": 0,
           "y": 5
+        },
+        "id": 9,
+        "legend": {
+          "avg": false,
+          "current": false,
+          "max": false,
+          "min": false,
+          "show": false,
+          "total": false,
+          "values": false
+        },
+        "lines": true,
+        "linewidth": 1,
+        "links": [],
+        "nullPointMode": "null",
+        "percentage": false,
+        "pointradius": 5,
+        "points": false,
+        "renderer": "flot",
+        "seriesOverrides": [],
+        "spaceLength": 10,
+        "stack": false,
+        "steppedLine": false,
+        "targets": [
+          {
+            "expr": "OriginDbRowsFetched - DuplicateOriginDbRowsDiscarded",
+            "format": "time_series",
+            "intervalFactor": 1,
+            "legendFormat": "Total Unique Rows Fetched from Origin DB",
+            "refId": "A"
+          },
+          {
+            "expr": "TargetDbRowsInserted",
+            "format": "time_series",
+            "intervalFactor": 1,
+            "legendFormat": "Total Rows Inserted into Target DB",
+            "refId": "B"
+          }
+        ],
+        "thresholds": [],
+        "timeFrom": null,
+        "timeRegions": [],
+        "timeShift": null,
+        "title": "DB Row Totals",
+        "tooltip": {
+          "shared": true,
+          "sort": 0,
+          "value_type": "individual"
+        },
+        "type": "graph",
+        "xaxis": {
+          "buckets": null,
+          "mode": "time",
+          "name": null,
+          "show": true,
+          "values": []
+        },
+        "yaxes": [
+          {
+            "format": "short",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+          },
+          {
+            "format": "short",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": false
+          }
+        ],
+        "yaxis": {
+          "align": false,
+          "alignLevel": null
+        }
+      },
+      {
+        "aliasColors": {},
+        "bars": false,
+        "dashLength": 10,
+        "dashes": false,
+        "datasource": "prometheus",
+        "fill": 1,
+        "gridPos": {
+          "h": 5,
+          "w": 24,
+          "x": 0,
+          "y": 10
         },
         "id": 2,
         "legend": {
@@ -200,7 +313,7 @@
           "h": 5,
           "w": 24,
           "x": 0,
-          "y": 10
+          "y": 15
         },
         "id": 7,
         "legend": {
@@ -285,7 +398,7 @@
           "h": 5,
           "w": 24,
           "x": 0,
-          "y": 15
+          "y": 20
         },
         "id": 4,
         "legend": {
@@ -370,7 +483,7 @@
           "h": 5,
           "w": 24,
           "x": 0,
-          "y": 20
+          "y": 25
         },
         "id": 6,
         "legend": {
@@ -455,7 +568,7 @@
           "h": 5,
           "w": 24,
           "x": 0,
-          "y": 25
+          "y": 30
         },
         "id": 3,
         "legend": {
@@ -540,7 +653,7 @@
           "h": 5,
           "w": 24,
           "x": 0,
-          "y": 30
+          "y": 35
         },
         "id": 5,
         "legend": {

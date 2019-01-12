@@ -10,6 +10,20 @@ object Metrics {
       .help("n/a")
       .register()
 
+  val OriginDbRowsFetched: Counter =
+    Counter
+      .build()
+      .name("OriginDbRowsFetched")
+      .help("n/a")
+      .register()
+
+  val DuplicateOriginDbRowsDiscarded: Counter =
+    Counter
+      .build()
+      .name("DuplicateOriginDbRowsDiscarded")
+      .help("n/a")
+      .register()
+
   val JdbcResultConverterHistogram: Histogram =
     Histogram
       .build()
@@ -24,6 +38,13 @@ object Metrics {
       .help("n/a")
       .register()
 
+  val TargetDbRowsInserted: Counter =
+    Counter
+      .build()
+      .name("TargetDbRowsInserted")
+      .help("n/a")
+      .register()
+
   val PendingTasksGauge: Gauge =
     Gauge
     .build()
@@ -31,10 +52,10 @@ object Metrics {
     .help("n/a")
     .register()
 
-  val DuplicateRecordDiscarded: Counter =
+  val DuplicateFkTasksDiscarded: Counter =
     Counter
     .build()
-    .name("DuplicateRecordDiscarded")
+    .name("DuplicateFkTasksDiscarded")
     .help("n/a")
     .register()
 }
