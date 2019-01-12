@@ -124,18 +124,72 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
   }
 
   private[this] def jdbcBatchFullFlow(tableSuffix: String, batchSize: Int): Unit = {
-    val insertStatement: PreparedStatement = buildJdbcBatchInsertStatement(tableSuffix)
+    def buildInsertStatement(tableSuffix: String): PreparedStatement = {
+      val insertSql =
+        s"""insert into quantum_data_$tableSuffix
+           |  (id, experiment_id, quantum_domain_data_id, data_1, data_2, data_3, created_at)
+           |  values
+           |  (?, ?, ?, ?, ?, ?, ?)
+       """.stripMargin
+      targetJdbcConnection.prepareStatement(insertSql)
+    }
+
+    def insertRows(insertStatement: PreparedStatement, rows: Vector[Row]): Unit = {
+      insertStatement.clearParameters()
+
+      rows.foreach { row =>
+        insertStatement.setObject(1, row(0))
+        insertStatement.setObject(2, row(1))
+        insertStatement.setObject(3, row(2))
+        insertStatement.setObject(4, row(3))
+        insertStatement.setObject(5, row(4))
+        insertStatement.setObject(6, row(5))
+        insertStatement.setObject(7, row(6))
+        insertStatement.addBatch()
+      }
+
+      insertStatement.executeBatch()
+    }
+
+    val insertStatement: PreparedStatement = buildInsertStatement(tableSuffix)
     val runtimeSeconds: Long = runWithTimerSeconds(() => {
       (1 to 6000000 by batchSize).foreach(startOfBatchId => {
         val rows: Vector[Row] = fetchRows(startOfBatchId, startOfBatchId + batchSize - 1)
-        jdbcBatchInsert(insertStatement, rows)
+        insertRows(insertStatement, rows)
       })
     })
     System.out.println(s"JDBC Batch Insert $batchSize Rows At A Time Runtime: $runtimeSeconds Seconds")
   }
 
   private[this] def singleStatementFullFlow(tableSuffix: String, batchSize: Int): Unit = {
-    val defaultInsertStatement: PreparedStatement = buildSingleInsertStatement(tableSuffix, batchSize)
+    def buildInsertStatement(tableSuffix: String, batchSize: Int): PreparedStatement = {
+      val questionMarks = (0 until batchSize).map(_ => "(?, ?, ?, ?, ?, ?, ?)").mkString(",\n")
+      val insertSql =
+        s"""insert into quantum_data_$tableSuffix
+           |  (id, experiment_id, quantum_domain_data_id, data_1, data_2, data_3, created_at)
+           |  values
+           |  $questionMarks
+       """.stripMargin
+      targetJdbcConnection.prepareStatement(insertSql)
+    }
+
+    def insertRows(insertStatement: PreparedStatement, rows: Vector[Row]): Unit = {
+      insertStatement.clearParameters()
+
+      rows.zipWithIndex.foreach { case (row, rowIndex) =>
+        insertStatement.setObject(rowIndex * 7 + 1, row(0))
+        insertStatement.setObject(rowIndex * 7 + 2, row(1))
+        insertStatement.setObject(rowIndex * 7 + 3, row(2))
+        insertStatement.setObject(rowIndex * 7 + 4, row(3))
+        insertStatement.setObject(rowIndex * 7 + 5, row(4))
+        insertStatement.setObject(rowIndex * 7 + 6, row(5))
+        insertStatement.setObject(rowIndex * 7 + 7, row(6))
+      }
+
+      insertStatement.execute()
+    }
+
+    val defaultInsertStatement: PreparedStatement = buildInsertStatement(tableSuffix, batchSize)
     val runtimeSeconds: Long = runWithTimerSeconds(() => {
       (1 to 6000000 by batchSize).foreach(startOfBatchId => {
         val rows: Vector[Row] = fetchRows(startOfBatchId, startOfBatchId + batchSize - 1)
@@ -145,9 +199,9 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
           } else {
             // This should only happen for the last batch
             System.out.println(s"Building single insert statement for nonstandard batch size ${rows.length}")
-            buildSingleInsertStatement(tableSuffix, batchSize)
+            buildInsertStatement(tableSuffix, batchSize)
           }
-        singleStatementInsert(insertStatement, rows)
+        insertRows(insertStatement, rows)
       })
     })
     System.out.println(s"Single Insert Statement $batchSize Rows At A Time Runtime: $runtimeSeconds Seconds")
@@ -228,60 +282,6 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
       rows += row
     }
     rows.toVector
-  }
-
-  private[this] def buildJdbcBatchInsertStatement(tableSuffix: String): PreparedStatement = {
-    val insertSql =
-      s"""insert into quantum_data_$tableSuffix
-         |  (id, experiment_id, quantum_domain_data_id, data_1, data_2, data_3, created_at)
-         |  values
-         |  (?, ?, ?, ?, ?, ?, ?)
-       """.stripMargin
-    targetJdbcConnection.prepareStatement(insertSql)
-  }
-
-  private[this] def buildSingleInsertStatement(tableSuffix: String, batchSize: Int): PreparedStatement = {
-    val questionMarks = (0 until batchSize).map(_ => "(?, ?, ?, ?, ?, ?, ?)").mkString(",\n")
-    val insertSql =
-      s"""insert into quantum_data_$tableSuffix
-         |  (id, experiment_id, quantum_domain_data_id, data_1, data_2, data_3, created_at)
-         |  values
-         |  $questionMarks
-       """.stripMargin
-    targetJdbcConnection.prepareStatement(insertSql)
-  }
-
-  private[this] def jdbcBatchInsert(insertStatement: PreparedStatement, rows: Vector[Row]): Unit = {
-    insertStatement.clearParameters()
-
-    rows.foreach { row =>
-      insertStatement.setObject(1, row(0))
-      insertStatement.setObject(2, row(1))
-      insertStatement.setObject(3, row(2))
-      insertStatement.setObject(4, row(3))
-      insertStatement.setObject(5, row(4))
-      insertStatement.setObject(6, row(5))
-      insertStatement.setObject(7, row(6))
-      insertStatement.addBatch()
-    }
-
-    insertStatement.executeBatch()
-  }
-
-  private[this] def singleStatementInsert(insertStatement: PreparedStatement, rows: Vector[Row]): Unit = {
-    insertStatement.clearParameters()
-
-    rows.zipWithIndex.foreach { case (row, rowIndex) =>
-      insertStatement.setObject(rowIndex * 7 + 1, row(0))
-      insertStatement.setObject(rowIndex * 7 + 2, row(1))
-      insertStatement.setObject(rowIndex * 7 + 3, row(2))
-      insertStatement.setObject(rowIndex * 7 + 4, row(3))
-      insertStatement.setObject(rowIndex * 7 + 5, row(4))
-      insertStatement.setObject(rowIndex * 7 + 6, row(5))
-      insertStatement.setObject(rowIndex * 7 + 7, row(6))
-    }
-
-    insertStatement.execute()
   }
 
   private[this] lazy val originJdbcConnection: Connection = {
