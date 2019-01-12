@@ -10,6 +10,10 @@ import util.docker.ContainerUtil
 // Assumes physics DB is completely set up already
 class TargetDBInsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
 
+  override protected def testName: String = ???
+
+  protected def programArgs: Array[String] = ???
+
   override protected def startOriginContainer(): Unit = ContainerUtil.start(containers.origin.name)
 
   override protected def createOriginDatabase(): Unit = {}
@@ -43,8 +47,6 @@ class TargetDBInsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
     )
     targetSingleThreadedSlick.run(createTableStatements)
   }
-
-  protected def programArgs: Array[String]
 
   override protected def runSubsetInSingleThreadedMode(): Unit = {}
 
