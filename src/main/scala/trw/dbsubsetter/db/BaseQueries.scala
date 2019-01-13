@@ -1,8 +1,7 @@
-package trw.dbsubsetter.workflow
+package trw.dbsubsetter.db
 
 import trw.dbsubsetter.config.Config
-import trw.dbsubsetter.db.{SchemaInfo, Sql}
-
+import trw.dbsubsetter.workflow.BaseQuery
 
 object BaseQueries {
   def get(config: Config, sch: SchemaInfo): Vector[BaseQuery] = {
