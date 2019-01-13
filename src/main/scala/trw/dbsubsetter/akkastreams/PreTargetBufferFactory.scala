@@ -22,21 +22,21 @@ private[akkastreams] object PreTargetBufferFactory {
   }
 
   private[this] def wrapWithInstrumentation(flow: Flow[PksAdded, PksAdded, NotUsed]): Flow[PksAdded, PksAdded, NotUsed] = {
-    val instrumentFlowEntrance: PksAdded => PksAdded = pksEnteringBuffer => {
+    val instrumentEntrance: PksAdded => PksAdded = pksEnteringBuffer => {
       Metrics.PreTargetBufferSizeGauge.inc()
       Metrics.PreTargetBufferRowsGauge.inc(pksEnteringBuffer.rowsNeedingParentTasks.size)
       pksEnteringBuffer
     }
 
-    val instrumentFlowExit: PksAdded => PksAdded = pksExitingBuffer => {
+    val instrumentExit: PksAdded => PksAdded = pksExitingBuffer => {
       Metrics.PreTargetBufferSizeGauge.dec()
       Metrics.PreTargetBufferRowsGauge.dec(pksExitingBuffer.rowsNeedingParentTasks.size)
       pksExitingBuffer
     }
 
     val wrapper: BidiFlow[PksAdded, PksAdded, PksAdded, PksAdded, NotUsed] =
-      BidiFlow.fromFunctions(instrumentFlowEntrance, instrumentFlowExit)
+      BidiFlow.fromFunctions(instrumentEntrance, instrumentExit)
 
-    flow.join(wrapper)
+    wrapper.join(flow)
   }
 }
