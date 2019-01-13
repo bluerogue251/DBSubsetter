@@ -87,17 +87,17 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
 
   override protected def postSubset(): Unit = {}
 
-//  test("JDBC Batch Insert 100 Rows At A Time") {
-//    jdbcBatchFullFlow("jdbc_batch_100", 100)
-//  }
+  test("JDBC Batch Insert 100 Rows At A Time") {
+    jdbcBatchFullFlow("jdbc_batch_100", 100)
+  }
 
-//  test("JDBC Batch Insert 1000 Rows At A Time") {
-//    jdbcBatchFullFlow("jdbc_batch_1000", 1000)
-//  }
-//
-//  test("JDBC Batch Insert 10000 Rows At A Time") {
-//    jdbcBatchFullFlow("jdbc_batch_10000", 10000)
-//  }
+  test("JDBC Batch Insert 1000 Rows At A Time") {
+    jdbcBatchFullFlow("jdbc_batch_1000", 1000)
+  }
+
+  test("JDBC Batch Insert 10000 Rows At A Time") {
+    jdbcBatchFullFlow("jdbc_batch_10000", 10000)
+  }
 
   test("Single Statement Insert 100 Rows At A Time") {
     singleStatementFullFlow("single_statement_100", 100)
@@ -165,6 +165,7 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
       }
 
       insertStatement.executeBatch()
+      targetJdbcConnection.commit()
     }
 
     val insertStatement: PreparedStatement = buildInsertStatement(tableSuffix)
@@ -203,6 +204,7 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
       }
 
       insertStatement.execute()
+      targetJdbcConnection.commit()
     }
 
     val defaultInsertStatement: PreparedStatement = buildInsertStatement(batchSize)
@@ -254,8 +256,10 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
     val runtimeSeconds: Long = runWithTimerSeconds(() => {
       (1 to 6000000 by batchSize).foreach(startOfBatchId => {
         doPostgresBulkCopy(startOfBatchId, startOfBatchId + batchSize - 1)
+        targetJdbcConnection.commit()
       })
     })
+
     System.out.println(s"Bulk Copy $batchSize Rows At A Time Runtime: $runtimeSeconds Seconds")
   }
 
@@ -315,6 +319,8 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
 
   private[this] lazy val targetJdbcConnection: Connection = {
     val connectionString = s"jdbc:postgresql://localhost:${containers.targetSingleThreaded.db.port}/${containers.targetSingleThreaded.db.name}?user=postgres"
-    DriverManager.getConnection(connectionString)
+    val connection: Connection = DriverManager.getConnection(connectionString)
+    connection.setAutoCommit(false)
+    connection
   }
 }
