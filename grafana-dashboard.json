@@ -903,6 +903,204 @@
           "align": false,
           "alignLevel": null
         }
+      },
+      {
+        "aliasColors": {},
+        "bars": false,
+        "dashLength": 10,
+        "dashes": false,
+        "datasource": "prometheus",
+        "fill": 1,
+        "gridPos": {
+          "h": 5,
+          "w": 24,
+          "x": 0,
+          "y": 50
+        },
+        "id": 12,
+        "legend": {
+          "avg": false,
+          "current": false,
+          "max": false,
+          "min": false,
+          "show": false,
+          "total": false,
+          "values": false
+        },
+        "lines": true,
+        "linewidth": 1,
+        "links": [],
+        "nullPointMode": "null",
+        "percentage": false,
+        "pointradius": 5,
+        "points": false,
+        "renderer": "flot",
+        "seriesOverrides": [],
+        "spaceLength": 10,
+        "stack": false,
+        "steppedLine": false,
+        "targets": [
+          {
+            "expr": "rate(PrimaryKeyStoreMarkSeen_count[1s])",
+            "format": "time_series",
+            "intervalFactor": 1,
+            "legendFormat": "Calls to MarkSeen Per Second",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(PrimaryKeyStoreMarkSeenWithChildren_count[1s])",
+            "format": "time_series",
+            "intervalFactor": 1,
+            "legendFormat": "Calls to MarkSeenWithChildren Per Second",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(PrimaryKeyStoreQueryAlreadySeen_count[1s])",
+            "format": "time_series",
+            "intervalFactor": 1,
+            "legendFormat": "Calls to QueryAlreadySeen Per Second",
+            "refId": "C"
+          }
+        ],
+        "thresholds": [],
+        "timeFrom": null,
+        "timeRegions": [],
+        "timeShift": null,
+        "title": "PrimaryKeyStore Event Frequency",
+        "tooltip": {
+          "shared": true,
+          "sort": 0,
+          "value_type": "individual"
+        },
+        "type": "graph",
+        "xaxis": {
+          "buckets": null,
+          "mode": "time",
+          "name": null,
+          "show": true,
+          "values": []
+        },
+        "yaxes": [
+          {
+            "format": "short",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+          },
+          {
+            "format": "short",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": false
+          }
+        ],
+        "yaxis": {
+          "align": false,
+          "alignLevel": null
+        }
+      },
+      {
+        "aliasColors": {},
+        "bars": false,
+        "dashLength": 10,
+        "dashes": false,
+        "datasource": "prometheus",
+        "fill": 1,
+        "gridPos": {
+          "h": 5,
+          "w": 24,
+          "x": 0,
+          "y": 55
+        },
+        "id": 13,
+        "legend": {
+          "avg": false,
+          "current": false,
+          "max": false,
+          "min": false,
+          "show": false,
+          "total": false,
+          "values": false
+        },
+        "lines": true,
+        "linewidth": 1,
+        "links": [],
+        "nullPointMode": "null",
+        "percentage": false,
+        "pointradius": 5,
+        "points": false,
+        "renderer": "flot",
+        "seriesOverrides": [],
+        "spaceLength": 10,
+        "stack": false,
+        "steppedLine": false,
+        "targets": [
+          {
+            "expr": "rate(PrimaryKeyStoreMarkSeen_sum[1s]) / rate(PrimaryKeyStoreMarkSeen_count[1s])",
+            "format": "time_series",
+            "intervalFactor": 1,
+            "legendFormat": "MarkSeen Average Duration",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(PrimaryKeyStoreMarkSeenWithChildren_sum[1s]) / rate(PrimaryKeyStoreMarkSeenWithChildren_count[1s])",
+            "format": "time_series",
+            "intervalFactor": 1,
+            "legendFormat": "MarkSeenWithChildren Average Duration",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(PrimaryKeyStoreQueryAlreadySeen_sum[1s]) / rate(PrimaryKeyStoreQueryAlreadySeen_count[1s])",
+            "format": "time_series",
+            "intervalFactor": 1,
+            "legendFormat": "QueryAlreadySeen Average Duration",
+            "refId": "C"
+          }
+        ],
+        "thresholds": [],
+        "timeFrom": null,
+        "timeRegions": [],
+        "timeShift": null,
+        "title": "PrimaryKeyStore Performance",
+        "tooltip": {
+          "shared": true,
+          "sort": 0,
+          "value_type": "individual"
+        },
+        "type": "graph",
+        "xaxis": {
+          "buckets": null,
+          "mode": "time",
+          "name": null,
+          "show": true,
+          "values": []
+        },
+        "yaxes": [
+          {
+            "format": "s",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+          },
+          {
+            "format": "short",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": false
+          }
+        ],
+        "yaxis": {
+          "align": false,
+          "alignLevel": null
+        }
       }
     ],
     "refresh": "5s",
