@@ -789,7 +789,7 @@
         "timeFrom": null,
         "timeRegions": [],
         "timeShift": null,
-        "title": "Pre-Target Buffer Entries and Rows (1 entry can have n rows)",
+        "title": "Pre-Target Buffer Entries and Rows (1 Entry Has Many Rows) (Akka Streams Only)",
         "tooltip": {
           "shared": true,
           "sort": 0,
