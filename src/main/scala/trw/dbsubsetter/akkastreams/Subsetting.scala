@@ -3,9 +3,9 @@ package trw.dbsubsetter.akkastreams
 import akka.NotUsed
 import akka.actor.ActorRef
 import akka.pattern.ask
+import akka.stream.SourceShape
 import akka.stream.scaladsl.GraphDSL.Implicits._
 import akka.stream.scaladsl.{Balance, Broadcast, Flow, GraphDSL, Merge, Partition, Source}
-import akka.stream.{OverflowStrategy, SourceShape}
 import akka.util.Timeout
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.{DbAccessFactory, SchemaInfo}
@@ -76,7 +76,7 @@ object Subsetting {
       fkTaskBufferFlow
 
     broadcastPksAdded ~>
-      Flow[PksAdded].buffer(config.preTargetBufferSize, OverflowStrategy.backpressure) ~>
+      PreTargetBufferFactory.buildPreTargetBuffer(config) ~>
       balanceTargetDb
 
     // FkTasks ~> cannotBePrechecked       ~>        OriginDbRequest
