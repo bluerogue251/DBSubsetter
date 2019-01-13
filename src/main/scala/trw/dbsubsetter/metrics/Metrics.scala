@@ -52,6 +52,27 @@ object Metrics {
     .help("n/a")
     .register()
 
+  val PreTargetBufferMaxSizeGauge: Gauge =
+    Gauge
+    .build()
+    .name("PreTargetBufferMaxSize")
+    .help("n/a")
+    .register()
+
+  val PreTargetBufferSizeGauge: Gauge =
+    Gauge
+    .build()
+    .name("PreTargetBufferSize")
+    .help("n/a")
+    .register()
+
+  val PreTargetBufferRowsGauge: Gauge =
+    Gauge
+    .build()
+    .name("PreTargetBufferRows")
+    .help("n/a")
+    .register()
+
   val DuplicateFkTasksDiscarded: Counter =
     Counter
     .build()
