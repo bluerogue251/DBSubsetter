@@ -4,6 +4,8 @@ version := "v1.0.0-beta.3"
 
 scalaVersion := "2.12.3"
 
+scalacOptions ++= Seq("-deprecation", "-Xfatal-warnings")
+
 libraryDependencies ++= Seq(
   // Command line parser
   "com.github.scopt" %% "scopt" % "3.7.0",

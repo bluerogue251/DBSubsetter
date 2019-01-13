@@ -58,7 +58,7 @@ class PhysicsDDL(val profile: slick.jdbc.JdbcProfile) {
     val researchGroupId: Rep[Option[Int]] = column[Option[Int]]("research_group_id")
     val createdAt: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("created_at")
 
-    lazy val fk1 = foreignKey("scientists_research_group_id_fkey", researchGroupId, ResearchGroups)(_.id)
+    lazy val fk1 = foreignKey("scientists_research_group_id_fkey", researchGroupId, ResearchGroups)(_.id.?)
     val idx1 = index("scientists_research_group_id_idx", researchGroupId)
   }
 
@@ -230,9 +230,9 @@ class PhysicsDDL(val profile: slick.jdbc.JdbcProfile) {
     val note: Rep[String] = column[String]("note")
     val createdAt: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("created_at")
 
-    lazy val fk1 = foreignKey("datum_notes_particle_collider_datum_id_fkey", particleColliderDatumId, ParticleColliderData)(_.id)
-    lazy val fk2 = foreignKey("datum_notes_quantum_datum_id_fkey", quantumDatumId, QuantumData)(_.id)
-    lazy val fk3 = foreignKey("datum_notes_gravitational_wave_datum_id_fkey", gravitationalWaveDatumId, GravitationalWaveData)(_.id)
+    lazy val fk1 = foreignKey("datum_notes_particle_collider_datum_id_fkey", particleColliderDatumId, ParticleColliderData)(_.id.?)
+    lazy val fk2 = foreignKey("datum_notes_quantum_datum_id_fkey", quantumDatumId, QuantumData)(_.id.?)
+    lazy val fk3 = foreignKey("datum_notes_gravitational_wave_datum_id_fkey", gravitationalWaveDatumId, GravitationalWaveData)(_.id.?)
     val idx1 = index("datum_notes_particle_collider_datum_id_idx", particleColliderDatumId)
     val idx2 = index("datum_notes_quantum_datum_id_idx", quantumDatumId)
     val idx3 = index("datum_notes_gravitational_wave_datum_id_idx", gravitationalWaveDatumId)

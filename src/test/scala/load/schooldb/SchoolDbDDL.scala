@@ -207,7 +207,7 @@ class SchoolDbDDL(val profile: slick.jdbc.JdbcProfile) {
     val latestValedictorianIdCache: Rep[Option[Long]] = column[Option[Long]]("latest_valedictorian_id_cache", O.Default(None))
 
     lazy val districtsFk = foreignKey("schools_district_id_fkey", districtId, Districts)(_.id)
-    lazy val studentsFk = foreignKey("schools_latest_valedictorian_id_cache_fkey", latestValedictorianIdCache, Students)(r => r.studentId)
+    lazy val studentsFk = foreignKey("schools_latest_valedictorian_id_cache_fkey", latestValedictorianIdCache, Students)(_.studentId.?)
     val index1 = index("schools_district_id_idx", districtId)
     val index2 = index("schools_latest_valedictorian_id_cache_idx", latestValedictorianIdCache)
   }
@@ -238,7 +238,7 @@ class SchoolDbDDL(val profile: slick.jdbc.JdbcProfile) {
     val createdAt: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("created_at")
     val updatedAt: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("updated_at")
 
-    lazy val schoolFk = foreignKey("Students_current_school_id_cache_fkey", currentSchoolIdCache, Schools)(_.id)
+    lazy val schoolFk = foreignKey("Students_current_school_id_cache_fkey", currentSchoolIdCache, Schools)(_.id.?)
     val index2 = index("Students_current_school_id_cache_idx", currentSchoolIdCache)
   }
 

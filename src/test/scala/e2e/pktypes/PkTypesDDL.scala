@@ -93,13 +93,13 @@ class PkTypesDDL(val profile: JdbcProfile) {
     val char10Id: Rep[Option[String]] = column[Option[String]]("char_10_id", O.Length(10, varying = false))
     val varchar10Id: Rep[Option[String]] = column[Option[String]]("varchar_10_id", O.Length(10, varying = true))
 
-    lazy val byteIdFk = foreignKey("byte_id_fkey", byteId, BytePkTable)(_.id)
-    lazy val shortIdFk = foreignKey("short_id_fkey", shortId, ShortPkTable)(_.id)
-    lazy val intIdFk = foreignKey("int_id_fkey", intId, IntPkTable)(_.id)
-    lazy val longIdFk = foreignKey("long_id_fkey", longId, LongPkTable)(_.id)
-    lazy val uuidIdFk = foreignKey("uuid_id_fkey", uuidId, UUIDPkTable)(_.id)
-    lazy val char10IdFk = foreignKey("char_10_id_fkey", char10Id, Char10PkTable)(_.id)
-    lazy val varchar10IdFk = foreignKey("varchar_10_id_fkey", varchar10Id, Varchar10PkTable)(_.id)
+    lazy val byteIdFk = foreignKey("byte_id_fkey", byteId, BytePkTable)(_.id.?)
+    lazy val shortIdFk = foreignKey("short_id_fkey", shortId, ShortPkTable)(_.id.?)
+    lazy val intIdFk = foreignKey("int_id_fkey", intId, IntPkTable)(_.id.?)
+    lazy val longIdFk = foreignKey("long_id_fkey", longId, LongPkTable)(_.id.?)
+    lazy val uuidIdFk = foreignKey("uuid_id_fkey", uuidId, UUIDPkTable)(_.id.?)
+    lazy val char10IdFk = foreignKey("char_10_id_fkey", char10Id, Char10PkTable)(_.id.?)
+    lazy val varchar10IdFk = foreignKey("varchar_10_id_fkey", varchar10Id, Varchar10PkTable)(_.id.?)
   }
 
   lazy val ReferencingTable = new TableQuery(tag => new ReferencingTable(tag))
