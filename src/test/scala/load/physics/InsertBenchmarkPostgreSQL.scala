@@ -20,12 +20,17 @@ import scala.concurrent.{Await, Future}
 
 
 /*
- * This is a very hacky extension of EndToEndTest class, but it gets the job done for now and can be refactored later.
+ * This is a benchmark to find out what the fastest way to insert large volumes of data into Postgres is.
+ * This is a very hacky extension of EndToEndTest class, and as benchmarks go it is not carefully controlled.
+ * However, it gets the job done for now and can be refactored and improved later.
  *
  * Assumes origin physics DB is completely set up already
  *
  * By far the fastest is when we use Bulk Copy with a small SQL Query String. Unfortunately,
- * our actual bulk copy SQL Query Strings need to be large with many IDs in them.
+ * our actual bulk copy SQL Query Strings need to be large with many IDs in them. If we go with Bulk Copy
+ * as the Production implementation of target DB Inserts, it might be worth having a feature which attempts
+ * to batch large lists of sequential integers as ranges with a start and an end, so that we can use a `BETWEEN`
+ * clause instead of listing out all of the IDs in the SQL query.
  *
  * Insert Benchmarks for 6,000,000 Rows:
  *
