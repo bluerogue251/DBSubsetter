@@ -2,9 +2,8 @@ package trw.dbsubsetter
 
 import io.prometheus.client.exporter.HTTPServer
 import trw.dbsubsetter.config.{CommandLineParser, Config}
-import trw.dbsubsetter.db.SchemaInfoRetrieval
+import trw.dbsubsetter.db.{BaseQueries, SchemaInfoRetrieval}
 import trw.dbsubsetter.util.Util
-import trw.dbsubsetter.workflow.BaseQueries
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
