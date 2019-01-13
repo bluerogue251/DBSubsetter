@@ -18,10 +18,37 @@ import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
 
-// Assumes physics DB is completely set up already
-// By far the fastest is when we use Bulk Copy with a small SQL Query String
-// But doing a Bulk Copy with a large SQL query string with many IDs in it is almost just as slow as the single SQL Statement Solution
-// (But, it is nice not to have to load all those rows into memory...)
+
+/*
+ * This is a very hacky extension of EndToEndTest class, but it gets the job done for now and can be refactored later.
+ *
+ * Assumes origin physics DB is completely set up already
+ *
+ * By far the fastest is when we use Bulk Copy with a small SQL Query String. Unfortunately,
+ * our actual bulk copy SQL Query Strings need to be large with many IDs in them.
+ *
+ * Insert Benchmarks for 6,000,000 Rows:
+ *
+ *   100 Rows at a time
+ *   JDBC Batch Insert:       529 Seconds
+ *   Single Insert Statement: 495 Seconds
+ *   Bulk Copy:               509 Seconds
+ *
+ *   1000 Rows at a time
+ *   JDBC Batch Insert:       182 Seconds
+ *   Single Insert Statement: 143 Seconds
+ *   Bulk Copy:               91  Seconds
+ *
+ *   4681 Rows At A Time
+ *   JDBC Batch Insert:       121 Seconds
+ *   Single Insert Statement: 67  Seconds
+ *   Bulk Copy:               53  Seconds
+ *
+ *   10000 Rows at a time:
+ *   JDBC Batch Insert: 118 Seconds
+ *   Bulk Copy:         49  Seconds
+
+ */
 class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
 
   override protected def testName: String = "insert_benchmark"
@@ -55,6 +82,7 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
     // TODO all of these are single connection at a time. What about multiple connections at a time?
     val jdbcBatch100 = createTargetTableSql("jdbc_batch_100")
     val jdbcBatch1000 = createTargetTableSql("jdbc_batch_1000")
+    val jdbcBatch4681 = createTargetTableSql("jdbc_batch_4681")
     val jdbcBatch10000 = createTargetTableSql("jdbc_batch_10000")
     val singleStatement100 = createTargetTableSql("single_statement_100")
     val singleStatement1000 = createTargetTableSql("single_statement_1000")
@@ -63,10 +91,10 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
     val bulkCopy1000 = createTargetTableSql("bulk_copy_1000")
     val bulkCopy4681 = createTargetTableSql("bulk_copy_4681")
     val bulkCopy10000 = createTargetTableSql("bulk_copy_10000")
-    val bulkCopy50000 = createTargetTableSql("bulk_copy_50000")
     val createTableStatements = DBIO.seq(
       jdbcBatch100,
       jdbcBatch1000,
+      jdbcBatch4681,
       jdbcBatch10000,
       singleStatement100,
       singleStatement1000,
@@ -74,8 +102,7 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
       bulkCopy100,
       bulkCopy1000,
       bulkCopy4681,
-      bulkCopy10000,
-      bulkCopy50000
+      bulkCopy10000
     )
 
     Await.ready(targetSingleThreadedSlick.run(createTableStatements), Duration.Inf)
@@ -93,6 +120,10 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
 
   test("JDBC Batch Insert 1000 Rows At A Time") {
     jdbcBatchFullFlow("jdbc_batch_1000", 1000)
+  }
+
+  test("JDBC Batch Insert 4681 Rows At A Time") {
+    jdbcBatchFullFlow("jdbc_batch_4681", 4681)
   }
 
   test("JDBC Batch Insert 10000 Rows At A Time") {
@@ -133,10 +164,6 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
 
   test("Bulk Copy 10000 Rows At A Time") {
     bulkCopyFullFlow("bulk_copy_10000", 10000)
-  }
-
-  test("Bulk Copy 50000 Rows At A Time") {
-    bulkCopyFullFlow("bulk_copy_50000", 50000)
   }
 
   private[this] def jdbcBatchFullFlow(tableSuffix: String, batchSize: Int): Unit = {
