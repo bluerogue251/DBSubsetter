@@ -87,17 +87,17 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
 
   override protected def postSubset(): Unit = {}
 
-  test("JDBC Batch Insert 100 Rows At A Time") {
-    jdbcBatchFullFlow("jdbc_batch_100", 100)
-  }
+//  test("JDBC Batch Insert 100 Rows At A Time") {
+//    jdbcBatchFullFlow("jdbc_batch_100", 100)
+//  }
 
-  test("JDBC Batch Insert 1000 Rows At A Time") {
-    jdbcBatchFullFlow("jdbc_batch_1000", 1000)
-  }
-
-  test("JDBC Batch Insert 10000 Rows At A Time") {
-    jdbcBatchFullFlow("jdbc_batch_10000", 10000)
-  }
+//  test("JDBC Batch Insert 1000 Rows At A Time") {
+//    jdbcBatchFullFlow("jdbc_batch_1000", 1000)
+//  }
+//
+//  test("JDBC Batch Insert 10000 Rows At A Time") {
+//    jdbcBatchFullFlow("jdbc_batch_10000", 10000)
+//  }
 
   test("Single Statement Insert 100 Rows At A Time") {
     singleStatementFullFlow("single_statement_100", 100)
@@ -201,6 +201,8 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
         insertStatement.setObject(rowIndex * 7 + 6, row(5))
         insertStatement.setObject(rowIndex * 7 + 7, row(6))
       }
+
+      insertStatement.execute()
     }
 
     val defaultInsertStatement: PreparedStatement = buildInsertStatement(batchSize)
@@ -227,9 +229,6 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
 
 
     def makeBulkCopyIdString(fromIdInclusive: Int, endIdInclusive: Int): String = {
-//      val idValues = (fromIdInclusive to endIdInclusive).map(i => s"($i)").mkString(",")
-//      s"COPY (select * from quantum_data where id in (VALUES $idValues)) TO STDOUT (FORMAT BINARY)"
-
       val idValues = (fromIdInclusive to endIdInclusive).mkString(",")
       s"COPY (select * from quantum_data where id in ($idValues)) TO STDOUT (FORMAT BINARY)"
     }
