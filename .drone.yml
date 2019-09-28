@@ -9,4 +9,3 @@ steps:
     commands:
       - sbt "testOnly unit.*"
       - sbt "testOnly integration.*"
-      - sbt "testOnly e2e.*"
