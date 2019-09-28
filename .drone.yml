@@ -9,3 +9,8 @@ steps:
     commands:
       - sbt "testOnly unit.*"
       - sbt "testOnly integration.*"
+---
+kind: signature
+hmac: a5724ad73ae0766e29e63407c5b2beb65e1e695e64b0679fa34b16efd687bad4
+
+...
