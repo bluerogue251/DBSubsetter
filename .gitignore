@@ -1,4 +1,8 @@
-target
+# Careful not to accidentally ignore scala packages called "target"
+# We have some packages with that name referring to the target database of a subsetting run
+target/*
+project/target/*
+project/project/target/*
 
 # IntelliJ
 *.iml
