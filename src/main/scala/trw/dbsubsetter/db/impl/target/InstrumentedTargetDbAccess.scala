@@ -1,4 +1,4 @@
-package trw.dbsubsetter.db.impl.workaroundtest
+package trw.dbsubsetter.db.impl.target
 
 import io.prometheus.client.{Counter, Histogram}
 import trw.dbsubsetter.db.{Row, Table, TargetDbAccess}

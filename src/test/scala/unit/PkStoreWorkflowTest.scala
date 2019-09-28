@@ -1,4 +1,4 @@
-package unit.somethingelse
+package unit
 
 import org.scalatest.FunSuite
 import trw.dbsubsetter.config.Config
