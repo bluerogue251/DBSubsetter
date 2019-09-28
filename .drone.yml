@@ -8,3 +8,4 @@ steps:
     image: bluerogue251/db-subsetter-sbt:2
     commands:
       - sbt testOnly PkStoreTest
+
