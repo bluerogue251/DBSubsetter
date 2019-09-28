@@ -4,7 +4,7 @@ import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.impl.connection.ConnectionFactory
 import trw.dbsubsetter.db.impl.mapper.{JdbcResultConverter, JdbcResultConverterImpl, JdbcResultConverterTimed}
 import trw.dbsubsetter.db.impl.origin.{InstrumentedOriginDbAccess, OriginDbAccessImpl}
-import trw.dbsubsetter.db.impl.target.{InstrumentedTargetDbAccess, TargetDbAccessImpl}
+import trw.dbsubsetter.db.impl.workaroundtest.{InstrumentedTargetDbAccess, TargetDbAccessImpl}
 
 final class DbAccessFactory(config: Config, schemaInfo: SchemaInfo) {
 
