@@ -12,26 +12,47 @@ package object db {
   type SqlQuery = String
   type SqlTemplates = Map[(ForeignKey, Table), SqlQuery]
 
-  case class SchemaInfo(tablesByName: Map[(SchemaName, TableName), Table],
-                        colsByTableOrdered: Map[Table, Vector[Column]],
-                        pksByTableOrdered: Map[Table, Vector[Column]],
-                        fksOrdered: Array[ForeignKey],
-                        fksFromTable: Map[Table, Vector[ForeignKey]],
-                        fksToTable: Map[Table, Vector[ForeignKey]],
-                        dbVendor: DbVendor)
+  class SchemaInfo(
+    val tablesByName: Map[(SchemaName, TableName), Table],
+    val colsByTableOrdered: Map[Table, Vector[Column]],
+    val pksByTableOrdered: Map[Table, Vector[Column]],
+    val fksOrdered: Array[ForeignKey],
+    val fksFromTable: Map[Table, Vector[ForeignKey]],
+    val fksToTable: Map[Table, Vector[ForeignKey]],
+    val dbVendor: DbVendor
+  )
 
-  case class Table(schema: SchemaName, name: TableName, hasSqlServerAutoIncrement: Boolean, storePks: Boolean)
+  class Table(
+    val schema: SchemaName,
+    val name: TableName,
+    val hasSqlServerAutoIncrement: Boolean,
+    val storePks: Boolean
+  )
 
-  case class Column(table: Table, name: ColumnName, ordinalPosition: Int, jdbcType: JDBCType, typeName: String)
+  class Column(
+    val table: Table,
+    val name: ColumnName,
+    val ordinalPosition: Int,
+    val jdbcType: JDBCType,
+    val typeName: String
+  )
 
-  case class ForeignKey(fromCols: Vector[Column], toCols: Vector[Column], pointsToPk: Boolean, i: Short) {
+  class ForeignKey(
+    val fromCols: Vector[Column],
+    val toCols: Vector[Column],
+    val pointsToPk: Boolean,
+    var i: Short
+  ) {
     val fromTable: Table = fromCols.head.table
     val toTable: Table = toCols.head.table
-
     val isSingleCol: Boolean = fromCols.size == 1
+    // TODO Refactor to remove mutability
+    def setIndex(index: Short): Unit = {
+      i = index
+    }
   }
 
-  implicit class VendorAwareJdbcConnection(conn: Connection) {
+  implicit class VendorAwareJdbcConnection(private val conn: Connection) {
     private val vendorName: String = conn.getMetaData.getDatabaseProductName
 
     val dbVendor: DbVendor = vendorName match {

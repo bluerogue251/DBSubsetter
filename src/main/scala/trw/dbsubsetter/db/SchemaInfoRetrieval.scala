@@ -11,14 +11,14 @@ object SchemaInfoRetrieval {
     val tablesByName = tables.map { t =>
       val hasSqlServerAutoincrement = columns.exists(c => c.schema == t.schema && c.table == t.name && c.isSqlServerAutoincrement)
       val storePks = !config.skipPkStore.contains((t.schema, t.name))
-      (t.schema, t.name) -> Table(t.schema, t.name, hasSqlServerAutoincrement, storePks)
+      (t.schema, t.name) -> new Table(t.schema, t.name, hasSqlServerAutoincrement, storePks)
     }.toMap
 
     val colsByTableAndName: Map[Table, Map[ColumnName, Column]] = {
       columns
         .groupBy(c => tablesByName(c.schema, c.table))
         .map { case (table, cols) =>
-          table -> cols.zipWithIndex.map { case (c, i) => c.name -> Column(table, c.name, i, c.jdbcType, c.typeName) }.toMap
+          table -> cols.zipWithIndex.map { case (c, i) => c.name -> new Column(table, c.name, i, c.jdbcType, c.typeName) }.toMap
         }
     }
 
@@ -68,10 +68,13 @@ object SchemaInfoRetrieval {
 
           val pointsToPk = pksByTableOrdered.get(toTable).fold(false)(pkCols => pkCols == toCols)
 
-        ForeignKey(fromCols, toCols, pointsToPk, 0)
+        new ForeignKey(fromCols, toCols, pointsToPk, 0)
       }
 
-      fksUnordered.toArray.zipWithIndex.map { case (fk, idx) => fk.copy(i = idx.toShort) }
+      fksUnordered.toArray.zipWithIndex.map { case (fk, idx) =>
+        fk.setIndex(idx.toShort)
+        fk
+      }
     }
 
     val fksFromTable: Map[Table, Vector[ForeignKey]] = {
@@ -82,7 +85,7 @@ object SchemaInfoRetrieval {
       foreignKeysOrdered.toVector.groupBy(_.toTable).withDefaultValue(Vector.empty)
     }
 
-    SchemaInfo(
+    new SchemaInfo(
       tablesByName,
       colsByTableOrdered,
       pksByTableOrdered,

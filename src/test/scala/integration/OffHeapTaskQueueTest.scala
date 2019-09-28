@@ -64,10 +64,15 @@ class OffHeapTaskQueueTest extends FunSuite {
 private[this] object OffHeapTaskQueueTest {
 
   private val parentTable: Table =
-    Table("public", "parent", hasSqlServerAutoIncrement = false, storePks = true)
+    new Table(
+      schema = "public",
+      name = "parent",
+      hasSqlServerAutoIncrement = false,
+      storePks = true
+    )
 
   private[this] val parentPkColumn: Column =
-    Column(
+    new Column(
       table = parentTable,
       name = "id",
       ordinalPosition = 4,
@@ -75,11 +80,16 @@ private[this] object OffHeapTaskQueueTest {
       typeName = "whatever"
     )
 
-  private[this] val childTable:
-    Table = Table("public", "child", hasSqlServerAutoIncrement = false, storePks = true)
+  private[this] val childTable: Table =
+    new Table(
+      schema = "public",
+      name = "child",
+      hasSqlServerAutoIncrement = false,
+      storePks = true
+    )
 
   private[this] val childFkColumn: Column =
-    Column(
+    new Column(
       table = childTable,
       name = "parentId",
       ordinalPosition = 7,
@@ -87,14 +97,22 @@ private[this] object OffHeapTaskQueueTest {
       typeName = "whatever"
     )
 
-  private val foreignKey: ForeignKey = ForeignKey(
-    fromCols = Vector(childFkColumn),
-    toCols = Vector(parentPkColumn),
-    pointsToPk = true,
-    i = 0
-  )
+  private val foreignKey: ForeignKey =
+    new ForeignKey(
+      fromCols = Vector(childFkColumn),
+      toCols = Vector(parentPkColumn),
+      pointsToPk = true,
+      i = 0
+    )
 
-  private val schemaInfo: SchemaInfo = {
-    SchemaInfo(Map.empty, Map.empty, Map.empty, Array(foreignKey), Map.empty, Map.empty, null)
-  }
+  private val schemaInfo: SchemaInfo =
+    new SchemaInfo(
+      tablesByName = Map.empty,
+      colsByTableOrdered = Map.empty,
+      pksByTableOrdered = Map.empty,
+      fksOrdered = Array(foreignKey),
+      fksFromTable = Map.empty,
+      fksToTable = Map.empty,
+      dbVendor = null
+    )
 }
