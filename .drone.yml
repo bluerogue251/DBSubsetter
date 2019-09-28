@@ -1,0 +1,10 @@
+---
+kind: pipeline
+type: docker
+name: default
+
+steps:
+  - name: test
+    image: bluerogue251/db-subsetter-sbt:1
+    commands:
+      - sbt testOnly PkStoreTest
