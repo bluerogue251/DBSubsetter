@@ -7,12 +7,38 @@ import trw.dbsubsetter.primarykeystore._
 
 class PkStoreTest extends FunSuite {
   test("PkStore is conscious of whether children have been processed yet") {
-    val table = Table("public", "users", hasSqlServerAutoIncrement = true, storePks = true)
-    val pkCol = Column(table, null, 0, null, null)
-    val schemaInfo = SchemaInfo(Map.empty, Map.empty, Map(table -> Vector(pkCol)), Array.empty, Map.empty, Map.empty, null)
-    val pkStore: PrimaryKeyStore = PrimaryKeyStoreFactory.buildPrimaryKeyStore(Config(), schemaInfo)
+    val table: Table =
+      new Table(
+        schema = "public",
+        name ="users",
+        hasSqlServerAutoIncrement = true,
+        storePks = true
+      )
 
-    val pkValue = "pkValue"
+    val pkCol: Column =
+      new Column(
+        table = table,
+        name = null,
+        ordinalPosition = 0,
+        jdbcType = null,
+        typeName = null
+      )
+
+    val schemaInfo: SchemaInfo =
+      new SchemaInfo(
+        tablesByName = Map.empty,
+        colsByTableOrdered = Map.empty,
+        pksByTableOrdered = Map(table -> Vector(pkCol)),
+        fksOrdered = Array.empty,
+        fksFromTable = Map.empty,
+        fksToTable = Map.empty,
+        dbVendor = null
+      )
+
+    val pkStore: PrimaryKeyStore =
+      PrimaryKeyStoreFactory.buildPrimaryKeyStore(Config(), schemaInfo)
+
+    val pkValue: String = "pkValue"
 
     // Add the PK to the pkStore, noting that we are not planning to fetch its children at this time
     val writeOutcome1 = pkStore.markSeen(table, pkValue)
