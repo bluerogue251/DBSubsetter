@@ -5,6 +5,6 @@ name: default
 
 steps:
   - name: test
-    image: bluerogue251/db-subsetter-sbt:2
+    image: bluerogue251/db-subsetter-sbt:3
     commands:
       - sbt "testOnly trw.dbsubsetter.unit.PkStoreTest"
