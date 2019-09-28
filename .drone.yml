@@ -7,12 +7,9 @@ steps:
   - name: test
     image: bluerogue251/db-subsetter-sbt:4
     commands:
-      - sbt compile
-      - sbt test:compile
-      - sbt "testOnly unit.*"
-      - sbt "testOnly integration.*"
+      - sbt "testOnly unit.* integration.*"
 ---
 kind: signature
-hmac: f471211e4d107b5ad80df662bbec792d1f6144ae9b060c80c3ab773bae227adb
+hmac: b8b107f924972368623a17b5162c627787f193f2833e2e443874728221ce3784
 
 ...
