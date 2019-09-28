@@ -6,6 +6,7 @@ target
 *.iws
 .idea
 out
+.attach_pid*
 
 # Mac
 .DS_Store

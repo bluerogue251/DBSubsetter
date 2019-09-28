@@ -8,14 +8,45 @@ import trw.dbsubsetter.workflow._
 
 class PkStoreWorkflowTest extends FunSuite {
   test("PkStoreWorkflow is conscious of fetchChildren") {
-    val table = Table("public", "users", hasSqlServerAutoIncrement = true, storePks = true)
-    val pkCol = Column(table, null, 0, null, null)
-    val schemaInfo = SchemaInfo(Map.empty, Map.empty, Map(table -> Vector(pkCol)), Array.empty, Map.empty, Map.empty, null)
-    val pkStore: PrimaryKeyStore = PrimaryKeyStoreFactory.buildPrimaryKeyStore(Config(), schemaInfo)
-    val pkStoreWorkflow = new PkStoreWorkflow(pkStore, schemaInfo)
-    val fkValue = "fkValue"
+    val table: Table =
+      new Table(
+        schema = "public",
+        name = "users",
+        hasSqlServerAutoIncrement = true,
+        storePks = true
+      )
+
+    val pkCol: Column =
+      new Column(
+        table = table,
+        name = null,
+        ordinalPosition = 0,
+        jdbcType = null,
+        typeName = null
+      )
+
+    val schemaInfo: SchemaInfo =
+      new SchemaInfo(
+        tablesByName = Map.empty,
+        colsByTableOrdered = Map.empty,
+        pksByTableOrdered = Map(table -> Vector(pkCol)),
+        fksOrdered = Array.empty,
+        fksFromTable = Map.empty,
+        fksToTable = Map.empty,
+        dbVendor = null
+      )
+
+    val pkStore: PrimaryKeyStore =
+      PrimaryKeyStoreFactory.buildPrimaryKeyStore(Config(), schemaInfo)
+
+    val pkStoreWorkflow =
+      new PkStoreWorkflow(pkStore, schemaInfo)
+
+    val fkValue: String = "fkValue"
+
     val row: Row = Array(fkValue)
-    val rows = Vector(row)
+
+    val rows: Vector[Row] = Vector(row)
 
     // Add the PK to the pkStore, noting that we have NOT yet fetched children
     val pkAddRequest1 = OriginDbResult(table, rows, None, fetchChildren = false)
@@ -42,11 +73,40 @@ class PkStoreWorkflowTest extends FunSuite {
   }
 
   test("PkStoreWorkflow is conscious of fetchChildren part2") {
-    val table = Table("public", "users", hasSqlServerAutoIncrement = true, storePks = true)
-    val primaryKeyColumn = Column(table, null, 0, null, null)
-    val schemaInfo: SchemaInfo = SchemaInfo(Map.empty, Map.empty, Map(table -> Vector(primaryKeyColumn)), Array.empty, Map.empty, Map.empty, null)
-    val pkStore: PrimaryKeyStore = PrimaryKeyStoreFactory.buildPrimaryKeyStore(Config(), schemaInfo)
-    val pkStoreWorkflow: PkStoreWorkflow = new PkStoreWorkflow(pkStore, schemaInfo)
+    val table: Table =
+      new Table(
+        schema = "public",
+        name = "users",
+        hasSqlServerAutoIncrement = true,
+        storePks = true
+      )
+
+    val primaryKeyColumn: Column =
+      new Column(
+        table = table,
+        name = null,
+        ordinalPosition = 0,
+        jdbcType = null,
+        typeName = null
+      )
+
+    val schemaInfo: SchemaInfo =
+      new SchemaInfo(
+        tablesByName = Map.empty,
+        colsByTableOrdered = Map.empty,
+        pksByTableOrdered = Map(table -> Vector(primaryKeyColumn)),
+        fksOrdered = Array.empty,
+        fksFromTable = Map.empty,
+        fksToTable = Map.empty,
+        dbVendor = null
+      )
+
+    val pkStore: PrimaryKeyStore =
+      PrimaryKeyStoreFactory.buildPrimaryKeyStore(Config(), schemaInfo)
+
+    val pkStoreWorkflow: PkStoreWorkflow =
+      new PkStoreWorkflow(pkStore, schemaInfo)
+
     val fkValue: String = "fkValue"
     val row: Row = Array(fkValue)
     val rows: Vector[Row] = Vector(row)
