@@ -46,13 +46,13 @@ abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest[Postg
   override protected def prepareOriginDML(): Unit
 
   override protected def prepareTargetDDL(): Unit = {
-    PostgresqlEndToEndTestUtil.syncDDL(containers.origin.name, containers.origin.db.name, containers.targetSingleThreaded.name, containers.targetSingleThreaded.db.name)
-    PostgresqlEndToEndTestUtil.syncDDL(containers.origin.name, containers.origin.db.name, containers.targetAkkaStreams.name, containers.targetAkkaStreams.db.name)
+    PostgresqlEndToEndTestUtil.preSubsetDdlSync(containers.origin.db, containers.targetSingleThreaded.db)
+    PostgresqlEndToEndTestUtil.preSubsetDdlSync(containers.origin.db, containers.targetAkkaStreams.db)
   }
 
   override protected def postSubset(): Unit = {
-    s"./src/test/util/postgres_post_subset.sh ${containers.origin.name} ${containers.origin.db.name} ${containers.targetSingleThreaded.name} ${containers.targetSingleThreaded.db.name}".!!
-    s"./src/test/util/postgres_post_subset.sh ${containers.origin.name} ${containers.origin.db.name} ${containers.targetAkkaStreams.name} ${containers.targetAkkaStreams.db.name}".!!
+    PostgresqlEndToEndTestUtil.postSubsetDdlSync(containers.origin.db, containers.targetSingleThreaded.db)
+    PostgresqlEndToEndTestUtil.postSubsetDdlSync(containers.origin.db, containers.targetAkkaStreams.db)
   }
 }
 
@@ -67,7 +67,11 @@ object PostgresqlEndToEndTestUtil {
     SqlExecutor.execute(db, s"create database $newDatabaseName")
   }
 
-  def syncDDL(originContainer: String, originDb: String, targetContainer: String, targetDb: String): Unit = {
-    s"./src/test/util/sync_postgres_origin_to_target.sh $originContainer $originDb $targetContainer $targetDb".!!
+  def preSubsetDdlSync(origin: PostgreSQLDatabase, target: PostgreSQLDatabase): Unit = {
+    s"./src/test/util/postgres_pre_subset_ddl_sync.sh ${origin.host} ${origin.port} ${origin.name} ${target.host} ${target.port} ${target.name}".!!
+  }
+
+  def postSubsetDdlSync(origin: PostgreSQLDatabase, target: PostgreSQLDatabase): Unit = {
+    s"./src/test/util/postgres_post_subset_ddl_sync.sh ${origin.host} ${origin.port} ${origin.name} ${target.host} ${target.port} ${target.name}".!!
   }
 }
