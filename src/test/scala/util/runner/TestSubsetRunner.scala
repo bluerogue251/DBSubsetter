@@ -1,6 +1,6 @@
 package util.runner
 
-import trw.dbsubsetter.Application
+import trw.dbsubsetter.OneLayerOfIndirection
 import util.db.{Database, DatabaseContainerSet}
 
 object TestSubsetRunner {
@@ -32,7 +32,7 @@ object TestSubsetRunner {
   // TODO: refactor to re-use the timing logic already present in production code
   private def timedSubsetMilliseconds(args: Array[String]): Long = {
     val start = System.nanoTime()
-    Application.main(args)
+    OneLayerOfIndirection.foo(args)
     val end = System.nanoTime()
     (end - start) / 1000000
   }
