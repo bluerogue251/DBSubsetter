@@ -13,9 +13,9 @@ steps:
     environment:
       DB_SUBSETTER_POSTGRES_HOST: postgres
     commands:
-      - sbt "testOnly unit.* integration.* e2e.pgdatatypes.PostgreSQLDataTypesTest"
+      - sbt "testOnly unit.* integration.* e2e.*PostgreSQL e2e.pgdatatypes.PostgreSQLDataTypesTest"
 ---
 kind: signature
-hmac: dcdd7f062505384c212419efc4b27208d5ae67fe1fd1cef5776e2d83d6af8e48
+hmac: 15be51b0a8ee0017155704e3b6a5deb6529ee3120d44872dc053d64fd43009d0
 
 ...
