@@ -16,6 +16,6 @@ steps:
       - sbt "testOnly unit.* integration.* e2e.pgdatatypes.PostgreSQLDataTypesTest"
 ---
 kind: signature
-hmac: e2787ce46f420e4945abb59d446ee7ca5bb938609bc2dcc8d176091c8c8b5612
+hmac: 24d002e2d617daa76bf6a89ad1e4814833267dd4a7d4c77812ef25b5de0a2db8
 
 ...
