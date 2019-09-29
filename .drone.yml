@@ -6,8 +6,6 @@ name: default
 services:
   - name: postgres
     image: postgres:9.6.3
-    ports:
-      - "5432:5432"
 
 steps:
   - name: test
@@ -16,6 +14,6 @@ steps:
       - sbt "testOnly unit.* integration.* e2e.pgdatatypes.PostgreSQLDataTypesTest"
 ---
 kind: signature
-hmac: b8b107f924972368623a17b5162c627787f193f2833e2e443874728221ce3784
+hmac: e2787ce46f420e4945abb59d446ee7ca5bb938609bc2dcc8d176091c8c8b5612
 
 ...
