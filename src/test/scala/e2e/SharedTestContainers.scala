@@ -16,7 +16,7 @@ object SharedTestContainers {
     /*
      * Remove container on JVM shutdown
      */
-    sys.addShutdownHook(ContainerUtil.rm(containerName))
+    // sys.addShutdownHook(ContainerUtil.rm(containerName))
 
     new PostgreSQLContainer(containerName, db)
   }
