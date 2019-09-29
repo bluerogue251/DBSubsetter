@@ -17,9 +17,7 @@ object DatabaseContainer {
   }
 
   def recreatePostgreSQL(name: String, port: Int): Unit = {
-    ContainerUtil.rm(name)
-    s"docker create --name $name -p $port:5432 postgres:9.6.3".!!
-    ContainerUtil.start(name)
+    // No-Op
   }
 
   def recreateSqlServer(name: String, port: Int): Unit = {

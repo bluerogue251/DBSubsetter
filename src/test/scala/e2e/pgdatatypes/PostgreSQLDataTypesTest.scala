@@ -47,6 +47,6 @@ class PostgreSQLDataTypesTest extends AbstractPostgresqlEndToEndTest {
   }
 
   private def originPsqlCommand = {
-    s"docker exec -i ${containers.origin.name} psql --user postgres ${containers.origin.db.name}"
+    s"psql --host postgres --port 5432 --user postgres ${containers.origin.db.name}"
   }
 }

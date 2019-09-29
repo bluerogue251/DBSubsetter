@@ -3,13 +3,15 @@ kind: pipeline
 type: docker
 name: default
 
+services:
+  - name: postgres
+    image: postgres:9.6.3
+    command: ["postgres", "-c", "max_connections=200"]
+
 steps:
   - name: test
-    image: bluerogue251/db-subsetter-sbt:4
+    image: bluerogue251/db-subsetter-ci:1
+    environment:
+      DB_SUBSETTER_POSTGRES_HOST: postgres
     commands:
-      - sbt "testOnly unit.* integration.*"
----
-kind: signature
-hmac: b8b107f924972368623a17b5162c627787f193f2833e2e443874728221ce3784
-
-...
+      - sbt "testOnly unit.* integration.* e2e.*PostgreSQL e2e.pgdatatypes.PostgreSQLDataTypesTest"

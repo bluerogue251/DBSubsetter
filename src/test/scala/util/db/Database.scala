@@ -11,7 +11,7 @@ class MySqlDatabase(val name: String, val port: Int) extends Database {
 }
 
 class PostgreSQLDatabase(val name: String, val port: Int) extends Database {
-  override def connectionString: String = s"jdbc:postgresql://0.0.0.0:$port/$name?user=postgres"
+  override def connectionString: String = s"jdbc:postgresql://postgres:$port/$name?user=postgres"
 }
 
 class SqlServerDatabase(val name: String, val port: Int) extends Database {

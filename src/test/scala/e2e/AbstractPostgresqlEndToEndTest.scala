@@ -61,7 +61,7 @@ object PostgresqlEndToEndTestUtil {
   }
 
   def createDb(containerName: String, dbName: String): Unit = {
-    s"docker exec $containerName createdb --user postgres $dbName".!!
+    s"createdb --host postgres --port 5432 --user postgres $dbName".!!
   }
 
   def syncDDL(originContainer: String, originDb: String, targetContainer: String, targetDb: String): Unit = {
