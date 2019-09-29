@@ -63,8 +63,8 @@ object PostgresqlEndToEndTestUtil {
   }
 
   def createDb(db: PostgreSQLDatabase, newDatabaseName: String): Unit = {
-    SqlExecutor.execute(db, s"drop database if exists $newDatabaseName")
-    SqlExecutor.execute(db, s"create database $newDatabaseName")
+    SqlExecutor.execute(db, s"""drop database if exists "$newDatabaseName"""")
+    SqlExecutor.execute(db, s"""create database "$newDatabaseName"""")
   }
 
   def preSubsetDdlSync(origin: PostgreSQLDatabase, target: PostgreSQLDatabase): Unit = {
