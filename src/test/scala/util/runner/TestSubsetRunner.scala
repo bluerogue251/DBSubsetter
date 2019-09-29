@@ -9,8 +9,7 @@ object TestSubsetRunner {
     val defaultArgs: Array[String] = Array(
       "--originDbConnStr", containers.origin.db.connectionString,
       "--targetDbConnStr", containers.targetSingleThreaded.db.connectionString,
-      "--singleThreadedDebugMode",
-      "--exposeMetrics"
+      "--singleThreadedDebugMode"
 
     )
     val finalArgs: Array[String] = defaultArgs ++ programArgs
@@ -23,8 +22,7 @@ object TestSubsetRunner {
       "--originDbConnStr", containers.origin.db.connectionString,
       "--originDbParallelism", "10",
       "--targetDbParallelism", "10",
-      "--targetDbConnStr", containers.targetAkkaStreams.db.connectionString,
-      "--exposeMetrics"
+      "--targetDbConnStr", containers.targetAkkaStreams.db.connectionString
     )
     val finalArgs: Array[String] = defaultArgs ++ programArgs
 
