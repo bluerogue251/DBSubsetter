@@ -1,6 +1,6 @@
 package load.physics
 
-import e2e.{AbstractPostgresqlEndToEndTest, PostgresqlEndToEndTestUtil, SharedTestContainers}
+import e2e.{AbstractPostgresqlEndToEndTest, PostgresqlEndToEndTestUtil}
 import load.LoadTest
 import util.Ports
 import util.db.{DatabaseContainerSet, PostgreSQLContainer, PostgreSQLDatabase}
@@ -32,7 +32,8 @@ class PhysicsTestPostgreSQL extends AbstractPostgresqlEndToEndTest with LoadTest
     }
   }
 
-  override protected def startTargetContainers(): Unit = SharedTestContainers.postgres
+  // Commenting out in an effort to get e2e tests working in Drone CI
+  override protected def startTargetContainers(): Unit = {} // SharedTestContainers.postgres
 
   override protected def createOriginDatabase(): Unit = {
     if (mustReCreateOriginDb) {

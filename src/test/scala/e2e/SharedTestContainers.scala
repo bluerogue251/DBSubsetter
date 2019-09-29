@@ -7,13 +7,6 @@ import util.docker.ContainerUtil
 object SharedTestContainers {
   private val dbName = "do-not-use"
 
-  lazy val postgres: PostgreSQLContainer = {
-    val port = Ports.sharedPostgresPort
-    val db = new PostgreSQLDatabase(dbName, "localhost", port)
-
-    new PostgreSQLContainer("placeholder-container-name", db)
-  }
-
   lazy val awaitPostgresUp: Unit = Thread.sleep(5000)
 
   lazy val sqlServer: SqlServerContainer = {

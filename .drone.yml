@@ -10,6 +10,8 @@ services:
 steps:
   - name: test
     image: bluerogue251/db-subsetter-sbt:4
+    environment:
+      DB_SUBSETTER_POSTGRES_HOST: postgres
     commands:
       - sbt "testOnly unit.* integration.* e2e.pgdatatypes.PostgreSQLDataTypesTest"
 ---

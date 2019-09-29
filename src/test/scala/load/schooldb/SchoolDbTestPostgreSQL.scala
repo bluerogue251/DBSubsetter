@@ -1,6 +1,6 @@
 package load.schooldb
 
-import e2e.{AbstractPostgresqlEndToEndTest, PostgresqlEndToEndTestUtil, SharedTestContainers}
+import e2e.{AbstractPostgresqlEndToEndTest, PostgresqlEndToEndTestUtil}
 import load.LoadTest
 import slick.dbio.DBIO
 import slick.jdbc.PostgresProfile.api._
@@ -37,7 +37,8 @@ class SchoolDbTestPostgreSQL extends AbstractPostgresqlEndToEndTest with LoadTes
     }
   }
 
-  override protected def startTargetContainers(): Unit = SharedTestContainers.postgres
+  // Commenting out in an effort to get e2e tests working in Drone CI
+  override protected def startTargetContainers(): Unit = {} // SharedTestContainers.postgres
 
   override protected def createOriginDatabase(): Unit = {
     if (mustReCreateOriginDb) {

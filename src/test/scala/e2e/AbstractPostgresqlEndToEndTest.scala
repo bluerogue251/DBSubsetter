@@ -1,13 +1,17 @@
 package e2e
 
+import util.Ports
 import util.db._
 
 import scala.sys.process._
+import scala.util.Properties
 
 abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest[PostgreSQLDatabase] {
   override protected val profile = slick.jdbc.PostgresProfile
 
-  val adminDb: PostgreSQLDatabase = new PostgreSQLDatabase("postgres", "localhost", SharedTestContainers.postgres.db.port)
+  val dbHost: String = Properties.envOrElse("DB_SUBSETTER_POSTGRES_HOST", "localhost")
+
+  val adminDb: PostgreSQLDatabase = new PostgreSQLDatabase("postgres", dbHost, Ports.sharedPostgresPort)
 
   protected def testName: String
 
@@ -27,17 +31,16 @@ abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest[Postg
   }
 
   override protected def containers: DatabaseContainerSet[PostgreSQLDatabase] = {
-    val containerName = "placeholder"
-    val port = SharedTestContainers.postgres.db.port
+    val port = Ports.sharedPostgresPort
 
     val originDb = s"${testName}_origin"
     val targetSingleThreadedDb = s"${testName}_target_single_threaded"
     val targetAkkaStreamsDb = s"${testName}_target_akka_streams"
 
     new DatabaseContainerSet(
-      PostgresqlEndToEndTestUtil.buildContainer(containerName, port, originDb),
-      PostgresqlEndToEndTestUtil.buildContainer(containerName, port, targetSingleThreadedDb),
-      PostgresqlEndToEndTestUtil.buildContainer(containerName, port, targetAkkaStreamsDb)
+      PostgresqlEndToEndTestUtil.buildContainer(dbHost, port, originDb),
+      PostgresqlEndToEndTestUtil.buildContainer(dbHost, port, targetSingleThreadedDb),
+      PostgresqlEndToEndTestUtil.buildContainer(dbHost, port, targetAkkaStreamsDb)
     )
   }
 
@@ -57,9 +60,9 @@ abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest[Postg
 }
 
 object PostgresqlEndToEndTestUtil {
-  def buildContainer(containerName: String, dbPort: Int, dbName: String): PostgreSQLContainer = {
-    val db: PostgreSQLDatabase = new PostgreSQLDatabase(dbName, "localhost", dbPort)
-    new PostgreSQLContainer(containerName, db)
+  def buildContainer(dbHost: String, dbPort: Int, dbName: String): PostgreSQLContainer = {
+    val db: PostgreSQLDatabase = new PostgreSQLDatabase(dbName, dbHost, dbPort)
+    new PostgreSQLContainer("placeholder", db)
   }
 
   def createDb(db: PostgreSQLDatabase, newDatabaseName: String): Unit = {
