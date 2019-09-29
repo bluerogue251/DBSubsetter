@@ -1,0 +1,15 @@
+---
+kind: pipeline
+type: docker
+name: default
+
+steps:
+  - name: test
+    image: bluerogue251/db-subsetter-sbt:4
+    commands:
+      - sbt "testOnly unit.* integration.*"
+---
+kind: signature
+hmac: b8b107f924972368623a17b5162c627787f193f2833e2e443874728221ce3784
+
+...
