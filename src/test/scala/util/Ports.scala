@@ -1,7 +1,7 @@
 package util
 
 object Ports {
-  val sharedPostgresPort: Int = 5495
+  val sharedPostgresPort: Int = 5432
   val sharedSqlServerPort: Int = 5496
   val sharedMySqlOriginPort: Int = 5497
   val sharedMySqlTargetSingleThreadedPort: Int = 5498

@@ -3,7 +3,7 @@ package load.physics
 import e2e.{AbstractPostgresqlEndToEndTest, PostgresqlEndToEndTestUtil, SharedTestContainers}
 import load.LoadTest
 import util.Ports
-import util.db.{DatabaseContainer, DatabaseContainerSet, PostgreSQLContainer, PostgreSQLDatabase}
+import util.db.{DatabaseContainerSet, PostgreSQLContainer, PostgreSQLDatabase}
 import util.docker.ContainerUtil
 
 import scala.sys.process._
@@ -25,7 +25,8 @@ class PhysicsTestPostgreSQL extends AbstractPostgresqlEndToEndTest with LoadTest
 
   override protected def startOriginContainer(): Unit = {
     if (mustReCreateOriginDb) {
-      DatabaseContainer.recreatePostgreSQL(containers.origin.name, containers.origin.db.port)
+      // Commenting out to enable drone e2e tests
+      // DatabaseContainer.recreatePostgreSQL(containers.origin.name, containers.origin.db.port)
     } else {
       ContainerUtil.start(containers.origin.name)
     }
@@ -35,14 +36,14 @@ class PhysicsTestPostgreSQL extends AbstractPostgresqlEndToEndTest with LoadTest
 
   override protected def createOriginDatabase(): Unit = {
     if (mustReCreateOriginDb) {
-      PostgresqlEndToEndTestUtil.createDb(containers.origin.name, containers.origin.db.name)
+      PostgresqlEndToEndTestUtil.createDb(containers.origin.db)
     }
   }
 
   override protected def containers: DatabaseContainerSet[PostgreSQLDatabase] = {
     val defaults = super.containers
 
-    val originDb = new PostgreSQLDatabase("physics_db", Ports.postgresPhysicsDbOrigin)
+    val originDb = new PostgreSQLDatabase("localhost", Ports.postgresPhysicsDbOrigin, "physics_db")
     val originContainer = new PostgreSQLContainer("physics_origin_postgres", originDb)
 
     new DatabaseContainerSet[PostgreSQLDatabase](

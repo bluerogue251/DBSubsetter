@@ -3,6 +3,7 @@ package e2e.pgdatatypes
 import java.io.File
 
 import e2e.AbstractPostgresqlEndToEndTest
+import util.db.PostgreSQLDatabase
 
 import scala.sys.process._
 
@@ -47,6 +48,7 @@ class PostgreSQLDataTypesTest extends AbstractPostgresqlEndToEndTest {
   }
 
   private def originPsqlCommand = {
-    s"docker exec -i ${containers.origin.name} psql --user postgres ${containers.origin.db.name}"
+    val originDb: PostgreSQLDatabase = containers.origin.db
+    s"psql --host ${originDb.host} --port ${originDb.port} --user postgres ${originDb.name}"
   }
 }

@@ -67,7 +67,7 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
   override protected def containers: DatabaseContainerSet[PostgreSQLDatabase] = {
     val defaults = super.containers
 
-    val originDb = new PostgreSQLDatabase("physics_db", Ports.postgresPhysicsDbOrigin)
+    val originDb = new PostgreSQLDatabase("localhost", Ports.postgresPhysicsDbOrigin, "physics_db")
     val originContainer = new PostgreSQLContainer("physics_origin_postgres", originDb)
 
     new DatabaseContainerSet[PostgreSQLDatabase](
