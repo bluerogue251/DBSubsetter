@@ -8,8 +8,14 @@ import trw.dbsubsetter.util.Util
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
-object OneLayerOfIndirection {
-  def foo(args: Array[String]): Unit = {
+/**
+  * Provides a very thin layer underneath the real Application object. Tests will
+  * call this object rather than calling the real Application object. This is because
+  * the real Application object appears to have some non-threadsafe behavior which
+  * can cause tests to fail nondeterministically when executed in parallel.
+ */
+object ApplicationRunner {
+  def run(args: Array[String]): Unit = {
     val startingTime = System.nanoTime()
 
     CommandLineParser.parser.parse(args, Config()) match {
