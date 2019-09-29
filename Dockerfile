@@ -4,6 +4,8 @@ RUN apk add --no-cache bash
 
 RUN apk add --no-cache --virtual=build-dependencies curl
 
+RUN apk add --no-cache postgresql-client
+
 RUN curl -sL "https://piccolo.link/sbt-1.0.4.tgz" | gunzip | tar -x -C /usr/local && \
     ln -s /usr/local/sbt/bin/sbt /usr/local/bin/sbt && \
     chmod 0755 /usr/local/bin/sbt && \
