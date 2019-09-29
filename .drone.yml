@@ -10,13 +10,13 @@ services:
 
 steps:
   - name: test
-    image: bluerogue251/db-subsetter-ci:1
+    image: bluerogue251/db-subsetter-ci:2
     environment:
       DB_SUBSETTER_POSTGRES_HOST: postgres
     commands:
       - sbt "testOnly unit.* integration.* e2e.*PostgreSQL e2e.pgdatatypes.PostgreSQLDataTypesTest"
 ---
 kind: signature
-hmac: 7b44833fba4eeb168f1df3d15d4fd323b024aafce7276949817af4e73fcb3ba2
+hmac: 9ee06d4253e851372bfca17919a2a1e171073486190f7ad38fed093b9e6a6b90
 
 ...
