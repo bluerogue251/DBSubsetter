@@ -6,6 +6,7 @@ name: default
 services:
   - name: postgres
     image: postgres:9.6.3
+    command: postgres -c 'max_connections=200'
 
 steps:
   - name: test
@@ -16,6 +17,6 @@ steps:
       - sbt "testOnly unit.* integration.* e2e.*PostgreSQL e2e.pgdatatypes.PostgreSQLDataTypesTest"
 ---
 kind: signature
-hmac: 15be51b0a8ee0017155704e3b6a5deb6529ee3120d44872dc053d64fd43009d0
+hmac: 84f2829f9cd2037211debc595a8623246e974bab19243a476edfad5eca0dfed9
 
 ...
