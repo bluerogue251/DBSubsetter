@@ -10,8 +10,8 @@ class MySqlDatabase(val name: String, val port: Int) extends Database {
   override def connectionString: String = s"jdbc:mysql://localhost:$port/$name?user=root&useSSL=false&rewriteBatchedStatements=true"
 }
 
-class PostgreSQLDatabase(val name: String, val port: Int) extends Database {
-  override def connectionString: String = s"jdbc:postgresql://postgres:$port/$name?user=postgres"
+class PostgreSQLDatabase(val host: String, val port: Int, val name: String) extends Database {
+  override def connectionString: String = s"jdbc:postgresql://$host:$port/$name?user=postgres"
 }
 
 class SqlServerDatabase(val name: String, val port: Int) extends Database {
