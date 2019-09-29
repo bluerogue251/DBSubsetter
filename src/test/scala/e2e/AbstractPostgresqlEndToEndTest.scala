@@ -7,25 +7,27 @@ import scala.sys.process._
 abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest[PostgreSQLDatabase] {
   override protected val profile = slick.jdbc.PostgresProfile
 
+  val adminDb: PostgreSQLDatabase = new PostgreSQLDatabase("postgres", "localhost", SharedTestContainers.postgres.db.port)
+
   protected def testName: String
 
-  override protected def startOriginContainer():Unit = SharedTestContainers.postgres
+  override protected def startOriginContainer():Unit = {} // No-op
 
   override protected def startTargetContainers(): Unit = {} // No-op (shares container with origin)
 
-  override protected def awaitContainersReady(): Unit = SharedTestContainers.awaitPostgresUp
+  override protected def awaitContainersReady(): Unit = {} // No-op
 
   override protected def createOriginDatabase(): Unit = {
-    PostgresqlEndToEndTestUtil.createDb(containers.origin.name, containers.origin.db.name)
+    PostgresqlEndToEndTestUtil.createDb(adminDb, containers.origin.db.name)
   }
 
   override protected def createTargetDatabases(): Unit = {
-    PostgresqlEndToEndTestUtil.createDb(containers.targetSingleThreaded.name, containers.targetSingleThreaded.db.name)
-    PostgresqlEndToEndTestUtil.createDb(containers.targetAkkaStreams.name, containers.targetAkkaStreams.db.name)
+    PostgresqlEndToEndTestUtil.createDb(adminDb, containers.targetSingleThreaded.db.name)
+    PostgresqlEndToEndTestUtil.createDb(adminDb, containers.targetAkkaStreams.db.name)
   }
 
   override protected def containers: DatabaseContainerSet[PostgreSQLDatabase] = {
-    val containerName = SharedTestContainers.postgres.name
+    val containerName = "placeholder"
     val port = SharedTestContainers.postgres.db.port
 
     val originDb = s"${testName}_origin"
@@ -56,12 +58,13 @@ abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest[Postg
 
 object PostgresqlEndToEndTestUtil {
   def buildContainer(containerName: String, dbPort: Int, dbName: String): PostgreSQLContainer = {
-    val db: PostgreSQLDatabase = new PostgreSQLDatabase(dbName, dbPort)
+    val db: PostgreSQLDatabase = new PostgreSQLDatabase(dbName, "localhost", dbPort)
     new PostgreSQLContainer(containerName, db)
   }
 
-  def createDb(containerName: String, dbName: String): Unit = {
-    s"docker exec $containerName createdb --user postgres $dbName".!!
+  def createDb(db: PostgreSQLDatabase, newDatabaseName: String): Unit = {
+    SqlExecutor.execute(db, s"drop database if exists $newDatabaseName")
+    SqlExecutor.execute(db, s"create database $newDatabaseName")
   }
 
   def syncDDL(originContainer: String, originDb: String, targetContainer: String, targetDb: String): Unit = {

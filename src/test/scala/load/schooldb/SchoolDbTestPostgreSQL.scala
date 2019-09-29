@@ -5,7 +5,7 @@ import load.LoadTest
 import slick.dbio.DBIO
 import slick.jdbc.PostgresProfile.api._
 import util.Ports
-import util.db.{DatabaseContainer, DatabaseContainerSet, PostgreSQLContainer, PostgreSQLDatabase}
+import util.db.{DatabaseContainerSet, PostgreSQLContainer, PostgreSQLDatabase}
 import util.docker.ContainerUtil
 
 import scala.concurrent.Await
@@ -30,7 +30,8 @@ class SchoolDbTestPostgreSQL extends AbstractPostgresqlEndToEndTest with LoadTes
 
   override protected def startOriginContainer(): Unit = {
     if (mustReCreateOriginDb) {
-      DatabaseContainer.recreatePostgreSQL(containers.origin.name, containers.origin.db.port)
+      // Commenting out in an effort to get e2e tests working in Drone CI
+      // DatabaseContainer.recreatePostgreSQL(containers.origin.name, containers.origin.db.port)
     } else {
       ContainerUtil.start(containers.origin.name)
     }
@@ -40,14 +41,14 @@ class SchoolDbTestPostgreSQL extends AbstractPostgresqlEndToEndTest with LoadTes
 
   override protected def createOriginDatabase(): Unit = {
     if (mustReCreateOriginDb) {
-      PostgresqlEndToEndTestUtil.createDb(containers.origin.name, containers.origin.db.name)
+      PostgresqlEndToEndTestUtil.createDb(containers.origin.db, containers.origin.db.name)
     }
   }
 
   override protected def containers: DatabaseContainerSet[PostgreSQLDatabase] = {
     val defaults = super.containers
 
-    val originDb = new PostgreSQLDatabase("school_db", Ports.postgresSchoolDbOrigin)
+    val originDb = new PostgreSQLDatabase("school_db", "localhost", Ports.postgresSchoolDbOrigin)
     val originContainer = new PostgreSQLContainer("school_db_origin_postgres", originDb)
 
     new DatabaseContainerSet[PostgreSQLDatabase](

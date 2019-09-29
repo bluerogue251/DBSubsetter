@@ -3,8 +3,9 @@ package e2e.pgdatatypes
 import java.io.File
 
 import e2e.AbstractPostgresqlEndToEndTest
+import util.db.SqlExecutor
 
-import scala.sys.process._
+import scala.io.Source
 
 class PostgreSQLDataTypesTest extends AbstractPostgresqlEndToEndTest {
   override protected val testName = "pg_data_types"
@@ -38,15 +39,13 @@ class PostgreSQLDataTypesTest extends AbstractPostgresqlEndToEndTest {
 
   override protected def prepareOriginDDL(): Unit = {
     val ddlFile = new File("./src/test/scala/e2e/pgdatatypes/ddl.sql")
-    (ddlFile #> originPsqlCommand).!!
+    val sql: String = Source.fromFile(ddlFile).getLines().mkString("\n")
+    SqlExecutor.execute(containers.origin.db, sql)
   }
 
   override protected def prepareOriginDML(): Unit = {
     val dmlFile = new File("./src/test/scala/e2e/pgdatatypes/dml.sql")
-    (dmlFile #> originPsqlCommand).!!
-  }
-
-  private def originPsqlCommand = {
-    s"docker exec -i ${containers.origin.name} psql --user postgres ${containers.origin.db.name}"
+    val sql: String = Source.fromFile(dmlFile).getLines().mkString("\n")
+    SqlExecutor.execute(containers.origin.db, sql)
   }
 }

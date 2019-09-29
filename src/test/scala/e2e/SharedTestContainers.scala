@@ -8,17 +8,10 @@ object SharedTestContainers {
   private val dbName = "do-not-use"
 
   lazy val postgres: PostgreSQLContainer = {
-    val containerName = "e2e_postgres"
     val port = Ports.sharedPostgresPort
-    DatabaseContainer.recreatePostgreSQL(containerName, port)
-    val db = new PostgreSQLDatabase(dbName, port)
+    val db = new PostgreSQLDatabase(dbName, "localhost", port)
 
-    /*
-     * Remove container on JVM shutdown
-     */
-    sys.addShutdownHook(ContainerUtil.rm(containerName))
-
-    new PostgreSQLContainer(containerName, db)
+    new PostgreSQLContainer("placeholder-container-name", db)
   }
 
   lazy val awaitPostgresUp: Unit = Thread.sleep(5000)
