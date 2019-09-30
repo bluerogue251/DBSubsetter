@@ -32,14 +32,4 @@ object SharedTestContainers {
   }
 
   lazy val awaitSqlServerUp: Unit = Thread.sleep(6000)
-
-  lazy val mysqlOrigin: DatabaseContainer[MySqlDatabase] = startMysql(Ports.sharedMySqlOriginPort)
-  lazy val mysqlTargetSingleThreaded: DatabaseContainer[MySqlDatabase] = startMysql(Ports.sharedMySqlTargetSingleThreadedPort)
-  lazy val mysqlTargetAkkaStreams: DatabaseContainer[MySqlDatabase] = startMysql(Ports.sharedMySqlTargetAkkaStreamsPort)
-
-  private def startMysql(port: Int): MySqlContainer = {
-    val dbHost: String = Properties.envOrElse("DB_SUBSETTER_MYSQL_HOST", "localhost")
-    val db = new MySqlDatabase(dbHost, port, dbName)
-    new MySqlContainer("placholder-do-not-use", db)
-  }
 }

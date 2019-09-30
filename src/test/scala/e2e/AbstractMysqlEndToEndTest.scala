@@ -1,8 +1,10 @@
 package e2e
 
+import util.Ports
 import util.db._
 
 import scala.sys.process._
+import scala.util.Properties
 
 abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest[MySqlDatabase] {
   override protected val profile = slick.jdbc.MySQLProfile
@@ -11,12 +13,9 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest[MySqlDatab
 
   protected def testName: String
 
-  override protected def startOriginContainer():Unit = SharedTestContainers.mysqlOrigin
+  override protected def startOriginContainer():Unit = {} // No-Op
 
-  override protected def startTargetContainers(): Unit = {
-    SharedTestContainers.mysqlTargetSingleThreaded
-    SharedTestContainers.mysqlTargetAkkaStreams
-  }
+  override protected def startTargetContainers(): Unit = {} // No-Op
 
   override protected def awaitContainersReady(): Unit = {} // No-Op
 
@@ -30,7 +29,15 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest[MySqlDatab
   }
 
   override protected def containers: DatabaseContainerSet[MySqlDatabase] = {
-    import SharedTestContainers._
+    lazy val mysqlOrigin: DatabaseContainer[MySqlDatabase] = buildMysqlContainer(Ports.sharedMySqlOriginPort)
+    lazy val mysqlTargetSingleThreaded: DatabaseContainer[MySqlDatabase] = buildMysqlContainer(Ports.sharedMySqlTargetSingleThreadedPort)
+    lazy val mysqlTargetAkkaStreams: DatabaseContainer[MySqlDatabase] = buildMysqlContainer(Ports.sharedMySqlTargetAkkaStreamsPort)
+
+    def buildMysqlContainer(port: Int): MySqlContainer = {
+      val dbHost: String = Properties.envOrElse("DB_SUBSETTER_MYSQL_HOST", "0.0.0.0")
+      val db = new MySqlDatabase(dbHost, port, testName)
+      new MySqlContainer("placholder-do-not-use", db)
+    }
 
     new DatabaseContainerSet[MySqlDatabase](
       mysqlOrigin,
@@ -61,8 +68,8 @@ object MysqlEndToEndTestUtil {
 
   def preSubsetDdlSync(origin: MySqlDatabase, target: MySqlDatabase, schemas: List[String]): Unit = {
     schemas.foreach(schema => {
-      val exportCommand: String = s"mysqldump --host${origin.host} --port ${origin.port} --user root --no-data $schema"
-      val importCommand: String = s"mysql -host ${target.host} --port ${target.port} --user root $schema"
+      val exportCommand: String = s"mysqldump --host ${origin.host} --port ${origin.port} --user root --no-data $schema"
+      val importCommand: String = s"mysql --host ${target.host} --port ${target.port} --user root $schema"
       (exportCommand #| importCommand).!!
     })
   }
