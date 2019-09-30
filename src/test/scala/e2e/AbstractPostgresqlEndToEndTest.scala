@@ -13,7 +13,7 @@ abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest[Postg
 
   override protected def startTargetContainers(): Unit = {} // No-op (shares container with origin)
 
-  override protected def awaitContainersReady(): Unit = SharedTestContainers.awaitPostgresUp
+  override protected def awaitContainersReady(): Unit = {} // No-op
 
   override protected def createOriginDatabase(): Unit = {
     PostgresqlEndToEndTestUtil.createDb(containers.origin.db)

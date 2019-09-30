@@ -16,24 +16,24 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest[MySqlDatab
     SharedTestContainers.mysqlTargetAkkaStreams
   }
 
-  override protected def awaitContainersReady(): Unit = SharedTestContainers.awaitMysqlUp
+  override protected def awaitContainersReady(): Unit = {} // No-Op
 
   override protected def createOriginDatabase(): Unit = {
-    MysqlEndToEndTestUtil.createDb(containers.origin.name, containers.origin.db.name)
+    MysqlEndToEndTestUtil.createDb(containers.origin.db)
   }
 
   override protected def createTargetDatabases(): Unit = {
-    MysqlEndToEndTestUtil.createDb(containers.targetSingleThreaded.name, containers.targetSingleThreaded.db.name)
-    MysqlEndToEndTestUtil.createDb(containers.targetAkkaStreams.name, containers.targetAkkaStreams.db.name)
+    MysqlEndToEndTestUtil.createDb(containers.targetSingleThreaded.db)
+    MysqlEndToEndTestUtil.createDb(containers.targetAkkaStreams.db)
   }
 
   override protected def containers: DatabaseContainerSet[MySqlDatabase] = {
     import SharedTestContainers._
 
     new DatabaseContainerSet[MySqlDatabase](
-      MysqlEndToEndTestUtil.buildContainer(mysqlOrigin.name, testName, mysqlOrigin.db.port),
-      MysqlEndToEndTestUtil.buildContainer(mysqlTargetSingleThreaded.name, testName, mysqlTargetSingleThreaded.db.port),
-      MysqlEndToEndTestUtil.buildContainer(mysqlTargetAkkaStreams.name, testName, mysqlTargetAkkaStreams.db.port)
+      mysqlOrigin,
+      mysqlTargetSingleThreaded,
+      mysqlTargetAkkaStreams
     )
   }
 
@@ -50,12 +50,13 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest[MySqlDatab
 }
 
 object MysqlEndToEndTestUtil {
-  def buildContainer(containerName: String, dbName: String, dbPort: Int): MySqlContainer = {
-    val db: MySqlDatabase = new MySqlDatabase(dbName, dbPort)
-    new MySqlContainer(containerName, db)
+  def createDb(db: MySqlDatabase): Unit = {
+    s"""mysql --host ${db.host} --port ${db.port} --user root -e "create database ${db.name}""".!!
   }
 
-  def createDb(container: String, db: String): Unit = {
-    s"./src/test/util/create_mysql_db.sh $container $db".!!
+  def preSubsetDdlSync(origin: MySqlDatabase, target: MySqlDatabase): Unit = {
+    val exportCommand: String = s"mysqldump --host${origin.host} --port ${origin.port} --user root --no-data ${origin.name}"
+    val importCommand: String = s"mysql -host ${target.host} --port ${target.port} --user root ${target.name}"
+    (exportCommand #| importCommand).!!
   }
 }

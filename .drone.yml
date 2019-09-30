@@ -13,6 +13,7 @@ steps:
     image: bluerogue251/db-subsetter-ci:2
     environment:
       DB_SUBSETTER_POSTGRES_HOST: postgres
+      DB_SUBSETTER_MYSQL_HOST: mysql
     commands:
       - sbt "testOnly unit.* integration.* e2e.*PostgreSQL e2e.pgdatatypes.PostgreSQLDataTypesTest"
 ---
