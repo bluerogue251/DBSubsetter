@@ -29,6 +29,15 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest[MySqlDatab
   }
 
   override protected def containers: DatabaseContainerSet[MySqlDatabase] = {
+    val mySqlOriginHost: String =
+      Properties.envOrElse("DB_SUBSETTER_MYSQL_ORIGIN_PORT", "0.0.0.0")
+
+    val mySqlTargetSingleThreadedHost: String =
+      Properties.envOrElse("DB_SUBSETTER_MYSQL_TARGET_SINGLE_THREADED_HOST", "0.0.0.0")
+
+    val mySqlTargetAkkaStreamsHost: String =
+      Properties.envOrElse("DB_SUBSETTER_MYSQL_TARGET_AKKA_STREAMS_HOST", "0.0.0.0")
+
     val mySqlOriginPort: Int =
       Properties.envOrElse("DB_SUBSETTER_MYSQL_ORIGIN_PORT", Ports.sharedMySqlOriginPort.toString).toInt
 
@@ -38,13 +47,17 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest[MySqlDatab
     val mySqlTargetAkkaStreamsPort: Int =
       Properties.envOrElse("DB_SUBSETTER_MYSQL_TARGET_AKKA_STREAMS_PORT", Ports.sharedMySqlTargetAkkaStreamsPort.toString).toInt
 
-    lazy val mysqlOrigin: DatabaseContainer[MySqlDatabase] = buildMysqlContainer(mySqlOriginPort)
-    lazy val mysqlTargetSingleThreaded: DatabaseContainer[MySqlDatabase] = buildMysqlContainer(mySqlTargetSingleThreadedPort)
-    lazy val mysqlTargetAkkaStreams: DatabaseContainer[MySqlDatabase] = buildMysqlContainer(mySqlTargetAkkaStreamsPort)
+    lazy val mysqlOrigin: DatabaseContainer[MySqlDatabase] =
+      buildMysqlContainer(mySqlOriginHost, mySqlOriginPort)
 
-    def buildMysqlContainer(port: Int): MySqlContainer = {
-      val dbHost: String = Properties.envOrElse("DB_SUBSETTER_MYSQL_HOST", "0.0.0.0")
-      val db = new MySqlDatabase(dbHost, port, testName)
+    lazy val mysqlTargetSingleThreaded: DatabaseContainer[MySqlDatabase] =
+      buildMysqlContainer(mySqlTargetSingleThreadedHost, mySqlTargetSingleThreadedPort)
+
+    lazy val mysqlTargetAkkaStreams: DatabaseContainer[MySqlDatabase] =
+      buildMysqlContainer(mySqlTargetAkkaStreamsHost, mySqlTargetAkkaStreamsPort)
+
+    def buildMysqlContainer(host: String, port: Int): MySqlContainer = {
+      val db = new MySqlDatabase(host, port, testName)
       new MySqlContainer("placholder-do-not-use", db)
     }
 
