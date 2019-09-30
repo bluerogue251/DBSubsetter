@@ -10,20 +10,20 @@ services:
   mysql_origin:
     image: mysql:8.0.3
     environment:
-      MYSQL_ALLOW_EMPTY_PASSWORD: true
+      MYSQL_ALLOW_EMPTY_PASSWORD: "true"
     ports:
       - "3306:3306"
 
   mysql_target_single_threaded:
     image: mysql:8.0.3
     environment:
-      MYSQL_ALLOW_EMPTY_PASSWORD: true
+      MYSQL_ALLOW_EMPTY_PASSWORD: "true"
     ports:
       - "3307:3306"
 
   mysql_target_akka_streams:
     image: mysql:8.0.3
     environment:
-      MYSQL_ALLOW_EMPTY_PASSWORD: true
+      MYSQL_ALLOW_EMPTY_PASSWORD: "true"
     ports:
       - "3308:3306"
