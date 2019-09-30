@@ -30,7 +30,7 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest[MySqlDatab
 
   override protected def containers: DatabaseContainerSet[MySqlDatabase] = {
     val mySqlOriginHost: String =
-      Properties.envOrElse("DB_SUBSETTER_MYSQL_ORIGIN_PORT", "0.0.0.0")
+      Properties.envOrElse("DB_SUBSETTER_MYSQL_ORIGIN_HOST", "0.0.0.0")
 
     val mySqlTargetSingleThreadedHost: String =
       Properties.envOrElse("DB_SUBSETTER_MYSQL_TARGET_SINGLE_THREADED_HOST", "0.0.0.0")
@@ -84,7 +84,9 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest[MySqlDatab
 object MysqlEndToEndTestUtil {
   def createSchemas(db: MySqlDatabase, schemas: List[String]): Unit = {
     schemas.foreach(schema => {
-      s"./src/test/util/create_mysql_db.sh ${db.host} ${db.port} $schema".!!
+      val command = s"./src/test/util/create_mysql_db.sh ${db.host} ${db.port} $schema"
+      System.out.println(s"Command is: $command")
+      command.!!
     })
   }
 
