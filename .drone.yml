@@ -8,12 +8,30 @@ services:
     image: postgres:9.6.3
     command: ["postgres", "-c", "max_connections=200"]
 
+  - name: mysql_origin
+    image: mysql:8.0.3
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "true"
+
+  - name: mysql_target_single_threaded
+    image: mysql:8.0.3
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "true"
+
+  - name: mysql_target_akka_streams
+    image: mysql:8.0.3
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "true"
+
 steps:
   - name: test
     image: bluerogue251/db-subsetter-ci:2
     environment:
       DB_SUBSETTER_POSTGRES_HOST: postgres
       DB_SUBSETTER_MYSQL_HOST: mysql
+      DB_SUBSETTER_MYSQL_ORIGIN_PORT: 3306
+      DB_SUBSETTER_MYSQL_TARGET_SINGLE_THREADED_PORT: 3306
+      DB_SUBSETTER_MYSQL_TARGET_AKKA_STREAMS_PORT: 3306
     commands:
       - sbt "testOnly unit.* integration.* e2e.*PostgreSQL e2e.pgdatatypes.PostgreSQLDataTypesTest"
 ---

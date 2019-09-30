@@ -29,9 +29,18 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest[MySqlDatab
   }
 
   override protected def containers: DatabaseContainerSet[MySqlDatabase] = {
-    lazy val mysqlOrigin: DatabaseContainer[MySqlDatabase] = buildMysqlContainer(Ports.sharedMySqlOriginPort)
-    lazy val mysqlTargetSingleThreaded: DatabaseContainer[MySqlDatabase] = buildMysqlContainer(Ports.sharedMySqlTargetSingleThreadedPort)
-    lazy val mysqlTargetAkkaStreams: DatabaseContainer[MySqlDatabase] = buildMysqlContainer(Ports.sharedMySqlTargetAkkaStreamsPort)
+    val mySqlOriginPort: Int =
+      Properties.envOrElse("DB_SUBSETTER_MYSQL_ORIGIN_PORT", Ports.sharedMySqlOriginPort.toString).toInt
+
+    val mySqlTargetSingleThreadedPort: Int =
+      Properties.envOrElse("DB_SUBSETTER_MYSQL_TARGET_SINGLE_THREADED_PORT", Ports.sharedMySqlTargetSingleThreadedPort.toString).toInt
+
+    val mySqlTargetAkkaStreamsPort: Int =
+      Properties.envOrElse("DB_SUBSETTER_MYSQL_TARGET_AKKA_STREAMS_PORT", Ports.sharedMySqlTargetAkkaStreamsPort.toString).toInt
+
+    lazy val mysqlOrigin: DatabaseContainer[MySqlDatabase] = buildMysqlContainer(mySqlOriginPort)
+    lazy val mysqlTargetSingleThreaded: DatabaseContainer[MySqlDatabase] = buildMysqlContainer(mySqlTargetSingleThreadedPort)
+    lazy val mysqlTargetAkkaStreams: DatabaseContainer[MySqlDatabase] = buildMysqlContainer(mySqlTargetAkkaStreamsPort)
 
     def buildMysqlContainer(port: Int): MySqlContainer = {
       val dbHost: String = Properties.envOrElse("DB_SUBSETTER_MYSQL_HOST", "0.0.0.0")
