@@ -4,6 +4,7 @@ import java.io.File
 
 import e2e.AbstractMysqlEndToEndTest
 import util.assertion.AssertionUtil
+import util.db.MySqlDatabase
 
 import scala.sys.process._
 
@@ -47,6 +48,7 @@ class MySqlDataTypesTest extends AbstractMysqlEndToEndTest with AssertionUtil {
   }
 
   private def originMySqlCommand = {
-    s"docker exec -i ${containers.origin.name} mysql --user root ${containers.origin.db.name}"
+    val db: MySqlDatabase = containers.origin.db
+    s"mysql --host ${db.host} --port ${db.port} --user root ${db.name}"
   }
 }
