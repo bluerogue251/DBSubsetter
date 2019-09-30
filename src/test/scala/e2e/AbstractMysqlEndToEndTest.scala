@@ -71,8 +71,7 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest[MySqlDatab
 object MysqlEndToEndTestUtil {
   def createSchemas(db: MySqlDatabase, schemas: List[String]): Unit = {
     schemas.foreach(schema => {
-      s"""mysql --host ${db.host} --port ${db.port} --user root -e "drop database if exists $schema"""".!!
-      s"""mysql --host ${db.host} --port ${db.port} --user root -e "create database $schema"""".!!
+      s"./src/test/util/create_mysql_db.sh ${db.host} ${db.port} $schema".!!
     })
   }
 
