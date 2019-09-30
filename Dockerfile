@@ -4,7 +4,7 @@ RUN apk add --no-cache bash
 
 RUN apk add --no-cache postgresql-client
 
-RUN apk add --no-cache mysql
+RUN apk add --no-cache mysql-client
 
 RUN apk add --no-cache --virtual=build-dependencies curl
 
