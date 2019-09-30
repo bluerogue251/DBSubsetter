@@ -2,7 +2,9 @@
 
 set -eou pipefail
 
-container=$1
-database=$2
+host=$1
+port=$2
+database=$3
 
-docker exec ${container} mysql --user root -e "create database ${database}"
+mysql --host ${host} --port ${port} --user root -e "drop database if exists ${database}"
+mysql --host ${host} --port ${port} --user root -e "create database ${database}"

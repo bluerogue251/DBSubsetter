@@ -8,15 +8,36 @@ services:
     image: postgres:9.6.3
     command: ["postgres", "-c", "max_connections=200"]
 
+  - name: mysql_origin
+    image: mysql:8.0.3
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "true"
+
+  - name: mysql_target_single_threaded
+    image: mysql:8.0.3
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "true"
+
+  - name: mysql_target_akka_streams
+    image: mysql:8.0.3
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "true"
+
 steps:
   - name: test
-    image: bluerogue251/db-subsetter-ci:1
+    image: bluerogue251/db-subsetter-ci:2
     environment:
       DB_SUBSETTER_POSTGRES_HOST: postgres
+      DB_SUBSETTER_MYSQL_ORIGIN_HOST: mysql_origin
+      DB_SUBSETTER_MYSQL_TARGET_SINGLE_THREADED_HOST: mysql_target_single_threaded
+      DB_SUBSETTER_MYSQL_TARGET_AKKA_STREAMS_HOST: mysql_target_akka_streams
+      DB_SUBSETTER_MYSQL_ORIGIN_PORT: 3306
+      DB_SUBSETTER_MYSQL_TARGET_SINGLE_THREADED_PORT: 3306
+      DB_SUBSETTER_MYSQL_TARGET_AKKA_STREAMS_PORT: 3306
     commands:
-      - sbt "testOnly unit.* integration.* e2e.*PostgreSQL e2e.pgdatatypes.PostgreSQLDataTypesTest"
+      - sbt "testOnly unit.* integration.* e2e.*PostgreSQL e2e.*MySql e2e.pgdatatypes.* e2e.mysqldatatypes.*"
 ---
 kind: signature
-hmac: 7b44833fba4eeb168f1df3d15d4fd323b024aafce7276949817af4e73fcb3ba2
+hmac: 17c870c36a9990687dc120f816e0f095254d598829eef3f063e8b44d8fe1b17d
 
 ...

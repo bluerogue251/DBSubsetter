@@ -1,39 +1,70 @@
 package e2e
 
+import util.Ports
 import util.db._
 
 import scala.sys.process._
+import scala.util.Properties
 
 abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest[MySqlDatabase] {
   override protected val profile = slick.jdbc.MySQLProfile
 
+  protected def additionalSchemas: List[String] = List.empty
+
   protected def testName: String
 
-  override protected def startOriginContainer():Unit = SharedTestContainers.mysqlOrigin
+  override protected def startOriginContainer():Unit = {} // No-Op
 
-  override protected def startTargetContainers(): Unit = {
-    SharedTestContainers.mysqlTargetSingleThreaded
-    SharedTestContainers.mysqlTargetAkkaStreams
-  }
+  override protected def startTargetContainers(): Unit = {} // No-Op
 
-  override protected def awaitContainersReady(): Unit = SharedTestContainers.awaitMysqlUp
+  override protected def awaitContainersReady(): Unit = {} // No-Op
 
   override protected def createOriginDatabase(): Unit = {
-    MysqlEndToEndTestUtil.createDb(containers.origin.name, containers.origin.db.name)
+    MysqlEndToEndTestUtil.createSchemas(containers.origin.db, containers.origin.db.name :: additionalSchemas)
   }
 
   override protected def createTargetDatabases(): Unit = {
-    MysqlEndToEndTestUtil.createDb(containers.targetSingleThreaded.name, containers.targetSingleThreaded.db.name)
-    MysqlEndToEndTestUtil.createDb(containers.targetAkkaStreams.name, containers.targetAkkaStreams.db.name)
+    MysqlEndToEndTestUtil.createSchemas(containers.targetSingleThreaded.db, containers.targetSingleThreaded.db.name :: additionalSchemas)
+    MysqlEndToEndTestUtil.createSchemas(containers.targetAkkaStreams.db, containers.targetAkkaStreams.db.name :: additionalSchemas)
   }
 
   override protected def containers: DatabaseContainerSet[MySqlDatabase] = {
-    import SharedTestContainers._
+    val mySqlOriginHost: String =
+      Properties.envOrElse("DB_SUBSETTER_MYSQL_ORIGIN_HOST", "0.0.0.0")
+
+    val mySqlTargetSingleThreadedHost: String =
+      Properties.envOrElse("DB_SUBSETTER_MYSQL_TARGET_SINGLE_THREADED_HOST", "0.0.0.0")
+
+    val mySqlTargetAkkaStreamsHost: String =
+      Properties.envOrElse("DB_SUBSETTER_MYSQL_TARGET_AKKA_STREAMS_HOST", "0.0.0.0")
+
+    val mySqlOriginPort: Int =
+      Properties.envOrElse("DB_SUBSETTER_MYSQL_ORIGIN_PORT", Ports.sharedMySqlOriginPort.toString).toInt
+
+    val mySqlTargetSingleThreadedPort: Int =
+      Properties.envOrElse("DB_SUBSETTER_MYSQL_TARGET_SINGLE_THREADED_PORT", Ports.sharedMySqlTargetSingleThreadedPort.toString).toInt
+
+    val mySqlTargetAkkaStreamsPort: Int =
+      Properties.envOrElse("DB_SUBSETTER_MYSQL_TARGET_AKKA_STREAMS_PORT", Ports.sharedMySqlTargetAkkaStreamsPort.toString).toInt
+
+    lazy val mysqlOrigin: DatabaseContainer[MySqlDatabase] =
+      buildMysqlContainer(mySqlOriginHost, mySqlOriginPort)
+
+    lazy val mysqlTargetSingleThreaded: DatabaseContainer[MySqlDatabase] =
+      buildMysqlContainer(mySqlTargetSingleThreadedHost, mySqlTargetSingleThreadedPort)
+
+    lazy val mysqlTargetAkkaStreams: DatabaseContainer[MySqlDatabase] =
+      buildMysqlContainer(mySqlTargetAkkaStreamsHost, mySqlTargetAkkaStreamsPort)
+
+    def buildMysqlContainer(host: String, port: Int): MySqlContainer = {
+      val db = new MySqlDatabase(host, port, testName)
+      new MySqlContainer("placholder-do-not-use", db)
+    }
 
     new DatabaseContainerSet[MySqlDatabase](
-      MysqlEndToEndTestUtil.buildContainer(mysqlOrigin.name, testName, mysqlOrigin.db.port),
-      MysqlEndToEndTestUtil.buildContainer(mysqlTargetSingleThreaded.name, testName, mysqlTargetSingleThreaded.db.port),
-      MysqlEndToEndTestUtil.buildContainer(mysqlTargetAkkaStreams.name, testName, mysqlTargetAkkaStreams.db.port)
+      mysqlOrigin,
+      mysqlTargetSingleThreaded,
+      mysqlTargetAkkaStreams
     )
   }
 
@@ -42,20 +73,26 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest[MySqlDatab
   override protected def prepareOriginDML(): Unit
 
   override protected def prepareTargetDDL(): Unit = {
-    s"./src/test/util/sync_mysql_origin_to_target.sh ${containers.origin.name} ${containers.origin.db.name} ${containers.targetSingleThreaded.name} ${containers.targetSingleThreaded.db.name}".!!
-    s"./src/test/util/sync_mysql_origin_to_target.sh ${containers.origin.name} ${containers.origin.db.name} ${containers.targetAkkaStreams.name} ${containers.targetAkkaStreams.db.name}".!!
+    val allSchemas: List[String] = containers.origin.db.name :: additionalSchemas
+    MysqlEndToEndTestUtil.preSubsetDdlSync(containers.origin.db, containers.targetSingleThreaded.db, allSchemas)
+    MysqlEndToEndTestUtil.preSubsetDdlSync(containers.origin.db, containers.targetAkkaStreams.db, allSchemas)
   }
 
   override protected def postSubset(): Unit = {} // No-op
 }
 
 object MysqlEndToEndTestUtil {
-  def buildContainer(containerName: String, dbName: String, dbPort: Int): MySqlContainer = {
-    val db: MySqlDatabase = new MySqlDatabase(dbName, dbPort)
-    new MySqlContainer(containerName, db)
+  def createSchemas(db: MySqlDatabase, schemas: List[String]): Unit = {
+    schemas.foreach(schema => {
+      s"./src/test/util/create_mysql_db.sh ${db.host} ${db.port} $schema".!!
+    })
   }
 
-  def createDb(container: String, db: String): Unit = {
-    s"./src/test/util/create_mysql_db.sh $container $db".!!
+  def preSubsetDdlSync(origin: MySqlDatabase, target: MySqlDatabase, schemas: List[String]): Unit = {
+    schemas.foreach(schema => {
+      val exportCommand: String = s"mysqldump --host ${origin.host} --port ${origin.port} --user root --no-data $schema"
+      val importCommand: String = s"mysql --host ${target.host} --port ${target.port} --user root $schema"
+      (exportCommand #| importCommand).!!
+    })
   }
 }
