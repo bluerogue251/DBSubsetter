@@ -84,9 +84,7 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest[MySqlDatab
 object MysqlEndToEndTestUtil {
   def createSchemas(db: MySqlDatabase, schemas: List[String]): Unit = {
     schemas.foreach(schema => {
-      val command = s"./src/test/util/create_mysql_db.sh ${db.host} ${db.port} $schema"
-      System.out.println(s"Command is: $command")
-      command.!!
+      s"./src/test/util/create_mysql_db.sh ${db.host} ${db.port} $schema".!!
     })
   }
 
