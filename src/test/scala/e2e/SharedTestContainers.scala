@@ -17,10 +17,10 @@ object SharedTestContainers {
   }
 
   lazy val sqlServer: SqlServerContainer = {
-    val containerName = "dbsubsetter_e2e_sql_server_1"
+    val containerName = "placeholder-do-not-use"
+    val dbHost: String = Properties.envOrElse("DB_SUBSETTER_SQL_SERVER_HOST", "localhost")
     val port = Ports.sharedSqlServerPort
-    val db = new SqlServerDatabase(dbName, port)
-
+    val db = new SqlServerDatabase(dbHost, dbName, port)
     new SqlServerContainer(containerName, db)
   }
 }

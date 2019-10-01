@@ -14,6 +14,6 @@ class PostgreSQLDatabase(val host: String, val port: Int, val name: String) exte
   override def connectionString: String = s"jdbc:postgresql://$host:$port/$name?user=postgres"
 }
 
-class SqlServerDatabase(val name: String, val port: Int) extends Database {
-  override def connectionString: String = s"jdbc:sqlserver://localhost:$port;databaseName=$name;user=sa;password=MsSqlServerLocal1"
+class SqlServerDatabase(val host: String, val name: String, val port: Int) extends Database {
+  override def connectionString: String = s"jdbc:sqlserver://$host:$port;databaseName=$name;user=sa;password=MsSqlServerLocal1"
 }
