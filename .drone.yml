@@ -8,6 +8,14 @@ services:
     image: postgres:9.6.3
     command: ["postgres", "-c", "max_connections=200"]
 
+  - name: e2e_sql_server
+    image: microsoft/mssql-server-linux:2017-CU12
+    environment:
+      SA_PASSWORD: "MsSqlServerLocal1"
+      MSSQL_PID: "Developer"
+      ACCEPT_EULA: "Y"
+    command: ["/opt/mssql/bin/sqlservr"]
+
   - name: mysql_origin
     image: mysql:8.0.3
     environment:
@@ -23,11 +31,14 @@ services:
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: "true"
 
+
+
 steps:
   - name: test
     image: bluerogue251/db-subsetter-ci:2
     environment:
       DB_SUBSETTER_POSTGRES_HOST: postgres
+      DB_SUBSETTER_SQL_SERVER_HOST: sql_server
       DB_SUBSETTER_MYSQL_ORIGIN_HOST: mysql_origin
       DB_SUBSETTER_MYSQL_TARGET_SINGLE_THREADED_HOST: mysql_target_single_threaded
       DB_SUBSETTER_MYSQL_TARGET_AKKA_STREAMS_HOST: mysql_target_akka_streams

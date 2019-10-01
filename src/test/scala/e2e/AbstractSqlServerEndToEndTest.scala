@@ -9,11 +9,11 @@ abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest[SqlSer
 
   protected def testName: String
 
-  override protected def startOriginContainer():Unit = SharedTestContainers.sqlServer
+  override protected def startOriginContainer():Unit = {} // No-op
 
   override protected def startTargetContainers(): Unit = {} // No-op (container is shared with origin)
 
-  override protected def awaitContainersReady(): Unit = SharedTestContainers.awaitSqlServerUp
+  override protected def awaitContainersReady(): Unit = {} // No-op
 
   override protected def createOriginDatabase(): Unit = {
     createEmptyDb(containers.origin.name, containers.origin.db.name)
