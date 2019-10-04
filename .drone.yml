@@ -9,10 +9,10 @@ services:
     command: ["postgres", "-c", "max_connections=200"]
 
   - name: sql_server
-    image: microsoft/mssql-server-linux:2017-CU12
+    image: microsoft/mssql-server-linux:2017-CU14-ubuntu
     environment:
       SA_PASSWORD: "MsSqlServerLocal1"
-      MSSQL_PID: "Standard"
+      MSSQL_PID: "Developer"
       ACCEPT_EULA: "Y"
     command: ["/opt/mssql/bin/sqlservr"]
 
