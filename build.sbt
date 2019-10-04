@@ -33,5 +33,3 @@ libraryDependencies ++= Seq(
   "com.typesafe.slick" %% "slick" % "3.2.1" % "test",
   "com.typesafe.slick" %% "slick-hikaricp" % "3.2.1" % "test"
 )
-
-parallelExecution in Test := false
