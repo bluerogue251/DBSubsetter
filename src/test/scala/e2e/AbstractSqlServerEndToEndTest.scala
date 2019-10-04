@@ -2,7 +2,6 @@ package e2e
 
 import util.db._
 
-import scala.annotation.tailrec
 import scala.sys.process._
 
 abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest[SqlServerDatabase] {
@@ -44,20 +43,8 @@ abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest[SqlSer
   override protected def prepareOriginDML(): Unit
 
   override protected def prepareTargetDDL(): Unit = {
-    @tailrec
-    def doSync(i: Int): Unit = {
-      if (i < 5) {
-        try {
-          s"./src/test/util/sync_sqlserver_origin_to_target.sh ${containers.origin.db.host} ${containers.origin.db.name} ${containers.targetSingleThreaded.db.name}".!!
-          s"./src/test/util/sync_sqlserver_origin_to_target.sh ${containers.origin.db.host} ${containers.origin.db.name} ${containers.targetAkkaStreams.db.name}".!!
-        } catch {
-          case e: RuntimeException =>
-            Thread.sleep(500) // Trying to make this fail less often :-/
-            doSync(i + 1)
-        }
-      }
-    }
-    doSync(0)
+    s"./src/test/util/sync_sqlserver_origin_to_target.sh ${containers.origin.db.host} ${containers.origin.db.name} ${containers.targetSingleThreaded.db.name}".!!
+    s"./src/test/util/sync_sqlserver_origin_to_target.sh ${containers.origin.db.host} ${containers.origin.db.name} ${containers.targetAkkaStreams.db.name}".!!
   }
 
   override protected def postSubset(): Unit = {

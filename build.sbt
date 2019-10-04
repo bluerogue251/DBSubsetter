@@ -33,3 +33,6 @@ libraryDependencies ++= Seq(
   "com.typesafe.slick" %% "slick" % "3.2.1" % "test",
   "com.typesafe.slick" %% "slick-hikaricp" % "3.2.1" % "test"
 )
+
+// Try to get around flaky SQL Server tests
+parallelExecution in Test := false
