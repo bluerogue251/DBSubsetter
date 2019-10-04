@@ -48,6 +48,6 @@ steps:
       - sbt "testOnly unit.* integration.* e2e.*"
 ---
 kind: signature
-hmac: 6a2557692491fff2aa472f296545e9fd783fd09440190f796c1ea578298ea891
+hmac: 2a2ac9181c49b42ab8183c31d060e9f1b977e9b9cf2d72d562130e9d346eb892
 
 ...
