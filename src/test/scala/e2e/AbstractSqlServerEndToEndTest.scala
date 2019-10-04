@@ -25,7 +25,6 @@ abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest[SqlSer
   }
 
   override protected def containers: DatabaseContainerSet[SqlServerDatabase] = {
-    val containerName = SharedTestContainers.sqlServer.name
     val host = SharedTestContainers.sqlServer.db.host
     val port = SharedTestContainers.sqlServer.db.port
     val originDbName = s"${testName}_origin"
