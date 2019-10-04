@@ -33,9 +33,9 @@ abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest[SqlSer
     val targetAkkaStreamsDbName = s"${testName}_target_akka_streams"
 
     new DatabaseContainerSet(
-      buildContainer(containerName, originDbName, port),
-      buildContainer(containerName, targetSingleThreadedDbName, port),
-      buildContainer(containerName, targetAkkaStreamsDbName, port)
+      buildContainer(host, originDbName, port),
+      buildContainer(host, targetSingleThreadedDbName, port),
+      buildContainer(host, targetAkkaStreamsDbName, port)
     )
   }
 
@@ -45,7 +45,7 @@ abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest[SqlSer
 
   override protected def prepareTargetDDL(): Unit = {
     s"./src/test/util/sync_sqlserver_origin_to_target.sh ${containers.origin.db.host} ${containers.origin.db.name} ${containers.targetSingleThreaded.db.name}".!!
-    s"./src/test/util/sync_sqlserver_origin_to_target.sh ${containers.origin.name} ${containers.origin.db.name} ${containers.targetAkkaStreams.db.name}".!!
+    s"./src/test/util/sync_sqlserver_origin_to_target.sh ${containers.origin.db.host} ${containers.origin.db.name} ${containers.targetAkkaStreams.db.name}".!!
   }
 
   override protected def postSubset(): Unit = {
