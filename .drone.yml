@@ -44,9 +44,9 @@ steps:
       DB_SUBSETTER_MYSQL_TARGET_SINGLE_THREADED_PORT: 3306
       DB_SUBSETTER_MYSQL_TARGET_AKKA_STREAMS_PORT: 3306
     commands:
-      - sbt "testOnly e2e.*SqlServer"
+      - sbt "testOnly unit.* integration.* e2e.*PostgreSQL e2e.*MySql e2e.pgdatatypes.* e2e.mysqldatatypes.*"
 ---
 kind: signature
-hmac: 106f644a2e123871eb4012bfceff93c34a01401d61089c0c35053f90000b17d1
+hmac: c5dfba22307ad91a6b3d1d9ca264f62416486fd2536a9b8135001bd3c6ac73dc
 
 ...
