@@ -43,6 +43,7 @@ abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest[SqlSer
   override protected def prepareOriginDML(): Unit
 
   override protected def prepareTargetDDL(): Unit = {
+    Thread.sleep(1000) // Try to make parallel tests a little more reliable?
     s"./src/test/util/sync_sqlserver_origin_to_target.sh ${containers.origin.db.host} ${containers.origin.db.name} ${containers.targetSingleThreaded.db.name}".!!
     s"./src/test/util/sync_sqlserver_origin_to_target.sh ${containers.origin.db.host} ${containers.origin.db.name} ${containers.targetAkkaStreams.db.name}".!!
   }
