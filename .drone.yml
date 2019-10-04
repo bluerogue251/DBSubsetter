@@ -31,11 +31,9 @@ services:
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: "true"
 
-
-
 steps:
   - name: test
-    image: bluerogue251/db-subsetter-ci:2
+    image: bluerogue251/db-subsetter-ci:3
     environment:
       DB_SUBSETTER_POSTGRES_HOST: postgres
       DB_SUBSETTER_SQL_SERVER_HOST: sql_server
@@ -49,6 +47,6 @@ steps:
       - sbt "testOnly unit.* integration.* e2e.*PostgreSQL e2e.*MySql e2e.pgdatatypes.* e2e.mysqldatatypes.*"
 ---
 kind: signature
-hmac: 17c870c36a9990687dc120f816e0f095254d598829eef3f063e8b44d8fe1b17d
+hmac: cebed815ff636f303a38a2261c652a979230589570d2025075955c1a282e7388
 
 ...
