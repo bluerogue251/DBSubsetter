@@ -9,7 +9,7 @@ services:
     command: ["postgres", "-c", "max_connections=200"]
 
   - name: sql_server
-    image: microsoft/mssql-server-linux:2017-CU12
+    image: microsoft/mssql-server-windows-developer
     environment:
       SA_PASSWORD: "MsSqlServerLocal1"
       MSSQL_PID: "Developer"
@@ -47,6 +47,6 @@ steps:
       - sbt "testOnly unit.* integration.* e2e.*"
 ---
 kind: signature
-hmac: c9ec6734cfe52425c964fe6706aabf9ec68125b2260bc9a659220ae830cf205b
+hmac: 28f67f038d9332fb0f18ded58b44154d7c3b5f241034ab3a2ebb34706bb52dc7
 
 ...

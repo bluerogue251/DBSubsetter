@@ -8,7 +8,7 @@ services:
       - "5432:5432"
 
   e2e_sql_server:
-    image: microsoft/mssql-server-linux:2017-CU12
+    image: microsoft/mssql-server-windows-developer
     environment:
       SA_PASSWORD: "MsSqlServerLocal1"
       MSSQL_PID: "Developer"
