@@ -12,7 +12,7 @@ services:
     image: microsoft/mssql-server-linux:2017-CU12
     environment:
       SA_PASSWORD: "MsSqlServerLocal1"
-      MSSQL_PID: "Developer"
+      MSSQL_PID: "Standard"
       ACCEPT_EULA: "Y"
     command: ["/opt/mssql/bin/sqlservr"]
 
