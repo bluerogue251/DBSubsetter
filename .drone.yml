@@ -8,7 +8,7 @@ services:
     image: postgres:9.6.3
     command: ["postgres", "-c", "max_connections=200"]
 
-  - name: e2e_sql_server
+  - name: sql_server
     image: microsoft/mssql-server-linux:2017-CU12
     environment:
       SA_PASSWORD: "MsSqlServerLocal1"
@@ -47,6 +47,6 @@ steps:
       - sbt "testOnly unit.* integration.* e2e.*"
 ---
 kind: signature
-hmac: 338ab38787bb6af7565a4f48eb38475f073bd357ea01429af5bff200e8707b85
+hmac: c9ec6734cfe52425c964fe6706aabf9ec68125b2260bc9a659220ae830cf205b
 
 ...
