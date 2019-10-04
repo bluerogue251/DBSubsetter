@@ -33,7 +33,7 @@ services:
 
 steps:
   - name: test
-    image: bluerogue251/db-subsetter-ci:3
+    image: bluerogue251/db-subsetter-ci:4
     environment:
       DB_SUBSETTER_POSTGRES_HOST: postgres
       DB_SUBSETTER_SQL_SERVER_HOST: sql_server
@@ -43,11 +43,10 @@ steps:
       DB_SUBSETTER_MYSQL_ORIGIN_PORT: 3306
       DB_SUBSETTER_MYSQL_TARGET_SINGLE_THREADED_PORT: 3306
       DB_SUBSETTER_MYSQL_TARGET_AKKA_STREAMS_PORT: 3306
-      LC_ALL: en_US.UTF-8
     commands:
       - sbt "testOnly unit.* integration.* e2e.*"
 ---
 kind: signature
-hmac: 2a2ac9181c49b42ab8183c31d060e9f1b977e9b9cf2d72d562130e9d346eb892
+hmac: fe87e7d64b35e83869f2046efced460dfe88035e23e0441ffb4e1a18333d7cc4
 
 ...

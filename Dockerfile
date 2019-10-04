@@ -29,3 +29,9 @@ WORKDIR /tmp-project-install
 RUN sbt compile
 WORKDIR root
 run rm -rf /tmp-project-install
+
+# https://github.com/Microsoft/mssql-docker/issues/163
+RUN apt-get install -y locales
+RUN echo "nb_NO.UTF-8 UTF-8" > /etc/locale.gen
+RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
+RUN locale-gen
