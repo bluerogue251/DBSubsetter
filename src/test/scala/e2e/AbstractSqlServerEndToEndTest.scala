@@ -22,6 +22,7 @@ abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest[SqlSer
   override protected def createTargetDatabases(): Unit = {
     createEmptyDb(containers.origin.name, containers.targetSingleThreaded.db.name)
     createEmptyDb(containers.origin.name, containers.targetAkkaStreams.db.name)
+    Thread.sleep(2000) // Try to get around flaky SqlServer tests
   }
 
   override protected def containers: DatabaseContainerSet[SqlServerDatabase] = {
