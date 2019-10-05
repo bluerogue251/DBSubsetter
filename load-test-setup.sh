@@ -34,13 +34,14 @@ sudo docker exec pg_target createdb --user postgres school_db
 sudo docker exec pg_origin createdb --user postgres physics_db
 sudo docker exec pg_target createdb --user postgres physics_db
 
-# Only do this block if we are populating the DBs from scratch
+# Only do this block if we are populating school_db from scratch
 SCHOOL_DB_DUMP_URL="https://s3.amazonaws.com/db-subsetter/load-test/school-db/pgdump.sql.gz"
 wget -q -O - "${SCHOOL_DB_DUMP_URL}" | gunzip | sudo docker exec --interactive pg_origin psql --user postgres --dbname school_db
 
+# Only do this block if we are populating physics_db from scratch
 wget -O /home/ubuntu/tmp-data/physics-db-dump.tar "https://s3.amazonaws.com/db-subsetter/load-test/physics-db/physics-db-dump.tar"
-sudo tar -xvf /home/ubuntu/tmp-data/physics-db-dump.tar --directory /home/ubuntu/tmp-data/
-sudo docker exec pg_origin pg_restore --jobs 8 --user postgres --dbname physics_db /tmp-data/physics-db-dump.tar
+tar -xvf /home/ubuntu/tmp-data/physics-db-dump.tar --directory /home/ubuntu/tmp-data/
+sudo docker exec pg_origin pg_restore --jobs 8 --user postgres --dbname physics_db --verbose /tmp-data/physics-db-dump
 
 sudo docker exec pg_origin psql --user postgres --dbname school_db -c "VACUUM ANALYZE"
 sudo docker exec pg_origin psql --user postgres --dbname physics_db -c "VACUUM ANALYZE"
