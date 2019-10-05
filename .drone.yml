@@ -33,7 +33,7 @@ services:
 
 steps:
   - name: test
-    image: bluerogue251/db-subsetter-ci:4
+    image: bluerogue251/db-subsetter-ci:5
     environment:
       DB_SUBSETTER_POSTGRES_HOST: postgres
       DB_SUBSETTER_SQL_SERVER_HOST: sql_server
@@ -46,17 +46,22 @@ steps:
     commands:
       - sbt "testOnly unit.* integration.* e2e.*"
   - name: build_jar
-    image: bluerogue251/db-subsetter-ci:4
+    image: bluerogue251/db-subsetter-ci:5
     commands:
       - sbt 'set test in assembly := {}' 'set version := "${DRONE_COMMIT_SHA}"' assembly
+  - name: upload_jar
+    image: bluerogue251/db-subsetter-ci:5
+    secrets: [aws_access_key_id, aws_secret_access_key]
+    commands:
+      - aws s3 cp /drone/src/target/scala-2.12/DBSubsetter-assembly-"${DRONE_COMMIT_SHA}".jar s3://db-subsetter/load-test/jars/
   - name: load_test
-    image: bluerogue251/db-subsetter-ci:4
+    image: bluerogue251/db-subsetter-ci:5
     environment:
       DB_SUBSETTER_POSTGRES_HOST: postgres
     commands:
       - sbt "testOnly load.schooldb.SchoolDbTestPostgreSQL"
 ---
 kind: signature
-hmac: 34051ef996ff2e4db05529d80366f2f3bff1db6c7d9f0099dc53838eb58a494e
+hmac: 5e5d3a0b2ac8126556b03dec2b98b9433fe0419733eddec4a9e15ef9dc7a9667
 
 ...
