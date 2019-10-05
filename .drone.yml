@@ -48,7 +48,7 @@ steps:
   - name: build_jar
     image: bluerogue251/db-subsetter-ci:4
     commands:
-      - sbt assembly
+      - sbt 'set test in assembly := {}' assembly
   - name: load_test
     image: bluerogue251/db-subsetter-ci:4
     environment:
@@ -57,6 +57,6 @@ steps:
       - sbt "testOnly load.schooldb.SchoolDbTestPostgreSQL"
 ---
 kind: signature
-hmac: abfb8ef7a00dd1309f23180f67b9df4b91ed5870d23588f10752493b762d3038
+hmac: 34051ef996ff2e4db05529d80366f2f3bff1db6c7d9f0099dc53838eb58a494e
 
 ...
