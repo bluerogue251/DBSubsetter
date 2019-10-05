@@ -48,14 +48,17 @@ steps:
   - name: build_jar
     image: bluerogue251/db-subsetter-ci:5
     commands:
-      - sbt 'set test in assembly := {}' 'set version := "${DRONE_COMMIT_SHA}"' assembly
+      - sbt 'set test in assembly := {}' 'set version := "${DRONE_COMMIT}"' assembly
   - name: upload_jar
     image: bluerogue251/db-subsetter-ci:5
     secrets: [aws_access_key_id, aws_secret_access_key]
+    environment:
+      AWS_ACCESS_KEY_ID:
+        from_secret: aws_access_key_id
+      AWS_SECRET_ACCESS_KEY:
+        from_secret: aws_secret_access_key
     commands:
-      - echo "foo"
-      - echo $AWS_ACCESS_KEY_ID
-      - aws s3 cp /drone/src/target/scala-2.12/DBSubsetter-assembly-${DRONE_COMMIT_SHA}.jar s3://db-subsetter/load-test/jars/
+      - aws s3 cp /drone/src/target/scala-2.12/DBSubsetter-assembly-${DRONE_COMMIT}.jar s3://db-subsetter/load-test/jars/
   - name: load_test
     image: bluerogue251/db-subsetter-ci:5
     environment:
@@ -64,6 +67,6 @@ steps:
       - sbt "testOnly load.schooldb.SchoolDbTestPostgreSQL"
 ---
 kind: signature
-hmac: 671e490255d6cbe72c89d9884c1098a9a30f0af6d6cdd806fbca8858c70f6087
+hmac: d44cd6765aae91fd6e333afbdbcbbff094912976c05ed0a942cbe19a8b0e74e4
 
 ...
