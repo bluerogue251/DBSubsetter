@@ -57,6 +57,6 @@ steps:
       - sbt "testOnly load.schooldb.SchoolDbTestPostgreSQL"
 ---
 kind: signature
-hmac: 897d8321e69fa18d57494e09060797dfa1b4e42213009fdfecf50db7343f16c2
+hmac: abfb8ef7a00dd1309f23180f67b9df4b91ed5870d23588f10752493b762d3038
 
 ...
