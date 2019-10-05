@@ -33,3 +33,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.slick" %% "slick" % "3.2.1" % "test",
   "com.typesafe.slick" %% "slick-hikaricp" % "3.2.1" % "test"
 )
+
+// Unfortunately SqlServer tests are flaky when run in parallel
+// TODO remove this and re-enable parallel tests
+parallelExecution in Test := false
