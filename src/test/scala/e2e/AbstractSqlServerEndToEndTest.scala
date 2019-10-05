@@ -1,41 +1,37 @@
 package e2e
 
+import util.Ports
 import util.db._
 
 import scala.sys.process._
+import scala.util.Properties
 
 abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest[SqlServerDatabase] {
   override protected val profile = slick.jdbc.SQLServerProfile
 
   protected def testName: String
 
-  override protected def startOriginContainer():Unit = {} // No-op
-
-  override protected def startTargetContainers(): Unit = {} // No-op (container is shared with origin)
-
-  override protected def awaitContainersReady(): Unit = {} // No-op
-
   override protected def createOriginDatabase(): Unit = {
-    createEmptyDb(containers.origin.name, containers.origin.db.name)
+    createEmptyDb(dbs.origin.name, dbs.origin.name)
   }
 
   override protected def createTargetDatabases(): Unit = {
-    createEmptyDb(containers.origin.name, containers.targetSingleThreaded.db.name)
-    createEmptyDb(containers.origin.name, containers.targetAkkaStreams.db.name)
+    createEmptyDb(dbs.origin.name, dbs.targetSingleThreaded.name)
+    createEmptyDb(dbs.origin.name, dbs.targetAkkaStreams.name)
     Thread.sleep(2000) // Try to get around flaky SqlServer tests
   }
 
-  override protected def containers: DatabaseContainerSet[SqlServerDatabase] = {
-    val host = SharedTestContainers.sqlServer.db.host
-    val port = SharedTestContainers.sqlServer.db.port
+  override protected def dbs: DatabaseSet[SqlServerDatabase] = {
+    val host = Properties.envOrElse("DB_SUBSETTER_SQL_SERVER_HOST", "localhost")
+    val port = Ports.sharedSqlServerPort
     val originDbName = s"${testName}_origin"
     val targetSingleThreadedDbName = s"${testName}_target_single_threaded"
     val targetAkkaStreamsDbName = s"${testName}_target_akka_streams"
 
-    new DatabaseContainerSet(
-      buildContainer(host, originDbName, port),
-      buildContainer(host, targetSingleThreadedDbName, port),
-      buildContainer(host, targetAkkaStreamsDbName, port)
+    new DatabaseSet(
+      buildDatabase(host, originDbName, port),
+      buildDatabase(host, targetSingleThreadedDbName, port),
+      buildDatabase(host, targetAkkaStreamsDbName, port)
     )
   }
 
@@ -44,21 +40,20 @@ abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest[SqlSer
   override protected def prepareOriginDML(): Unit
 
   override protected def prepareTargetDDL(): Unit = {
-    s"./src/test/util/sync_sqlserver_origin_to_target.sh ${containers.origin.db.host} ${containers.origin.db.name} ${containers.targetSingleThreaded.db.name}".!!
-    s"./src/test/util/sync_sqlserver_origin_to_target.sh ${containers.origin.db.host} ${containers.origin.db.name} ${containers.targetAkkaStreams.db.name}".!!
+    s"./src/test/util/sync_sqlserver_origin_to_target.sh ${dbs.origin.host} ${dbs.origin.name} ${dbs.targetSingleThreaded.name}".!!
+    s"./src/test/util/sync_sqlserver_origin_to_target.sh ${dbs.origin.host} ${dbs.origin.name} ${dbs.targetAkkaStreams.name}".!!
   }
 
   override protected def postSubset(): Unit = {
-    s"./src/test/util/sqlserver_post_subset.sh ${containers.origin.db.host} ${containers.targetSingleThreaded.db.name}".!!
-    s"./src/test/util/sqlserver_post_subset.sh ${containers.origin.db.host} ${containers.targetAkkaStreams.db.name}".!!
+    s"./src/test/util/sqlserver_post_subset.sh ${dbs.origin.host} ${dbs.targetSingleThreaded.name}".!!
+    s"./src/test/util/sqlserver_post_subset.sh ${dbs.origin.host} ${dbs.targetAkkaStreams.name}".!!
   }
 
   private def createEmptyDb(containerName: String, dbName: String): Unit = {
-    s"./src/test/util/create_sqlserver_db.sh ${containers.origin.db.host} $dbName".!!
+    s"./src/test/util/create_sqlserver_db.sh ${dbs.origin.host} $dbName".!!
   }
 
-  private def buildContainer(dbHost: String, dbName: String, dbPort: Int): SqlServerContainer = {
-    val db: SqlServerDatabase = new SqlServerDatabase(dbHost, dbName, dbPort)
-    new SqlServerContainer(SharedTestContainers.sqlServer.name, db)
+  private def buildDatabase(dbHost: String, dbName: String, dbPort: Int): SqlServerDatabase = {
+    new SqlServerDatabase(dbHost, dbName, dbPort)
   }
 }

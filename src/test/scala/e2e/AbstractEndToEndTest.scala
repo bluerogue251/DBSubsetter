@@ -2,7 +2,7 @@ package e2e
 
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 import slick.jdbc.JdbcBackend
-import util.db.{Database, DatabaseContainerSet}
+import util.db.{Database, DatabaseSet}
 import util.runner.TestSubsetRunner
 
 abstract class AbstractEndToEndTest[T <: Database] extends FunSuite with BeforeAndAfterAll {
@@ -11,17 +11,11 @@ abstract class AbstractEndToEndTest[T <: Database] extends FunSuite with BeforeA
    */
   protected def profile: slick.jdbc.JdbcProfile
 
-  protected def startOriginContainer(): Unit
-
-  protected def startTargetContainers(): Unit
-
-  protected def awaitContainersReady(): Unit
-
   protected def createOriginDatabase(): Unit
 
   protected def createTargetDatabases(): Unit
 
-  protected def containers: DatabaseContainerSet[T]
+  protected def dbs: DatabaseSet[T]
 
   protected def prepareOriginDDL(): Unit
 
@@ -32,11 +26,11 @@ abstract class AbstractEndToEndTest[T <: Database] extends FunSuite with BeforeA
   protected def programArgs: Array[String]
 
   protected def runSubsetInSingleThreadedMode(): Unit = {
-    TestSubsetRunner.runSubsetInSingleThreadedMode(containers, programArgs)
+    TestSubsetRunner.runSubsetInSingleThreadedMode(dbs, programArgs)
   }
 
   protected def runSubsetInAkkaStreamsMode(): Unit = {
-    TestSubsetRunner.runSubsetInAkkaStreamsMode(containers, programArgs)
+    TestSubsetRunner.runSubsetInAkkaStreamsMode(dbs, programArgs)
   }
 
   protected def postSubset(): Unit
@@ -58,13 +52,6 @@ abstract class AbstractEndToEndTest[T <: Database] extends FunSuite with BeforeA
     super.beforeAll()
 
     /*
-     * Spin up containers
-     */
-    startOriginContainer()
-    startTargetContainers()
-    awaitContainersReady()
-
-    /*
      * Create origin and target databases
      */
     createOriginDatabase()
@@ -75,9 +62,9 @@ abstract class AbstractEndToEndTest[T <: Database] extends FunSuite with BeforeA
      * purposes such as populating the origin DB with DDL/DML, querying the target DBs after subsetting
      * to make assertions about their contents, etc.
      */
-    originSlick = profile.backend.Database.forURL(containers.origin.db.connectionString)
-    targetSingleThreadedSlick = profile.backend.Database.forURL(containers.targetSingleThreaded.db.connectionString)
-    targetAkkaStreamsSlick = profile.backend.Database.forURL(containers.targetAkkaStreams.db.connectionString)
+    originSlick = profile.backend.Database.forURL(dbs.origin.connectionString)
+    targetSingleThreadedSlick = profile.backend.Database.forURL(dbs.targetSingleThreaded.connectionString)
+    targetAkkaStreamsSlick = profile.backend.Database.forURL(dbs.targetAkkaStreams.connectionString)
 
     /*
      * Set up the DDL and DML in the origin DB

@@ -1,14 +1,14 @@
 package util.runner
 
 import trw.dbsubsetter.ApplicationRunner
-import util.db.{Database, DatabaseContainerSet}
+import util.db.{Database, DatabaseSet}
 
 object TestSubsetRunner {
 
-  def runSubsetInSingleThreadedMode[T <: Database](containers: DatabaseContainerSet[T], programArgs: Array[String]): Long = {
+  def runSubsetInSingleThreadedMode[T <: Database](dbs: DatabaseSet[T], programArgs: Array[String]): Long = {
     val defaultArgs: Array[String] = Array(
-      "--originDbConnStr", containers.origin.db.connectionString,
-      "--targetDbConnStr", containers.targetSingleThreaded.db.connectionString,
+      "--originDbConnStr", dbs.origin.connectionString,
+      "--targetDbConnStr", dbs.targetSingleThreaded.connectionString,
       "--singleThreadedDebugMode"
 
     )
@@ -17,12 +17,12 @@ object TestSubsetRunner {
     timedSubsetMilliseconds(finalArgs)
   }
 
-  def runSubsetInAkkaStreamsMode[T <: Database](containers: DatabaseContainerSet[T], programArgs: Array[String]): Long = {
+  def runSubsetInAkkaStreamsMode[T <: Database](containers: DatabaseSet[T], programArgs: Array[String]): Long = {
     val defaultArgs: Array[String] = Array(
-      "--originDbConnStr", containers.origin.db.connectionString,
+      "--originDbConnStr", containers.origin.connectionString,
       "--originDbParallelism", "10",
       "--targetDbParallelism", "10",
-      "--targetDbConnStr", containers.targetAkkaStreams.db.connectionString
+      "--targetDbConnStr", containers.targetAkkaStreams.connectionString
     )
     val finalArgs: Array[String] = defaultArgs ++ programArgs
 

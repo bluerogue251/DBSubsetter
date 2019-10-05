@@ -10,8 +10,7 @@ import slick.jdbc.PostgresProfile.api._
 import slick.sql.SqlAction
 import trw.dbsubsetter.db.Row
 import util.Ports
-import util.db.{DatabaseContainerSet, PostgreSQLContainer, PostgreSQLDatabase}
-import util.docker.ContainerUtil
+import util.db.{DatabaseSet, PostgreSQLDatabase}
 
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.duration.Duration
@@ -60,18 +59,15 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
 
   protected def programArgs: Array[String] = ???
 
-  override protected def startOriginContainer(): Unit = ContainerUtil.start(containers.origin.name)
-
   override protected def createOriginDatabase(): Unit = {}
 
-  override protected def containers: DatabaseContainerSet[PostgreSQLDatabase] = {
-    val defaults = super.containers
+  override protected def dbs: DatabaseSet[PostgreSQLDatabase] = {
+    val defaults = super.dbs
 
     val originDb = new PostgreSQLDatabase("localhost", Ports.postgresPhysicsDbOrigin, "physics_db")
-    val originContainer = new PostgreSQLContainer("physics_origin_postgres", originDb)
 
-    new DatabaseContainerSet[PostgreSQLDatabase](
-      originContainer,
+    new DatabaseSet[PostgreSQLDatabase](
+      originDb,
       defaults.targetSingleThreaded,
       defaults.targetAkkaStreams
     )
@@ -343,14 +339,14 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
   }
 
   private[this] lazy val originJdbcConnection: Connection = {
-    val connectionString = s"jdbc:postgresql://localhost:${containers.origin.db.port}/${containers.origin.db.name}?user=postgres"
+    val connectionString = s"jdbc:postgresql://localhost:${dbs.origin.port}/${dbs.origin.name}?user=postgres"
     val connection: Connection = DriverManager.getConnection(connectionString)
     connection.setReadOnly(true)
     connection
   }
 
   private[this] lazy val targetJdbcConnection: Connection = {
-    val connectionString = s"jdbc:postgresql://localhost:${containers.targetSingleThreaded.db.port}/${containers.targetSingleThreaded.db.name}?user=postgres"
+    val connectionString = s"jdbc:postgresql://localhost:${dbs.targetSingleThreaded.port}/${dbs.targetSingleThreaded.name}?user=postgres"
     val connection: Connection = DriverManager.getConnection(connectionString)
     connection.setAutoCommit(false)
     connection
