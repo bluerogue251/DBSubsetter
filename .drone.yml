@@ -32,19 +32,19 @@ services:
       MYSQL_ALLOW_EMPTY_PASSWORD: "true"
 
 steps:
-  - name: test
-    image: bluerogue251/db-subsetter-ci:5
-    environment:
-      DB_SUBSETTER_POSTGRES_HOST: postgres
-      DB_SUBSETTER_SQL_SERVER_HOST: sql_server
-      DB_SUBSETTER_MYSQL_ORIGIN_HOST: mysql_origin
-      DB_SUBSETTER_MYSQL_TARGET_SINGLE_THREADED_HOST: mysql_target_single_threaded
-      DB_SUBSETTER_MYSQL_TARGET_AKKA_STREAMS_HOST: mysql_target_akka_streams
-      DB_SUBSETTER_MYSQL_ORIGIN_PORT: 3306
-      DB_SUBSETTER_MYSQL_TARGET_SINGLE_THREADED_PORT: 3306
-      DB_SUBSETTER_MYSQL_TARGET_AKKA_STREAMS_PORT: 3306
-    commands:
-      - sbt "testOnly unit.* integration.* e2e.*"
+#  - name: test
+#    image: bluerogue251/db-subsetter-ci:5
+#    environment:
+#      DB_SUBSETTER_POSTGRES_HOST: postgres
+#      DB_SUBSETTER_SQL_SERVER_HOST: sql_server
+#      DB_SUBSETTER_MYSQL_ORIGIN_HOST: mysql_origin
+#      DB_SUBSETTER_MYSQL_TARGET_SINGLE_THREADED_HOST: mysql_target_single_threaded
+#      DB_SUBSETTER_MYSQL_TARGET_AKKA_STREAMS_HOST: mysql_target_akka_streams
+#      DB_SUBSETTER_MYSQL_ORIGIN_PORT: 3306
+#      DB_SUBSETTER_MYSQL_TARGET_SINGLE_THREADED_PORT: 3306
+#      DB_SUBSETTER_MYSQL_TARGET_AKKA_STREAMS_PORT: 3306
+#    commands:
+#      - sbt "testOnly unit.* integration.* e2e.*"
   - name: build_jar
     image: bluerogue251/db-subsetter-ci:5
     commands:
@@ -53,7 +53,9 @@ steps:
     image: bluerogue251/db-subsetter-ci:5
     secrets: [aws_access_key_id, aws_secret_access_key]
     commands:
-      - aws s3 cp /drone/src/target/scala-2.12/DBSubsetter-assembly-"${DRONE_COMMIT_SHA}".jar s3://db-subsetter/load-test/jars/
+      - echo "foo"
+      - echo $AWS_ACCESS_KEY_ID
+      - aws s3 cp /drone/src/target/scala-2.12/DBSubsetter-assembly-${DRONE_COMMIT_SHA}.jar s3://db-subsetter/load-test/jars/
   - name: load_test
     image: bluerogue251/db-subsetter-ci:5
     environment:
@@ -62,6 +64,6 @@ steps:
       - sbt "testOnly load.schooldb.SchoolDbTestPostgreSQL"
 ---
 kind: signature
-hmac: 5e5d3a0b2ac8126556b03dec2b98b9433fe0419733eddec4a9e15ef9dc7a9667
+hmac: cd6fb0a6cffe61b8bfa9a592970fd7c41d1df8f5e0bf8b7c8d0174c8de68fde2
 
 ...
