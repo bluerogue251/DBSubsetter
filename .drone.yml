@@ -4,32 +4,32 @@ type: docker
 name: default
 
 services:
-  - name: postgres
-    image: postgres:9.6.3
-    command: ["postgres", "-c", "max_connections=200"]
-
-  - name: sql_server
-    image: mcr.microsoft.com/mssql/server:2017-CU14-ubuntu
-    environment:
-      SA_PASSWORD: "MsSqlServerLocal1"
-      MSSQL_PID: "Developer"
-      ACCEPT_EULA: "Y"
-    command: ["/opt/mssql/bin/sqlservr"]
-
-  - name: mysql_origin
-    image: mysql:8.0.3
-    environment:
-      MYSQL_ALLOW_EMPTY_PASSWORD: "true"
-
-  - name: mysql_target_single_threaded
-    image: mysql:8.0.3
-    environment:
-      MYSQL_ALLOW_EMPTY_PASSWORD: "true"
-
-  - name: mysql_target_akka_streams
-    image: mysql:8.0.3
-    environment:
-      MYSQL_ALLOW_EMPTY_PASSWORD: "true"
+#  - name: postgres
+#    image: postgres:9.6.3
+#    command: ["postgres", "-c", "max_connections=200"]
+#
+#  - name: sql_server
+#    image: mcr.microsoft.com/mssql/server:2017-CU14-ubuntu
+#    environment:
+#      SA_PASSWORD: "MsSqlServerLocal1"
+#      MSSQL_PID: "Developer"
+#      ACCEPT_EULA: "Y"
+#    command: ["/opt/mssql/bin/sqlservr"]
+#
+#  - name: mysql_origin
+#    image: mysql:8.0.3
+#    environment:
+#      MYSQL_ALLOW_EMPTY_PASSWORD: "true"
+#
+#  - name: mysql_target_single_threaded
+#    image: mysql:8.0.3
+#    environment:
+#      MYSQL_ALLOW_EMPTY_PASSWORD: "true"
+#
+#  - name: mysql_target_akka_streams
+#    image: mysql:8.0.3
+#    environment:
+#      MYSQL_ALLOW_EMPTY_PASSWORD: "true"
 
 steps:
 #  - name: test
@@ -64,6 +64,6 @@ steps:
       - sbt "testOnly load.schooldb.SchoolDbTestPostgreSQL"
 ---
 kind: signature
-hmac: cd6fb0a6cffe61b8bfa9a592970fd7c41d1df8f5e0bf8b7c8d0174c8de68fde2
+hmac: 671e490255d6cbe72c89d9884c1098a9a30f0af6d6cdd806fbca8858c70f6087
 
 ...
