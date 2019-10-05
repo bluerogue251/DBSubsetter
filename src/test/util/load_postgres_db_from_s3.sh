@@ -2,9 +2,9 @@
 
 set -eou pipefail
 
-url=$1
-container=$2
+dump_url=$1
+host=$2
 database=$3
 
-wget -q -O - ${url} | gunzip | docker exec -i ${container} psql --user postgres --dbname ${database}
-docker exec ${container} psql --user postgres --dbname ${database} -c "VACUUM ANALYZE"
+wget -q -O - "${dump_url}" | gunzip | psql --host "${host}" --port 5432 --user postgres --dbname "${database}"
+psql --host "${host}" --port 5432 --user postgres --dbname "${database}" -c "VACUUM ANALYZE"

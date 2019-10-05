@@ -31,11 +31,11 @@ trait LoadTest[T <: Database] { this: AbstractEndToEndTest[T] =>
     akkaStreamsRuntimeMillis = TestSubsetRunner.runSubsetInAkkaStreamsMode(dbs, programArgs)
   }
 
-  test("Single threaded runtime did not significantly increase") {
+  test("Check that single threaded runtime did not significantly increase") {
     assert(singleThreadedRuntimeMillis < singleThreadedRuntimeLimitMillis)
   }
 
-  test("Akka Streams runtime did not significantly increase") {
+  test("Check that Akka Streams runtime did not significantly increase") {
     assert(akkaStreamsRuntimeMillis < akkaStreamsRuntimeLimitMillis)
   }
 }

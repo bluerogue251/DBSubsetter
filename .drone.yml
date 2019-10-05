@@ -45,8 +45,14 @@ steps:
       DB_SUBSETTER_MYSQL_TARGET_AKKA_STREAMS_PORT: 3306
     commands:
       - sbt "testOnly unit.* integration.* e2e.*"
+  - name: load_test
+    image: bluerogue251/db-subsetter-ci:4
+    environment:
+      DB_SUBSETTER_POSTGRES_HOST: postgres
+    commands:
+      - sbt "testOnly load.schooldb.SchoolDbTestPostgreSQL"
 ---
 kind: signature
-hmac: 0df8661b01ae492760d7db2deacaf9e47780549a009f40edaf3b8a5881d8c940
+hmac: 897d8321e69fa18d57494e09060797dfa1b4e42213009fdfecf50db7343f16c2
 
 ...
