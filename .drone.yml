@@ -45,6 +45,10 @@ steps:
       DB_SUBSETTER_MYSQL_TARGET_AKKA_STREAMS_PORT: 3306
     commands:
       - sbt "testOnly unit.* integration.* e2e.*"
+  - name: build_jar
+    image: bluerogue251/db-subsetter-ci:4
+    commands:
+      - sbt assembly
   - name: load_test
     image: bluerogue251/db-subsetter-ci:4
     environment:
