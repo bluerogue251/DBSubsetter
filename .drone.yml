@@ -48,7 +48,7 @@ steps:
   - name: build_jar
     image: bluerogue251/db-subsetter-ci:4
     commands:
-      - sbt 'set test in assembly := {}' assembly
+      - sbt 'set test in assembly := {}' 'set version := "${DRONE_COMMIT_SHA}"' assembly
   - name: load_test
     image: bluerogue251/db-subsetter-ci:4
     environment:

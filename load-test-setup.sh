@@ -30,3 +30,7 @@ sudo docker exec pg_school_db_origin psql --user postgres --dbname school_db -c 
 
 sudo docker exec pg_school_db_origin pg_dump --user postgres --dbname school_db --section pre-data | \
   sudo docker exec --interactive pg_school_db_target psql --user postgres --dbname school_db
+
+# Install JRE
+sudo add-apt-repository -y ppa:openjdk-r/ppa
+sudo apt install -y openjdk-8-jre-headless
