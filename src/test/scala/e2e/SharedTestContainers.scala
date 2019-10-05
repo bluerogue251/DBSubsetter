@@ -2,7 +2,6 @@ package e2e
 
 import util.Ports
 import util.db._
-import util.docker.ContainerUtil
 
 import scala.util.Properties
 
@@ -18,18 +17,10 @@ object SharedTestContainers {
   }
 
   lazy val sqlServer: SqlServerContainer = {
-    val containerName = "e2e_sql_server"
+    val containerName = "placeholder-do-not-use"
+    val dbHost: String = Properties.envOrElse("DB_SUBSETTER_SQL_SERVER_HOST", "localhost")
     val port = Ports.sharedSqlServerPort
-    DatabaseContainer.recreateSqlServer(containerName, port)
-    val db = new SqlServerDatabase(dbName, port)
-
-    /*
-     * Remove container on JVM shutdown
-     */
-    sys.addShutdownHook(ContainerUtil.rm(containerName))
-
+    val db = new SqlServerDatabase(dbHost, dbName, port)
     new SqlServerContainer(containerName, db)
   }
-
-  lazy val awaitSqlServerUp: Unit = Thread.sleep(6000)
 }

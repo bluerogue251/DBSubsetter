@@ -8,6 +8,14 @@ services:
     image: postgres:9.6.3
     command: ["postgres", "-c", "max_connections=200"]
 
+  - name: sql_server
+    image: mcr.microsoft.com/mssql/server:2017-CU14-ubuntu
+    environment:
+      SA_PASSWORD: "MsSqlServerLocal1"
+      MSSQL_PID: "Developer"
+      ACCEPT_EULA: "Y"
+    command: ["/opt/mssql/bin/sqlservr"]
+
   - name: mysql_origin
     image: mysql:8.0.3
     environment:
@@ -25,9 +33,10 @@ services:
 
 steps:
   - name: test
-    image: bluerogue251/db-subsetter-ci:2
+    image: bluerogue251/db-subsetter-ci:4
     environment:
       DB_SUBSETTER_POSTGRES_HOST: postgres
+      DB_SUBSETTER_SQL_SERVER_HOST: sql_server
       DB_SUBSETTER_MYSQL_ORIGIN_HOST: mysql_origin
       DB_SUBSETTER_MYSQL_TARGET_SINGLE_THREADED_HOST: mysql_target_single_threaded
       DB_SUBSETTER_MYSQL_TARGET_AKKA_STREAMS_HOST: mysql_target_akka_streams
@@ -35,9 +44,9 @@ steps:
       DB_SUBSETTER_MYSQL_TARGET_SINGLE_THREADED_PORT: 3306
       DB_SUBSETTER_MYSQL_TARGET_AKKA_STREAMS_PORT: 3306
     commands:
-      - sbt "testOnly unit.* integration.* e2e.*PostgreSQL e2e.*MySql e2e.pgdatatypes.* e2e.mysqldatatypes.*"
+      - sbt "testOnly unit.* integration.* e2e.*"
 ---
 kind: signature
-hmac: 17c870c36a9990687dc120f816e0f095254d598829eef3f063e8b44d8fe1b17d
+hmac: 0df8661b01ae492760d7db2deacaf9e47780549a009f40edaf3b8a5881d8c940
 
 ...

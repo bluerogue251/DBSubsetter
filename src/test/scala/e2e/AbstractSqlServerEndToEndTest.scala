@@ -9,11 +9,11 @@ abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest[SqlSer
 
   protected def testName: String
 
-  override protected def startOriginContainer():Unit = SharedTestContainers.sqlServer
+  override protected def startOriginContainer():Unit = {} // No-op
 
   override protected def startTargetContainers(): Unit = {} // No-op (container is shared with origin)
 
-  override protected def awaitContainersReady(): Unit = SharedTestContainers.awaitSqlServerUp
+  override protected def awaitContainersReady(): Unit = {} // No-op
 
   override protected def createOriginDatabase(): Unit = {
     createEmptyDb(containers.origin.name, containers.origin.db.name)
@@ -22,19 +22,20 @@ abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest[SqlSer
   override protected def createTargetDatabases(): Unit = {
     createEmptyDb(containers.origin.name, containers.targetSingleThreaded.db.name)
     createEmptyDb(containers.origin.name, containers.targetAkkaStreams.db.name)
+    Thread.sleep(2000) // Try to get around flaky SqlServer tests
   }
 
   override protected def containers: DatabaseContainerSet[SqlServerDatabase] = {
-    val containerName = SharedTestContainers.sqlServer.name
+    val host = SharedTestContainers.sqlServer.db.host
     val port = SharedTestContainers.sqlServer.db.port
     val originDbName = s"${testName}_origin"
     val targetSingleThreadedDbName = s"${testName}_target_single_threaded"
     val targetAkkaStreamsDbName = s"${testName}_target_akka_streams"
 
     new DatabaseContainerSet(
-      buildContainer(containerName, originDbName, port),
-      buildContainer(containerName, targetSingleThreadedDbName, port),
-      buildContainer(containerName, targetAkkaStreamsDbName, port)
+      buildContainer(host, originDbName, port),
+      buildContainer(host, targetSingleThreadedDbName, port),
+      buildContainer(host, targetAkkaStreamsDbName, port)
     )
   }
 
@@ -43,21 +44,21 @@ abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest[SqlSer
   override protected def prepareOriginDML(): Unit
 
   override protected def prepareTargetDDL(): Unit = {
-    s"./src/test/util/sync_sqlserver_origin_to_target.sh ${containers.origin.name} ${containers.origin.db.name} ${containers.targetSingleThreaded.db.name}".!!
-    s"./src/test/util/sync_sqlserver_origin_to_target.sh ${containers.origin.name} ${containers.origin.db.name} ${containers.targetAkkaStreams.db.name}".!!
+    s"./src/test/util/sync_sqlserver_origin_to_target.sh ${containers.origin.db.host} ${containers.origin.db.name} ${containers.targetSingleThreaded.db.name}".!!
+    s"./src/test/util/sync_sqlserver_origin_to_target.sh ${containers.origin.db.host} ${containers.origin.db.name} ${containers.targetAkkaStreams.db.name}".!!
   }
 
   override protected def postSubset(): Unit = {
-    s"./src/test/util/sqlserver_post_subset.sh ${containers.origin.name} ${containers.targetSingleThreaded.db.name}".!!
-    s"./src/test/util/sqlserver_post_subset.sh ${containers.origin.name} ${containers.targetAkkaStreams.db.name}".!!
+    s"./src/test/util/sqlserver_post_subset.sh ${containers.origin.db.host} ${containers.targetSingleThreaded.db.name}".!!
+    s"./src/test/util/sqlserver_post_subset.sh ${containers.origin.db.host} ${containers.targetAkkaStreams.db.name}".!!
   }
 
   private def createEmptyDb(containerName: String, dbName: String): Unit = {
-    s"./src/test/util/create_sqlserver_db.sh $containerName $dbName".!!
+    s"./src/test/util/create_sqlserver_db.sh ${containers.origin.db.host} $dbName".!!
   }
 
-  private def buildContainer(containerName: String, dbName: String, dbPort: Int): SqlServerContainer = {
-    val db: SqlServerDatabase = new SqlServerDatabase(dbName, dbPort)
-    new SqlServerContainer(containerName, db)
+  private def buildContainer(dbHost: String, dbName: String, dbPort: Int): SqlServerContainer = {
+    val db: SqlServerDatabase = new SqlServerDatabase(dbHost, dbName, dbPort)
+    new SqlServerContainer(SharedTestContainers.sqlServer.name, db)
   }
 }
