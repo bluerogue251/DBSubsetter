@@ -24,11 +24,11 @@ trait LoadTest[T <: Database] { this: AbstractEndToEndTest[T] =>
   private var akkaStreamsRuntimeMillis: Long = _
 
   override protected def runSubsetInSingleThreadedMode(): Unit = {
-    singleThreadedRuntimeMillis = TestSubsetRunner.runSubsetInSingleThreadedMode(containers, programArgs)
+    singleThreadedRuntimeMillis = TestSubsetRunner.runSubsetInSingleThreadedMode(dbs, programArgs)
   }
 
   override protected def runSubsetInAkkaStreamsMode(): Unit = {
-    akkaStreamsRuntimeMillis = TestSubsetRunner.runSubsetInAkkaStreamsMode(containers, programArgs)
+    akkaStreamsRuntimeMillis = TestSubsetRunner.runSubsetInAkkaStreamsMode(dbs, programArgs)
   }
 
   test("Single threaded runtime did not significantly increase") {

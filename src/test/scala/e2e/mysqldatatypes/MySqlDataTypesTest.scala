@@ -47,8 +47,8 @@ class MySqlDataTypesTest extends AbstractMysqlEndToEndTest with AssertionUtil {
     (dmlFile #> originMySqlCommand).!!
   }
 
-  private def originMySqlCommand = {
-    val db: MySqlDatabase = containers.origin.db
+  private def originMySqlCommand: String = {
+    val db: MySqlDatabase = dbs.origin
     s"mysql --host ${db.host} --port ${db.port} --user root ${db.name}"
   }
 }

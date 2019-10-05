@@ -1,41 +1,37 @@
 package e2e
 
+import util.Ports
 import util.db._
 
 import scala.sys.process._
+import scala.util.Properties
 
 abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest[PostgreSQLDatabase] {
   override protected val profile = slick.jdbc.PostgresProfile
 
   protected def testName: String
 
-  override protected def startOriginContainer():Unit = SharedTestContainers.postgres
-
-  override protected def startTargetContainers(): Unit = {} // No-op (shares container with origin)
-
-  override protected def awaitContainersReady(): Unit = {} // No-op
-
   override protected def createOriginDatabase(): Unit = {
-    PostgresqlEndToEndTestUtil.createDb(containers.origin.db)
+    PostgresqlEndToEndTestUtil.createDb(dbs.origin)
   }
 
   override protected def createTargetDatabases(): Unit = {
-    PostgresqlEndToEndTestUtil.createDb(containers.targetSingleThreaded.db)
-    PostgresqlEndToEndTestUtil.createDb(containers.targetAkkaStreams.db)
+    PostgresqlEndToEndTestUtil.createDb(dbs.targetSingleThreaded)
+    PostgresqlEndToEndTestUtil.createDb(dbs.targetAkkaStreams)
   }
 
-  override protected def containers: DatabaseContainerSet[PostgreSQLDatabase] = {
-    val host = SharedTestContainers.postgres.db.host
-    val port = SharedTestContainers.postgres.db.port
+  override protected def dbs: DatabaseSet[PostgreSQLDatabase] = {
+    val host = Properties.envOrElse("DB_SUBSETTER_POSTGRES_HOST", "localhost")
+    val port = Ports.sharedPostgresPort
 
     val originDb = s"${testName}_origin"
     val targetSingleThreadedDb = s"${testName}_target_single_threaded"
     val targetAkkaStreamsDb = s"${testName}_target_akka_streams"
 
-    new DatabaseContainerSet(
-      PostgresqlEndToEndTestUtil.buildContainer(host, port, originDb),
-      PostgresqlEndToEndTestUtil.buildContainer(host, port, targetSingleThreadedDb),
-      PostgresqlEndToEndTestUtil.buildContainer(host, port, targetAkkaStreamsDb)
+    new DatabaseSet(
+      PostgresqlEndToEndTestUtil.buildDatabase(host, port, originDb),
+      PostgresqlEndToEndTestUtil.buildDatabase(host, port, targetSingleThreadedDb),
+      PostgresqlEndToEndTestUtil.buildDatabase(host, port, targetAkkaStreamsDb)
     )
   }
 
@@ -44,20 +40,19 @@ abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest[Postg
   override protected def prepareOriginDML(): Unit
 
   override protected def prepareTargetDDL(): Unit = {
-    PostgresqlEndToEndTestUtil.preSubsetDdlSync(containers.origin.db, containers.targetSingleThreaded.db)
-    PostgresqlEndToEndTestUtil.preSubsetDdlSync(containers.origin.db, containers.targetAkkaStreams.db)
+    PostgresqlEndToEndTestUtil.preSubsetDdlSync(dbs.origin, dbs.targetSingleThreaded)
+    PostgresqlEndToEndTestUtil.preSubsetDdlSync(dbs.origin, dbs.targetAkkaStreams)
   }
 
   override protected def postSubset(): Unit = {
-    PostgresqlEndToEndTestUtil.postSubsetDdlSync(containers.origin.db, containers.targetSingleThreaded.db)
-    PostgresqlEndToEndTestUtil.postSubsetDdlSync(containers.origin.db, containers.targetAkkaStreams.db)
+    PostgresqlEndToEndTestUtil.postSubsetDdlSync(dbs.origin, dbs.targetSingleThreaded)
+    PostgresqlEndToEndTestUtil.postSubsetDdlSync(dbs.origin, dbs.targetAkkaStreams)
   }
 }
 
 object PostgresqlEndToEndTestUtil {
-  def buildContainer(dbHost: String, dbPort: Int, dbName: String): PostgreSQLContainer = {
-    val db: PostgreSQLDatabase = new PostgreSQLDatabase(dbHost, dbPort, dbName)
-    new PostgreSQLContainer("placeholder-do-not-user", db)
+  def buildDatabase(dbHost: String, dbPort: Int, dbName: String): PostgreSQLDatabase = {
+    new PostgreSQLDatabase(dbHost, dbPort, dbName)
   }
 
   def createDb(db: PostgreSQLDatabase): Unit = {

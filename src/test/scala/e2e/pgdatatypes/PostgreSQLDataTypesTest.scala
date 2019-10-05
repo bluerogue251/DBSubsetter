@@ -47,8 +47,8 @@ class PostgreSQLDataTypesTest extends AbstractPostgresqlEndToEndTest {
     (dmlFile #> originPsqlCommand).!!
   }
 
-  private def originPsqlCommand = {
-    val originDb: PostgreSQLDatabase = containers.origin.db
+  private def originPsqlCommand: String = {
+    val originDb: PostgreSQLDatabase = dbs.origin
     s"psql --host ${originDb.host} --port ${originDb.port} --user postgres ${originDb.name}"
   }
 }
