@@ -14,7 +14,7 @@ sudo apt install -y openjdk-8-jre-headless
 
 # Assumes the postgres data is preloaded into a volume mounted at /pg-origin-data
 # lsblk # --> see what it's called and substitute into next command, maybe xvdb, maybe /dev/xvdf1, etc.
-# sudo mount xvdb /pg-origin/data
+# sudo mount /dev/xvdb /pg-origin-data
 sudo chown -R ubuntu /pg-origin-data
 sudo chmod --recursive 777 /pg-origin-data
 sudo docker run \

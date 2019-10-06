@@ -45,22 +45,9 @@ steps:
       DB_SUBSETTER_MYSQL_TARGET_AKKA_STREAMS_PORT: 3306
     commands:
       - sbt "testOnly unit.* integration.* e2e.*"
-  - name: load_test
-    when:
-      branch:
-        - load-test
-    image: bluerogue251/db-subsetter-ci:5
-    environment:
-      AWS_ACCESS_KEY_ID:
-        from_secret: aws_access_key_id
-      AWS_SECRET_ACCESS_KEY:
-        from_secret: aws_secret_access_key
-    commands:
-      - sbt 'set test in assembly := {}' 'set version := "${DRONE_COMMIT}"' assembly
-      - aws s3 cp /drone/src/target/scala-2.12/DBSubsetter-assembly-${DRONE_COMMIT}.jar s3://db-subsetter/load-test/jars/
 
 ---
 kind: signature
-hmac: c11c2a15be5cbc92782e30edc414856759b1307fb81dc35af46eba679540bfcd
+hmac: f03beb501229110e5970112dbb14282e94959c22cbc3d8c94c9445cce336980b
 
 ...
