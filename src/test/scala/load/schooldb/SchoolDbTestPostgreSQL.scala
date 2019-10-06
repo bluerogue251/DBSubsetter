@@ -12,9 +12,14 @@ import scala.sys.process._
 
 class SchoolDbTestPostgreSQL extends AbstractPostgresqlEndToEndTest with LoadTest[PostgreSQLDatabase] with SchoolDbTest {
 
-  override val singleThreadedRuntimeLimitMillis: Long = 110000 // 110 seconds
+  /*
+   * These values are configured for the Drone CI environment and are supposed to be pretty lenient,
+   * only catching major performance degradations. For more rigorous testing, do load testing on AWS.
+   * See the load-test directory for details.
+   */
+  override val singleThreadedRuntimeLimitMillis: Long = 120000 // 120 seconds
 
-  override val akkaStreamsRuntimeLimitMillis: Long = 20000 // 20 seconds
+  override val akkaStreamsRuntimeLimitMillis: Long = 25000 // 25 seconds
 
   /*
     * Only to be used when manually changing the origin db definition. In this case, the origin DB needs
