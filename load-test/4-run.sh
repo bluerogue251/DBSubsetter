@@ -15,7 +15,7 @@ sudo docker exec pg_origin pg_dump --user postgres --dbname physics_db --section
   sudo docker exec --interactive pg_target psql --user postgres --dbname physics_db
 
 echo "Running load test of school_db"
-java -jar DBSubsetter.jar \
+java -Xmx4G -jar DBSubsetter.jar \
   --originDbConnStr "jdbc:postgresql://0.0.0.0:5432/school_db?user=postgres" \
   --targetDbConnStr "jdbc:postgresql://0.0.0.0:5433/school_db?user=postgres" \
   --originDbParallelism 8 \
@@ -31,7 +31,7 @@ java -jar DBSubsetter.jar \
 # TODO: fix so that some experiment plans have no scientist. Then use this base query to test auto-skipPkStore calculations
 # "--baseQuery", "public.experiment_plans ::: id % 35 = 0 ::: includeChildren",
 echo "Running load test of physics_db"
-java -jar DBSubsetter.jar \
+nohup java -Xmx4G -jar DBSubsetter.jar \
   --originDbConnStr "jdbc:postgresql://0.0.0.0:5432/physics_db?user=postgres" \
   --targetDbConnStr "jdbc:postgresql://0.0.0.0:5433/physics_db?user=postgres" \
   --originDbParallelism 8 \
@@ -46,4 +46,4 @@ java -jar DBSubsetter.jar \
   --skipPkStore "public.gravitational_wave_data" \
   --skipPkStore "public.particle_collider_data" \
   --skipPkStore "public.quantum_data" \
-  --exposeMetrics
+  --exposeMetrics &
