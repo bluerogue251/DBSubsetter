@@ -2,7 +2,6 @@
 
 set -eou pipefail
 
-# Run infrequently to prepare base load testing infrastructure.
 
 # Install docker
 sudo apt-get update

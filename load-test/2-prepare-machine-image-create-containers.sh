@@ -2,7 +2,6 @@
 
 set -eou pipefail
 
-# Run infrequently to prepare base load testing infrastructure.
 
 # Clean up temporary utilities from the previous step
 sudo docker rm --force --volumes tmp

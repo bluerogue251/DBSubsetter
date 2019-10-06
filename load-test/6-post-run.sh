@@ -2,7 +2,6 @@
 
 set -eou pipefail
 
-# Runs after each load test
 
 sudo docker exec pg_origin pg_dump --user postgres --dbname school_db --section post-data --format custom --file /tmp-data/school-db-post-data.pgdump
 sudo docker exec pg_target pg_restore --user postgres --dbname school_db --jobs 8 /tmp-data/school-db-post-data.pgdump
