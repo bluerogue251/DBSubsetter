@@ -2,25 +2,6 @@
 
 set -eou pipefail
 
-DB_SUBSETTER_JAR_URL="https://s3.amazonaws.com/db-subsetter/load-test/jars/DBSubsetter-assembly-f91e64d0d622aeebf44f217e365f35ac990fd534.jar"
-wget -O DBSubsetter.jar "${DB_SUBSETTER_JAR_URL}"
-
-sudo docker start --detach pg_origin
-sudo docker start --detach pg_target
-sudo docker start --detach prometheus
-
-sleep 20
-
-sudo docker exec pg_target dropdb --user postgres --if-exists school_db
-sudo docker exec pg_target dropdb --user postgres --if-exists physics_db
-sudo docker exec pg_target createdb --user postgres school_db
-sudo docker exec pg_target createdb --user postgres physics_db
-
-sudo docker exec pg_origin pg_dump --user postgres --dbname school_db --section pre-data | \
-  sudo docker exec --interactive pg_target psql --user postgres --dbname school_db
-
-sudo docker exec pg_origin pg_dump --user postgres --dbname physics_db --section pre-data | \
-  sudo docker exec --interactive pg_target psql --user postgres --dbname physics_db
 
 echo "Running load test of school_db"
 java -jar DBSubsetter.jar \
