@@ -4,7 +4,7 @@ set -eou pipefail
 
 # Runs before each load test
 
-# Assumes that the origin data is preloaded into the /home/ubuntu/pgdata/origin directory
+# Assumes that the origin data is already located in /home/ubuntu/pgdata/origin
 sudo docker run \
   --detach \
   --name pg_origin \
@@ -19,6 +19,12 @@ sudo docker run \
   -p 5432:5432 \
   postgres:9.6.3 \
   postgres -c 'max_connections=15'
+
+sudo docker run \
+  --detach \
+  --name prometheus \
+  --volume /home/ubuntu/prometheus-config.yml:/etc/prometheus/prometheus.yml \
+  prom/prometheus:v2.6.0
 
 sudo docker exec pg_target createdb --user postgres school_db
 sudo docker exec pg_target createdb --user postgres physics_db

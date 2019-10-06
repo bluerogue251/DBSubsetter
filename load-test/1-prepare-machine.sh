@@ -14,7 +14,7 @@ sudo apt install -y openjdk-8-jre-headless
 # Create permanent origin data directory
 mkdir --parents /home/ubuntu/pgdata/origin
 
-# Create temporary utility directory
+# Create utility directory
 mkdir --parents /home/ubuntu/tmp-data
 
 # Load postgres origin data onto disk using a temporary docker container
@@ -25,7 +25,7 @@ sudo docker run \
   --volume /home/ubuntu/tmp-data:/tmp-data \
   -p 5432:5432 \
   postgres:9.6.3 \
-  postgres -c 'max_connections=15' -c 'maintenance_work_mem=2GB' -c 'max_wal_size=4GB' -c 'full_page_writes=off' -c 'autovacuum=off' -c 'fsync=off'
+  postgres -c 'max_connections=15' -c 'maintenance_work_mem=3GB' -c 'max_wal_size=4GB' -c 'full_page_writes=off' -c 'autovacuum=off' -c 'fsync=off'
 
 # Wait for postgres to be available
 sleep 10
@@ -46,4 +46,5 @@ sudo docker exec --detach tmp pg_restore --jobs 4 --user postgres --dbname physi
 
 # Clean up temporary utilities, leaving the postgres data permanently on disk
 # sudo docker rm --force --volumes tmp
-# rm -rf /home/ubuntu/tmp-data
+# rm /home/ubuntu/tmp-data/physics-db-dump.tar
+# rm -rf /home/ubuntu/tmp-data/physics-db-dump
