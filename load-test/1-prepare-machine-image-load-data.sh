@@ -12,6 +12,8 @@ mkdir /home/ubuntu/tmp-data
 
 # Load postgres origin data onto disk using a temporary docker container
 # Assumes an existing external volume mounted at /pg-origin-data
+# lsblk # --> see what it's called and substitute into next command, maybe /dev/xvdb, maybe /dev/xvdf1, etc.
+# sudo mount /dev/xvdb /pg-origin-data
 sudo docker run \
   --detach \
   --name tmp \
