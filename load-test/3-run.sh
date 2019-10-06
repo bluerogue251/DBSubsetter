@@ -2,7 +2,25 @@
 
 set -eou pipefail
 
-echo "Run"
+DB_SUBSETTER_JAR_URL="https://s3.amazonaws.com/db-subsetter/load-test/jars/DBSubsetter-assembly-f91e64d0d622aeebf44f217e365f35ac990fd534.jar"
+wget -O DBSubsetter.jar "${DB_SUBSETTER_JAR_URL}"
+
+sudo docker start --detach pg_origin
+sudo docker start --detach pg_target
+sudo docker start --detach prometheus
+
+sleep 20
+
+sudo docker exec pg_target dropdb --user postgres --if-exists school_db
+sudo docker exec pg_target dropdb --user postgres --if-exists physics_db
+sudo docker exec pg_target createdb --user postgres school_db
+sudo docker exec pg_target createdb --user postgres physics_db
+
+sudo docker exec pg_origin pg_dump --user postgres --dbname school_db --section pre-data | \
+  sudo docker exec --interactive pg_target psql --user postgres --dbname school_db
+
+sudo docker exec pg_origin pg_dump --user postgres --dbname physics_db --section pre-data | \
+  sudo docker exec --interactive pg_target psql --user postgres --dbname physics_db
 
 echo "Running load test of school_db"
 java -jar DBSubsetter.jar \
@@ -37,13 +55,3 @@ java -jar DBSubsetter.jar \
   --skipPkStore "public.particle_collider_data" \
   --skipPkStore "public.quantum_data" \
   --exposeMetrics
-
-# Export prometheus metrics
-# curl -X POST http://localhost:9090/api/v1/admin/tsdb/snapshot
-# {
-#  "status": "success",
-#  "data": {
-#    "name": "20171210T211224Z-2be650b6d019eb54"
-#  }
-#}
-# The snapshot now exists at <data-dir>/snapshots/20171210T211224Z-2be650b6d019eb54
