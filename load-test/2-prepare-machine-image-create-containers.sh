@@ -20,7 +20,7 @@ sudo docker run \
   --volume /home/ubuntu/tmp-data:/tmp-data \
   -p 5432:5432 \
   postgres:9.6.3 \
-  postgres -c 'max_connections=15' -c 'maintenance_work_mem=3GB'
+  postgres -c 'max_connections=15'
 
 sudo docker create \
   --name pg_target \
