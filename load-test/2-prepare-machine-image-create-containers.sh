@@ -12,10 +12,15 @@ rm -rf /home/ubuntu/tmp-data/physics-db-dump
 sudo add-apt-repository -y ppa:openjdk-r/ppa
 sudo apt install -y openjdk-8-jre-headless
 
+# Assumes the postgres data is preloaded into a volume mounted at /pg-origin-data
+# lsblk # --> see what it's called and substitute into next command, maybe xvdb, maybe /dev/xvdf1, etc.
+# sudo mount xvdb /pg-origin/data
+sudo chown -R ubuntu /pg-origin-data
+sudo chmod --recursive 777 /pg-origin-data
 sudo docker run \
   --detach \
   --name pg_origin \
-  --volume /home/ubuntu/pg-origin-data:/var/lib/postgresql/data \
+  --volume /pg-origin-data:/var/lib/postgresql/data \
   --volume /home/ubuntu/tmp-data:/tmp-data \
   -p 5432:5432 \
   postgres:9.6.3 \
@@ -29,7 +34,6 @@ sudo docker create \
   postgres -c 'max_connections=15' -c 'maintenance_work_mem=3GB'
 
 # TODO Here we currently manually upload prometheus-config.yml
-# TODO -- this was edited since the last time we made an image snapshot (ports --> network) -- must be redone.
 mkdir --mode 777 prometheus-data
 sudo docker create \
   --name prometheus \
@@ -39,7 +43,6 @@ sudo docker create \
   prom/prometheus:v2.6.0 \
   --web.enable-admin-api
 
-sudo docker start pg_origin
 sudo docker exec pg_origin psql --user postgres --dbname school_db -c "VACUUM ANALYZE"
 nohup sudo docker exec pg_origin psql --user postgres --dbname physics_db -c "VACUUM ANALYZE" && sudo docker stop pg_origin &
 

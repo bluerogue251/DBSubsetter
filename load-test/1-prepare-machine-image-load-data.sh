@@ -7,17 +7,15 @@ set -eou pipefail
 sudo apt-get update
 sudo apt-get install -y docker.io
 
-# Create permanent origin data directory
-mkdir /home/ubuntu/pg-origin-data
-
 # Create utility directory
 mkdir /home/ubuntu/tmp-data
 
 # Load postgres origin data onto disk using a temporary docker container
+# Assumes an existing external volume mounted at /pg-origin-data
 sudo docker run \
   --detach \
   --name tmp \
-  --volume /home/ubuntu/pg-origin-data:/var/lib/postgresql/data \
+  --volume /pg-origin-data:/var/lib/postgresql/data \
   --volume /home/ubuntu/tmp-data:/tmp-data \
   -p 5432:5432 \
   postgres:9.6.3 \
