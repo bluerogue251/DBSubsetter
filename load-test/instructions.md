@@ -5,6 +5,8 @@
 * There is a pre-existing AMI with dependencies and some test data pre-installed.
   Spin up an EC2 instance from this AMI (Amazon Machine Image) ID ami-026d4599c1d66c647.
   For consistency, use a "General Purpose" `t2.large` instance type (2 vCPUs, 8GB RAM).
+  Increase the root volume size to 100GB. This is where target data will end up.
+  This should come with an external volume of 200GB. This is where origin data comes from. Leave that one as-is.
 * Build an uber jar of the DBSubsetter application locally with: 
   `$ sbt 'set test in assembly := {}' assembly`
 * `$ scp` the uber jar from your machine into the running EC2 instance

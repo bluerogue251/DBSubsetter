@@ -28,6 +28,9 @@ java -Xmx4G -jar DBSubsetter.jar \
   --preTargetBufferSize 10000 \
   --exposeMetrics
 
+echo "Sleeping 90 seconds to make a clear boundary in metrics"
+sleep 90
+
 # TODO: fix so that some experiment plans have no scientist. Then use this base query to test auto-skipPkStore calculations
 # "--baseQuery", "public.experiment_plans ::: id % 35 = 0 ::: includeChildren",
 echo "Running load test of physics_db"
