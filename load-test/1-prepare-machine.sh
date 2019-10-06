@@ -25,7 +25,7 @@ sudo docker run \
   --volume /home/ubuntu/tmp-data:/tmp-data \
   -p 5432:5432 \
   postgres:9.6.3 \
-  postgres -c 'max_connections=15'
+  postgres -c 'max_connections=15' -c 'maintenance_work_mem=2GB' -c 'max_wal_size=4GB' -c 'full_page_writes=off' -c 'autovacuum=off' -c 'fsync=off'
 
 # Wait for postgres to be available
 sleep 10
