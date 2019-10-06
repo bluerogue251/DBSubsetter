@@ -23,12 +23,6 @@ RUN curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E4
 RUN apt-get update
 RUN apt-get install -y sbt
 
-# Install AWS CLI
-RUN apt-get install -y python
-RUN curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"
-RUN unzip awscli-bundle.zip
-RUN ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws
-
 # https://github.com/Microsoft/mssql-docker/issues/163
 RUN apt-get install -y locales
 RUN echo "nb_NO.UTF-8 UTF-8" > /etc/locale.gen
