@@ -7,10 +7,6 @@ set -eou pipefail
 # Install docker (in the future try to lock this down to version 18.06.1-ce)
 sudo snap install docker
 
-# Install JRE
-sudo add-apt-repository -y ppa:openjdk-r/ppa
-sudo apt install -y openjdk-8-jre-headless
-
 # Create permanent origin data directory
 mkdir --parents /home/ubuntu/pgdata/origin
 
