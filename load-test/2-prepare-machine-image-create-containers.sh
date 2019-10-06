@@ -29,12 +29,13 @@ sudo docker create \
   postgres -c 'max_connections=15' -c 'maintenance_work_mem=3GB'
 
 # TODO Here we currently manually upload prometheus-config.yml
+# TODO -- this was edited since the last time we made an image snapshot (ports --> network) -- must be redone.
 mkdir --mode 777 prometheus-data
 sudo docker create \
   --name prometheus \
+  --network host \
   --volume /home/ubuntu/prometheus-config.yml:/etc/prometheus/prometheus.yml \
   --volume /home/ubuntu/prometheus-data:/prometheus \
-  -p 9090:9090 \
   prom/prometheus:v2.6.0 \
   --web.enable-admin-api
 
