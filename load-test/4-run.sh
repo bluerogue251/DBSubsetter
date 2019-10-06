@@ -3,6 +3,17 @@
 set -eou pipefail
 
 
+sudo docker exec pg_target dropdb --user postgres --if-exists school_db
+sudo docker exec pg_target dropdb --user postgres --if-exists physics_db
+sudo docker exec pg_target createdb --user postgres school_db
+sudo docker exec pg_target createdb --user postgres physics_db
+
+sudo docker exec pg_origin pg_dump --user postgres --dbname school_db --section pre-data | \
+  sudo docker exec --interactive pg_target psql --user postgres --dbname school_db
+
+sudo docker exec pg_origin pg_dump --user postgres --dbname physics_db --section pre-data | \
+  sudo docker exec --interactive pg_target psql --user postgres --dbname physics_db
+
 echo "Running load test of school_db"
 java -jar DBSubsetter.jar \
   --originDbConnStr "jdbc:postgresql://0.0.0.0:5432/school_db?user=postgres" \
@@ -10,7 +21,7 @@ java -jar DBSubsetter.jar \
   --originDbParallelism 8 \
   --targetDbParallelism 8 \
   --schemas "school_db,Audit" \
-  --baseQuery "school_db.Students ::: student_id % 100 = 0 ::: includeChildren" \
+  --baseQuery "school_db.Students ::: student_id % 25 = 0 ::: includeChildren" \
   --baseQuery "school_db.standalone_table ::: id < 4 ::: includeChildren" \
   --excludeColumns "school_db.schools(mascot)" \
   --excludeTable "school_db.empty_table_2" \
