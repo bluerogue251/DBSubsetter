@@ -4,7 +4,7 @@
 
 * There is a pre-existing AMI with dependencies and some test data pre-installed.
   Spin up an EC2 instance from this AMI (Amazon Machine Image) ID ami-026d4599c1d66c647.
-  For consistency, use a "General Purpose" `t2.large` instance type (2 vCPUs, 8GB RAM)
+  For consistency, use a "General Purpose" `t2.large` instance type (2 vCPUs, 8GB RAM).
 * Build an uber jar of the DBSubsetter application locally with: 
   `$ sbt 'set test in assembly := {}' assembly`
 * `$ scp` the uber jar from your machine into the running EC2 instance
@@ -13,6 +13,9 @@
 
 ## Viewing metrics from the load test
 
+* Make sure your EC2 instance's security group allows incoming traffic to port 9090,
+  so that the prometheus instance running there is accessible to the outside world.
+  
 * Edit observability-tools.sh in the project root directory to point Grafana to the 
   prometheus instance running on the EC2 instance itself.
   
