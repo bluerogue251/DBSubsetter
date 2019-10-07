@@ -33,7 +33,7 @@ services:
 
 steps:
   - name: test
-    image: bluerogue251/db-subsetter-ci:4
+    image: bluerogue251/db-subsetter-ci:6
     environment:
       DB_SUBSETTER_POSTGRES_HOST: postgres
       DB_SUBSETTER_SQL_SERVER_HOST: sql_server
@@ -46,13 +46,14 @@ steps:
     commands:
       - sbt "testOnly unit.* integration.* e2e.*"
   - name: load_test
-    image: bluerogue251/db-subsetter-ci:4
+    image: bluerogue251/db-subsetter-ci:6
     environment:
       DB_SUBSETTER_POSTGRES_HOST: postgres
     commands:
       - sbt "testOnly load.schooldb.SchoolDbTestPostgreSQL"
+
 ---
 kind: signature
-hmac: 897d8321e69fa18d57494e09060797dfa1b4e42213009fdfecf50db7343f16c2
+hmac: c4bac506be121b3488be60e1e314b5e2466b189bc99908c246268df85e040635
 
 ...

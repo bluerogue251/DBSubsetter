@@ -23,15 +23,15 @@ RUN curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E4
 RUN apt-get update
 RUN apt-get install -y sbt
 
+# https://github.com/Microsoft/mssql-docker/issues/163
+RUN apt-get install -y locales
+RUN echo "nb_NO.UTF-8 UTF-8" > /etc/locale.gen
+RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
+RUN locale-gen
+
 # Eagerly prime SBT and download project dependencies to speed up builds on CI
 ADD . /tmp-project-install
 WORKDIR /tmp-project-install
 RUN sbt compile
 WORKDIR root
 run rm -rf /tmp-project-install
-
-# https://github.com/Microsoft/mssql-docker/issues/163
-RUN apt-get install -y locales
-RUN echo "nb_NO.UTF-8 UTF-8" > /etc/locale.gen
-RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
-RUN locale-gen
