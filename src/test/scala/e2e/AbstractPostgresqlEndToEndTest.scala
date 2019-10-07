@@ -1,6 +1,5 @@
 package e2e
 
-import util.Ports
 import util.db._
 
 import scala.sys.process._
@@ -22,9 +21,9 @@ abstract class AbstractPostgresqlEndToEndTest extends AbstractEndToEndTest[Postg
 
   override protected def dbs: DatabaseSet[PostgreSQLDatabase] = {
     val host = Properties.envOrElse("DB_SUBSETTER_POSTGRES_HOST", "localhost")
-    val port = Ports.sharedPostgresPort
+    val port = 5551
 
-    val originDb = s"${testName}_origin"
+    val originDb = s"${testName}"
     val targetSingleThreadedDb = s"${testName}_target_single_threaded"
     val targetAkkaStreamsDb = s"${testName}_target_akka_streams"
 

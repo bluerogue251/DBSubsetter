@@ -769,13 +769,6 @@
             "intervalFactor": 1,
             "legendFormat": "Entries",
             "refId": "A"
-          },
-          {
-            "expr": "PreTargetBufferMaxSize",
-            "format": "time_series",
-            "intervalFactor": 1,
-            "legendFormat": "Max Allowed Entries",
-            "refId": "B"
           }
         ],
         "thresholds": [],

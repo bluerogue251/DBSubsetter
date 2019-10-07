@@ -9,7 +9,6 @@ import org.postgresql.core.BaseConnection
 import slick.jdbc.PostgresProfile.api._
 import slick.sql.SqlAction
 import trw.dbsubsetter.db.Row
-import util.Ports
 import util.db.{DatabaseSet, PostgreSQLDatabase}
 
 import scala.collection.mutable.ArrayBuffer
@@ -64,7 +63,7 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
   override protected def dbs: DatabaseSet[PostgreSQLDatabase] = {
     val defaults = super.dbs
 
-    val originDb = new PostgreSQLDatabase("localhost", Ports.postgresPhysicsDbOrigin, "physics_db")
+    val originDb = new PostgreSQLDatabase("localhost", ???, "physics_db")
 
     new DatabaseSet[PostgreSQLDatabase](
       originDb,

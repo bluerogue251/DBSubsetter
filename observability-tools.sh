@@ -27,7 +27,7 @@ sleep 5
 curl \
   -X POST \
   -H 'Content-Type: application/json' \
-  --data '{"name": "prometheus", "type": "prometheus", "url": "http://localhost:9090", "access": "browser", "jsonData": { "timeInterval": "500ms" } }' \
+  --data '{"name": "prometheus", "type": "prometheus", "url": "http://ec2-54-86-163-7.compute-1.amazonaws.com:9090", "access": "browser", "jsonData": { "timeInterval": "500ms" } }' \
   admin:admin@localhost:3000/api/datasources
 
 echo ""
