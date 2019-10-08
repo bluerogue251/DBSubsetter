@@ -1,6 +1,7 @@
 package trw.dbsubsetter
 
 import io.prometheus.client.exporter.HTTPServer
+import io.prometheus.client.hotspot.DefaultExports
 import trw.dbsubsetter.config.{CommandLineParser, Config}
 import trw.dbsubsetter.db.{BaseQueries, SchemaInfoRetrieval}
 import trw.dbsubsetter.util.Util
@@ -27,6 +28,7 @@ object ApplicationRunner {
 
         val optionalMetricsEndpoint: Option[HTTPServer] =
           if (config.exposeMetrics) {
+            DefaultExports.initialize()
             Some(new HTTPServer(9092, true))
           } else {
             None

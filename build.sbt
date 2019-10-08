@@ -26,6 +26,7 @@ libraryDependencies ++= Seq(
 
   // Observability tools
   "io.prometheus" % "simpleclient" % "0.6.0",
+  "io.prometheus" % "simpleclient_hotspot" % "0.6.0",
   "io.prometheus" % "simpleclient_httpserver" % "0.6.0",
 
   // For testing only
