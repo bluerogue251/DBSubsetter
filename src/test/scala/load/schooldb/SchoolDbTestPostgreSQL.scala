@@ -2,7 +2,13 @@ package load.schooldb
 
 import e2e.AbstractPostgresqlEndToEndTest
 import load.LoadTest
+import slick.dbio.DBIO
+import slick.jdbc.PostgresProfile.api._
 import util.db.PostgreSQLDatabase
+
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
+import scala.sys.process._
 
 class SchoolDbTestPostgreSQL extends AbstractPostgresqlEndToEndTest with LoadTest[PostgreSQLDatabase] with SchoolDbTest {
 
@@ -23,21 +29,19 @@ class SchoolDbTestPostgreSQL extends AbstractPostgresqlEndToEndTest with LoadTes
     */
   private val updateOriginDb: Boolean = false
 
-  override protected def createOriginDatabase(): Unit = {} // No-op
-
   override protected def prepareOriginDDL(): Unit = {
-//    (updateOriginDb) match {
-//      case (false) => // Load origin DB from dump file stored in S3
-//        val dumpUrl = "https://s3.amazonaws.com/db-subsetter/load-test/school-db/pgdump.sql.gz"
-//        s"./src/test/util/load_postgres_db_from_s3.sh $dumpUrl ${dbs.origin.host} ${dbs.origin.name}".!!
-//      case (true) => // Recreate origin DB from original slick definitions
-//        val createSchemaStatements: DBIO[Unit] = DBIO.seq(
-//          sqlu"create schema school_db",
-//          sqlu"""create schema "Audit""""
-//        )
-//        Await.ready(originSlick.run(createSchemaStatements), Duration.Inf)
-//        super.prepareOriginDDL()
-//    }
+    (updateOriginDb) match {
+      case (false) => // Load origin DB from dump file stored in S3
+        val dumpUrl = "https://s3.amazonaws.com/db-subsetter/load-test/school-db/pgdump.sql.gz"
+        s"./src/test/util/load_postgres_db_from_s3.sh $dumpUrl ${dbs.origin.host} ${dbs.origin.name}".!!
+      case (true) => // Recreate origin DB from original slick definitions
+        val createSchemaStatements: DBIO[Unit] = DBIO.seq(
+          sqlu"create schema school_db",
+          sqlu"""create schema "Audit""""
+        )
+        Await.ready(originSlick.run(createSchemaStatements), Duration.Inf)
+        super.prepareOriginDDL()
+    }
   }
 
   override protected def prepareOriginDML(): Unit = {

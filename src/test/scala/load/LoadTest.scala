@@ -24,7 +24,7 @@ trait LoadTest[T <: Database] { this: AbstractEndToEndTest[T] =>
   private var akkaStreamsRuntimeMillis: Long = _
 
   override protected def runSubsetInSingleThreadedMode(): Unit = {
-//    singleThreadedRuntimeMillis = TestSubsetRunner.runSubsetInSingleThreadedMode(dbs, programArgs)
+    singleThreadedRuntimeMillis = TestSubsetRunner.runSubsetInSingleThreadedMode(dbs, programArgs)
   }
 
   override protected def runSubsetInAkkaStreamsMode(): Unit = {
