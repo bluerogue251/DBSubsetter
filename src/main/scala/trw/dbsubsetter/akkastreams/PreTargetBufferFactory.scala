@@ -14,7 +14,6 @@ private[akkastreams] object PreTargetBufferFactory {
       Flow[PksAdded].buffer(config.preTargetBufferSize, OverflowStrategy.backpressure)
 
     if (config.exposeMetrics) {
-      Metrics.PreTargetBufferMaxSizeGauge.set(config.preTargetBufferSize)
       flow = wrapWithInstrumentation(flow)
     }
 
@@ -37,6 +36,7 @@ private[akkastreams] object PreTargetBufferFactory {
     val wrapper: BidiFlow[PksAdded, PksAdded, PksAdded, PksAdded, NotUsed] =
       BidiFlow.fromFunctions(instrumentEntrance, instrumentExit)
 
-    wrapper.join(flow)
+    // Async seems necessary for the metric to ever show up as non-zero
+    wrapper.join(flow.async)
   }
 }

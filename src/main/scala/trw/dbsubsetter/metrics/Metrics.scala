@@ -52,13 +52,6 @@ object Metrics {
       .help("n/a")
       .register()
 
-  val PreTargetBufferMaxSizeGauge: Gauge =
-    Gauge
-      .build()
-      .name("PreTargetBufferMaxSize")
-      .help("n/a")
-      .register()
-
   val PreTargetBufferSizeGauge: Gauge =
     Gauge
       .build()

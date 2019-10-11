@@ -22,7 +22,8 @@ object TestSubsetRunner {
       "--originDbConnStr", containers.origin.connectionString,
       "--originDbParallelism", "10",
       "--targetDbParallelism", "10",
-      "--targetDbConnStr", containers.targetAkkaStreams.connectionString
+      "--targetDbConnStr", containers.targetAkkaStreams.connectionString,
+      "--exposeMetrics"
     )
     val finalArgs: Array[String] = defaultArgs ++ programArgs
 
