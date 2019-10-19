@@ -12,8 +12,7 @@ class PkStoreWorkflowTest extends FunSuite {
       new Table(
         schema = "public",
         name = "users",
-        hasSqlServerAutoIncrement = true,
-        storePks = true
+        hasSqlServerAutoIncrement = true
       )
 
     val pkCol: Column =
@@ -77,8 +76,7 @@ class PkStoreWorkflowTest extends FunSuite {
       new Table(
         schema = "public",
         name = "users",
-        hasSqlServerAutoIncrement = true,
-        storePks = true
+        hasSqlServerAutoIncrement = true
       )
 
     val primaryKeyColumn: Column =

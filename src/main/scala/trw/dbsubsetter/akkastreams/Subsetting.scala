@@ -22,14 +22,12 @@ object Subsetting {
     val mergeOriginDbRequests = b.add(Merge[OriginDbRequest](3))
     val balanceOriginDb = b.add(Balance[OriginDbRequest](config.originDbParallelism, waitForAllDownstreams = true))
     val mergeOriginDbResults = b.add(Merge[OriginDbResult](config.originDbParallelism))
-    val partitionOriginDbResults = b.add(Partition[OriginDbResult](2, res => if (res.table.storePks) 1 else 0))
     val partitionFkTasks = b.add(Partition[ForeignKeyTask](2, {
       case t: FetchParentTask => if (FkTaskPreCheck.shouldPrecheck(t)) 1 else 0
       case _ => 0
     }))
     // TODO try to turn this broadcast into a typesafe Partition stage with two output ports, each output port with a different type
     val broadcastPkExistResult = b.add(Broadcast[PkQueryResult](2))
-    val mergePksAdded = b.add(Merge[PksAdded](2))
     val broadcastPksAdded = b.add(Broadcast[PksAdded](2))
     val balanceTargetDb = b.add(Balance[PksAdded](config.targetDbParallelism, waitForAllDownstreams = true))
     val mergeTargetDbResults = b.add(Merge[TargetDbInsertResult](config.targetDbParallelism))
@@ -51,20 +49,8 @@ object Subsetting {
       balanceTargetDb ~> TargetDb.insert(config, schemaInfo, dbAccessFactory).async ~> mergeTargetDbResults
     }
 
-    // Origin DB Results ~> PkStoreAdd  ~> |merge| ~> NewTasks
-    //                   ~> SkipPkStore ~> |merge| ~> TargetDbInserts
     mergeOriginDbResults ~>
-      partitionOriginDbResults
-
-    partitionOriginDbResults.out(0) ~>
-      Flow[OriginDbResult].map(SkipPkStore.process) ~>
-      mergePksAdded
-
-    partitionOriginDbResults.out(1) ~>
       Flow[OriginDbResult].mapAsyncUnordered(10)(dbResult => (pkStore ? dbResult).mapTo[PksAdded]) ~>
-      mergePksAdded
-
-    mergePksAdded ~>
       broadcastPksAdded
 
     broadcastPksAdded ~>

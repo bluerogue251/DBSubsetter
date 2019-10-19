@@ -6,7 +6,6 @@ class CircularDepTestSqlServer extends AbstractSqlServerEndToEndTest with Circul
 
   override val programArgs = Array(
     "--schemas", "dbo",
-    "--baseQuery", "dbo.grandparents ::: id % 6 = 0 ::: includeChildren",
-    "--skipPkStore", "dbo.children"
+    "--baseQuery", "dbo.grandparents ::: id % 6 = 0 ::: includeChildren"
   )
 }

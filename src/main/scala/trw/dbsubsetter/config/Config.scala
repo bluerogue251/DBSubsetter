@@ -15,7 +15,6 @@ case class Config(
   cmdLinePrimaryKeys: List[CmdLinePrimaryKey] = List.empty,
   excludeColumns: Map[(SchemaName, TableName), Set[ColumnName]] = Map.empty.withDefaultValue(Set.empty),
   excludeTables: Set[(SchemaName, TableName)] = Set.empty,
-  skipPkStore: Set[(SchemaName, TableName)] = Set.empty,
   preTargetBufferSize: Int = 100,
   taskQueueDirOpt: Option[File] = None,
   isSingleThreadedDebugMode: Boolean = false,

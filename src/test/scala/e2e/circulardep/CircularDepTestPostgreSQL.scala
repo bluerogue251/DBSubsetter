@@ -6,7 +6,6 @@ class CircularDepTestPostgreSQL extends AbstractPostgresqlEndToEndTest with Circ
 
   override val programArgs = Array(
     "--schemas", "public",
-    "--baseQuery", "public.grandparents ::: id % 6 = 0 ::: includeChildren",
-    "--skipPkStore", "public.children"
+    "--baseQuery", "public.grandparents ::: id % 6 = 0 ::: includeChildren"
   )
 }

@@ -10,8 +10,7 @@ object SchemaInfoRetrieval {
 
     val tablesByName = tables.map { t =>
       val hasSqlServerAutoincrement = columns.exists(c => c.schema == t.schema && c.table == t.name && c.isSqlServerAutoincrement)
-      val storePks = !config.skipPkStore.contains((t.schema, t.name))
-      (t.schema, t.name) -> new Table(t.schema, t.name, hasSqlServerAutoincrement, storePks)
+      (t.schema, t.name) -> new Table(t.schema, t.name, hasSqlServerAutoincrement)
     }.toMap
 
     val colsByTableAndName: Map[Table, Map[ColumnName, Column]] = {
