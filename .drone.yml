@@ -32,7 +32,22 @@ services:
       MYSQL_ALLOW_EMPTY_PASSWORD: "true"
 
 steps:
-  - name: test
+  - name: compile
+    image: bluerogue251/db-subsetter-ci:6
+    commands:
+      - sbt compile test:compile
+
+  - name: unit_tests
+    image: bluerogue251/db-subsetter-ci:6
+    commands:
+      - sbt "testOnly unit.*"
+
+  - name: integration_tests
+    image: bluerogue251/db-subsetter-ci:6
+    commands:
+      - sbt "testOnly integration.*"
+
+  - name: end_to_end_tests
     image: bluerogue251/db-subsetter-ci:6
     environment:
       DB_SUBSETTER_POSTGRES_HOST: postgres
@@ -44,7 +59,8 @@ steps:
       DB_SUBSETTER_MYSQL_TARGET_SINGLE_THREADED_PORT: 3306
       DB_SUBSETTER_MYSQL_TARGET_AKKA_STREAMS_PORT: 3306
     commands:
-      - sbt "testOnly unit.* integration.* e2e.*"
+      - sbt "testOnly e2e.*"
+
   - name: load_test
     image: bluerogue251/db-subsetter-ci:6
     environment:
@@ -54,6 +70,6 @@ steps:
 
 ---
 kind: signature
-hmac: c4bac506be121b3488be60e1e314b5e2466b189bc99908c246268df85e040635
+hmac: 96c0da4de6e379dc9d0e344c235bb60db656c549f29deeefd7a930d5474b50eb
 
 ...
