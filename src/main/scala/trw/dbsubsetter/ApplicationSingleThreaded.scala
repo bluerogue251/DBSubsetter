@@ -30,7 +30,7 @@ object ApplicationSingleThreaded {
       }
       taskOpt.foreach { task =>
         val dbResult = originDbWorkflow.process(task)
-        val pksAdded = if (dbResult.table.storePks) pkWorkflow.add(dbResult) else SkipPkStore.process(dbResult)
+        val pksAdded = pkWorkflow.add(dbResult)
         targetDbWorkflow.process(pksAdded)
         val newTasks = fkTaskCreationWorkflow.createFkTasks(pksAdded)
         newTasks.taskInfo.foreach { case ((foreignKey, fetchChildren), fkValues) =>

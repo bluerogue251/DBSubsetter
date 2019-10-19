@@ -13,6 +13,6 @@ object FkTaskPreCheck {
    * another class for that case extending ForeignKeyTask called OneToOne[SomethingTask]
   */
   def shouldPrecheck(task: FetchParentTask): Boolean = {
-    task.fk.pointsToPk && task.parentTable.storePks
+    task.fk.pointsToPk
   }
 }

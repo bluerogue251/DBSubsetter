@@ -25,8 +25,7 @@ package object db {
   class Table(
     val schema: SchemaName,
     val name: TableName,
-    val hasSqlServerAutoIncrement: Boolean,
-    val storePks: Boolean
+    val hasSqlServerAutoIncrement: Boolean
   )
 
   class Column(

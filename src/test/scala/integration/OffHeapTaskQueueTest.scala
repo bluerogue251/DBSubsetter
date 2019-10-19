@@ -67,8 +67,7 @@ private[this] object OffHeapTaskQueueTest {
     new Table(
       schema = "public",
       name = "parent",
-      hasSqlServerAutoIncrement = false,
-      storePks = true
+      hasSqlServerAutoIncrement = false
     )
 
   private[this] val parentPkColumn: Column =
@@ -84,8 +83,7 @@ private[this] object OffHeapTaskQueueTest {
     new Table(
       schema = "public",
       name = "child",
-      hasSqlServerAutoIncrement = false,
-      storePks = true
+      hasSqlServerAutoIncrement = false
     )
 
   private[this] val childFkColumn: Column =
