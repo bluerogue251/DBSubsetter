@@ -346,7 +346,7 @@
             "refId": "A"
           },
           {
-            "expr": "rate(TargetDbRowsInsertedPerStatement_sum[1s]) / rate(TargetDbRowsInsertedPerStatement_sum[1s])",
+            "expr": "rate(TargetDbRowsInsertedPerStatement_sum[1s]) / rate(TargetDbRowsInsertedPerStatement_count[1s])",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "Target DB Average Rows Inserted Per Statement",
