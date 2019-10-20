@@ -16,7 +16,7 @@
     "editable": true,
     "gnetId": null,
     "graphTooltip": 0,
-    "id": null,
+    "id": 1,
     "links": [],
     "panels": [
       {
@@ -56,14 +56,14 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "rate(OriginDbRowsFetched[1s])",
+            "expr": "rate(OriginDbRowsFetchedPerStatement_sum[1s])",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "Rows Fetched from Origin DB Per Second",
             "refId": "A"
           },
           {
-            "expr": "rate(TargetDbRowsInserted[1s])",
+            "expr": "rate(TargetDbRowsInsertedPerStatement_sum[1s])",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "Rows Inserted into Target DB Per Second",
@@ -162,14 +162,14 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "OriginDbRowsFetched - DuplicateOriginDbRowsDiscarded",
+            "expr": "OriginDbRowsFetchedPerStatement_sum - DuplicateOriginDbRowsDiscarded",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "Total Unique Rows Fetched from Origin DB",
             "refId": "A"
           },
           {
-            "expr": "TargetDbRowsInserted",
+            "expr": "TargetDbRowsInsertedPerStatement_sum",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "Total Rows Inserted into Target DB",
@@ -315,7 +315,7 @@
           "x": 0,
           "y": 15
         },
-        "id": 7,
+        "id": 23,
         "legend": {
           "avg": false,
           "current": false,
@@ -339,18 +339,25 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "rate(OriginDbSelects_count[1s])",
+            "expr": "rate(OriginDbRowsFetchedPerStatement_sum[1s]) / rate(OriginDbRowsFetchedPerStatement_count[1s])",
             "format": "time_series",
             "intervalFactor": 1,
-            "legendFormat": "Origin DB SELECT Statement Per-Second Rate",
+            "legendFormat": "Origin DB Average Rows Fetched Per Statement",
             "refId": "A"
+          },
+          {
+            "expr": "rate(TargetDbRowsInsertedPerStatement_sum[1s]) / rate(TargetDbRowsInsertedPerStatement_sum[1s])",
+            "format": "time_series",
+            "intervalFactor": 1,
+            "legendFormat": "Target DB Average Rows Inserted Per Statement",
+            "refId": "B"
           }
         ],
         "thresholds": [],
         "timeFrom": null,
         "timeRegions": [],
         "timeShift": null,
-        "title": "Origin DB Query Frequency",
+        "title": "DB Average Rows Processed Per Statement",
         "tooltip": {
           "shared": true,
           "sort": 0,
@@ -366,7 +373,7 @@
         },
         "yaxes": [
           {
-            "format": "short",
+            "format": "none",
             "label": null,
             "logBase": 1,
             "max": null,
@@ -400,7 +407,7 @@
           "x": 0,
           "y": 20
         },
-        "id": 4,
+        "id": 24,
         "legend": {
           "avg": false,
           "current": false,
@@ -424,18 +431,25 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "rate(OriginDbSelects_sum[1s]) / rate(OriginDbSelects_count[1s])",
+            "expr": "rate(OriginDbDurationPerRow_sum[1s]) / rate(OriginDbDurationPerRow_count[1s])",
             "format": "time_series",
             "intervalFactor": 1,
-            "legendFormat": "Origin DB SELECT Statement Average Duration",
+            "legendFormat": "Origin DB Row Fetched",
             "refId": "A"
+          },
+          {
+            "expr": "rate(TargetDbDurationPerRow_sum[1s]) / rate(TargetDbDurationPerRow_count[1s])",
+            "format": "time_series",
+            "intervalFactor": 1,
+            "legendFormat": "Target DB Row Inserted",
+            "refId": "B"
           }
         ],
         "thresholds": [],
         "timeFrom": null,
         "timeRegions": [],
         "timeShift": null,
-        "title": "Origin DB Query Performance",
+        "title": "DB Average Time Spent Per Row",
         "tooltip": {
           "shared": true,
           "sort": 0,
@@ -484,6 +498,98 @@
           "w": 24,
           "x": 0,
           "y": 25
+        },
+        "id": 7,
+        "legend": {
+          "avg": false,
+          "current": false,
+          "max": false,
+          "min": false,
+          "show": false,
+          "total": false,
+          "values": false
+        },
+        "lines": true,
+        "linewidth": 1,
+        "links": [],
+        "nullPointMode": "null",
+        "percentage": false,
+        "pointradius": 5,
+        "points": false,
+        "renderer": "flot",
+        "seriesOverrides": [],
+        "spaceLength": 10,
+        "stack": false,
+        "steppedLine": false,
+        "targets": [
+          {
+            "expr": "rate(OriginDbRowsFetchedPerStatement_count[1s])",
+            "format": "time_series",
+            "intervalFactor": 1,
+            "legendFormat": "Origin DB",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(TargetDbRowsInsertedPerStatement_count[1s])",
+            "format": "time_series",
+            "intervalFactor": 1,
+            "legendFormat": "Target DB",
+            "refId": "B"
+          }
+        ],
+        "thresholds": [],
+        "timeFrom": null,
+        "timeRegions": [],
+        "timeShift": null,
+        "title": "DB Statements Per Second",
+        "tooltip": {
+          "shared": true,
+          "sort": 0,
+          "value_type": "individual"
+        },
+        "type": "graph",
+        "xaxis": {
+          "buckets": null,
+          "mode": "time",
+          "name": null,
+          "show": true,
+          "values": []
+        },
+        "yaxes": [
+          {
+            "format": "short",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": true
+          },
+          {
+            "format": "short",
+            "label": null,
+            "logBase": 1,
+            "max": null,
+            "min": null,
+            "show": false
+          }
+        ],
+        "yaxis": {
+          "align": false,
+          "alignLevel": null
+        }
+      },
+      {
+        "aliasColors": {},
+        "bars": false,
+        "dashLength": 10,
+        "dashes": false,
+        "datasource": "prometheus",
+        "fill": 1,
+        "gridPos": {
+          "h": 5,
+          "w": 24,
+          "x": 0,
+          "y": 30
         },
         "id": 6,
         "legend": {
@@ -568,177 +674,7 @@
           "h": 5,
           "w": 24,
           "x": 0,
-          "y": 30
-        },
-        "id": 3,
-        "legend": {
-          "avg": false,
-          "current": false,
-          "max": false,
-          "min": false,
-          "show": false,
-          "total": false,
-          "values": false
-        },
-        "lines": true,
-        "linewidth": 1,
-        "links": [],
-        "nullPointMode": "null",
-        "percentage": false,
-        "pointradius": 5,
-        "points": false,
-        "renderer": "flot",
-        "seriesOverrides": [],
-        "spaceLength": 10,
-        "stack": false,
-        "steppedLine": false,
-        "targets": [
-          {
-            "expr": "rate(TargetDbInserts_count[1s])",
-            "format": "time_series",
-            "intervalFactor": 1,
-            "legendFormat": "Target DB INSERT Statement Per-Second Rate",
-            "refId": "A"
-          }
-        ],
-        "thresholds": [],
-        "timeFrom": null,
-        "timeRegions": [],
-        "timeShift": null,
-        "title": "Target DB Write Frequency",
-        "tooltip": {
-          "shared": true,
-          "sort": 0,
-          "value_type": "individual"
-        },
-        "type": "graph",
-        "xaxis": {
-          "buckets": null,
-          "mode": "time",
-          "name": null,
-          "show": true,
-          "values": []
-        },
-        "yaxes": [
-          {
-            "format": "short",
-            "label": null,
-            "logBase": 1,
-            "max": null,
-            "min": null,
-            "show": true
-          },
-          {
-            "format": "short",
-            "label": null,
-            "logBase": 1,
-            "max": null,
-            "min": null,
-            "show": false
-          }
-        ],
-        "yaxis": {
-          "align": false,
-          "alignLevel": null
-        }
-      },
-      {
-        "aliasColors": {},
-        "bars": false,
-        "dashLength": 10,
-        "dashes": false,
-        "datasource": "prometheus",
-        "fill": 1,
-        "gridPos": {
-          "h": 5,
-          "w": 24,
-          "x": 0,
           "y": 35
-        },
-        "id": 5,
-        "legend": {
-          "avg": false,
-          "current": false,
-          "max": false,
-          "min": false,
-          "show": false,
-          "total": false,
-          "values": false
-        },
-        "lines": true,
-        "linewidth": 1,
-        "links": [],
-        "nullPointMode": "null",
-        "percentage": false,
-        "pointradius": 5,
-        "points": false,
-        "renderer": "flot",
-        "seriesOverrides": [],
-        "spaceLength": 10,
-        "stack": false,
-        "steppedLine": false,
-        "targets": [
-          {
-            "expr": "rate(TargetDbInserts_sum[1s]) / rate(TargetDbInserts_count[1s])",
-            "format": "time_series",
-            "intervalFactor": 1,
-            "legendFormat": "Target DB INSERT Statement Average Duration",
-            "refId": "A"
-          }
-        ],
-        "thresholds": [],
-        "timeFrom": null,
-        "timeRegions": [],
-        "timeShift": null,
-        "title": "Target DB Write Performance",
-        "tooltip": {
-          "shared": true,
-          "sort": 0,
-          "value_type": "individual"
-        },
-        "type": "graph",
-        "xaxis": {
-          "buckets": null,
-          "mode": "time",
-          "name": null,
-          "show": true,
-          "values": []
-        },
-        "yaxes": [
-          {
-            "format": "s",
-            "label": null,
-            "logBase": 1,
-            "max": null,
-            "min": null,
-            "show": true
-          },
-          {
-            "format": "short",
-            "label": null,
-            "logBase": 1,
-            "max": null,
-            "min": null,
-            "show": false
-          }
-        ],
-        "yaxis": {
-          "align": false,
-          "alignLevel": null
-        }
-      },
-      {
-        "aliasColors": {},
-        "bars": false,
-        "dashLength": 10,
-        "dashes": false,
-        "datasource": "prometheus",
-        "fill": 1,
-        "gridPos": {
-          "h": 5,
-          "w": 24,
-          "x": 0,
-          "y": 40
         },
         "id": 10,
         "legend": {
@@ -823,7 +759,7 @@
           "h": 5,
           "w": 24,
           "x": 0,
-          "y": 45
+          "y": 40
         },
         "id": 11,
         "legend": {
@@ -908,7 +844,7 @@
           "h": 5,
           "w": 24,
           "x": 0,
-          "y": 50
+          "y": 45
         },
         "id": 12,
         "legend": {
@@ -1007,7 +943,7 @@
           "h": 5,
           "w": 24,
           "x": 0,
-          "y": 55
+          "y": 50
         },
         "id": 13,
         "legend": {
@@ -1101,12 +1037,14 @@
         "dashLength": 10,
         "dashes": false,
         "datasource": "prometheus",
+        "decimals": 2,
+        "description": "",
         "fill": 1,
         "gridPos": {
           "h": 5,
           "w": 24,
           "x": 0,
-          "y": 60
+          "y": 55
         },
         "id": 14,
         "legend": {
@@ -1134,10 +1072,10 @@
           {
             "expr": "rate(jvm_gc_collection_seconds_sum[30s])",
             "format": "time_series",
+            "instant": false,
             "intervalFactor": 1,
             "legendFormat": "Total Time ({{gc}})",
-            "refId": "A",
-            "instant": false
+            "refId": "A"
           }
         ],
         "thresholds": [],
@@ -1160,13 +1098,13 @@
         },
         "yaxes": [
           {
+            "decimals": null,
             "format": "percentunit",
             "label": null,
             "logBase": 1,
             "max": null,
             "min": null,
-            "show": true,
-            "decimals": null
+            "show": true
           },
           {
             "format": "short",
@@ -1180,10 +1118,9 @@
         "yaxis": {
           "align": false,
           "alignLevel": null
-        },
-        "description": "",
-        "decimals": 2
-      },{
+        }
+      },
+      {
         "aliasColors": {},
         "bars": false,
         "dashLength": 10,
@@ -1196,7 +1133,7 @@
           "h": 5,
           "w": 24,
           "x": 0,
-          "y": 65
+          "y": 60
         },
         "id": 15,
         "legend": {
@@ -1238,11 +1175,11 @@
             "refId": "B"
           },
           {
-            "refId": "C",
             "expr": "jvm_memory_bytes_used{area=\"heap\"}",
-            "intervalFactor": 1,
             "format": "time_series",
-            "legendFormat": "Used"
+            "intervalFactor": 1,
+            "legendFormat": "Used",
+            "refId": "C"
           }
         ],
         "thresholds": [],
@@ -1300,7 +1237,7 @@
           "h": 5,
           "w": 24,
           "x": 0,
-          "y": 70
+          "y": 65
         },
         "id": 16,
         "legend": {
@@ -1378,14 +1315,14 @@
       }
     ],
     "refresh": "5s",
-    "schemaVersion": 1,
+    "schemaVersion": 16,
     "style": "dark",
     "tags": [],
     "templating": {
       "list": []
     },
     "time": {
-      "from": "now-15m",
+      "from": "now-5m",
       "to": "now"
     },
     "timepicker": {
@@ -1408,6 +1345,6 @@
     "timezone": "",
     "title": "DBSubsetter Metrics",
     "uid": "XuQKmDUmk",
-    "version": 0
+    "version": 1
   }
 }
