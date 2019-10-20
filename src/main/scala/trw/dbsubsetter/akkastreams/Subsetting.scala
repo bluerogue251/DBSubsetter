@@ -1,11 +1,14 @@
 package trw.dbsubsetter.akkastreams
 
+import java.util.concurrent.TimeUnit
+
 import akka.Done
 import akka.actor.ActorRef
 import akka.pattern.ask
 import akka.stream.ClosedShape
 import akka.stream.scaladsl.GraphDSL.Implicits._
 import akka.stream.scaladsl.{Balance, Broadcast, Flow, GraphDSL, Merge, Partition, RunnableGraph, Sink, Source}
+import akka.util.Timeout
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.{DbAccessFactory, SchemaInfo}
 import trw.dbsubsetter.workflow.offheap.OffHeapFkTaskQueue
@@ -15,7 +18,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 object Subsetting {
   def runnableGraph(config: Config, schemaInfo: SchemaInfo, baseQueries: Vector[BaseQuery], pkStore: ActorRef, dbAccessFactory: DbAccessFactory, fkTaskCreationWorkflow: FkTaskCreationWorkflow, fkTaskQueue: OffHeapFkTaskQueue)(implicit ec: ExecutionContext): RunnableGraph[Future[Done]] = RunnableGraph.fromGraph(GraphDSL.create(Sink.ignore) { implicit b => sink =>
-    // Infrastructure: Merges, Balances, Partitions, Broadcasts
+    // Infrastructure: Timeouts, Merges, Balances, Partitions, Broadcasts
+    implicit val askTimeout: Timeout = Timeout(48, TimeUnit.HOURS) // For `mapAsyncUnordered`. The need for this timeout may be a code smell.
     val mergeOriginDbRequests = b.add(Merge[OriginDbRequest](3))
     val balanceOriginDb = b.add(Balance[OriginDbRequest](config.originDbParallelism, waitForAllDownstreams = true))
     val mergeOriginDbResults = b.add(Merge[OriginDbResult](config.originDbParallelism))
