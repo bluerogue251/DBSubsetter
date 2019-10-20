@@ -1,8 +1,8 @@
 package trw.dbsubsetter.workflow.offheap
 
-import trw.dbsubsetter.workflow.{ForeignKeyTask, NewTasks}
+import trw.dbsubsetter.workflow.ForeignKeyTask
 
 trait OffHeapFkTaskQueue {
-  def enqueue(rawTasks: NewTasks): Unit
+  def enqueue(fkOrdinal: Short, fkValue: Any, fetchChildren: Boolean): Unit
   def dequeue(): Option[ForeignKeyTask]
 }

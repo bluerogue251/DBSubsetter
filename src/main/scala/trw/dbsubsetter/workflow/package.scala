@@ -20,7 +20,6 @@ package object workflow {
   case object AlreadySeen extends PkQueryResult
   case class NotAlreadySeen(task: FetchParentTask) extends PkQueryResult
 
-  // Consider Array vs. Vector type
   case class NewTasks(taskInfo: Map[(ForeignKey, Boolean), Array[Any]])
   val EmptyNewTasks = NewTasks(Map.empty)
 }

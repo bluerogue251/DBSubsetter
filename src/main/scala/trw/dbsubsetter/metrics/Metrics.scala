@@ -19,6 +19,15 @@ object Metrics {
     .1, .25, .5, .75
   )
 
+  val taskQueueDurationBuckets: Array[Double] = Array(
+    .0000001, .00000025, .0000005, .00000075,
+    .000001, .0000025, .000005, .0000075,
+    .00001, .000025, .00005, .000075,
+    .0001, .0005,
+    .001, .005,
+    .01, .05
+  )
+
   val OriginDbDurationPerStatement: Histogram =
     Histogram
       .build()
@@ -87,6 +96,22 @@ object Metrics {
       .build()
       .name("PendingTasks")
       .help("n/a")
+      .register()
+
+  val TaskEnqueueDuration: Histogram =
+    Histogram
+      .build()
+      .name("TaskEnqueueDuration")
+      .help("n/a")
+      .buckets(taskQueueDurationBuckets: _*)
+      .register()
+
+  val TaskDequeueDuration: Histogram =
+    Histogram
+      .build()
+      .name("TaskDequeueDuration")
+      .help("n/a")
+      .buckets(taskQueueDurationBuckets: _*)
       .register()
 
   val PreTargetBufferSizeGauge: Gauge =
