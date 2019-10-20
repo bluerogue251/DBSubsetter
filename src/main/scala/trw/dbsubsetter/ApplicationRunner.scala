@@ -6,9 +6,6 @@ import trw.dbsubsetter.config.{CommandLineParser, Config}
 import trw.dbsubsetter.db.{BaseQueries, SchemaInfoRetrieval}
 import trw.dbsubsetter.util.Util
 
-import scala.concurrent.Await
-import scala.concurrent.duration.Duration
-
 /**
   * Provides a very thin layer underneath the real Application object. Tests will
   * call this object rather than calling the real Application object. This is because
@@ -37,8 +34,7 @@ object ApplicationRunner {
         if (config.isSingleThreadedDebugMode) {
           ApplicationSingleThreaded.run(config, schemaInfo, baseQueries)
         } else {
-          val futureResult = ApplicationAkkaStreams.run(config, schemaInfo, baseQueries)
-          Await.ready(futureResult, Duration.Inf)
+          ApplicationAkkaStreams.run(config, schemaInfo, baseQueries)
         }
         Util.printRuntime(startingTime)
         optionalMetricsEndpoint.foreach(_.stop())

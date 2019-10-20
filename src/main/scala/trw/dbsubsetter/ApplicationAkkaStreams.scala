@@ -10,7 +10,8 @@ import trw.dbsubsetter.metrics.Metrics
 import trw.dbsubsetter.workflow._
 import trw.dbsubsetter.workflow.offheap.{OffHeapFkTaskQueue, OffHeapFkTaskQueueFactory}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 object ApplicationAkkaStreams {
   def run(config: Config, schemaInfo: SchemaInfo, baseQueries: Vector[BaseQuery]): Future[Done] = {
@@ -27,13 +28,16 @@ object ApplicationAkkaStreams {
       Metrics.PendingTasksGauge.inc(config.baseQueries.size)
     }
 
-    Subsetting
-      .runnableGraph(config, schemaInfo, baseQueries, pkStore, dbAccessFactory, fkTaskCreationWorkflow, fkTaskQueue)
-      .run()
-      .map { success =>
-        dbAccessFactory.closeAllConnections()
-        system.terminate()
-        success
-      }
+    val subsettingFuture: Future[Done] =
+      Subsetting
+        .runnableGraph(config, schemaInfo, baseQueries, pkStore, dbAccessFactory, fkTaskCreationWorkflow, fkTaskQueue)
+        .run()
+        .map { success =>
+          dbAccessFactory.closeAllConnections()
+          system.terminate()
+          success
+        }
+
+    Await.ready(subsettingFuture, Duration.Inf)
   }
 }
