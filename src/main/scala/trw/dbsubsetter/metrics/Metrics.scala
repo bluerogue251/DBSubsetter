@@ -3,18 +3,28 @@ package trw.dbsubsetter.metrics
 import io.prometheus.client.{Counter, Gauge, Histogram}
 
 object Metrics {
-  val OriginDbSelectsHistogram: Histogram =
+  val dbStatementDurationBuckets: Array[Double] = Array(
+    .001, .0025, .005, .0075,
+    .01, .025, .05, .075,
+    .1, .25, .5, .75,
+    1, 2.5, 5, 7.5,
+    10, 25, 50, 75
+  )
+
+  val OriginDbRowsFetchedPerStatement: Histogram =
     Histogram
       .build()
-      .name("OriginDbSelects")
+      .name("OriginDbRowsFetchedPerStatement")
       .help("n/a")
+      .buckets(dbStatementDurationBuckets: _*)
       .register()
 
-  val OriginDbRowsFetched: Counter =
-    Counter
+  val OriginDbDurationPerStatement: Histogram =
+    Histogram
       .build()
-      .name("OriginDbRowsFetched")
+      .name("OriginDbDurationPerStatement")
       .help("n/a")
+      .buckets()
       .register()
 
   val DuplicateOriginDbRowsDiscarded: Counter =
@@ -31,18 +41,20 @@ object Metrics {
       .help("n/a")
       .register()
 
-  val TargetDbInsertsHistogram: Histogram =
+  val TargetDbRowsInsertedPerStatement: Histogram =
     Histogram
       .build()
-      .name("TargetDbInserts")
+      .name("TargetDbRowsInsertedPerStatement")
       .help("n/a")
+      .exponentialBuckets(1, 2, 25)
       .register()
 
-  val TargetDbRowsInserted: Counter =
-    Counter
+  val TargetDbDurationPerStatement: Histogram =
+    Histogram
       .build()
-      .name("TargetDbRowsInserted")
+      .name("TargetDbDurationPerStatement")
       .help("n/a")
+      .buckets(dbStatementDurationBuckets: _*)
       .register()
 
   val PendingTasksGauge: Gauge =
