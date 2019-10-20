@@ -41,4 +41,5 @@ nohup java -Xmx4G -jar DBSubsetter.jar \
   --targetDbParallelism 8 \
   --schemas "public" \
   --baseQuery "public.scientists ::: id in (2) ::: includeChildren" \
+  --preTargetBufferSize 200 \
   --exposeMetrics &
