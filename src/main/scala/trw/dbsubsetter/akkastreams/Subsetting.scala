@@ -3,9 +3,9 @@ package trw.dbsubsetter.akkastreams
 import akka.NotUsed
 import akka.actor.ActorRef
 import akka.pattern.ask
-import akka.stream.ClosedShape
+import akka.stream.SourceShape
 import akka.stream.scaladsl.GraphDSL.Implicits._
-import akka.stream.scaladsl.{Balance, Broadcast, Flow, GraphDSL, Merge, Partition, RunnableGraph, Source}
+import akka.stream.scaladsl.{Balance, Broadcast, Flow, GraphDSL, Merge, Partition, Source}
 import akka.util.Timeout
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.{DbAccessFactory, SchemaInfo}
@@ -16,9 +16,9 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 object Subsetting {
-  def runnableGraph(config: Config, schemaInfo: SchemaInfo, baseQueries: Vector[BaseQuery], pkStore: ActorRef, dbAccessFactory: DbAccessFactory, fkTaskCreationWorkflow: FkTaskCreationWorkflow, fkTaskQueue: OffHeapFkTaskQueue)(implicit ec: ExecutionContext): RunnableGraph[NotUsed] = RunnableGraph.fromGraph(GraphDSL.create() { implicit b =>
+  def source(config: Config, schemaInfo: SchemaInfo, baseQueries: Vector[BaseQuery], pkStore: ActorRef, dbAccessFactory: DbAccessFactory, fkTaskCreationWorkflow: FkTaskCreationWorkflow, fkTaskQueue: OffHeapFkTaskQueue)(implicit ec: ExecutionContext): Source[TargetDbInsertResult, NotUsed] = Source.fromGraph(GraphDSL.create() { implicit b =>
     // Infrastructure: Timeouts, Merges, and Broadcasts
-    implicit val subsettingTimeout: Timeout = Timeout(365.days)
+    implicit val askTimeout: Timeout = Timeout(48.hours)
     val mergeOriginDbRequests = b.add(Merge[OriginDbRequest](3))
     val balanceOriginDb = b.add(Balance[OriginDbRequest](config.originDbParallelism, waitForAllDownstreams = true))
     val mergeOriginDbResults = b.add(Merge[OriginDbResult](config.originDbParallelism))
@@ -30,6 +30,7 @@ object Subsetting {
     val broadcastPkExistResult = b.add(Broadcast[PkQueryResult](2))
     val broadcastPksAdded = b.add(Broadcast[PksAdded](2))
     val balanceTargetDb = b.add(Balance[PksAdded](config.targetDbParallelism, waitForAllDownstreams = true))
+    val mergeTargetDbResults = b.add(Merge[TargetDbInsertResult](config.targetDbParallelism))
     val fkTaskBufferFlow = b.add(new FkTaskBufferFlow(fkTaskQueue).async)
     val mergeToOustandingTaskCounter = b.add(Merge[NewTasks](2))
 
@@ -45,7 +46,7 @@ object Subsetting {
 
     // Process Target DB Inserts in Parallel
     for (_ <- 0 until config.targetDbParallelism) {
-      balanceTargetDb ~> TargetDb.insert(config, schemaInfo, dbAccessFactory).async
+      balanceTargetDb ~> TargetDb.insert(config, schemaInfo, dbAccessFactory).async ~> mergeTargetDbResults
     }
 
     mergeOriginDbResults ~>
@@ -86,6 +87,6 @@ object Subsetting {
       Flow[PkQueryResult].collect { case AlreadySeen => EmptyNewTasks } ~>
       mergeToOustandingTaskCounter
 
-    ClosedShape
+    SourceShape(mergeTargetDbResults.out)
   })
 }
