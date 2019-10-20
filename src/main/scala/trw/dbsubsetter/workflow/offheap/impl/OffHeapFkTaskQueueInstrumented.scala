@@ -1,6 +1,5 @@
 package trw.dbsubsetter.workflow.offheap.impl
 
-import io.prometheus.client.Histogram.Timer
 import trw.dbsubsetter.metrics.Metrics
 import trw.dbsubsetter.workflow.ForeignKeyTask
 import trw.dbsubsetter.workflow.offheap.OffHeapFkTaskQueue
@@ -20,12 +19,8 @@ private[offheap] final class OffHeapFkTaskQueueInstrumented(delegatee: OffHeapFk
   }
 
   override def dequeue(): Option[ForeignKeyTask] = {
-    val timer: Timer = taskDequeueDuration.startTimer()
-    val optionalTask: Option[ForeignKeyTask] = delegatee.dequeue()
-    optionalTask.foreach(_ => {
-      pendingTaskCount.dec()
-      timer.observeDuration()
-    })
+    val optionalTask: Option[ForeignKeyTask] = taskDequeueDuration.time(() => delegatee.dequeue())
+    optionalTask.foreach(_ => pendingTaskCount.dec())
     optionalTask
   }
 }
