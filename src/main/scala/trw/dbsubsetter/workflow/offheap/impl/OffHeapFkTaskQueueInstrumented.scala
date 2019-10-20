@@ -1,8 +1,9 @@
 package trw.dbsubsetter.workflow.offheap.impl
 
+import io.prometheus.client.Histogram.Timer
 import trw.dbsubsetter.metrics.Metrics
+import trw.dbsubsetter.workflow.ForeignKeyTask
 import trw.dbsubsetter.workflow.offheap.OffHeapFkTaskQueue
-import trw.dbsubsetter.workflow.{ForeignKeyTask, NewTasks}
 
 private[offheap] final class OffHeapFkTaskQueueInstrumented(delegatee: OffHeapFkTaskQueue) extends OffHeapFkTaskQueue {
 
@@ -10,17 +11,21 @@ private[offheap] final class OffHeapFkTaskQueueInstrumented(delegatee: OffHeapFk
 
   private[this] val taskEnqueueDuration = Metrics.TaskEnqueueDuration
 
-  override def enqueue(rawTasks: NewTasks): Unit = {
-    val runnable: Runnable = () => delegatee.enqueue(rawTasks)
-    val enqueueDuration: Double = taskEnqueueDuration.time(runnable)
+  private[this] val taskDequeueDuration = Metrics.TaskDequeueDuration
 
-    pendingTaskCount.inc(rawTasks.taskInfo.values.map(_.length).sum)
+  override def enqueue(fkOrdinal: Short, fkValue: Any, fetchChildren: Boolean): Unit = {
+    val runnable: Runnable = () => delegatee.enqueue(fkOrdinal, fkValue, fetchChildren)
+    taskEnqueueDuration.time(runnable)
+    pendingTaskCount.inc()
   }
 
   override def dequeue(): Option[ForeignKeyTask] = {
-    delegatee.dequeue().map(fkTask => {
+    val timer: Timer = taskDequeueDuration.startTimer()
+    val optionalTask: Option[ForeignKeyTask] = delegatee.dequeue()
+    optionalTask.foreach(_ => {
       pendingTaskCount.dec()
-      fkTask
+      timer.observeDuration()
     })
+    optionalTask
   }
 }

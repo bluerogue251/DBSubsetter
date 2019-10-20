@@ -6,9 +6,9 @@ import net.openhft.chronicle.queue.RollCycles
 import net.openhft.chronicle.queue.impl.single.SingleChronicleQueueBuilder
 import net.openhft.chronicle.wire.WriteMarshallable
 import trw.dbsubsetter.config.Config
-import trw.dbsubsetter.db.{ForeignKey, SchemaInfo}
+import trw.dbsubsetter.db.SchemaInfo
 import trw.dbsubsetter.workflow.offheap.OffHeapFkTaskQueue
-import trw.dbsubsetter.workflow.{ForeignKeyTask, NewTasks, RawTaskToForeignKeyTaskMapper}
+import trw.dbsubsetter.workflow.{ForeignKeyTask, RawTaskToForeignKeyTaskMapper}
 
 
 private[offheap] final class ChronicleQueueFkTaskQueue(config: Config, schemaInfo: SchemaInfo) extends OffHeapFkTaskQueue {
@@ -42,15 +42,10 @@ private[offheap] final class ChronicleQueueFkTaskQueue(config: Config, schemaInf
   private[this] val childFkWriters =
     schemaInfo.fksOrdered.zipWithIndex.map { case (fk, i) => new TaskQueueWriter(i.toShort, fk.fromCols.map(c => (c.jdbcType, c.typeName)), schemaInfo.dbVendor) }
 
-  override def enqueue(rawTasks: NewTasks): Unit = {
-    val newTaskMap: Map[(ForeignKey, Boolean), Array[Any]] = rawTasks.taskInfo
-    newTaskMap.foreach { case ((fk, fetchChildren), fkValues) =>
-      val writer = if (fetchChildren) childFkWriters(fk.i) else parentFkWriters(fk.i)
-      fkValues.foreach { fkValue =>
-        val writeMarshallable: WriteMarshallable = writer.writeHandler(fetchChildren, fkValue)
-        appender.writeDocument(writeMarshallable)
-      }
-    }
+  override def enqueue(fkOrdinal: Short, fkValue: Any, fetchChildren: Boolean): Unit = {
+    val writer = if (fetchChildren) childFkWriters(fkOrdinal) else parentFkWriters(fkOrdinal)
+    val writeMarshallable: WriteMarshallable = writer.writeHandler(fetchChildren, fkValue)
+    appender.writeDocument(writeMarshallable)
   }
 
   override def dequeue(): Option[ForeignKeyTask] = {
