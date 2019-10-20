@@ -10,9 +10,15 @@ private[db] class InstrumentedTargetDbAccess(delegatee: TargetDbAccess) extends 
 
   private[this] val rowsInsertedPerStatement: Histogram = Metrics.TargetDbRowsInsertedPerStatement
 
+  private[this] val durationPerRow: Histogram = Metrics.TargetDbDurationPerRow
+
+  // TODO institute a guarantee that this will never be called with empty rows
   override def insertRows(table: Table, rows: Vector[Row]): Unit = {
     val runnable: Runnable = () => delegatee.insertRows(table, rows)
-    durationPerStatement.time(runnable)
     rowsInsertedPerStatement.observe(rows.size)
+    val statementDuration: Double = durationPerStatement.time(runnable)
+    if (rows.nonEmpty) {
+      durationPerRow.observe(statementDuration / rows.size)
+    }
   }
 }

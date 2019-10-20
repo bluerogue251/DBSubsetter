@@ -3,13 +3,29 @@ package trw.dbsubsetter.metrics
 import io.prometheus.client.{Counter, Gauge, Histogram}
 
 object Metrics {
-  val dbStatementDurationBuckets: Array[Double] = Array(
+  val dbDurationPerStatementBuckets: Array[Double] = Array(
     .001, .0025, .005, .0075,
     .01, .025, .05, .075,
     .1, .25, .5, .75,
     1, 2.5, 5, 7.5,
     10, 25, 50, 75
   )
+
+  val dbDurationPerRowBuckets: Array[Double] = Array(
+    .00001, .000025, .000075,
+    .0001, .00025, .0005, .00075,
+    .001, .0025, .005, .0075,
+    .01, .025, .05, .075,
+    .1, .25, .5, .75
+  )
+
+  val OriginDbDurationPerStatement: Histogram =
+    Histogram
+      .build()
+      .name("OriginDbDurationPerStatement")
+      .help("n/a")
+      .buckets(dbDurationPerStatementBuckets: _*)
+      .register()
 
   val OriginDbRowsFetchedPerStatement: Histogram =
     Histogram
@@ -19,12 +35,12 @@ object Metrics {
       .exponentialBuckets(1, 2, 20)
       .register()
 
-  val OriginDbDurationPerStatement: Histogram =
+  val OriginDbDurationPerRow: Histogram =
     Histogram
       .build()
-      .name("OriginDbDurationPerStatement")
+      .name("OriginDbDurationPerRow")
       .help("n/a")
-      .buckets(dbStatementDurationBuckets: _*)
+      .buckets(dbDurationPerRowBuckets: _*)
       .register()
 
   val DuplicateOriginDbRowsDiscarded: Counter =
@@ -41,6 +57,15 @@ object Metrics {
       .help("n/a")
       .register()
 
+
+  val TargetDbDurationPerStatement: Histogram =
+    Histogram
+      .build()
+      .name("TargetDbDurationPerStatement")
+      .help("n/a")
+      .buckets(dbDurationPerStatementBuckets: _*)
+      .register()
+
   val TargetDbRowsInsertedPerStatement: Histogram =
     Histogram
       .build()
@@ -49,12 +74,12 @@ object Metrics {
       .exponentialBuckets(1, 2, 20)
       .register()
 
-  val TargetDbDurationPerStatement: Histogram =
+  val TargetDbDurationPerRow: Histogram =
     Histogram
       .build()
-      .name("TargetDbDurationPerStatement")
+      .name("TargetDbDurationPerRow")
       .help("n/a")
-      .buckets(dbStatementDurationBuckets: _*)
+      .buckets(dbDurationPerRowBuckets: _*)
       .register()
 
   val PendingTasksGauge: Gauge =

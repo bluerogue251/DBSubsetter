@@ -11,6 +11,8 @@ private[db] class InstrumentedOriginDbAccess(delegatee: OriginDbAccess) extends 
 
   private[this] val rowsFetchedPerStatement: Histogram = Metrics.OriginDbRowsFetchedPerStatement
 
+  private[this] val durationPerRow: Histogram = Metrics.OriginDbDurationPerRow
+
   override def getRowsFromTemplate(fk: ForeignKey, table: Table, fkValue: Any): Vector[Row] = {
     instrument(() => delegatee.getRowsFromTemplate(fk, table, fkValue))
   }
@@ -22,8 +24,12 @@ private[db] class InstrumentedOriginDbAccess(delegatee: OriginDbAccess) extends 
   private[this] def instrument(func: () => Vector[Row]): Vector[Row] = {
     val timer: Timer = durationPerStatement.startTimer()
     val result: Vector[Row] = func.apply()
-    timer.observeDuration()
+    val statementDuration: Double = timer.observeDuration()
     rowsFetchedPerStatement.observe(result.length)
+    if (result.nonEmpty) { // TODO test the divide by zero case
+      durationPerRow.observe(statementDuration / result.length)
+    }
+
     result
   }
 }
