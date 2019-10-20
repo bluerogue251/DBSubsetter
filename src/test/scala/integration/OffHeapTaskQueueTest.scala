@@ -5,8 +5,8 @@ import java.sql.JDBCType
 import org.scalatest.FunSuite
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.{Column, ForeignKey, SchemaInfo, Table}
+import trw.dbsubsetter.workflow.FetchParentTask
 import trw.dbsubsetter.workflow.offheap.OffHeapFkTaskQueueFactory
-import trw.dbsubsetter.workflow.{FetchParentTask, NewTasks}
 
 /*
  * TODO add more test cases covering various combinations of:
@@ -38,10 +38,10 @@ class OffHeapTaskQueueTest extends FunSuite {
     val fkValue2: Long = 10
     val fkValue3: Long = 23
 
-    val rawTaskInfo: Map[(ForeignKey, Boolean), Array[Any]] =
-      Map((OffHeapTaskQueueTest.foreignKey, false) -> Array[Any](fkValue1, fkValue2, fkValue3))
+    queue.enqueue(OffHeapTaskQueueTest.foreignKey.i, fkValue1, false)
+    queue.enqueue(OffHeapTaskQueueTest.foreignKey.i, fkValue2, false)
+    queue.enqueue(OffHeapTaskQueueTest.foreignKey.i, fkValue3, false)
 
-    queue.enqueue(NewTasks(rawTaskInfo))
     val baseTask: FetchParentTask = FetchParentTask(
       parentTable = OffHeapTaskQueueTest.parentTable,
       fk = OffHeapTaskQueueTest.foreignKey,
