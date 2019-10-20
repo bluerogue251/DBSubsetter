@@ -41,7 +41,4 @@ nohup java -Xmx4G -jar DBSubsetter.jar \
   --targetDbParallelism 8 \
   --schemas "public" \
   --baseQuery "public.scientists ::: id in (2) ::: includeChildren" \
-  --excludeTable "public.particle_domain" \
-  --excludeTable "public.quantum_domain" \
-  --excludeTable "public.gravitational_wave_domain" \
   --exposeMetrics &

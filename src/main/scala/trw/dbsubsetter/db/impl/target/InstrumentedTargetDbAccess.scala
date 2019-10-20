@@ -10,8 +10,9 @@ private[db] class InstrumentedTargetDbAccess(delegatee: TargetDbAccess) extends 
 
   private[this] val rowCounter: Counter = Metrics.TargetDbRowsInserted
 
-  override def insertRows(table: Table, rows: Vector[Row]): Int = {
+  override def insertRows(table: Table, rows: Vector[Row]): Unit = {
     rowCounter.inc(rows.size)
-    histogram.time(() => delegatee.insertRows(table, rows))
+    val runnable: Runnable = () => delegatee.insertRows(table, rows)
+    histogram.time(runnable)
   }
 }

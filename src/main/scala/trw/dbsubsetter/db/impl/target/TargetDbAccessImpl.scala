@@ -14,8 +14,7 @@ private[db] class TargetDbAccessImpl(connStr: String, sch: SchemaInfo, connectio
     table -> connection.prepareStatement(sqlStr)
   }
 
-  // TODO reconsider Int return type if we just return 1 -- it's confusing
-  override def insertRows(table: Table, rows: Vector[Row]): Int = {
+  override def insertRows(table: Table, rows: Vector[Row]): Unit = {
 
     val stmt = statements(table)
     val cols = sch.colsByTableOrdered(table).size
@@ -26,7 +25,5 @@ private[db] class TargetDbAccessImpl(connStr: String, sch: SchemaInfo, connectio
     }
 
     stmt.executeBatch()
-    1
   }
-
 }

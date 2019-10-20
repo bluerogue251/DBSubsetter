@@ -14,8 +14,6 @@ package object workflow {
 
   case class OriginDbResult(table: Table, rows: Vector[Row], viaTableOpt: Option[Table], fetchChildren: Boolean)
 
-  case class TargetDbInsertResult(table: Table, numRowsInserted: Long)
-
   case class PksAdded(table: Table, rowsNeedingParentTasks: Vector[Row], rowsNeedingChildTasks: Vector[Row], viaTableOpt: Option[Table])
 
   sealed trait PkQueryResult
