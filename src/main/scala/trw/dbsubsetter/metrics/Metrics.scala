@@ -24,7 +24,7 @@ object Metrics {
       .build()
       .name("OriginDbDurationPerStatement")
       .help("n/a")
-      .buckets()
+      .exponentialBuckets(1, 2, 20)
       .register()
 
   val DuplicateOriginDbRowsDiscarded: Counter =
@@ -46,7 +46,7 @@ object Metrics {
       .build()
       .name("TargetDbRowsInsertedPerStatement")
       .help("n/a")
-      .exponentialBuckets(1, 2, 25)
+      .exponentialBuckets(1, 2, 20)
       .register()
 
   val TargetDbDurationPerStatement: Histogram =
