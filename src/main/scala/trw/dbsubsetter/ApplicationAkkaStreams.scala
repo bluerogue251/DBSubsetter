@@ -3,7 +3,6 @@ package trw.dbsubsetter
 import akka.Done
 import akka.actor.{ActorRef, ActorSystem}
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.Sink
 import trw.dbsubsetter.akkastreams.{PkStoreActor, Subsetting}
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.{DbAccessFactory, SchemaInfo}
@@ -29,8 +28,8 @@ object ApplicationAkkaStreams {
     }
 
     Subsetting
-      .source(config, schemaInfo, baseQueries, pkStore, dbAccessFactory, fkTaskCreationWorkflow, fkTaskQueue)
-      .runWith(Sink.ignore)
+      .runnableGraph(config, schemaInfo, baseQueries, pkStore, dbAccessFactory, fkTaskCreationWorkflow, fkTaskQueue)
+      .run()
       .map { success =>
         dbAccessFactory.closeAllConnections()
         system.terminate()
