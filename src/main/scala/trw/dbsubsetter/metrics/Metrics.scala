@@ -3,18 +3,44 @@ package trw.dbsubsetter.metrics
 import io.prometheus.client.{Counter, Gauge, Histogram}
 
 object Metrics {
-  val OriginDbSelectsHistogram: Histogram =
+  val dbDurationPerStatementBuckets: Array[Double] = Array(
+    .001, .0025, .005, .0075,
+    .01, .025, .05, .075,
+    .1, .25, .5, .75,
+    1, 2.5, 5, 7.5,
+    10, 25, 50, 75
+  )
+
+  val dbDurationPerRowBuckets: Array[Double] = Array(
+    .00001, .000025, .000075,
+    .0001, .00025, .0005, .00075,
+    .001, .0025, .005, .0075,
+    .01, .025, .05, .075,
+    .1, .25, .5, .75
+  )
+
+  val OriginDbDurationPerStatement: Histogram =
     Histogram
       .build()
-      .name("OriginDbSelects")
+      .name("OriginDbDurationPerStatement")
       .help("n/a")
+      .buckets(dbDurationPerStatementBuckets: _*)
       .register()
 
-  val OriginDbRowsFetched: Counter =
-    Counter
+  val OriginDbRowsFetchedPerStatement: Histogram =
+    Histogram
       .build()
-      .name("OriginDbRowsFetched")
+      .name("OriginDbRowsFetchedPerStatement")
       .help("n/a")
+      .exponentialBuckets(1, 2, 20)
+      .register()
+
+  val OriginDbDurationPerRow: Histogram =
+    Histogram
+      .build()
+      .name("OriginDbDurationPerRow")
+      .help("n/a")
+      .buckets(dbDurationPerRowBuckets: _*)
       .register()
 
   val DuplicateOriginDbRowsDiscarded: Counter =
@@ -31,18 +57,29 @@ object Metrics {
       .help("n/a")
       .register()
 
-  val TargetDbInsertsHistogram: Histogram =
+
+  val TargetDbDurationPerStatement: Histogram =
     Histogram
       .build()
-      .name("TargetDbInserts")
+      .name("TargetDbDurationPerStatement")
       .help("n/a")
+      .buckets(dbDurationPerStatementBuckets: _*)
       .register()
 
-  val TargetDbRowsInserted: Counter =
-    Counter
+  val TargetDbRowsInsertedPerStatement: Histogram =
+    Histogram
       .build()
-      .name("TargetDbRowsInserted")
+      .name("TargetDbRowsInsertedPerStatement")
       .help("n/a")
+      .exponentialBuckets(1, 2, 20)
+      .register()
+
+  val TargetDbDurationPerRow: Histogram =
+    Histogram
+      .build()
+      .name("TargetDbDurationPerRow")
+      .help("n/a")
+      .buckets(dbDurationPerRowBuckets: _*)
       .register()
 
   val PendingTasksGauge: Gauge =
