@@ -26,5 +26,4 @@ private[db] class TargetDbAccessImpl(connStr: String, sch: SchemaInfo, connectio
 
     stmt.executeBatch()
   }
-
 }
