@@ -35,7 +35,7 @@ steps:
   - name: code_style_check
     image: bluerogue251/db-subsetter-ci:6
     commands:
-      - sbt scalastyle
+      - sbt scalastyle test:scalastyle
 
   - name: compile
     image: bluerogue251/db-subsetter-ci:6
