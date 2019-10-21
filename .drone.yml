@@ -32,6 +32,11 @@ services:
       MYSQL_ALLOW_EMPTY_PASSWORD: "true"
 
 steps:
+  - name: code_style_check
+    image: bluerogue251/db-subsetter-ci:6
+    commands:
+      - sbt scalastyle test:scalastyle
+
   - name: compile
     image: bluerogue251/db-subsetter-ci:6
     commands:
@@ -70,6 +75,6 @@ steps:
 
 ---
 kind: signature
-hmac: 96c0da4de6e379dc9d0e344c235bb60db656c549f29deeefd7a930d5474b50eb
+hmac: ae6e7c84a2acb0563d1185f0e49d752553383adf9f41318506fada5dd7769dcb
 
 ...
