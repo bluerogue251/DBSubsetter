@@ -15,7 +15,7 @@ docker run \
   --volume $(pwd)/prometheus-config.yml:/etc/prometheus/prometheus.yml \
   prom/prometheus:v2.6.0
   # Can download a point-in-time snapshot of what previous load testing metrics were from S3, unzip them, then:
-  # --volume /home/teddy/Downloads/20191020T033123Z-6f28aa5e4bb286dd/:/prometheus \
+  # --volume /home/teddy/Downloads/<snapshot-id>/:/prometheus \
 
 # TODO try to avoid using --network host
 docker run \

@@ -22,10 +22,13 @@ private[db] object DbMetadataQueries {
     // Get all tables for configured schemas
     //
     config.schemas.foreach { schema =>
-      val tablesJdbcResultSet = {
-        if (conn.isMysql) ddl.getTables(schema, null, "%", Array("TABLE"))
-        else ddl.getTables(catalog, schema, "%", Array("TABLE"))
-      }
+      val tablesJdbcResultSet =
+        if (conn.isMysql) {
+          ddl.getTables(schema, null, "%", Array("TABLE"))
+        } else {
+          ddl.getTables(catalog, schema, "%", Array("TABLE"))
+        }
+
       while (tablesJdbcResultSet.next()) {
         val table = tablesJdbcResultSet.getString("TABLE_NAME")
         if (!config.excludeTables.contains((schema, table))) {
@@ -38,10 +41,13 @@ private[db] object DbMetadataQueries {
     // Fetch columns from DB
     //
     tables.foreach { table =>
-      val colsJdbcResultSet = {
-        if (conn.isMysql) ddl.getColumns(table.schema, null, table.name, "%")
-        else ddl.getColumns(catalog, table.schema, table.name, "%")
-      }
+      val colsJdbcResultSet =
+        if (conn.isMysql) {
+          ddl.getColumns(table.schema, null, table.name, "%")
+        } else {
+          ddl.getColumns(catalog, table.schema, table.name, "%")
+        }
+
       while (colsJdbcResultSet.next()) {
         val columnName = colsJdbcResultSet.getString("COLUMN_NAME")
         val jdbcType = JDBCType.valueOf(colsJdbcResultSet.getInt("DATA_TYPE"))
@@ -60,10 +66,13 @@ private[db] object DbMetadataQueries {
     // Fetch primary keys from DB
     //
     tables.foreach { table =>
-      val pksJdbcResultSet = {
-        if (conn.isMysql) ddl.getPrimaryKeys(table.schema, null, table.name)
-        else ddl.getPrimaryKeys(catalog, table.schema, table.name)
-      }
+      val pksJdbcResultSet =
+        if (conn.isMysql) {
+          ddl.getPrimaryKeys(table.schema, null, table.name)
+        } else {
+          ddl.getPrimaryKeys(catalog, table.schema, table.name)
+        }
+
       while (pksJdbcResultSet.next()) {
         pks += PrimaryKeyQueryRow(
           table.schema,
@@ -84,10 +93,13 @@ private[db] object DbMetadataQueries {
     // Fetch foreign keys from DB
     //
     tables.foreach { table =>
-      val foreignKeysJdbcResultSet = {
-        if (conn.isMysql) ddl.getImportedKeys(table.schema, null, table.name)
-        else ddl.getImportedKeys(catalog, table.schema, table.name)
-      }
+      val foreignKeysJdbcResultSet =
+        if (conn.isMysql) {
+          ddl.getImportedKeys(table.schema, null, table.name)
+        } else {
+          ddl.getImportedKeys(catalog, table.schema, table.name)
+        }
+
       while (foreignKeysJdbcResultSet.next()) {
         val fromSchema = if (conn.isMysql) foreignKeysJdbcResultSet.getString("FKTABLE_CAT") else foreignKeysJdbcResultSet.getString("FKTABLE_SCHEM")
         val fromTable = foreignKeysJdbcResultSet.getString("FKTABLE_NAME")

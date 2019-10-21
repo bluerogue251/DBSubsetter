@@ -49,11 +49,11 @@ private[offheap] final class ChronicleQueueFkTaskQueue(config: Config, schemaInf
   }
 
   override def dequeue(): Option[ForeignKeyTask] = {
-    var task: ForeignKeyTask = null
+    var optionalTask: Option[ForeignKeyTask] = None
 
     /*
-     * `tailer.readDocument` can early return `false` if there is no new data on-disk to read.
-     * In this case, `var task` stays `null` and we therefore return a `Option#None` from this method.
+     * `tailer.readDocument` can early return `false` if there is no new data on-disk to read. In this case,
+     * `var optionalTask` stays set to `None` and is eventually returned as `None` from this method.
      */
     tailer.readDocument { r =>
       val in = r.getValueIn
@@ -64,9 +64,10 @@ private[offheap] final class ChronicleQueueFkTaskQueue(config: Config, schemaInf
       val fkValue = reader.read(in)
       val fk = schemaInfo.fksOrdered(fkOrdinal)
 
-      task = RawTaskToForeignKeyTaskMapper.map(fk, fetchChildren, fkValue)
+      val task: ForeignKeyTask = RawTaskToForeignKeyTaskMapper.map(fk, fetchChildren, fkValue)
+      optionalTask = Some(task)
     }
 
-    Option(task)
+    optionalTask
   }
 }

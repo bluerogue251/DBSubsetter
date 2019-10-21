@@ -168,12 +168,13 @@ object CommandLineParser {
       .action((dir, c) => c.copy(taskQueueDirOpt = Some(dir)))
       .validate { dir =>
         if (!dir.exists()) dir.mkdir()
-        if (!dir.isDirectory)
+        if (!dir.isDirectory) {
           failure("--taskQueueDir must be a directory")
-        else if (dir.listFiles().nonEmpty)
+        } else if (dir.listFiles().nonEmpty) {
           failure("--taskQueueDir must be an empty directory")
-        else
+        } else {
           success
+        }
       }
       .text(
         """Directory in which DBSubsetter will store its queue of outstanding tasks
