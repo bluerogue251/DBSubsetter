@@ -35,7 +35,7 @@ steps:
   - name: code_style_check
     image: bluerogue251/db-subsetter-ci:6
     commands:
-      - sbt scalastyle test:scalastyle
+      - sbt scalastyle
 
   - name: compile
     image: bluerogue251/db-subsetter-ci:6
@@ -75,6 +75,6 @@ steps:
 
 ---
 kind: signature
-hmac: ae6e7c84a2acb0563d1185f0e49d752553383adf9f41318506fada5dd7769dcb
+hmac: 478bc0c13337c143b8d2eecb25461cc5bfa89d5c3c8ddbab1824b3a71a1c95c8
 
 ...

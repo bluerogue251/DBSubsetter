@@ -14,10 +14,16 @@ curl -X POST http://localhost:9090/api/v1/admin/tsdb/snapshot
 # {
 #  "status": "success",
 #  "data": {
-#    "name": "20171210T211224Z-2be650b6d019eb54"
+#    "name": "<snapshot-id>"
 #  }
 #}
-# The snapshot now exists at /home/ubuntu/prometheus-data/snapshots/20171210T211224Z-2be650b6d019eb54
+# The snapshot now exists at /home/ubuntu/prometheus-data/snapshots/<snapshot-id>
 
 # Zip up the prometheus snapshot
-# Store the prometheus snapshot data in S3
+# zip -r <date>-prometheus-snapshot-<commit-hash>.zip prometheus-data/snapshots/<snapshot-id>
+
+# On your local machine:
+# scp -i "db-subsetter-load-test.pem" \
+#   ubuntu@<ec2-host>:/home/ubuntu/<date>-prometheus-snapshot-<commit-hash>.zip <date>-prometheus-snapshot-<commit-hash>.zip
+
+# Then manually save the prometheus snapshot data to the S3 db-subsetter/load-test/prometheus-snapshots bucket

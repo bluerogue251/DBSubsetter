@@ -75,18 +75,13 @@ object Metrics {
       .buckets(dbDurationPerStatementBuckets: _*)
       .register()
 
-  val TargetDbRowsInsertedPerStatement: Histogram = {
-    val bucketStart: Double = 1
-    val bucketFactor: Double = 2
-    val bucketCount: Int = 20
-
+  val TargetDbRowsInsertedPerStatement: Histogram =
     Histogram
       .build()
       .name("TargetDbRowsInsertedPerStatement")
       .help("n/a")
-      .exponentialBuckets(bucketStart, bucketFactor, bucketCount)
+      .exponentialBuckets(1, 2, 20)
       .register()
-  }
 
   val TargetDbDurationPerRow: Histogram =
     Histogram
