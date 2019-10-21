@@ -6,8 +6,8 @@ scalaVersion := "2.12.3"
 
 scalacOptions ++= Seq("-deprecation", "-Xfatal-warnings")
 
-scalastyleFailOnError := true
-scalastyleFailOnWarning := true
+scalastyleFailOnError := false
+scalastyleFailOnWarning := false
 
 libraryDependencies ++= Seq(
   // Command line parser
