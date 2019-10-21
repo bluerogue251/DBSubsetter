@@ -14,8 +14,10 @@ docker run \
   --name db_subsetter_prometheus \
   --volume $(pwd)/prometheus-config.yml:/etc/prometheus/prometheus.yml \
   prom/prometheus:v2.6.0
-  # Can download a point-in-time snapshot of what previous load testing metrics were from S3, unzip them, then:
-  # --volume /home/teddy/Downloads/<snapshot-id>/:/prometheus \
+  # Can download a point-in-time snapshot of what previous load testing metrics were from S3, then:
+  # unzip -r /path/to/<snapshot-id>
+  # chmod 777 -R /path/to/<snapshot-id>
+  # --volume /path/to/<snapshot-id>/:/prometheus \
 
 # TODO try to avoid using --network host
 docker run \
