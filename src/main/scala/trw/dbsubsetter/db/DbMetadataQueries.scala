@@ -22,13 +22,13 @@ private[db] object DbMetadataQueries {
     // Get all tables for configured schemas
     //
     config.schemas.foreach { schema =>
-      val tablesJdbcResultSet = {
+      val tablesJdbcResultSet =
         if (conn.isMysql) {
           ddl.getTables(schema, null, "%", Array("TABLE"))
         } else {
           ddl.getTables(catalog, schema, "%", Array("TABLE"))
         }
-      }
+
       while (tablesJdbcResultSet.next()) {
         val table = tablesJdbcResultSet.getString("TABLE_NAME")
         if (!config.excludeTables.contains((schema, table))) {
