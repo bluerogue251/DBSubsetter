@@ -49,12 +49,13 @@ private[primarykeystore] final class InMemoryPrimaryKeyStore(schemaInfo: SchemaI
     lazy val alreadySeenWithoutChildren: Boolean =
       seenWithoutChildrenStorage(table).remove(primaryKeyValue)
 
-    if (alreadySeenWithChildren)
+    if (alreadySeenWithChildren) {
       AlreadySeenWithChildren
-    else if (alreadySeenWithoutChildren)
+    } else if (alreadySeenWithoutChildren) {
       AlreadySeenWithoutChildren
-    else
+    } else {
       FirstTimeSeen
+    }
   }
 
   override def alreadySeen(table: Table, primaryKeyValue: Any): Boolean = {
