@@ -4,6 +4,7 @@ import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.{DbAccessFactory, PrimaryKeyValue, Row, SchemaInfo}
 
 
+// TODO rename this to something more along the lines of "Data Copy Workflow" (as opposed to "Key Query Workflow")
 final class TargetDbWorkflow(config: Config, schemaInfo: SchemaInfo, dbAccessFactory: DbAccessFactory) {
   private[this] val originDbAccess = dbAccessFactory.buildOriginDbAccess()
   private[this] val targetDbAccess = dbAccessFactory.buildTargetDbAccess()
@@ -27,6 +28,6 @@ final class TargetDbWorkflow(config: Config, schemaInfo: SchemaInfo, dbAccessFac
     val rowsToInsert: Vector[Row] =
       originDbAccess.getRowsFromPrimaryKeyValues(request.table, primaryKeyValues)
 
-    targetDbAccess.insertRows(request.table, request.rowsNeedingParentTasks)
+    targetDbAccess.insertRows(request.table, rowsToInsert)
   }
 }

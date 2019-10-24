@@ -6,6 +6,8 @@ import trw.dbsubsetter.db.impl.connection.ConnectionFactory
 import trw.dbsubsetter.db.impl.mapper.JdbcResultConverter
 import trw.dbsubsetter.db.{ForeignKey, OriginDbAccess, PrimaryKeyValue, Row, SchemaInfo, Sql, SqlQuery, Table}
 
+
+// TODO fix this so the line is shorter and re-enable scalastyle
 // scalastyle:off
 private[db] class OriginDbAccessImpl(connStr: String, sch: SchemaInfo, mapper: JdbcResultConverter, connectionFactory: ConnectionFactory) extends OriginDbAccess {
 // scalastyle:on
@@ -13,12 +15,12 @@ private[db] class OriginDbAccessImpl(connStr: String, sch: SchemaInfo, mapper: J
   private[this] val conn = connectionFactory.getReadOnlyConnection(connStr)
 
   private[this] val foreignKeyTemplateStatements: Map[(ForeignKey, Table), PreparedStatement] =
-    Sql.preparedQueryStatementStrings(sch).map { case ((fk, table), sqlString) =>
+    Sql.queryByFkSqlTemplates(sch).map { case ((fk, table), sqlString) =>
       (fk, table) -> conn.prepareStatement(sqlString)
     }
 
   private[this] val primaryKeyTemplateStatements: Map[Table, PreparedStatement] =
-    Sql.preparedQueryByPrimaryKeyStatementStrings(sch).map { case (table, sqlString) =>
+    Sql.queryByPkSqlTemplates(sch).map { case (table, sqlString) =>
       table -> conn.prepareStatement(sqlString)
     }
 

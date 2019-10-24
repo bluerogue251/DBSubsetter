@@ -1,7 +1,7 @@
 package trw.dbsubsetter.db
 
 private[db] object Sql {
-  def preparedQueryStatementStrings(sch: SchemaInfo): ForeignKeySqlTemplates = {
+  def queryByFkSqlTemplates(sch: SchemaInfo): ForeignKeySqlTemplates = {
     val allCombos = for {
       fk <- sch.fksOrdered
       table <- Set(fk.fromTable, fk.toTable)
@@ -22,14 +22,14 @@ private[db] object Sql {
     }.toMap
   }
 
-  def preparedQueryByPrimaryKeyStatementStrings(sch: SchemaInfo): PrimaryKeySqlTemplates = {
+  def queryByPkSqlTemplates(sch: SchemaInfo): PrimaryKeySqlTemplates = {
     sch.pksByTableOrdered.map { case (table, primaryKeyColumns) =>
       val whereClause: String = makeWhereClause(primaryKeyColumns)
       table -> makeQueryString(table, whereClause, sch)
     }
   }
 
-  def preparedInsertStatementStrings(sch: SchemaInfo): Map[Table, SqlQuery] = {
+  def insertSqlTemplates(sch: SchemaInfo): Map[Table, SqlQuery] = {
     sch.tablesByName.map { case (_, table) =>
       val cols = sch.colsByTableOrdered(table)
       val sqlString =
