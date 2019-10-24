@@ -1,17 +1,32 @@
 package trw.dbsubsetter.db
 
 private[db] object Sql {
-  def preparedQueryStatementStrings(sch: SchemaInfo): SqlTemplates = {
+  def preparedQueryStatementStrings(sch: SchemaInfo): ForeignKeySqlTemplates = {
     val allCombos = for {
       fk <- sch.fksOrdered
       table <- Set(fk.fromTable, fk.toTable)
     } yield (fk, table)
 
     allCombos.map { case (fk, table) =>
-      val whereClauseCols = if (table == fk.toTable) fk.toCols else fk.fromCols
-      val whereClause = whereClauseCols.map(col => s"${quoteFullyQualified(col)} = ?").mkString(" and ")
+      val whereClauseColumns: Seq[Column] =
+        if (table == fk.toTable) {
+          fk.toCols
+        } else {
+          fk.fromCols
+        }
+
+      val whereClause: String =
+        makeWhereClause(whereClauseColumns)
+
       (fk, table) -> makeQueryString(table, whereClause, sch)
     }.toMap
+  }
+
+  def preparedQueryByPrimaryKeyStatementStrings(sch: SchemaInfo): PrimaryKeySqlTemplates = {
+    sch.pksByTableOrdered.map { case (table, primaryKeyColumns) =>
+      val whereClause: String = makeWhereClause(primaryKeyColumns)
+      table -> makeQueryString(table, whereClause, sch)
+    }
   }
 
   def preparedInsertStatementStrings(sch: SchemaInfo): Map[Table, SqlQuery] = {
@@ -36,6 +51,12 @@ private[db] object Sql {
        | from ${quote(table)}
        | where $whereClause
        | """.stripMargin
+  }
+
+  private def makeWhereClause(columns: Seq[Column]): String = {
+      columns
+        .map(col => s"${quoteFullyQualified(col)} = ?")
+        .mkString(" and ")
   }
 
   private def quoteFullyQualified(col: Column): String = {
