@@ -48,6 +48,10 @@ private[db] class OriginDbAccessImpl(connStr: String, sch: SchemaInfo, mapper: J
     val stmt = primaryKeyTemplateStatements(table)
     stmt.clearParameters()
 
+    /*
+     * TODO fix the broken logic here. We need a statement that can support a variable number of primary key values,
+     *  but the hardcoded SQL string templates that we have currently support only a single primary key value.
+     */
     primaryKeyValues.foreach(primaryKeyValue => {
       primaryKeyValue.individualColumnValues.zipWithIndex.foreach { case (individualColumnValue, i) =>
           stmt.setObject(i + 1, individualColumnValue)
