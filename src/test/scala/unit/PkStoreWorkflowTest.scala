@@ -20,8 +20,7 @@ class PkStoreWorkflowTest extends FunSuite {
         table = table,
         name = null,
         ordinalPosition = 0,
-        jdbcType = null,
-        typeName = null
+        dataType = null
       )
 
     val schemaInfo: SchemaInfo =
@@ -31,8 +30,7 @@ class PkStoreWorkflowTest extends FunSuite {
         pksByTableOrdered = Map(table -> Vector(pkCol)),
         fksOrdered = Array.empty,
         fksFromTable = Map.empty,
-        fksToTable = Map.empty,
-        dbVendor = null
+        fksToTable = Map.empty
       )
 
     val pkStore: PrimaryKeyStore =
@@ -84,8 +82,7 @@ class PkStoreWorkflowTest extends FunSuite {
         table = table,
         name = null,
         ordinalPosition = 0,
-        jdbcType = null,
-        typeName = null
+        dataType = null
       )
 
     val schemaInfo: SchemaInfo =
@@ -95,8 +92,7 @@ class PkStoreWorkflowTest extends FunSuite {
         pksByTableOrdered = Map(table -> Vector(primaryKeyColumn)),
         fksOrdered = Array.empty,
         fksFromTable = Map.empty,
-        fksToTable = Map.empty,
-        dbVendor = null
+        fksToTable = Map.empty
       )
 
     val pkStore: PrimaryKeyStore =

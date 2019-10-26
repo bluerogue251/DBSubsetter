@@ -20,8 +20,7 @@ package object db {
     val pksByTableOrdered: Map[Table, Vector[Column]],
     val fksOrdered: Array[ForeignKey],
     val fksFromTable: Map[Table, Vector[ForeignKey]],
-    val fksToTable: Map[Table, Vector[ForeignKey]],
-    val dbVendor: DbVendor
+    val fksToTable: Map[Table, Vector[ForeignKey]]
   )
 
   class Table(

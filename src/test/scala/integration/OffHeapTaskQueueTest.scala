@@ -1,10 +1,8 @@
 package integration
 
-import java.sql.JDBCType
-
 import org.scalatest.FunSuite
 import trw.dbsubsetter.config.Config
-import trw.dbsubsetter.db.{Column, ForeignKey, SchemaInfo, Table}
+import trw.dbsubsetter.db.{Column, ColumnTypes, ForeignKey, SchemaInfo, Table}
 import trw.dbsubsetter.workflow.FetchParentTask
 import trw.dbsubsetter.workflow.offheap.OffHeapFkTaskQueueFactory
 
@@ -75,8 +73,7 @@ private[this] object OffHeapTaskQueueTest {
       table = parentTable,
       name = "id",
       ordinalPosition = 4,
-      jdbcType = JDBCType.BIGINT,
-      typeName = "whatever"
+      ColumnTypes.Long
     )
 
   private[this] val childTable: Table =
@@ -91,8 +88,7 @@ private[this] object OffHeapTaskQueueTest {
       table = childTable,
       name = "parentId",
       ordinalPosition = 7,
-      jdbcType = JDBCType.BIGINT,
-      typeName = "whatever"
+      ColumnTypes.Long
     )
 
   private val foreignKey: ForeignKey =
@@ -110,7 +106,6 @@ private[this] object OffHeapTaskQueueTest {
       pksByTableOrdered = Map.empty,
       fksOrdered = Array(foreignKey),
       fksFromTable = Map.empty,
-      fksToTable = Map.empty,
-      dbVendor = null
+      fksToTable = Map.empty
     )
 }

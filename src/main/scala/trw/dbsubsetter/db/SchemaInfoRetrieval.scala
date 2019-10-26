@@ -95,8 +95,7 @@ object SchemaInfoRetrieval {
       pksByTableOrdered,
       foreignKeysOrdered,
       fksFromTable,
-      fksToTable,
-      dbVendor
+      fksToTable
     )
   }
 }
