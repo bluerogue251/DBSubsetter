@@ -61,7 +61,7 @@ private[db] object Sql {
       .mkString(" and ")
   }
 
-  private def makeCompositeWhereClause(columns: Seq[Column], batchSize: Int): String = {
+  private def makeCompositeWhereClause(columns: Seq[Column], batchSize: Short): String = {
     (1 to batchSize)
       .map(_ => makeSimpleWhereClause(columns))
       .map(simpleWhereClause => s"($simpleWhereClause)")

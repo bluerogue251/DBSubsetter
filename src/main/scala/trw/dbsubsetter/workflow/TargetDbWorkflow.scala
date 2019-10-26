@@ -1,7 +1,8 @@
 package trw.dbsubsetter.workflow
 
 import trw.dbsubsetter.config.Config
-import trw.dbsubsetter.db.{DbAccessFactory, PrimaryKeyValue, Row, SchemaInfo}
+import trw.dbsubsetter.db.{Constants, DbAccessFactory, PrimaryKeyValue, Row, SchemaInfo}
+import trw.dbsubsetter.util.BatchingUtil
 
 
 // TODO rename this to something more along the lines of "Data Copy Workflow" (as opposed to "Key Query Workflow")
@@ -25,9 +26,14 @@ final class TargetDbWorkflow(config: Config, schemaInfo: SchemaInfo, dbAccessFac
         .map(row => pkColumnOrdinals.map(row))
         .map(value => new PrimaryKeyValue(value))
 
-    val rowsToInsert: Vector[Row] =
-      originDbAccess.getRowsFromPrimaryKeyValues(request.table, primaryKeyValues)
+    val batchedPrimaryKeyValues: Seq[Seq[PrimaryKeyValue]] =
+      BatchingUtil.batch(primaryKeyValues, Constants.dataCopyBatchSizes)
 
-    targetDbAccess.insertRows(request.table, rowsToInsert)
+    batchedPrimaryKeyValues.foreach(primaryKeyValueBatch => {
+      val rowsToInsert: Vector[Row] =
+        originDbAccess.getRowsFromPrimaryKeyValues(request.table, primaryKeyValueBatch)
+
+      targetDbAccess.insertRows(request.table, rowsToInsert)
+    })
   }
 }
