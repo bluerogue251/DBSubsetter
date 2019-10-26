@@ -9,6 +9,7 @@ case class Config(
   originDbConnectionString: String = "",
   targetDbConnectionString: String = "",
   baseQueries: Vector[((SchemaName, TableName), WhereClause, Boolean)] = Vector.empty,
+  // TODO rework these to be "Key query database connections" and "Data copy database connections"
   originDbParallelism: Int = 1,
   targetDbParallelism: Int = 1,
   cmdLineForeignKeys: List[CmdLineForeignKey] = List.empty,

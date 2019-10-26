@@ -11,10 +11,10 @@ final class OriginDbWorkflow(config: Config, schemaInfo: SchemaInfo, dbAccessFac
   def process(request: OriginDbRequest): OriginDbResult = {
     val result = request match {
       case FetchParentTask(parentTable, foreignKey, fkValueFromChild) =>
-        val rows = dbAccess.getRowsFromTemplate(foreignKey, parentTable, fkValueFromChild)
+        val rows = dbAccess.getRowsFromForeignKeyValue(foreignKey, parentTable, fkValueFromChild)
         OriginDbResult(parentTable, rows, viaTableOpt = None, fetchChildren = false)
       case FetchChildrenTask(childTable, viaParentTable, foreignKey, fkValueFromParent) =>
-        val rows = dbAccess.getRowsFromTemplate(foreignKey, childTable, fkValueFromParent)
+        val rows = dbAccess.getRowsFromForeignKeyValue(foreignKey, childTable, fkValueFromParent)
         OriginDbResult(childTable, rows, viaTableOpt = Some(viaParentTable), fetchChildren = true)
       case BaseQuery(table, sql, fetchChildren) =>
         val rows = dbAccess.getRows(sql, table)
