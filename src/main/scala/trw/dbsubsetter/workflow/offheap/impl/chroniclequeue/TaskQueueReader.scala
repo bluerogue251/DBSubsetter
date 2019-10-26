@@ -7,7 +7,7 @@ import trw.dbsubsetter.db.ColumnTypes.ColumnType
 private[offheap] final class TaskQueueReader(columnTypes: Seq[ColumnType]) {
   private[this] val valueReader: ValueIn => Any = {
     val funcs: Seq[ValueIn => Any] =
-      columnTypes.map(ChronicleQueueFunctions.resolveReadFunction)
+      columnTypes.map(ChronicleQueueFunctions.singleValueRead)
 
     if (columnTypes.size == 1) {
       in: ValueIn => funcs.head(in)

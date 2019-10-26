@@ -7,7 +7,7 @@ import trw.dbsubsetter.db.ColumnTypes.ColumnType
 private[offheap] final class TaskQueueWriter(fkOrdinal: Short, columnTypes: Seq[ColumnType]) {
   private[this] val valueWriter: (ValueOut, Any) => Unit = {
     val funcs: Seq[(ValueOut, Any) => WireOut] =
-      columnTypes.map(ChronicleQueueFunctions.resolveWriteFunction)
+      columnTypes.map(ChronicleQueueFunctions.singleValueWrite)
 
     if (columnTypes.size == 1) {
       (out, fkValue) => funcs.head(out, fkValue)

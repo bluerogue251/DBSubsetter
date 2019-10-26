@@ -9,7 +9,7 @@ import trw.dbsubsetter.db.ColumnTypes.ColumnType
 
 object ChronicleQueueFunctions {
 
-  def resolveReadFunction(dataType: ColumnType): ValueIn => Any = {
+  def singleValueRead(dataType: ColumnType): ValueIn => Any = {
     dataType match {
       case ColumnTypes.Short =>
         (in: ValueIn) => in.int16()
@@ -33,7 +33,7 @@ object ChronicleQueueFunctions {
     }
   }
 
-  def resolveWriteFunction(dataType: ColumnType): (ValueOut, Any) => WireOut = {
+  def singleValueWrite(dataType: ColumnType): (ValueOut, Any) => WireOut = {
     dataType match {
       case ColumnTypes.Short =>
         (out: ValueOut, fkVal: Any) => out.int16(fkVal.asInstanceOf[Short])
@@ -51,8 +51,8 @@ object ChronicleQueueFunctions {
         (out: ValueOut, fkVal: Any) => out.uuid(fkVal.asInstanceOf[UUID])
       case ColumnTypes.Unknown(description) =>
         val errorMessage =
-        s"Column type not yet fully supported: $description. " +
-        "Please open a GitHub issue and we will try to address it promptly."
+          s"Column type not yet fully supported: $description. " +
+            "Please open a GitHub issue and we will try to address it promptly."
         throw new RuntimeException(errorMessage)
     }
   }
