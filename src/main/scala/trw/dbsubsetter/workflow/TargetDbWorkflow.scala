@@ -32,14 +32,16 @@ final class TargetDbWorkflow(config: Config, schemaInfo: SchemaInfo, dbAccessFac
         .map(row => pkColumnOrdinals.map(row))
         .map(value => new PrimaryKeyValue(value))
 
-    val batchedPrimaryKeyValues: Seq[Seq[PrimaryKeyValue]] =
-      BatchingUtil.batch(primaryKeyValues, Constants.dataCopyBatchSizes)
+    if (primaryKeyValues.nonEmpty) {
+      val batchedPrimaryKeyValues: Seq[Seq[PrimaryKeyValue]] =
+        BatchingUtil.batch(primaryKeyValues, Constants.dataCopyBatchSizes)
 
-    batchedPrimaryKeyValues.foreach(primaryKeyValueBatch => {
-      val rowsToInsert: Vector[Row] =
-        originDbAccess.getRowsFromPrimaryKeyValues(request.table, primaryKeyValueBatch)
+      batchedPrimaryKeyValues.foreach(primaryKeyValueBatch => {
+        val rowsToInsert: Vector[Row] =
+          originDbAccess.getRowsFromPrimaryKeyValues(request.table, primaryKeyValueBatch)
 
-      targetDbAccess.insertRows(request.table, rowsToInsert)
-    })
+        targetDbAccess.insertRows(request.table, rowsToInsert)
+      })
+    }
   }
 }
