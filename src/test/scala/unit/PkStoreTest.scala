@@ -19,8 +19,7 @@ class PkStoreTest extends FunSuite {
         table = table,
         name = null,
         ordinalPosition = 0,
-        jdbcType = null,
-        typeName = null
+        dataType = null
       )
 
     val schemaInfo: SchemaInfo =
@@ -30,8 +29,7 @@ class PkStoreTest extends FunSuite {
         pksByTableOrdered = Map(table -> Vector(pkCol)),
         fksOrdered = Array.empty,
         fksFromTable = Map.empty,
-        fksToTable = Map.empty,
-        dbVendor = null
+        fksToTable = Map.empty
       )
 
     val pkStore: PrimaryKeyStore =

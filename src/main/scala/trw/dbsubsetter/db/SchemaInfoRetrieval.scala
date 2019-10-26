@@ -3,7 +3,9 @@ package trw.dbsubsetter.db
 import java.util.NoSuchElementException
 
 import trw.dbsubsetter.config.Config
+import trw.dbsubsetter.db.ColumnTypes.ColumnType
 
+// scalastyle:off
 object SchemaInfoRetrieval {
   def getSchemaInfo(config: Config): SchemaInfo = {
     val DbMetadataQueryResult(tables, columns, primaryKeys, foreignKeys, dbVendor) = DbMetadataQueries.queryDb(config)
@@ -17,7 +19,10 @@ object SchemaInfoRetrieval {
       columns
         .groupBy(c => tablesByName(c.schema, c.table))
         .map { case (table, cols) =>
-          table -> cols.zipWithIndex.map { case (c, i) => c.name -> new Column(table, c.name, i, c.jdbcType, c.typeName) }.toMap
+          table -> cols.zipWithIndex.map { case (c, i) =>
+            val columnType: ColumnType = ColumnTypes.fromRawInfo(c.jdbcType, c.typeName, dbVendor)
+            c.name -> new Column(table, c.name, i, columnType)
+          }.toMap
         }
     }
 
@@ -90,8 +95,7 @@ object SchemaInfoRetrieval {
       pksByTableOrdered,
       foreignKeysOrdered,
       fksFromTable,
-      fksToTable,
-      dbVendor
+      fksToTable
     )
   }
 }

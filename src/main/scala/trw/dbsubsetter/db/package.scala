@@ -1,6 +1,8 @@
 package trw.dbsubsetter
 
-import java.sql.{Connection, JDBCType}
+import java.sql.Connection
+
+import trw.dbsubsetter.db.ColumnTypes.ColumnType
 
 package object db {
   type SchemaName = String
@@ -18,8 +20,7 @@ package object db {
     val pksByTableOrdered: Map[Table, Vector[Column]],
     val fksOrdered: Array[ForeignKey],
     val fksFromTable: Map[Table, Vector[ForeignKey]],
-    val fksToTable: Map[Table, Vector[ForeignKey]],
-    val dbVendor: DbVendor
+    val fksToTable: Map[Table, Vector[ForeignKey]]
   )
 
   class Table(
@@ -32,8 +33,7 @@ package object db {
     val table: Table,
     val name: ColumnName,
     val ordinalPosition: Int,
-    val jdbcType: JDBCType,
-    val typeName: String
+    val dataType: ColumnType
   )
 
   class ForeignKey(
