@@ -32,12 +32,12 @@ private[offheap] final class ChronicleQueueFkTaskQueue(config: Config, schemaInf
     schemaInfo
       .fksOrdered
       .map { fk =>
-        new TaskQueueReader(fk.fromCols.map(c => (c.jdbcType, c.typeName)), schemaInfo.dbVendor)
+        new TaskQueueReader(fk.fromCols.map(_.dataType))
       }
 
   private[this] val parentReaders =
     schemaInfo.fksOrdered.map { fk =>
-      new TaskQueueReader(fk.toCols.map(c => (c.jdbcType, c.typeName)), schemaInfo.dbVendor)
+      new TaskQueueReader(fk.toCols.map(_.dataType))
     }
 
   private[this] val parentFkWriters =
@@ -80,8 +80,16 @@ private[offheap] final class ChronicleQueueFkTaskQueue(config: Config, schemaInf
 
       val fetchChildren: Boolean = in.bool()
       val fkOrdinal: Short = in.int16()
-      val reader: TaskQueueReader = if (fetchChildren) childReaders(fkOrdinal) else parentReaders(fkOrdinal)
+
+      val reader: TaskQueueReader =
+        if (fetchChildren) {
+          childReaders(fkOrdinal)
+        } else {
+          parentReaders(fkOrdinal)
+        }
+
       val fkValue: Any = reader.read(in)
+
       val foreignKey: ForeignKey = schemaInfo.fksOrdered(fkOrdinal)
 
       val task: ForeignKeyTask =

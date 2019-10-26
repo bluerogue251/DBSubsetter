@@ -4,9 +4,10 @@ import java.math.BigInteger
 import java.util.UUID
 
 import net.openhft.chronicle.wire.{ValueOut, WireOut, WriteMarshallable}
-import trw.dbsubsetter.db.{Column, ColumnTypes}
+import trw.dbsubsetter.db.ColumnTypes
+import trw.dbsubsetter.db.ColumnTypes.ColumnType
 
-private[offheap] final class TaskQueueWriter(fkOrdinal: Short, columns: Seq[Column]) {
+private[offheap] final class TaskQueueWriter(fkOrdinal: Short, columnTypes: Seq[ColumnType]) {
   def writeHandler(fetchChildren: Boolean, fkValue: Any): WriteMarshallable = {
     wireOut => {
       val out = wireOut.getValueOut
@@ -18,7 +19,7 @@ private[offheap] final class TaskQueueWriter(fkOrdinal: Short, columns: Seq[Colu
 
   private val valueWriter: (ValueOut, Any) => Unit = {
     val funcs: Seq[(ValueOut, Any) => WireOut] =
-      columns.map(_.dataType).map {
+      columnTypes.map {
         case ColumnTypes.Short =>
           (out: ValueOut, fkVal: Any) => out.int16(fkVal.asInstanceOf[Short])
         case ColumnTypes.Int =>
@@ -33,9 +34,9 @@ private[offheap] final class TaskQueueWriter(fkOrdinal: Short, columns: Seq[Colu
           (out: ValueOut, fkVal: Any) => out.bytes(fkVal.asInstanceOf[Array[Byte]])
         case ColumnTypes.Uuid =>
           (out: ValueOut, fkVal: Any) => out.uuid(fkVal.asInstanceOf[UUID])
-        case dataType =>
+        case ColumnTypes.Unknown(description) =>
           val errorMessage =
-            s"Type not yet supported for serialized storage: $dataType. " +
+            s"Column type not yet fully supported: $description. " +
             "Please open a GitHub issue and we will try to address it promptly."
           throw new RuntimeException(errorMessage)
       }
