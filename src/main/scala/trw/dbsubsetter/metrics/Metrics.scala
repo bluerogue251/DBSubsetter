@@ -114,13 +114,6 @@ object Metrics {
       .buckets(taskQueueDurationBuckets: _*)
       .register()
 
-  val PreTargetBufferSizeGauge: Gauge =
-    Gauge
-      .build()
-      .name("PreTargetBufferSize")
-      .help("n/a")
-      .register()
-
   val PreTargetBufferRowsGauge: Gauge =
     Gauge
       .build()

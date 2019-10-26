@@ -16,6 +16,7 @@ import trw.dbsubsetter.workflow.{AlreadySeen, _}
 
 import scala.concurrent.{ExecutionContext, Future}
 
+// scalastyle:off
 object Subsetting {
   def runnableGraph(config: Config, schemaInfo: SchemaInfo, baseQueries: Vector[BaseQuery], pkStore: ActorRef, dbAccessFactory: DbAccessFactory, fkTaskCreationWorkflow: FkTaskCreationWorkflow, fkTaskQueue: OffHeapFkTaskQueue)(implicit ec: ExecutionContext): RunnableGraph[Future[Done]] = RunnableGraph.fromGraph(GraphDSL.create(Sink.ignore) { implicit b => sink =>
     // Infrastructure: Timeouts, Merges, Balances, Partitions, Broadcasts

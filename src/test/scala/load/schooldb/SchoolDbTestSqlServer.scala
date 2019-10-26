@@ -17,8 +17,7 @@
 //    "--baseQuery", "school_db.Students ::: student_id % 100 = 0 ::: includeChildren",
 //    "--baseQuery", "school_db.standalone_table ::: id < 4 ::: includeChildren",
 //    "--excludeColumns", "school_db.schools(mascot)",
-//    "--excludeTable", "school_db.empty_table_2",
-//    "--preTargetBufferSize", "10000"
+//    "--excludeTable", "school_db.empty_table_2"
 //  )
 //
 //  override protected def prepareOriginDDL(): Unit = {
