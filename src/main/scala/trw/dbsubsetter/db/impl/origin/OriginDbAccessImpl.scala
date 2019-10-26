@@ -19,7 +19,7 @@ private[db] class OriginDbAccessImpl(connStr: String, sch: SchemaInfo, mapper: J
       (fk, table) -> conn.prepareStatement(sqlString)
     }
 
-  private[this] val primaryKeyTemplateStatements: Map[(Table, Int), PreparedStatement] =
+  private[this] val primaryKeyTemplateStatements: Map[(Table, Short), PreparedStatement] =
     Sql.queryByPkSqlTemplates(sch).map { case (tableWithBatchSize, sqlString) =>
       tableWithBatchSize -> conn.prepareStatement(sqlString)
     }
@@ -45,7 +45,7 @@ private[db] class OriginDbAccessImpl(connStr: String, sch: SchemaInfo, mapper: J
   }
 
   override def getRowsFromPrimaryKeyValues(table: Table, primaryKeyValues: Seq[PrimaryKeyValue]): Vector[Row] = {
-    val stmt = primaryKeyTemplateStatements((table, primaryKeyValues.size))
+    val stmt = primaryKeyTemplateStatements((table, primaryKeyValues.size.toShort))
     stmt.clearParameters()
 
     var i: Int = 1

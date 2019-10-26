@@ -11,7 +11,7 @@ package object db {
   type Row = Array[Any]
   type SqlQuery = String
   type ForeignKeySqlTemplates = Map[(ForeignKey, Table), SqlQuery]
-  type PrimaryKeySqlTemplates = Map[(Table, Int), SqlQuery]
+  type PrimaryKeySqlTemplates = Map[(Table, Short), SqlQuery]
 
   class SchemaInfo(
     val tablesByName: Map[(SchemaName, TableName), Table],
