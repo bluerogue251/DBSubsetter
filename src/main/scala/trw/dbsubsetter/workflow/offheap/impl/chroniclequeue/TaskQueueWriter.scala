@@ -41,7 +41,7 @@ private[offheap] final class TaskQueueWriter(fkOrdinal: Short, columnTypes: Seq[
           throw new RuntimeException(errorMessage)
       }
 
-    if (columns.size == 1) {
+    if (columnTypes.size == 1) {
       (out, fkValue) => funcs.head(out, fkValue)
     } else {
       (out, fkValues) => fkValues.asInstanceOf[Array[Any]].zip(funcs).foreach { case (v, f) => f(out, v) }

@@ -7,10 +7,10 @@ import trw.dbsubsetter.db.ColumnTypes.ColumnType
 private[offheap] final class TaskQueueReader(columnTypes: Seq[ColumnType]) {
 
   def read(in: ValueIn): Any = {
-    handlerFunc(in)
+    valueReader(in)
   }
 
-  private val handlerFunc: ValueIn => Any = {
+  private val valueReader: ValueIn => Any = {
     val funcs: Seq[ValueIn => Any] =
       columnTypes.map {
         case ColumnTypes.Short =>
