@@ -66,15 +66,16 @@ steps:
     commands:
       - sbt "testOnly e2e.*"
 
-  - name: load_test
-    image: bluerogue251/db-subsetter-ci:6
-    environment:
-      DB_SUBSETTER_POSTGRES_HOST: postgres
-    commands:
-      - sbt "testOnly load.schooldb.SchoolDbTestPostgreSQL"
+# TODO re-enable
+#  - name: load_test
+#    image: bluerogue251/db-subsetter-ci:6
+#    environment:
+#      DB_SUBSETTER_POSTGRES_HOST: postgres
+#    commands:
+#      - sbt "testOnly load.schooldb.SchoolDbTestPostgreSQL"
 
 ---
 kind: signature
-hmac: ae6e7c84a2acb0563d1185f0e49d752553383adf9f41318506fada5dd7769dcb
+hmac: 92cd1927f5d589cabdc63e2db0906b45a0f4d89c45414310a583564f8c4bdf94
 
 ...
