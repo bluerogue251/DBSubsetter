@@ -37,7 +37,7 @@ private[offheap] final class TaskQueueWriter(fkOrdinal: Short, typeList: Seq[(JD
       case (JDBCType.BINARY | JDBCType.VARBINARY | JDBCType.LONGVARBINARY, _, _) =>
         (out: ValueOut, fkVal: Any) => out.bytes(fkVal.asInstanceOf[Array[Byte]])
       case (_, "uuid", PostgreSQL) =>
-        (out: ValueOut, fkVal: Any) => out.text(fkVal.asInstanceOf[UUID].toString) // TODO optimize to use byte[] instead of string
+        (out: ValueOut, fkVal: Any) => out.uuid(fkVal.asInstanceOf[UUID])
       case (otherJDBCType, otherTypeName, _) =>
         throw new RuntimeException(s"Type not yet supported for foreign key. JDBC Type: $otherJDBCType. Type Name: $otherTypeName. Please open a GitHub issue for this.")
     }

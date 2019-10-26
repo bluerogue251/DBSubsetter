@@ -1,7 +1,6 @@
 package trw.dbsubsetter.workflow.offheap.impl.chroniclequeue
 
 import java.sql.JDBCType
-import java.util.UUID
 
 import net.openhft.chronicle.wire.ValueIn
 import trw.dbsubsetter.db.{DbVendor, TypeName}
@@ -30,7 +29,7 @@ private[offheap] final class TaskQueueReader(typeList: Seq[(JDBCType, TypeName)]
       case (JDBCType.BINARY | JDBCType.VARBINARY | JDBCType.LONGVARBINARY, _, _) =>
         (in: ValueIn) => in.bytes()
       case (_, "uuid", PostgreSQL) =>
-        (in: ValueIn) => UUID.fromString(in.text()) // TODO optimize to use byte[] instead of string
+        (in: ValueIn) => in.uuid()
       case (otherJDBCType, otherTypeName, _) =>
         throw new RuntimeException(s"Type not yet supported for foreign key. JDBC Type: $otherJDBCType. Type Name: $otherTypeName. Please open a GitHub issue for this.")
     }
