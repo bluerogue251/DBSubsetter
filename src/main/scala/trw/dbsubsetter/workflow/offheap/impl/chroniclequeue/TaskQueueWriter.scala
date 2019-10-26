@@ -42,10 +42,8 @@ private[offheap] final class TaskQueueWriter(fkOrdinal: Short, typeList: Seq[(JD
         throw new RuntimeException(s"Type not yet supported for foreign key. JDBC Type: $otherJDBCType. Type Name: $otherTypeName. Please open a GitHub issue for this.")
     }
 
-    val headFunc: (ValueOut, Any) => WireOut = funcs.head
-
     if (typeList.lengthCompare(1) == 0) {
-      (out, fkValue) => headFunc(out, fkValue)
+      (out, fkValue) => funcs.head(out, fkValue)
     } else {
       (out, fkValues) => fkValues.asInstanceOf[Array[Any]].zip(funcs).foreach { case (v, f) => f(out, v) }
     }
