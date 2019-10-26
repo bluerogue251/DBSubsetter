@@ -43,16 +43,15 @@ private[offheap] final class ChronicleQueueFkTaskQueue(config: Config, schemaInf
   private[this] val parentFkWriters =
     schemaInfo
       .fksOrdered
-      .zipWithIndex.map { case (fk, i) =>
-        new TaskQueueWriter(i.toShort, fk.toCols.map(c => (c.jdbcType, c.typeName)), schemaInfo.dbVendor)
+      .map { fk =>
+        new TaskQueueWriter(fk.i, fk.toCols.map(_.dataType))
       }
 
   private[this] val childFkWriters =
     schemaInfo
       .fksOrdered
-      .zipWithIndex
-      .map { case (fk, i) =>
-        new TaskQueueWriter(i.toShort, fk.fromCols.map(c => (c.jdbcType, c.typeName)), schemaInfo.dbVendor)
+      .map { fk =>
+        new TaskQueueWriter(fk.i, fk.fromCols.map(_.dataType))
       }
 
   override def enqueue(fkOrdinal: Short, fkValue: Any, fetchChildren: Boolean): Unit = {

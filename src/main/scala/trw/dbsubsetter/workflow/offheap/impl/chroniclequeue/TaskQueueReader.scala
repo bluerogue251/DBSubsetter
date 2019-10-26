@@ -34,10 +34,8 @@ private[offheap] final class TaskQueueReader(typeList: Seq[(JDBCType, TypeName)]
         throw new RuntimeException(s"Type not yet supported for foreign key. JDBC Type: $otherJDBCType. Type Name: $otherTypeName. Please open a GitHub issue for this.")
     }
 
-    val headFunc: ValueIn => Any = funcs.head
-
-    if (typeList.lengthCompare(1) == 0) {
-      in: ValueIn => headFunc(in)
+    if (typeList.size == 1) {
+      in: ValueIn => funcs.head(in)
     } else {
       in: ValueIn => funcs.toArray.map(f => f(in))
     }

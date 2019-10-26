@@ -1,48 +1,46 @@
 package trw.dbsubsetter.workflow.offheap.impl.chroniclequeue
 
 import java.math.BigInteger
-import java.sql.JDBCType
 import java.util.UUID
 
 import net.openhft.chronicle.wire.{ValueOut, WireOut, WriteMarshallable}
-import trw.dbsubsetter.db.{DbVendor, TypeName}
+import trw.dbsubsetter.db.{Column, ColumnTypes}
 
-private[offheap] final class TaskQueueWriter(fkOrdinal: Short, typeList: Seq[(JDBCType, TypeName)], dbVendor: DbVendor) {
+private[offheap] final class TaskQueueWriter(fkOrdinal: Short, columns: Seq[Column]) {
   def writeHandler(fetchChildren: Boolean, fkValue: Any): WriteMarshallable = {
     wireOut => {
       val out = wireOut.getValueOut
       out.bool(fetchChildren)
       out.int16(fkOrdinal)
-      handlerFunc(out, fkValue)
+      valueWriter(out, fkValue)
     }
   }
 
-  private val handlerFunc: (ValueOut, Any) => Unit = {
-    import DbVendor._
-    val typeListWithVendors = typeList.map { case (jdbc, name) => (jdbc, name, dbVendor) }
+  private val valueWriter: (ValueOut, Any) => Unit = {
+    val funcs: Seq[(ValueOut, Any) => WireOut] =
+      columns.map(_.dataType).map {
+        case ColumnTypes.Short =>
+          (out: ValueOut, fkVal: Any) => out.int16(fkVal.asInstanceOf[Short])
+        case ColumnTypes.Int =>
+          (out: ValueOut, fkVal: Any) => out.int32(fkVal.asInstanceOf[Int])
+        case ColumnTypes.Long =>
+          (out: ValueOut, fkVal: Any) => out.int64(fkVal.asInstanceOf[Long])
+        case ColumnTypes.BigInteger =>
+          (out: ValueOut, fkVal: Any) => out.`object`(fkVal.asInstanceOf[BigInteger])
+        case ColumnTypes.String =>
+          (out: ValueOut, fkVal: Any) => out.text(fkVal.asInstanceOf[String])
+        case ColumnTypes.ByteArray =>
+          (out: ValueOut, fkVal: Any) => out.bytes(fkVal.asInstanceOf[Array[Byte]])
+        case ColumnTypes.Uuid =>
+          (out: ValueOut, fkVal: Any) => out.uuid(fkVal.asInstanceOf[UUID])
+        case dataType =>
+          val errorMessage =
+            s"Type not yet supported for serialized storage: $dataType. " +
+            "Please open a GitHub issue and we will try to address it promptly."
+          throw new RuntimeException(errorMessage)
+      }
 
-    val funcs: Seq[(ValueOut, Any) => WireOut] = typeListWithVendors.map {
-      case (JDBCType.TINYINT | JDBCType.SMALLINT, _, MicrosoftSQLServer) =>
-        (out: ValueOut, fkVal: Any) => out.int16(fkVal.asInstanceOf[Short])
-      case (JDBCType.INTEGER, "INT UNSIGNED", MySQL) =>
-        (out: ValueOut, fkVal: Any) => out.int64(fkVal.asInstanceOf[Long])
-      case (JDBCType.TINYINT | JDBCType.SMALLINT | JDBCType.INTEGER, _, _) =>
-        (out: ValueOut, fkVal: Any) => out.int32(fkVal.asInstanceOf[Int])
-      case (JDBCType.BIGINT, "BIGINT UNSIGNED", MySQL) =>
-        (out: ValueOut, fkVal: Any) => out.`object`(fkVal.asInstanceOf[BigInteger])
-      case (JDBCType.BIGINT, _, _) =>
-        (out: ValueOut, fkVal: Any) => out.int64(fkVal.asInstanceOf[Long])
-      case (JDBCType.CHAR | JDBCType.VARCHAR | JDBCType.LONGVARCHAR | JDBCType.NCHAR, _, _) =>
-        (out: ValueOut, fkVal: Any) => out.text(fkVal.asInstanceOf[String])
-      case (JDBCType.BINARY | JDBCType.VARBINARY | JDBCType.LONGVARBINARY, _, _) =>
-        (out: ValueOut, fkVal: Any) => out.bytes(fkVal.asInstanceOf[Array[Byte]])
-      case (_, "uuid", PostgreSQL) =>
-        (out: ValueOut, fkVal: Any) => out.uuid(fkVal.asInstanceOf[UUID])
-      case (otherJDBCType, otherTypeName, _) =>
-        throw new RuntimeException(s"Type not yet supported for foreign key. JDBC Type: $otherJDBCType. Type Name: $otherTypeName. Please open a GitHub issue for this.")
-    }
-
-    if (typeList.lengthCompare(1) == 0) {
+    if (columns.size == 1) {
       (out, fkValue) => funcs.head(out, fkValue)
     } else {
       (out, fkValues) => fkValues.asInstanceOf[Array[Any]].zip(funcs).foreach { case (v, f) => f(out, v) }
