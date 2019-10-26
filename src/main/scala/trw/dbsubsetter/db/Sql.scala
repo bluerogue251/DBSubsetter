@@ -16,16 +16,18 @@ private[db] object Sql {
         }
 
       val whereClause: String =
-        makeWhereClause(whereClauseColumns)
+        makeSimpleWhereClause(whereClauseColumns)
 
       (fk, table) -> makeQueryString(table, whereClause, sch)
     }.toMap
   }
 
   def queryByPkSqlTemplates(sch: SchemaInfo): PrimaryKeySqlTemplates = {
-    sch.pksByTableOrdered.map { case (table, primaryKeyColumns) =>
-      val whereClause: String = makeWhereClause(primaryKeyColumns)
-      table -> makeQueryString(table, whereClause, sch)
+    sch.pksByTableOrdered.flatMap { case (table, primaryKeyColumns) =>
+      Constants.dataCopyBatchSizes.map(batchSize => {
+        val whereClause: String = makeCompositeWhereClause(primaryKeyColumns, batchSize)
+        (table, batchSize) -> makeQueryString(table, whereClause, sch)
+      })
     }
   }
 
@@ -53,10 +55,17 @@ private[db] object Sql {
        | """.stripMargin
   }
 
-  private def makeWhereClause(columns: Seq[Column]): String = {
-      columns
-        .map(col => s"${quoteFullyQualified(col)} = ?")
-        .mkString(" and ")
+  private def makeSimpleWhereClause(columns: Seq[Column]): String = {
+    columns
+      .map(col => s"${quoteFullyQualified(col)} = ?")
+      .mkString(" and ")
+  }
+
+  private def makeCompositeWhereClause(columns: Seq[Column], batchSize: Int): String = {
+    (1 to batchSize)
+      .map(_ => makeSimpleWhereClause(columns))
+      .map(simpleWhereClause => s"($simpleWhereClause)")
+      .mkString(" or ")
   }
 
   private def quoteFullyQualified(col: Column): String = {

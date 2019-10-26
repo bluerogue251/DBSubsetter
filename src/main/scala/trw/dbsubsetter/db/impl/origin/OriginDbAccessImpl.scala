@@ -19,9 +19,9 @@ private[db] class OriginDbAccessImpl(connStr: String, sch: SchemaInfo, mapper: J
       (fk, table) -> conn.prepareStatement(sqlString)
     }
 
-  private[this] val primaryKeyTemplateStatements: Map[Table, PreparedStatement] =
-    Sql.queryByPkSqlTemplates(sch).map { case (table, sqlString) =>
-      table -> conn.prepareStatement(sqlString)
+  private[this] val primaryKeyTemplateStatements: Map[(Table, Int), PreparedStatement] =
+    Sql.queryByPkSqlTemplates(sch).map { case (tableWithBatchSize, sqlString) =>
+      tableWithBatchSize -> conn.prepareStatement(sqlString)
     }
 
   override def getRowsFromForeignKeyValue(fk: ForeignKey, table: Table, fkValue: Any): Vector[Row] = {
@@ -45,7 +45,7 @@ private[db] class OriginDbAccessImpl(connStr: String, sch: SchemaInfo, mapper: J
   }
 
   override def getRowsFromPrimaryKeyValues(table: Table, primaryKeyValues: Seq[PrimaryKeyValue]): Vector[Row] = {
-    val stmt = primaryKeyTemplateStatements(table)
+    val stmt = primaryKeyTemplateStatements((table, primaryKeyValues.size))
     stmt.clearParameters()
 
     /*
