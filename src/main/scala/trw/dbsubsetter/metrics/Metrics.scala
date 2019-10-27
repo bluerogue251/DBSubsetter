@@ -19,7 +19,7 @@ object Metrics {
     .1, .25, .5, .75
   )
 
-  val taskQueueDurationBuckets: Array[Double] = Array(
+  val offHeapQueueDurationBuckets: Array[Double] = Array(
     .0000001, .00000025, .0000005, .00000075,
     .000001, .0000025, .000005, .0000075,
     .00001, .000025, .00005, .000075,
@@ -66,7 +66,6 @@ object Metrics {
       .help("n/a")
       .register()
 
-
   val TargetDbDurationPerStatement: Histogram =
     Histogram
       .build()
@@ -103,7 +102,7 @@ object Metrics {
       .build()
       .name("TaskEnqueueDuration")
       .help("n/a")
-      .buckets(taskQueueDurationBuckets: _*)
+      .buckets(offHeapQueueDurationBuckets: _*)
       .register()
 
   val TaskDequeueDuration: Histogram =
@@ -111,14 +110,30 @@ object Metrics {
       .build()
       .name("TaskDequeueDuration")
       .help("n/a")
-      .buckets(taskQueueDurationBuckets: _*)
+      .buckets(offHeapQueueDurationBuckets: _*)
       .register()
 
-  val PreTargetBufferRowsGauge: Gauge =
+  val PendingDataCopyRows: Gauge =
     Gauge
       .build()
-      .name("PreTargetBufferRows")
+      .name("PendingDataCopyRows")
       .help("n/a")
+      .register()
+
+  val DataCopyTaskEnqueueDuration: Histogram =
+    Histogram
+      .build()
+      .name("DataCopyTaskEnqueueDuration")
+      .help("n/a")
+      .buckets(offHeapQueueDurationBuckets: _*)
+      .register()
+
+  val DataCopyTaskDequeueDuration: Histogram =
+    Histogram
+      .build()
+      .name("DataCopyTaskDequeueDuration")
+      .help("n/a")
+      .buckets(offHeapQueueDurationBuckets: _*)
       .register()
 
   val DuplicateFkTasksDiscarded: Counter =
