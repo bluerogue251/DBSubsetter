@@ -6,7 +6,7 @@ import trw.dbsubsetter.db.SchemaInfo
 
 
 object DataCopyQueueFactory {
-  def builDataCopyQueue(config: Config, schemaInfo: SchemaInfo): DataCopyQueue = {
+  def buildDataCopyQueue(config: Config, schemaInfo: SchemaInfo): DataCopyQueue = {
     var dataCopyQueue: DataCopyQueue =
       ???
 

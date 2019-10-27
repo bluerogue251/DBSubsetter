@@ -1,30 +1,19 @@
 package trw.dbsubsetter.datacopyqueue.impl
 
-import java.nio.file.Files
 import java.util.function.BiConsumer
 
-import net.openhft.chronicle.queue.RollCycles
-import net.openhft.chronicle.queue.impl.single.{SingleChronicleQueue, SingleChronicleQueueBuilder}
+import net.openhft.chronicle.queue.impl.single.SingleChronicleQueue
 import net.openhft.chronicle.wire.{ValueIn, ValueOut, WireOut}
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.ColumnTypes.ColumnType
 import trw.dbsubsetter.db.PrimaryKeyValue
-import trw.dbsubsetter.workflow.offheap.impl.chroniclequeue.ChronicleQueueFunctions
+import trw.dbsubsetter.workflow.offheap.impl.chroniclequeue.{ChronicleQueueFactory, ChronicleQueueFunctions}
 
 
 private[offheap] final class ChronicleQueueAccess(config: Config, columnTypes: Seq[ColumnType]) {
 
-  private[this] val storageDir =
-    config.taskQueueDirOpt match {
-      case Some(dir) => dir.toPath
-      case None => Files.createTempDirectory("DBSubsetter-")
-    }
-
   private[this] val queue: SingleChronicleQueue =
-    SingleChronicleQueueBuilder
-      .binary(storageDir)
-      .rollCycle(RollCycles.MINUTELY)
-      .build()
+    ChronicleQueueFactory.createQueue(config)
 
   private[this] val writer: BiConsumer[ValueOut, PrimaryKeyValue] = {
     val singleColumnWriters: Seq[(ValueOut, Any) => WireOut] =
@@ -44,8 +33,7 @@ private[offheap] final class ChronicleQueueAccess(config: Config, columnTypes: S
       columnTypes.map(ChronicleQueueFunctions.singleValueRead)
 
     valueIn => {
-      val individualColumnValues =
-        singleColumnReaders.map(singleColumnReader => singleColumnReader.apply(valueIn))
+      val individualColumnValues = singleColumnReaders.map(_.apply(valueIn))
       new PrimaryKeyValue(individualColumnValues)
     }
   }

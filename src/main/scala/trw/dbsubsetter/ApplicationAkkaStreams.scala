@@ -24,7 +24,7 @@ object ApplicationAkkaStreams {
     val dbAccessFactory: DbAccessFactory = new DbAccessFactory(config, schemaInfo)
     val fkTaskCreationWorkflow: FkTaskCreationWorkflow = new FkTaskCreationWorkflow(schemaInfo)
     val fkTaskQueue: OffHeapFkTaskQueue = OffHeapFkTaskQueueFactory.buildOffHeapFkTaskQueue(config, schemaInfo)
-    val dataCopyQueue: DataCopyQueue = DataCopyQueueFactory.builDataCopyQueue(config, schemaInfo)
+    val dataCopyQueue: DataCopyQueue = DataCopyQueueFactory.buildDataCopyQueue(config, schemaInfo)
 
     if (config.exposeMetrics) {
       Metrics.PendingTasksGauge.inc(config.baseQueries.size)
