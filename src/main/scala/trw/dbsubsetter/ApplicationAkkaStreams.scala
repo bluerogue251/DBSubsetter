@@ -32,7 +32,7 @@ object ApplicationAkkaStreams {
 
     val subsettingFuture: Future[Done] =
       Subsetting
-        .runnableGraph(config, schemaInfo, baseQueries, pkStore, dbAccessFactory, fkTaskCreationWorkflow, fkTaskQueue)
+        .runnableGraph(config, schemaInfo, baseQueries, pkStore, dbAccessFactory, fkTaskCreationWorkflow, fkTaskQueue, dataCopyQueue)
         .run()
         .map { success =>
           dbAccessFactory.closeAllConnections()
