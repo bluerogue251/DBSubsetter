@@ -37,7 +37,7 @@ object Subsetting {
     val balanceTargetDb = b.add(Balance[DataCopyTask](config.targetDbParallelism, waitForAllDownstreams = true))
     val mergeTargetDbResults = b.add(Merge[Unit](config.targetDbParallelism))
     val fkTaskBufferFlow = b.add(new FkTaskBufferFlow(fkTaskQueue).async)
-    val mergeToOustandingTaskCounter = b.add(Merge[NewTasks](2))
+    val mergeToOutstandingTaskCounter = b.add(Merge[NewTasks](2))
 
     // Start everything off
     Source(baseQueries) ~>
@@ -60,9 +60,9 @@ object Subsetting {
 
     broadcastPksAdded ~>
       FkTaskCreation.flow(fkTaskCreationWorkflow) ~>
-      mergeToOustandingTaskCounter
+      mergeToOutstandingTaskCounter
 
-    mergeToOustandingTaskCounter ~>
+    mergeToOutstandingTaskCounter ~>
       OutstandingTaskCounter.counter(baseQueries.size) ~>
       fkTaskBufferFlow
 
@@ -91,7 +91,7 @@ object Subsetting {
 
     broadcastPkExistResult ~>
       Flow[PkQueryResult].collect { case AlreadySeen => EmptyNewTasks } ~>
-      mergeToOustandingTaskCounter
+      mergeToOutstandingTaskCounter
 
     mergeTargetDbResults.out ~> sink
 
