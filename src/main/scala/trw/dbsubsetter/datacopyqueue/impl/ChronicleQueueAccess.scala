@@ -10,7 +10,7 @@ import trw.dbsubsetter.db.PrimaryKeyValue
 import trw.dbsubsetter.workflow.offheap.impl.chroniclequeue.{ChronicleQueueFactory, ChronicleQueueFunctions}
 
 
-private[offheap] final class ChronicleQueueAccess(config: Config, columnTypes: Seq[ColumnType]) {
+private[impl] final class ChronicleQueueAccess(config: Config, columnTypes: Seq[ColumnType]) {
 
   private[this] val queue: SingleChronicleQueue =
     ChronicleQueueFactory.createQueue(config)
