@@ -8,6 +8,7 @@ import trw.dbsubsetter.workflow._
 // Adapted from https://github.com/torodb/akka-chronicle-queue
 // TODO refactor to enable code sharing with FkTaskBufferFlow
 // How does this flow know not to complete yet when upstream is complete but there are still remaining values in the buffer?
+// Refer to akka.stream.impl.fusing.Buffer for onUpstreamFinish logic...
 private[akkastreams] final class DataCopyBufferFlow(dataCopyQueue: DataCopyQueue) extends GraphStage[FlowShape[PksAdded, DataCopyTask]] {
 
   private[this] val in: Inlet[PksAdded] = Inlet.create[PksAdded]("DataCopyBufferFlow.in")
@@ -30,10 +31,21 @@ private[akkastreams] final class DataCopyBufferFlow(dataCopyQueue: DataCopyQueue
 
         pull(in)
       }
+
+      override def onUpstreamFinish(): Unit = {
+        if (dataCopyQueue.isEmpty()) {
+          completeStage()
+        }
+      }
     })
 
     setHandler(out, new OutHandler {
-      override def onPull(): Unit = doPull()
+      override def onPull(): Unit = {
+        doPull()
+        if (isClosed(in) && dataCopyQueue.isEmpty()) {
+          completeStage()
+        }
+      }
     })
 
     override def preStart(): Unit = {

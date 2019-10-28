@@ -24,4 +24,8 @@ private[datacopyqueue] final class DataCopyQueueInstrumented(delegatee: DataCopy
     optionalResult.foreach(dataCopyTask => pendingTaskCount.dec(dataCopyTask.pkValues.size))
     optionalResult
   }
+
+  override def isEmpty(): Boolean = {
+    delegatee.isEmpty()
+  }
 }

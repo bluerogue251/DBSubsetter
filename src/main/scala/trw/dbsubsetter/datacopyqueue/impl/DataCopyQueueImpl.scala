@@ -90,6 +90,17 @@ private[datacopyqueue] final class DataCopyQueueImpl(config: Config, schemaInfo:
       lock.unlock()
     }
   }
+
+  override def isEmpty(): Boolean = {
+    var result: Boolean = false
+    try {
+      lock.lock()
+      result = tablesWithQueuedValues.isEmpty
+    } finally {
+      lock.unlock()
+    }
+    result
+  }
 }
 
 object DataCopyQueueImpl {
