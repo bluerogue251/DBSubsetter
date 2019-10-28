@@ -1,5 +1,7 @@
 package trw.dbsubsetter.datacopyqueue.impl
 
+import java.util.concurrent.locks.{Lock, ReentrantLock}
+
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.datacopyqueue.DataCopyQueue
 import trw.dbsubsetter.db.ColumnTypes.ColumnType
@@ -13,6 +15,8 @@ import scala.collection.mutable
   * WARNING: this class is not threadsafe
   */
 private[datacopyqueue] final class DataCopyQueueImpl(config: Config, schemaInfo: SchemaInfo) extends DataCopyQueue {
+
+  private[this] val lock: Lock = new ReentrantLock()
 
   private[this] val tablesToQueuedValueCounts: mutable.Map[Table, Long] = {
     val elems: Seq[(Table, Long)] =
@@ -39,39 +43,51 @@ private[datacopyqueue] final class DataCopyQueueImpl(config: Config, schemaInfo:
     DataCopyQueueImpl.buildPkValueExtractionFunctions(schemaInfo)
 
   override def enqueue(pksAdded: PksAdded): Unit = {
-    val rows: Vector[Row] = pksAdded.rowsNeedingParentTasks
+    try {
+      lock.lock()
 
-    if (rows.nonEmpty) {
-      val table: Table = pksAdded.table
-      val chronicleQueueAccess: ChronicleQueueAccess = tablesToChronicleQueues(table)
-      val extractPkValue = pkValueExtractionFunctions(table)
-      val pkValues: Seq[PrimaryKeyValue] = rows.map(extractPkValue)
+      val rows: Vector[Row] = pksAdded.rowsNeedingParentTasks
 
-      chronicleQueueAccess.write(pkValues)
+      if (rows.nonEmpty) {
+        val table: Table = pksAdded.table
+        val chronicleQueueAccess: ChronicleQueueAccess = tablesToChronicleQueues(table)
+        val extractPkValue = pkValueExtractionFunctions(table)
+        val pkValues: Seq[PrimaryKeyValue] = rows.map(extractPkValue)
 
-      val previousCount: Long = tablesToQueuedValueCounts(table)
-      tablesToQueuedValueCounts.update(table, previousCount + pkValues.size)
-      tablesWithQueuedValues.add(table)
+        chronicleQueueAccess.write(pkValues)
+
+        val previousCount: Long = tablesToQueuedValueCounts(table)
+        tablesToQueuedValueCounts.update(table, previousCount + pkValues.size)
+        tablesWithQueuedValues.add(table)
+      }
+    } finally {
+      lock.unlock()
     }
   }
 
   override def dequeue(): Option[DataCopyTask] = {
-    if (tablesWithQueuedValues.isEmpty) {
-      None
-    } else {
-      val table: Table = tablesWithQueuedValues.head
+    try {
+      lock.lock()
 
-      val chronicleQueueAccess: ChronicleQueueAccess = tablesToChronicleQueues(table)
-      val primaryKeyValues: Seq[PrimaryKeyValue] = chronicleQueueAccess.read(1)
-      val dataCopyTask = new DataCopyTask(table, primaryKeyValues)
+      if (tablesWithQueuedValues.isEmpty) {
+        None
+      } else {
+        val table: Table = tablesWithQueuedValues.head
 
-      val previousCount: Long = tablesToQueuedValueCounts(table)
-      tablesToQueuedValueCounts.update(table, previousCount - 1)
-      if (previousCount == 1L) {
-        tablesWithQueuedValues.remove(table)
+        val chronicleQueueAccess: ChronicleQueueAccess = tablesToChronicleQueues(table)
+        val primaryKeyValues: Seq[PrimaryKeyValue] = chronicleQueueAccess.read(1)
+        val dataCopyTask = new DataCopyTask(table, primaryKeyValues)
+
+        val previousCount: Long = tablesToQueuedValueCounts(table)
+        tablesToQueuedValueCounts.update(table, previousCount - 1)
+        if (previousCount == 1L) {
+          tablesWithQueuedValues.remove(table)
+        }
+
+        Some(dataCopyTask)
       }
-
-      Some(dataCopyTask)
+    } finally {
+      lock.unlock()
     }
   }
 }
