@@ -9,6 +9,7 @@ import trw.dbsubsetter.workflow._
 // TODO refactor to enable code sharing with FkTaskBufferFlow
 // How does this flow know not to complete yet when upstream is complete but there are still remaining values in the buffer?
 // Refer to akka.stream.impl.fusing.Buffer for onUpstreamFinish logic...
+// Possibly helpful docs: https://doc.akka.io/docs/akka/current/stream/stream-customize.html
 private[akkastreams] final class DataCopyBufferFlow(dataCopyQueue: DataCopyQueue) extends GraphStage[FlowShape[PksAdded, DataCopyTask]] {
 
   private[this] val in: Inlet[PksAdded] = Inlet.create[PksAdded]("DataCopyBufferFlow.in")
