@@ -67,7 +67,6 @@ object Subsetting {
       fkTaskBufferFlow
 
     broadcastPksAdded ~>
-      Flow[PksAdded].filter(_.rowsNeedingParentTasks.nonEmpty) ~>
       dataCopyBufferFlow ~>
       balanceTargetDb
 

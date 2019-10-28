@@ -41,7 +41,6 @@ private[datacopyqueue] final class DataCopyQueueImpl(config: Config, schemaInfo:
   override def enqueue(pksAdded: PksAdded): Unit = {
     val rows: Vector[Row] = pksAdded.rowsNeedingParentTasks
 
-    // TODO centralize this nonEmpty check somewhere else
     if (rows.nonEmpty) {
       val table: Table = pksAdded.table
       val chronicleQueueAccess: ChronicleQueueAccess = tablesToChronicleQueues(table)
