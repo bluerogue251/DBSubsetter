@@ -53,7 +53,7 @@ private[impl] final class ChronicleQueueAccess(config: Config, columnTypes: Seq[
     *          read, and throws an exception if that is not the case.
     */
   def read(n: Short): Seq[PrimaryKeyValue] = {
-    (0 to n).map { _ =>
+    (1 to n).map { _ =>
       var optionalValue: Option[PrimaryKeyValue] = None
 
       tailer.readDocument { r =>
