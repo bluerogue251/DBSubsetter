@@ -1,9 +1,9 @@
 package trw.dbsubsetter.datacopyqueue
 
-import trw.dbsubsetter.workflow.PksAdded
+import trw.dbsubsetter.workflow.{DataCopyTask, PksAdded}
 
 
 trait DataCopyQueue {
   def enqueue(pksAdded: PksAdded): Unit
-  def dequeue(): Option[PksAdded]
+  def dequeue(): Option[DataCopyTask]
 }

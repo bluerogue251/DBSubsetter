@@ -3,8 +3,8 @@ package trw.dbsubsetter.datacopyqueue.impl
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.datacopyqueue.DataCopyQueue
 import trw.dbsubsetter.db.ColumnTypes.ColumnType
-import trw.dbsubsetter.db.{Row, SchemaInfo, Table}
-import trw.dbsubsetter.workflow.PksAdded
+import trw.dbsubsetter.db.{PrimaryKeyValue, Row, SchemaInfo, Table}
+import trw.dbsubsetter.workflow.{DataCopyTask, PksAdded}
 
 import scala.collection.mutable
 
@@ -35,31 +35,58 @@ private[datacopyqueue] final class DataCopyQueueImpl(config: Config, schemaInfo:
       }
   }
 
+  private[this] val pkValueExtractionFunctions: Map[Table, Row => PrimaryKeyValue] =
+    DataCopyQueueImpl.buildPkValueExtractionFunctions(schemaInfo)
+
   override def enqueue(pksAdded: PksAdded): Unit = {
-    val pkValues: Vector[Row] = pksAdded.rowsNeedingParentTasks
+    val rows: Vector[Row] = pksAdded.rowsNeedingParentTasks
 
     // TODO centralize this nonEmpty check somewhere else
-    if (pkValues.nonEmpty) {
+    if (rows.nonEmpty) {
       val table: Table = pksAdded.table
       val chronicleQueueAccess: ChronicleQueueAccess = tablesToChronicleQueues(table)
-      chronicleQueueAccess.write()
+      val extractPkValue = pkValueExtractionFunctions(table)
+      val pkValues: Seq[PrimaryKeyValue] = rows.map(extractPkValue)
+
+      chronicleQueueAccess.write(pkValues)
 
       val previousCount: Long = tablesToQueuedValueCounts(table)
       tablesToQueuedValueCounts.update(table, previousCount + pkValues.size)
       tablesWithQueuedValues.add(table)
     }
-
-    val runnable: Runnable = () => delegatee.enqueue(pksAdded)
-    taskEnqueueDuration.time(runnable)
-    pendingTaskCount.inc(pksAdded.rowsNeedingParentTasks.length)
   }
 
-  override def dequeue(): Option[PksAdded] = {
+  override def dequeue(): Option[DataCopyTask] = {
     if (tablesWithQueuedValues.isEmpty) {
       None
     } else {
       val table: Table = tablesWithQueuedValues.head
 
+      val chronicleQueueAccess: ChronicleQueueAccess = tablesToChronicleQueues(table)
+      val primaryKeyValues: Seq[PrimaryKeyValue] = chronicleQueueAccess.read(1)
+      val dataCopyTask = new DataCopyTask(table, primaryKeyValues)
+
+      val previousCount: Long = tablesToQueuedValueCounts(table)
+      tablesToQueuedValueCounts.update(table, previousCount - 1)
+      if (previousCount == 1L) {
+        tablesWithQueuedValues.remove(table)
+      }
+
+      Some(dataCopyTask)
+    }
+  }
+}
+
+object DataCopyQueueImpl {
+  // TODO consider deduplication with similar logic in PkStoreWorkflow
+  private def buildPkValueExtractionFunctions(schemaInfo: SchemaInfo): Map[Table, Row => PrimaryKeyValue] = {
+    schemaInfo.pksByTableOrdered.map { case (table, pkColumns) =>
+      val primaryKeyColumnOrdinals: Vector[Int] = pkColumns.map(_.ordinalPosition)
+      val primaryKeyExtractionFunction: Row => PrimaryKeyValue = row => {
+        val individualColumnValues: Seq[Any] = primaryKeyColumnOrdinals.map(row)
+        new PrimaryKeyValue(individualColumnValues)
+      }
+      table -> primaryKeyExtractionFunction
     }
   }
 }

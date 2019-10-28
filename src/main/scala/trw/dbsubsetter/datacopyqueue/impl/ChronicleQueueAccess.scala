@@ -33,7 +33,7 @@ private[impl] final class ChronicleQueueAccess(config: Config, columnTypes: Seq[
       columnTypes.map(ChronicleQueueFunctions.singleValueRead)
 
     valueIn => {
-      val individualColumnValues = singleColumnReaders.map(_.apply(valueIn))
+      val individualColumnValues: Seq[Any] = singleColumnReaders.map(_.apply(valueIn))
       new PrimaryKeyValue(individualColumnValues)
     }
   }
