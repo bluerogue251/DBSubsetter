@@ -54,6 +54,8 @@ object Subsetting {
       balanceTargetDb ~> TargetDb.insert(dbAccessFactory).async ~> mergeTargetDbResults
     }
 
+    // TODO try to understand if it's really necessary for pkStore to be in an actor... given that we should
+    //   only be writing to it from one place, are we really worried about threadsafety?
     mergeOriginDbResults ~>
       Flow[OriginDbResult].mapAsyncUnordered(10)(dbResult => (pkStore ? dbResult).mapTo[PksAdded]) ~>
       broadcastPksAdded
@@ -66,8 +68,7 @@ object Subsetting {
       OutstandingTaskCounter.counter(baseQueries.size) ~>
       fkTaskBufferFlow
 
-    // Are there race conditions with balanceTargetDb calling dataCopyBufferFlow multiple times concurrently?
-    // Also, consider adding a small, in-memory buffer so that targetDB will never be waiting on chronicle queue?
+    // Do we need a small in-memory buffer so the many targetDbs never wait on the single chronicle queue?
     broadcastPksAdded ~>
       dataCopyBufferFlow ~>
       balanceTargetDb

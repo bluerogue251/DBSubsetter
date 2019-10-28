@@ -4,6 +4,9 @@ import akka.NotUsed
 import akka.stream.scaladsl.Flow
 import trw.dbsubsetter.workflow.NewTasks
 
+// TODO consider whether this has anything to do with it working previously with the FkTaskBuffer...
+//   even without the custom onUpstreamFinish thing going on...
+//   Or, try to figure out what this is for.
 private[akkastreams] object OutstandingTaskCounter {
   def counter(numBaseQueries: Int): Flow[NewTasks, NewTasks, NotUsed] = {
     val counterFlow = Flow[NewTasks].statefulMapConcat { () =>
