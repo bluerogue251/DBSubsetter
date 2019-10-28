@@ -1,40 +1,22 @@
 package trw.dbsubsetter.workflow
 
-import trw.dbsubsetter.config.Config
-import trw.dbsubsetter.db.{Constants, DbAccessFactory, PrimaryKeyValue, Row, SchemaInfo, Table}
+import trw.dbsubsetter.db.{Constants, DbAccessFactory, PrimaryKeyValue, Row}
 import trw.dbsubsetter.util.BatchingUtil
 
 
 // TODO rename this to something more along the lines of "Data Copy Workflow" (as opposed to "Key Query Workflow")
-final class TargetDbWorkflow(config: Config, schemaInfo: SchemaInfo, dbAccessFactory: DbAccessFactory) {
+final class TargetDbWorkflow(dbAccessFactory: DbAccessFactory) {
 
   private[this] val originDbAccess = dbAccessFactory.buildOriginDbAccess()
 
   private[this] val targetDbAccess = dbAccessFactory.buildTargetDbAccess()
 
-  private[this] val pkOrdinalsByTable: Map[Table, Seq[Int]] =
-    schemaInfo
-      .pksByTableOrdered
-      .map { case (table, pkColumns) =>
-        table -> pkColumns.map(_.ordinalPosition)
-      }
+  def process(request: DataCopyTask): Unit = {
+    val pkValues: Seq[PrimaryKeyValue] = request.pkValues
 
-  def process(request: PksAdded): Unit = {
-    val pkColumnOrdinals: Seq[Int] = pkOrdinalsByTable(request.table)
-
-    /*
-     * The fact that a row still needs parent tasks means this is the first time we've seen it. By extension, that
-     * means it has not yet been added to the target db
-     */
-    val primaryKeyValues: Vector[PrimaryKeyValue] =
-      request
-        .rowsNeedingParentTasks
-        .map(row => pkColumnOrdinals.map(row))
-        .map(value => new PrimaryKeyValue(value))
-
-    if (primaryKeyValues.nonEmpty) {
+    if (pkValues.nonEmpty) {
       val batchedPrimaryKeyValues: Seq[Seq[PrimaryKeyValue]] =
-        BatchingUtil.batch(primaryKeyValues, Constants.dataCopyBatchSizes)
+        BatchingUtil.batch(pkValues, Constants.dataCopyBatchSizes)
 
       batchedPrimaryKeyValues.foreach(primaryKeyValueBatch => {
         val rowsToInsert: Vector[Row] =

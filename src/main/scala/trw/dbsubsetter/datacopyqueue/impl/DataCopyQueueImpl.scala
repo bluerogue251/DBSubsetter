@@ -78,7 +78,8 @@ private[datacopyqueue] final class DataCopyQueueImpl(config: Config, schemaInfo:
 }
 
 object DataCopyQueueImpl {
-  // TODO consider deduplication with similar logic in PkStoreWorkflow
+
+  // TODO consider deduplication with similar logic in PkStoreWorkflow and ApplicationSingleThreaded
   private def buildPkValueExtractionFunctions(schemaInfo: SchemaInfo): Map[Table, Row => PrimaryKeyValue] = {
     schemaInfo.pksByTableOrdered.map { case (table, pkColumns) =>
       val primaryKeyColumnOrdinals: Vector[Int] = pkColumns.map(_.ordinalPosition)

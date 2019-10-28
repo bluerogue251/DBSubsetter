@@ -6,13 +6,13 @@ import trw.dbsubsetter.datacopyqueue.DataCopyQueue
 import trw.dbsubsetter.workflow._
 
 // Adapted from https://github.com/torodb/akka-chronicle-queue
-private[akkastreams] final class DataCopyBufferFlow(dataCopyQueue: DataCopyQueue) extends GraphStage[FlowShape[PksAdded, PksAdded]] {
+private[akkastreams] final class DataCopyBufferFlow(dataCopyQueue: DataCopyQueue) extends GraphStage[FlowShape[PksAdded, DataCopyTask]] {
 
   private[this] val in: Inlet[PksAdded] = Inlet.create[PksAdded]("DataCopyBufferFlow.in")
 
-  private[this] val out: Outlet[PksAdded] = Outlet.create[PksAdded]("DataCopyBufferFlow.out")
+  private[this] val out: Outlet[DataCopyTask] = Outlet.create[DataCopyTask]("DataCopyBufferFlow.out")
 
-  override val shape: FlowShape[PksAdded, PksAdded] = FlowShape.of(in, out)
+  override val shape: FlowShape[PksAdded, DataCopyTask] = FlowShape.of(in, out)
 
   override def createLogic(inheritedAttributes: Attributes): GraphStageLogic = new GraphStageLogic(shape) {
 
@@ -39,8 +39,8 @@ private[akkastreams] final class DataCopyBufferFlow(dataCopyQueue: DataCopyQueue
     }
 
     private[this] def doPull(): Unit = {
-      val optionalPksAdded: Option[PksAdded] = dataCopyQueue.dequeue()
-      optionalPksAdded.foreach(pksAdded => push[PksAdded](out, pksAdded))
+      val optionalTask: Option[DataCopyTask] = dataCopyQueue.dequeue()
+      optionalTask.foreach(dataCopyTask => push[DataCopyTask](out, dataCopyTask))
     }
   }
 }

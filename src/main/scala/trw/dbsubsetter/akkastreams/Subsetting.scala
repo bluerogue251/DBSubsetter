@@ -34,7 +34,7 @@ object Subsetting {
     val broadcastPkExistResult = b.add(Broadcast[PkQueryResult](2))
     val broadcastPksAdded = b.add(Broadcast[PksAdded](2))
     val dataCopyBufferFlow = b.add(new DataCopyBufferFlow(dataCopyQueue).async)
-    val balanceTargetDb = b.add(Balance[PksAdded](config.targetDbParallelism, waitForAllDownstreams = true))
+    val balanceTargetDb = b.add(Balance[DataCopyTask](config.targetDbParallelism, waitForAllDownstreams = true))
     val mergeTargetDbResults = b.add(Merge[Unit](config.targetDbParallelism))
     val fkTaskBufferFlow = b.add(new FkTaskBufferFlow(fkTaskQueue).async)
     val mergeToOustandingTaskCounter = b.add(Merge[NewTasks](2))
@@ -51,7 +51,7 @@ object Subsetting {
 
     // Process Target DB Inserts in Parallel
     for (_ <- 0 until config.targetDbParallelism) {
-      balanceTargetDb ~> TargetDb.insert(config, schemaInfo, dbAccessFactory).async ~> mergeTargetDbResults
+      balanceTargetDb ~> TargetDb.insert(dbAccessFactory).async ~> mergeTargetDbResults
     }
 
     mergeOriginDbResults ~>

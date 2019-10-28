@@ -16,7 +16,7 @@ package object workflow {
 
   case class PksAdded(table: Table, rowsNeedingParentTasks: Vector[Row], rowsNeedingChildTasks: Vector[Row], viaTableOpt: Option[Table])
 
-  class DataCopyTask(table: Table, pkValues: Seq[PrimaryKeyValue])
+  class DataCopyTask(val table: Table, val pkValues: Seq[PrimaryKeyValue])
 
   sealed trait PkQueryResult
   case object AlreadySeen extends PkQueryResult

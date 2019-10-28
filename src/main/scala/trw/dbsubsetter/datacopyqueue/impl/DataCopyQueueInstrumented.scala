@@ -21,7 +21,7 @@ private[datacopyqueue] final class DataCopyQueueInstrumented(delegatee: DataCopy
 
   override def dequeue(): Option[DataCopyTask] = {
     val optionalResult: Option[DataCopyTask] = taskDequeueDuration.time(() => delegatee.dequeue())
-    optionalResult.foreach(pksAdded => pendingTaskCount.dec(pksAdded.rowsNeedingParentTasks.size))
+    optionalResult.foreach(dataCopyTask => pendingTaskCount.dec(dataCopyTask.pkValues.size))
     optionalResult
   }
 }

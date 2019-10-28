@@ -48,7 +48,7 @@ private[this] object PkStoreWorkflow {
     Map.empty[WriteOutcome, Vector[Row]]
       .withDefaultValue(Vector.empty[Row])
 
-  // TODO consider deduplication with similar logic in DataCopyQueueImpl
+  // TODO consider deduplication with similar logic in DataCopyQueueImpl and ApplicationSingleThreaded
   private def buildPkValueExtractionFunctions(schemaInfo: SchemaInfo): Map[Table, Row => Any] = {
     schemaInfo.pksByTableOrdered.map { case (table, pkColumns) =>
         val pkOrdinals: Vector[Int] = pkColumns.map(_.ordinalPosition)
