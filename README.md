@@ -57,7 +57,7 @@ Memory usage in the worst case will be proportional to the sum of:
 
 * The size of all primary keys in the target database.
 * The size of your largest single query result multiplied by 
-  (`--originDbParallelism` + `--targetDbParallelism` + `--preTargetBufferSize`)
+  (`--originDbParallelism` + `--targetDbParallelism`)
 
 Disk usage (in tempfiles) will be proportional to the size of all foreign keys in the target database.
 

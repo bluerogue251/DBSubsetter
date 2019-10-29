@@ -1,9 +1,6 @@
 package trw.dbsubsetter.workflow.offheap.impl.chroniclequeue
 
-import java.nio.file.Files
-
-import net.openhft.chronicle.queue.RollCycles
-import net.openhft.chronicle.queue.impl.single.SingleChronicleQueueBuilder
+import net.openhft.chronicle.queue.impl.single.SingleChronicleQueue
 import net.openhft.chronicle.wire.WriteMarshallable
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.{ForeignKey, SchemaInfo}
@@ -13,16 +10,7 @@ import trw.dbsubsetter.workflow.{ForeignKeyTask, RawTaskToForeignKeyTaskMapper}
 
 private[offheap] final class ChronicleQueueFkTaskQueue(config: Config, schemaInfo: SchemaInfo) extends OffHeapFkTaskQueue {
 
-  private[this] val storageDir = config.taskQueueDirOpt match {
-    case Some(dir) => dir.toPath
-    case None => Files.createTempDirectory("DBSubsetter-")
-  }
-
-  private[this] val queue =
-    SingleChronicleQueueBuilder
-      .binary(storageDir)
-      .rollCycle(RollCycles.MINUTELY)
-      .build()
+  private[this] val queue: SingleChronicleQueue = ChronicleQueueFactory.createQueue(config)
 
   private[this] val appender = queue.acquireAppender()
 

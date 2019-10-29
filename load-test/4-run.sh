@@ -25,7 +25,6 @@ java -Xmx4G -jar DBSubsetter.jar \
   --baseQuery "school_db.standalone_table ::: id < 4 ::: includeChildren" \
   --excludeColumns "school_db.schools(mascot)" \
   --excludeTable "school_db.empty_table_2" \
-  --preTargetBufferSize 10000 \
   --exposeMetrics
 
 echo "Sleeping 90 seconds to make a clear boundary in metrics"
@@ -41,5 +40,4 @@ nohup java -Xmx4G -jar DBSubsetter.jar \
   --targetDbParallelism 8 \
   --schemas "public" \
   --baseQuery "public.scientists ::: id in (2) ::: includeChildren" \
-  --preTargetBufferSize 200 \
   --exposeMetrics &
