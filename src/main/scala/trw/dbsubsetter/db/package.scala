@@ -62,15 +62,7 @@ package object db {
   }
 
   // Represents a single row in the origin database including only primary and foreign key columns
-  class Keys(data: Array[Any]) {
-    def getValue(primaryKey: PrimaryKey): PrimaryKeyValue = {
-      ???
-    }
-
-    def getValue(foreignKey: ForeignKey): ForeignKeyValue = {
-      ???
-    }
-  }
+  class Keys(val data: Array[Any])
 
   implicit class VendorAwareJdbcConnection(private val conn: Connection) {
     private val vendorName: String = conn.getMetaData.getDatabaseProductName

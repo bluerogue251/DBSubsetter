@@ -41,16 +41,16 @@ class PkStoreWorkflowTest extends FunSuite {
 
     val fkValue: String = "fkValue"
 
-    val row: Keys = Array(fkValue)
+    val singleRowKeys: Keys = new Keys(Array(fkValue))
 
-    val rows: Vector[Keys] = Vector(row)
+    val multiRowKeys: Vector[Keys] = Vector(singleRowKeys)
 
     val correspondingPrimaryKeyValue: PrimaryKeyValue = new PrimaryKeyValue(Seq(fkValue))
 
     // Add the PK to the pkStore, noting that we have NOT yet fetched children
-    val pkAddRequest1 = OriginDbResult(table, rows, None, fetchChildren = false)
+    val pkAddRequest1 = OriginDbResult(table, multiRowKeys, None, fetchChildren = false)
     val pkAddResult1 = pkStoreWorkflow.add(pkAddRequest1)
-    assert(pkAddResult1 === PksAdded(table, rows, Vector.empty, None))
+    assert(pkAddResult1 === PksAdded(table, multiRowKeys, Vector.empty, None))
 
     // Query whether the PK is in the pkStore given that we are only interested in parent records
     // The return value should be true, meaning that yes it's in the pkStore at least as far as having fetched its parent records
@@ -60,9 +60,9 @@ class PkStoreWorkflowTest extends FunSuite {
     // The fact that it was already in the PK store for having its parents fetched means that
     // It will only appear in the collection of rows still needing children processing
     // It will not appear in the collection of rows needing parents (and therefore will not be added duplicate to the target db either)
-    val pkAddRequest2 = OriginDbResult(table, rows, None, fetchChildren = true)
+    val pkAddRequest2 = OriginDbResult(table, multiRowKeys, None, fetchChildren = true)
     val pkAddResult2 = pkStoreWorkflow.add(pkAddRequest2)
-    assert(pkAddResult2 === PksAdded(table, Vector.empty, rows, None))
+    assert(pkAddResult2 === PksAdded(table, Vector.empty, multiRowKeys, None))
 
     // Do the same query as before
     // Query whether the PK is in the pkStore given that we are only interested in parent records
@@ -104,16 +104,16 @@ class PkStoreWorkflowTest extends FunSuite {
       new PkStoreWorkflow(pkStore, schemaInfo)
 
     val fkValue: String = "fkValue"
-    val row: Keys = Array(fkValue)
-    val rows: Vector[Keys] = Vector(row)
+    val singleRowKeys: Keys = new Keys(Array(fkValue))
+    val multiRowKeys: Vector[Keys] = Vector(singleRowKeys)
 
     // Add the PK to the pkStore, noting that we have NOT yet fetched children
-    val pkAddRequest1 = OriginDbResult(table, rows, viaTableOpt = None, fetchChildren = true)
+    val pkAddRequest1 = OriginDbResult(table, multiRowKeys, viaTableOpt = None, fetchChildren = true)
     val actual = pkStoreWorkflow.add(pkAddRequest1)
     val expected: PksAdded = PksAdded(
       table = table,
-      rowsNeedingParentTasks = rows,
-      rowsNeedingChildTasks = rows,
+      rowsNeedingParentTasks = multiRowKeys,
+      rowsNeedingChildTasks = multiRowKeys,
       viaTableOpt = None
     )
     assert(actual === expected)

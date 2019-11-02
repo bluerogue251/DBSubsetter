@@ -8,7 +8,7 @@ import org.postgresql.copy.CopyManager
 import org.postgresql.core.BaseConnection
 import slick.jdbc.PostgresProfile.api._
 import slick.sql.SqlAction
-import trw.dbsubsetter.db.Keys
+import trw.dbsubsetter.db.Row
 import util.db.{DatabaseSet, PostgreSQLDatabase}
 
 import scala.collection.mutable.ArrayBuffer
@@ -177,7 +177,7 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
       targetJdbcConnection.prepareStatement(insertSql)
     }
 
-    def insertRows(insertStatement: PreparedStatement, rows: Vector[Keys]): Unit = {
+    def insertRows(insertStatement: PreparedStatement, rows: Vector[Row]): Unit = {
       insertStatement.clearParameters()
 
       rows.foreach { row =>
@@ -198,7 +198,7 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
     val insertStatement: PreparedStatement = buildInsertStatement(tableSuffix)
     val runtimeSeconds: Long = runWithTimerSeconds(() => {
       (1 to 6000000 by batchSize).foreach(startOfBatchId => {
-        val rows: Vector[Keys] = fetchRows(startOfBatchId, startOfBatchId + batchSize - 1)
+        val rows: Vector[Row] = fetchRows(startOfBatchId, startOfBatchId + batchSize - 1)
         insertRows(insertStatement, rows)
       })
     })
@@ -217,7 +217,7 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
       targetJdbcConnection.prepareStatement(insertSql)
     }
 
-    def insertRows(insertStatement: PreparedStatement, rows: Vector[Keys]): Unit = {
+    def insertRows(insertStatement: PreparedStatement, rows: Vector[Row]): Unit = {
       insertStatement.clearParameters()
 
       rows.zipWithIndex.foreach { case (row, rowIndex) =>
@@ -237,7 +237,7 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
     val defaultInsertStatement: PreparedStatement = buildInsertStatement(batchSize)
     val runtimeSeconds: Long = runWithTimerSeconds(() => {
       (1 to 6000000 by batchSize).foreach(startOfBatchId => {
-        val rows: Vector[Keys] = fetchRows(startOfBatchId, startOfBatchId + batchSize - 1)
+        val rows: Vector[Row] = fetchRows(startOfBatchId, startOfBatchId + batchSize - 1)
         val insertStatement: PreparedStatement =
           if (rows.length == batchSize) {
             defaultInsertStatement
@@ -315,15 +315,15 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
     originJdbcConnection.prepareStatement("select * from quantum_data where id between ? and ?")
   }
 
-  private[this] def fetchRows(start: Int, end: Int): Vector[Keys] = {
+  private[this] def fetchRows(start: Int, end: Int): Vector[Row] = {
     selectStatement.clearParameters()
     selectStatement.setObject(1, start)
     selectStatement.setObject(2, end)
     val resultSet: ResultSet = selectStatement.executeQuery()
 
-    val rows = ArrayBuffer.empty[Keys]
+    val rows = ArrayBuffer.empty[Row]
     while (resultSet.next()) {
-      val row: Keys = Array(
+      val row: Row = Array(
         resultSet.getObject(1),
         resultSet.getObject(2),
         resultSet.getObject(3),

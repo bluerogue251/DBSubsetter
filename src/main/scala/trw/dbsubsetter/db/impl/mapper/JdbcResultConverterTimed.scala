@@ -10,7 +10,7 @@ private[db] class JdbcResultConverterTimed(delegatee: JdbcResultConverter) exten
   private[this] val metrics = Metrics.JdbcResultConverterHistogram
 
   def convertToKeys(jdbcResultSet: ResultSet, table: Table): Vector[Keys] = {
-    metrics.time(() => delegatee.convertToRows(jdbcResultSet, table))
+    metrics.time(() => delegatee.convertToKeys(jdbcResultSet, table))
   }
 
   override def convertToRows(jdbcResultSet: ResultSet, table: Table): Vector[Row] = {

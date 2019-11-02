@@ -7,8 +7,8 @@ object KeyExtractionUtil {
   def pkExtractionFunctions(schemaInfo: SchemaInfo): Map[Table, Keys => PrimaryKeyValue] = {
     schemaInfo.pksByTable.map { case (table, primaryKey) =>
       val primaryKeyColumnOrdinals: Seq[Int] = primaryKey.columns.map(_.ordinalPosition)
-      val primaryKeyExtractionFunction: Keys => PrimaryKeyValue = row => {
-        val individualColumnValues: Seq[Any] = primaryKeyColumnOrdinals.map(row)
+      val primaryKeyExtractionFunction: Keys => PrimaryKeyValue = keys => {
+        val individualColumnValues: Seq[Any] = primaryKeyColumnOrdinals.map(keys.data)
         new PrimaryKeyValue(individualColumnValues)
       }
       table -> primaryKeyExtractionFunction
@@ -21,12 +21,12 @@ object KeyExtractionUtil {
       val parentExtractionOrdinalPositions =
         foreignKey.fromCols.map(_.ordinalPosition)
       val parentExtractionFunction: Keys => ForeignKeyValue =
-        row => new ForeignKeyValue(parentExtractionOrdinalPositions.map(row))
+        keys => new ForeignKeyValue(parentExtractionOrdinalPositions.map(keys.data))
 
       val childExtractionOrdinalPositions =
         foreignKey.toCols.map(_.ordinalPosition)
       val childExtractionFunction: Keys => ForeignKeyValue =
-        row => new ForeignKeyValue(childExtractionOrdinalPositions.map(row))
+        keys => new ForeignKeyValue(childExtractionOrdinalPositions.map(keys.data))
 
       Seq(
         (foreignKey, false) -> parentExtractionFunction,
