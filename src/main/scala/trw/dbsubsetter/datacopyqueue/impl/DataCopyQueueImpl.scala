@@ -4,6 +4,7 @@ import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.datacopyqueue.DataCopyQueue
 import trw.dbsubsetter.db.ColumnTypes.ColumnType
 import trw.dbsubsetter.db.{Constants, PrimaryKeyValue, Row, SchemaInfo, Table}
+import trw.dbsubsetter.pkvalueextraction.PkValueExtractionUtil
 import trw.dbsubsetter.workflow.{DataCopyTask, PksAdded}
 
 import scala.collection.mutable
@@ -36,7 +37,7 @@ private[datacopyqueue] final class DataCopyQueueImpl(config: Config, schemaInfo:
   }
 
   private[this] val pkValueExtractionFunctions: Map[Table, Row => PrimaryKeyValue] =
-    DataCopyQueueImpl.buildPkValueExtractionFunctions(schemaInfo)
+    PkValueExtractionUtil.pkValueExtractionFunctionsByTable(schemaInfo)
 
   override def enqueue(pksAdded: PksAdded): Unit = {
     val rows: Vector[Row] = pksAdded.rowsNeedingParentTasks
@@ -79,20 +80,5 @@ private[datacopyqueue] final class DataCopyQueueImpl(config: Config, schemaInfo:
 
   override def isEmpty(): Boolean = {
     tablesWithQueuedValues.isEmpty
-  }
-}
-
-object DataCopyQueueImpl {
-
-  // TODO consider deduplication with similar logic in PkStoreWorkflow and ApplicationSingleThreaded
-  private def buildPkValueExtractionFunctions(schemaInfo: SchemaInfo): Map[Table, Row => PrimaryKeyValue] = {
-    schemaInfo.pksByTableOrdered.map { case (table, pkColumns) =>
-      val primaryKeyColumnOrdinals: Vector[Int] = pkColumns.map(_.ordinalPosition)
-      val primaryKeyExtractionFunction: Row => PrimaryKeyValue = row => {
-        val individualColumnValues: Seq[Any] = primaryKeyColumnOrdinals.map(row)
-        new PrimaryKeyValue(individualColumnValues)
-      }
-      table -> primaryKeyExtractionFunction
-    }
   }
 }
