@@ -11,7 +11,7 @@ private[db] class JdbcResultConverterImpl(schemaInfo: SchemaInfo) extends JdbcRe
   def convertToRows(jdbcResultSet: ResultSet, table: Table): Vector[Row] = {
     val cols: Seq[Column] = schemaInfo.dataColumnsByTableOrdered(table)
     val multipleRowsRawData = extractMultiRowRawData(jdbcResultSet, cols.size)
-    multipleRowsRawData.toVector
+    multipleRowsRawData.map(singleRowRawData => new Row(singleRowRawData)).toVector
   }
 
   override def convertToKeys(jdbcResultSet: ResultSet, table: Table): Vector[Keys] = {

@@ -15,12 +15,16 @@ private[db] class TargetDbAccessImpl(connStr: String, sch: SchemaInfo, connectio
   }
 
   override def insertRows(table: Table, rows: Vector[Row]): Unit = {
-
     val stmt = statements(table)
-    val cols = sch.dataColumnsByTableOrdered(table).size
 
     rows.foreach { row =>
-      (1 to cols).foreach(i => stmt.setObject(i, row(i - 1)))
+      row
+        .data
+        .zipWithIndex
+        .foreach { case (singleColumnValue, i) =>
+          stmt.setObject(i + 1, singleColumnValue)
+        }
+
       stmt.addBatch()
     }
 
