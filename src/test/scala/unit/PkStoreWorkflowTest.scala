@@ -2,7 +2,7 @@ package unit
 
 import org.scalatest.FunSuite
 import trw.dbsubsetter.config.Config
-import trw.dbsubsetter.db.{Column, PrimaryKeyValue, Row, SchemaInfo, Table}
+import trw.dbsubsetter.db.{Column, PrimaryKey, PrimaryKeyValue, Row, SchemaInfo, Table}
 import trw.dbsubsetter.primarykeystore.{PrimaryKeyStore, PrimaryKeyStoreFactory}
 import trw.dbsubsetter.workflow._
 
@@ -27,7 +27,7 @@ class PkStoreWorkflowTest extends FunSuite {
       new SchemaInfo(
         tablesByName = Map.empty,
         colsByTableOrdered = Map.empty,
-        pksByTableOrdered = Map(table -> Vector(pkCol)),
+        pksByTable = Map(table -> new PrimaryKey(Seq(pkCol))),
         fksOrdered = Array.empty,
         fksFromTable = Map.empty,
         fksToTable = Map.empty
@@ -91,7 +91,7 @@ class PkStoreWorkflowTest extends FunSuite {
       new SchemaInfo(
         tablesByName = Map.empty,
         colsByTableOrdered = Map.empty,
-        pksByTableOrdered = Map(table -> Vector(primaryKeyColumn)),
+        pksByTable = Map(table -> new PrimaryKey(Seq(primaryKeyColumn))),
         fksOrdered = Array.empty,
         fksFromTable = Map.empty,
         fksToTable = Map.empty

@@ -29,9 +29,9 @@ private[datacopyqueue] final class DataCopyQueueImpl(config: Config, schemaInfo:
 
   private[this] val tablesToChronicleQueues: Map[Table, ChronicleQueueAccess] = {
     schemaInfo
-      .pksByTableOrdered
-      .map { case (table, primaryKeyColumns) =>
-        val columnTypes: Seq[ColumnType] = primaryKeyColumns.map(_.dataType)
+      .pksByTable
+      .map { case (table, primaryKey) =>
+        val columnTypes: Seq[ColumnType] = primaryKey.columns.map(_.dataType)
         table -> new ChronicleQueueAccess(config, columnTypes)
       }
   }

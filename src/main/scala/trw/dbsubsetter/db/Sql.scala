@@ -23,9 +23,10 @@ private[db] object Sql {
   }
 
   def queryByPkSqlTemplates(sch: SchemaInfo): PrimaryKeySqlTemplates = {
-    sch.pksByTableOrdered.flatMap { case (table, primaryKeyColumns) =>
+    sch.pksByTable.flatMap { case (table, primaryKey) =>
       Constants.dataCopyBatchSizes.map(batchSize => {
-        val whereClause: String = makeCompositeWhereClause(primaryKeyColumns, batchSize)
+        val columns: Seq[Column] = primaryKey.columns
+        val whereClause: String = makeCompositeWhereClause(columns, batchSize)
         (table, batchSize) -> makeQueryString(table, whereClause, sch)
       })
     }

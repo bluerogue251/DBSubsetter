@@ -72,7 +72,7 @@ private[primarykeystore] final class InMemoryPrimaryKeyStore(schemaInfo: SchemaI
 
 private object InMemoryPrimaryKeyStore {
   private def buildStorage(schemaInfo: SchemaInfo): Map[Table, mutable.HashSet[Any]] = {
-    val tables: Iterable[Table] = schemaInfo.pksByTableOrdered.keys
+    val tables: Iterable[Table] = schemaInfo.pksByTable.keys
     tables.map { t => t -> mutable.HashSet.empty[Any] }.toMap
   }
 

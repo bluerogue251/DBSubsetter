@@ -5,8 +5,8 @@ import trw.dbsubsetter.db.{ForeignKey, ForeignKeyValue, PrimaryKeyValue, Row, Sc
 object KeyExtractionUtil {
 
   def pkExtractionFunctions(schemaInfo: SchemaInfo): Map[Table, Row => PrimaryKeyValue] = {
-    schemaInfo.pksByTableOrdered.map { case (table, primaryKeyColumns) =>
-      val primaryKeyColumnOrdinals: Vector[Int] = primaryKeyColumns.map(_.ordinalPosition)
+    schemaInfo.pksByTable.map { case (table, primaryKey) =>
+      val primaryKeyColumnOrdinals: Seq[Int] = primaryKey.columns.map(_.ordinalPosition)
       val primaryKeyExtractionFunction: Row => PrimaryKeyValue = row => {
         val individualColumnValues: Seq[Any] = primaryKeyColumnOrdinals.map(row)
         new PrimaryKeyValue(individualColumnValues)

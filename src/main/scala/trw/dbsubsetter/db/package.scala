@@ -18,7 +18,7 @@ package object db {
   class SchemaInfo(
     val tablesByName: Map[(SchemaName, TableName), Table],
     val colsByTableOrdered: Map[Table, Vector[Column]],
-    val pksByTableOrdered: Map[Table, Vector[Column]],
+    val pksByTable: Map[Table, PrimaryKey],
     val fksOrdered: Array[ForeignKey],
     val fksFromTable: Map[Table, Vector[ForeignKey]],
     val fksToTable: Map[Table, Vector[ForeignKey]]
@@ -36,6 +36,8 @@ package object db {
     val ordinalPosition: Int,
     val dataType: ColumnType
   )
+
+  class PrimaryKey(val columns: Seq[Column])
 
   class ForeignKey(
     val fromCols: Vector[Column],
