@@ -2,7 +2,7 @@ package trw.dbsubsetter.akkastreams
 
 import akka.stream._
 import akka.stream.stage._
-import trw.dbsubsetter.db.ForeignKey
+import trw.dbsubsetter.db.{ForeignKey, ForeignKeyValue}
 import trw.dbsubsetter.workflow._
 import trw.dbsubsetter.workflow.offheap.OffHeapFkTaskQueue
 
@@ -21,7 +21,7 @@ private[akkastreams] final class FkTaskBufferFlow(fkTaskQueue: OffHeapFkTaskQueu
     setHandler(in, new InHandler {
       override def onPush(): Unit = {
         val newTasks: NewTasks = grab(in)
-        val newTaskMap: Map[(ForeignKey, Boolean), Array[Any]] = newTasks.taskInfo
+        val newTaskMap: Map[(ForeignKey, Boolean), Seq[ForeignKeyValue]] = newTasks.taskInfo
         newTaskMap.foreach { case ((fk, fetchChildren), fkValues) =>
           fkValues.foreach(fkValue => fkTaskQueue.enqueue(fk.i, fkValue, fetchChildren))
         }

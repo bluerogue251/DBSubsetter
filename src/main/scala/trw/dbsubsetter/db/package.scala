@@ -45,7 +45,6 @@ package object db {
   ) {
     val fromTable: Table = fromCols.head.table
     val toTable: Table = toCols.head.table
-    val isSingleCol: Boolean = fromCols.size == 1
     // TODO Refactor to remove mutability
     def setIndex(index: Short): Unit = {
       i = index
@@ -54,6 +53,11 @@ package object db {
 
   // Primary keys can be multi-column. Therefore a single primary key value is a sequence of individual column values.
   class PrimaryKeyValue(val individualColumnValues: Seq[Any])
+
+  // Foreign keys can be multi-column. Therefore a single foreign key value is a sequence of individual column values.
+  class ForeignKeyValue(val individualColumnValues: Seq[Any]) {
+    val isEmpty: Boolean = individualColumnValues.forall(_ == null)
+  }
 
   implicit class VendorAwareJdbcConnection(private val conn: Connection) {
     private val vendorName: String = conn.getMetaData.getDatabaseProductName

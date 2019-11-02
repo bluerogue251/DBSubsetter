@@ -2,7 +2,7 @@ package integration
 
 import org.scalatest.FunSuite
 import trw.dbsubsetter.config.Config
-import trw.dbsubsetter.db.{Column, ColumnTypes, ForeignKey, SchemaInfo, Table}
+import trw.dbsubsetter.db.{Column, ColumnTypes, ForeignKey, ForeignKeyValue, SchemaInfo, Table}
 import trw.dbsubsetter.workflow.FetchParentTask
 import trw.dbsubsetter.workflow.offheap.OffHeapFkTaskQueueFactory
 
@@ -32,26 +32,37 @@ class OffHeapTaskQueueTest extends FunSuite {
     val schemaInfo: SchemaInfo = OffHeapTaskQueueTest.schemaInfo
     val queue = OffHeapFkTaskQueueFactory.buildOffHeapFkTaskQueue(config, schemaInfo)
 
-    val fkValue1: Long = 7
-    val fkValue2: Long = 10
-    val fkValue3: Long = 23
+    val fkValue1: ForeignKeyValue = new ForeignKeyValue(Seq[Long](7))
+    val fkValue2: ForeignKeyValue = new ForeignKeyValue(Seq[Long](10))
+    val fkValue3: ForeignKeyValue = new ForeignKeyValue(Seq[Long](23))
 
-    queue.enqueue(OffHeapTaskQueueTest.foreignKey.i, fkValue1, false)
-    queue.enqueue(OffHeapTaskQueueTest.foreignKey.i, fkValue2, false)
-    queue.enqueue(OffHeapTaskQueueTest.foreignKey.i, fkValue3, false)
+    val fetchChildren: Boolean = false
+
+    queue.enqueue(OffHeapTaskQueueTest.foreignKey.i, fkValue1, fetchChildren)
+    queue.enqueue(OffHeapTaskQueueTest.foreignKey.i, fkValue2, fetchChildren)
+    queue.enqueue(OffHeapTaskQueueTest.foreignKey.i, fkValue3, fetchChildren)
 
     val baseTask: FetchParentTask = FetchParentTask(
       parentTable = OffHeapTaskQueueTest.parentTable,
       fk = OffHeapTaskQueueTest.foreignKey,
-      fkValueFromChild = "placeholder",
+      fkValueFromChild = new ForeignKeyValue(Seq[String]("placeholder")),
     )
 
     // Dequeue the three FkTasks
-    assert(queue.dequeue() === Some(baseTask.copy(fkValueFromChild = 7)))
-    assert(queue.dequeue() === Some(baseTask.copy(fkValueFromChild = 10)))
-    assert(queue.dequeue() === Some(baseTask.copy(fkValueFromChild = 23)))
+    val firstTask: FetchParentTask = queue.dequeue().get.asInstanceOf[FetchParentTask]
+    val secondTask: FetchParentTask = queue.dequeue().get.asInstanceOf[FetchParentTask]
+    val thirdTask: FetchParentTask = queue.dequeue().get.asInstanceOf[FetchParentTask]
     // All the data has been drained from the queue -- now we get `None`
     assert(queue.dequeue() === None)
+
+    Seq(firstTask, secondTask, thirdTask).foreach{ dequeuedTask =>
+      assert(dequeuedTask.fk === OffHeapTaskQueueTest.foreignKey)
+      assert(dequeuedTask.parentTable === OffHeapTaskQueueTest.parentTable)
+    }
+
+    assert(firstTask.fkValueFromChild.individualColumnValues === fkValue1.individualColumnValues)
+    assert(secondTask.fkValueFromChild.individualColumnValues === fkValue2.individualColumnValues)
+    assert(thirdTask.fkValueFromChild.individualColumnValues === fkValue3.individualColumnValues)
   }
 }
 

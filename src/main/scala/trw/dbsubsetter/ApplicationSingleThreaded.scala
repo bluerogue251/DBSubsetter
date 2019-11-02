@@ -2,6 +2,7 @@ package trw.dbsubsetter
 
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.{DbAccessFactory, PrimaryKeyValue, Row, SchemaInfo, Table}
+import trw.dbsubsetter.keyextraction.KeyExtractionUtil
 import trw.dbsubsetter.primarykeystore.{PrimaryKeyStore, PrimaryKeyStoreFactory}
 import trw.dbsubsetter.taskqueue.{TaskQueue, TaskQueueFactory}
 import trw.dbsubsetter.workflow._
@@ -17,7 +18,7 @@ object ApplicationSingleThreaded {
     val fkTaskCreationWorkflow: FkTaskCreationWorkflow = new FkTaskCreationWorkflow(schemaInfo)
 
     val pkValueExtractionFunctions: Map[Table, Row => PrimaryKeyValue] =
-      buildPkValueExtractionFunctions(schemaInfo)
+      KeyExtractionUtil.pkExtractionFunctions(schemaInfo)
 
     // Set up task queue
     val taskQueue: TaskQueue = TaskQueueFactory.buildTaskQueue(config)
@@ -27,7 +28,7 @@ object ApplicationSingleThreaded {
     while (taskQueue.nonEmpty) {
       val taskOpt: Option[OriginDbRequest] = taskQueue.dequeue() match {
         case t: FetchParentTask if FkTaskPreCheck.shouldPrecheck(t) =>
-          if (pkStore.alreadySeen(t.parentTable, t.fkValueFromChild)) None else Some(t)
+          if (pkStore.alreadySeen(t.parentTable, new PrimaryKeyValue(t.fkValueFromChild.individualColumnValues))) None else Some(t)
         case t =>
           Some(t)
       }
@@ -50,17 +51,5 @@ object ApplicationSingleThreaded {
 
     // Ensure all SQL connections get closed
     dbAccessFactory.closeAllConnections()
-  }
-
-  // TODO consider deduplication with similar logic in PkStoreWorkflow and DataCopyQueueImpl
-  private def buildPkValueExtractionFunctions(schemaInfo: SchemaInfo): Map[Table, Row => PrimaryKeyValue] = {
-    schemaInfo.pksByTableOrdered.map { case (table, pkColumns) =>
-      val primaryKeyColumnOrdinals: Vector[Int] = pkColumns.map(_.ordinalPosition)
-      val primaryKeyExtractionFunction: Row => PrimaryKeyValue = row => {
-        val individualColumnValues: Seq[Any] = primaryKeyColumnOrdinals.map(row)
-        new PrimaryKeyValue(individualColumnValues)
-      }
-      table -> primaryKeyExtractionFunction
-    }
   }
 }
