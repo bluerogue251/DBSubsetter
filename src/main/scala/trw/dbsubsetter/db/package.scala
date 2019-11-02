@@ -64,7 +64,7 @@ package object db {
     val isEmpty: Boolean = individualColumnValues.forall(_ == null)
   }
 
-  // Represents a single row in the origin database including only primary and foreign key columns
+  // Represents a single row from the origin database including only primary and foreign key columns
   class Keys(data: Array[Any]) {
     def getValue(pk: PrimaryKey): PrimaryKeyValue = {
       val individualColumnValues: Seq[Any] =

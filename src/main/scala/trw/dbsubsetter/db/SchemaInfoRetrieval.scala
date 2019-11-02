@@ -21,7 +21,7 @@ object SchemaInfoRetrieval {
         .map { case (table, cols) =>
           table -> cols.zipWithIndex.map { case (c, i) =>
             val columnType: ColumnType = ColumnTypes.fromRawInfo(c.jdbcType, c.typeName, dbVendor)
-            c.name -> new Column(table, c.name, i, columnType)
+            c.name -> new Column(table, c.name, i, i, columnType)
           }.toMap
         }
     }
