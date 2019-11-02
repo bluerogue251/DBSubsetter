@@ -2,7 +2,7 @@ package unit
 
 import org.scalatest.FunSuite
 import trw.dbsubsetter.config.Config
-import trw.dbsubsetter.db.{Column, PrimaryKey, PrimaryKeyValue, Row, SchemaInfo, Table}
+import trw.dbsubsetter.db.{Column, Keys, PrimaryKey, PrimaryKeyValue, SchemaInfo, Table}
 import trw.dbsubsetter.primarykeystore.{PrimaryKeyStore, PrimaryKeyStoreFactory}
 import trw.dbsubsetter.workflow._
 
@@ -41,9 +41,9 @@ class PkStoreWorkflowTest extends FunSuite {
 
     val fkValue: String = "fkValue"
 
-    val row: Row = Array(fkValue)
+    val row: Keys = Array(fkValue)
 
-    val rows: Vector[Row] = Vector(row)
+    val rows: Vector[Keys] = Vector(row)
 
     val correspondingPrimaryKeyValue: PrimaryKeyValue = new PrimaryKeyValue(Seq(fkValue))
 
@@ -104,8 +104,8 @@ class PkStoreWorkflowTest extends FunSuite {
       new PkStoreWorkflow(pkStore, schemaInfo)
 
     val fkValue: String = "fkValue"
-    val row: Row = Array(fkValue)
-    val rows: Vector[Row] = Vector(row)
+    val row: Keys = Array(fkValue)
+    val rows: Vector[Keys] = Vector(row)
 
     // Add the PK to the pkStore, noting that we have NOT yet fetched children
     val pkAddRequest1 = OriginDbResult(table, rows, viaTableOpt = None, fetchChildren = true)

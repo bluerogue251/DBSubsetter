@@ -2,13 +2,13 @@ package trw.dbsubsetter.db.impl.mapper
 
 import java.sql.ResultSet
 
-import trw.dbsubsetter.db.{Row, SchemaInfo, Table}
+import trw.dbsubsetter.db.{Keys, Row, SchemaInfo, Table}
 
 import scala.collection.mutable.ArrayBuffer
 
 private[db] class JdbcResultConverterImpl(schemaInfo: SchemaInfo) extends JdbcResultConverter {
 
-  def convert(res: ResultSet, table: Table): Vector[Row] = {
+  def convertToRows(res: ResultSet, table: Table): Vector[Row] = {
     val cols = schemaInfo.colsByTableOrdered(table).size
     val rows = ArrayBuffer.empty[Row]
     while (res.next()) {
@@ -19,4 +19,7 @@ private[db] class JdbcResultConverterImpl(schemaInfo: SchemaInfo) extends JdbcRe
     rows.toVector
   }
 
+  override def convertToKeys(res: ResultSet, table: Table): Vector[Keys] = {
+    ???
+  }
 }

@@ -1,13 +1,13 @@
 package trw.dbsubsetter.keyextraction
 
-import trw.dbsubsetter.db.{ForeignKey, ForeignKeyValue, PrimaryKeyValue, Row, SchemaInfo, Table}
+import trw.dbsubsetter.db.{ForeignKey, ForeignKeyValue, Keys, PrimaryKeyValue, SchemaInfo, Table}
 
 object KeyExtractionUtil {
 
-  def pkExtractionFunctions(schemaInfo: SchemaInfo): Map[Table, Row => PrimaryKeyValue] = {
+  def pkExtractionFunctions(schemaInfo: SchemaInfo): Map[Table, Keys => PrimaryKeyValue] = {
     schemaInfo.pksByTable.map { case (table, primaryKey) =>
       val primaryKeyColumnOrdinals: Seq[Int] = primaryKey.columns.map(_.ordinalPosition)
-      val primaryKeyExtractionFunction: Row => PrimaryKeyValue = row => {
+      val primaryKeyExtractionFunction: Keys => PrimaryKeyValue = row => {
         val individualColumnValues: Seq[Any] = primaryKeyColumnOrdinals.map(row)
         new PrimaryKeyValue(individualColumnValues)
       }
@@ -15,17 +15,17 @@ object KeyExtractionUtil {
     }
   }
 
-  def fkExtractionFunctions(schemaInfo: SchemaInfo): Map[(ForeignKey, Boolean), Row => ForeignKeyValue] = {
+  def fkExtractionFunctions(schemaInfo: SchemaInfo): Map[(ForeignKey, Boolean), Keys => ForeignKeyValue] = {
     schemaInfo.fksOrdered.flatMap { foreignKey =>
 
       val parentExtractionOrdinalPositions =
         foreignKey.fromCols.map(_.ordinalPosition)
-      val parentExtractionFunction: Row => ForeignKeyValue =
+      val parentExtractionFunction: Keys => ForeignKeyValue =
         row => new ForeignKeyValue(parentExtractionOrdinalPositions.map(row))
 
       val childExtractionOrdinalPositions =
         foreignKey.toCols.map(_.ordinalPosition)
-      val childExtractionFunction: Row => ForeignKeyValue =
+      val childExtractionFunction: Keys => ForeignKeyValue =
         row => new ForeignKeyValue(childExtractionOrdinalPositions.map(row))
 
       Seq(
