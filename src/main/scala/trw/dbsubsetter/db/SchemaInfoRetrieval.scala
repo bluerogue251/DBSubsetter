@@ -90,12 +90,13 @@ object SchemaInfoRetrieval {
     }
 
     new SchemaInfo(
-      tablesByName,
-      colsByTableOrdered,
-      pksByTable,
-      foreignKeysOrdered,
-      fksFromTable,
-      fksToTable
+      tablesByName = tablesByName,
+      keyColumnsByTableOrdered = colsByTableOrdered, // TODO replace this with just the key columns
+      dataColumnsByTableOrdered = colsByTableOrdered,
+      pksByTable = pksByTable,
+      fksOrdered = foreignKeysOrdered,
+      fksFromTable = fksFromTable,
+      fksToTable = fksToTable
     )
   }
 }

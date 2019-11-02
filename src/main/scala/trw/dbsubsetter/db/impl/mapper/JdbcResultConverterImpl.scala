@@ -9,7 +9,7 @@ import scala.collection.mutable.ArrayBuffer
 private[db] class JdbcResultConverterImpl(schemaInfo: SchemaInfo) extends JdbcResultConverter {
 
   def convertToRows(jdbcResultSet: ResultSet, table: Table): Vector[Row] = {
-    val cols = schemaInfo.colsByTableOrdered(table).size
+    val cols = schemaInfo.dataColumnsByTableOrdered(table).size
     val rows = ArrayBuffer.empty[Row]
     while (jdbcResultSet.next()) {
       val row = new Row(cols)

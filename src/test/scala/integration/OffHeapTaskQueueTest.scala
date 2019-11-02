@@ -115,7 +115,8 @@ private[this] object OffHeapTaskQueueTest {
   private val schemaInfo: SchemaInfo =
     new SchemaInfo(
       tablesByName = Map.empty,
-      colsByTableOrdered = Map.empty,
+      keyColumnsByTableOrdered = Map.empty,
+      dataColumnsByTableOrdered = Map.empty,
       pksByTable = Map.empty,
       fksOrdered = Array(foreignKey),
       fksFromTable = Map.empty,

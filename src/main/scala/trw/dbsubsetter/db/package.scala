@@ -17,7 +17,10 @@ package object db {
 
   class SchemaInfo(
     val tablesByName: Map[(SchemaName, TableName), Table],
-    val colsByTableOrdered: Map[Table, Vector[Column]],
+    // Only those columns involved in a primary or foreign key
+    val keyColumnsByTableOrdered: Map[Table, Vector[Column]],
+    // All columns, even those uninvolved in a primary or foreign key
+    val dataColumnsByTableOrdered: Map[Table, Vector[Column]],
     val pksByTable: Map[Table, PrimaryKey],
     val fksOrdered: Array[ForeignKey],
     val fksFromTable: Map[Table, Vector[ForeignKey]],
