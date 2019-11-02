@@ -84,7 +84,7 @@ private[this] object OffHeapTaskQueueTest {
       table = parentTable,
       name = "id",
       keyOrdinalPosition = 4,
-      dataOrdinalPosition = 4,
+      dataOrdinalPosition = -1, // n/a
       ColumnTypes.Long
     )
 
@@ -100,7 +100,7 @@ private[this] object OffHeapTaskQueueTest {
       table = childTable,
       name = "parentId",
       keyOrdinalPosition = 7,
-      dataOrdinalPosition = 7,
+      dataOrdinalPosition = -1, // n/a
       ColumnTypes.Long
     )
 

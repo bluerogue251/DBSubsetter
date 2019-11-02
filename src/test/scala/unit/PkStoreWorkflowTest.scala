@@ -20,7 +20,7 @@ class PkStoreWorkflowTest extends FunSuite {
         table = table,
         name = null,
         keyOrdinalPosition = 0,
-        dataOrdinalPosition = 0,
+        dataOrdinalPosition = -1, // n/a
         dataType = null
       )
 
@@ -85,7 +85,7 @@ class PkStoreWorkflowTest extends FunSuite {
         table = table,
         name = null,
         keyOrdinalPosition = 0,
-        dataOrdinalPosition = 0,
+        dataOrdinalPosition = -1, // n/a
         dataType = null
       )
 

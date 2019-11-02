@@ -19,7 +19,7 @@ class PkStoreTest extends FunSuite {
         table = table,
         name = null,
         keyOrdinalPosition = 0,
-        dataOrdinalPosition = 0,
+        dataOrdinalPosition = -1, // n/a
         dataType = null
       )
 

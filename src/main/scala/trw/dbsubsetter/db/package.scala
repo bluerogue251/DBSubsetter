@@ -67,9 +67,7 @@ package object db {
   // Represents a single row from the origin database including only primary and foreign key columns
   class Keys(data: Array[Any]) {
     def getValue(pk: PrimaryKey): PrimaryKeyValue = {
-      val individualColumnValues: Seq[Any] =
-        pk.columns.map(_.keyOrdinalPosition).map(data)
-
+      val individualColumnValues: Seq[Any] = pk.columns.map(_.keyOrdinalPosition).map(data)
       new PrimaryKeyValue(individualColumnValues)
     }
 
