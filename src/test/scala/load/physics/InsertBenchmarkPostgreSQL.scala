@@ -181,13 +181,13 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
       insertStatement.clearParameters()
 
       rows.foreach { row =>
-        insertStatement.setObject(1, row(0))
-        insertStatement.setObject(2, row(1))
-        insertStatement.setObject(3, row(2))
-        insertStatement.setObject(4, row(3))
-        insertStatement.setObject(5, row(4))
-        insertStatement.setObject(6, row(5))
-        insertStatement.setObject(7, row(6))
+        insertStatement.setObject(1, row.data(0))
+        insertStatement.setObject(2, row.data(1))
+        insertStatement.setObject(3, row.data(2))
+        insertStatement.setObject(4, row.data(3))
+        insertStatement.setObject(5, row.data(4))
+        insertStatement.setObject(6, row.data(5))
+        insertStatement.setObject(7, row.data(6))
         insertStatement.addBatch()
       }
 
@@ -221,13 +221,13 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
       insertStatement.clearParameters()
 
       rows.zipWithIndex.foreach { case (row, rowIndex) =>
-        insertStatement.setObject(rowIndex * 7 + 1, row(0))
-        insertStatement.setObject(rowIndex * 7 + 2, row(1))
-        insertStatement.setObject(rowIndex * 7 + 3, row(2))
-        insertStatement.setObject(rowIndex * 7 + 4, row(3))
-        insertStatement.setObject(rowIndex * 7 + 5, row(4))
-        insertStatement.setObject(rowIndex * 7 + 6, row(5))
-        insertStatement.setObject(rowIndex * 7 + 7, row(6))
+        insertStatement.setObject(rowIndex * 7 + 1, row.data(0))
+        insertStatement.setObject(rowIndex * 7 + 2, row.data(1))
+        insertStatement.setObject(rowIndex * 7 + 3, row.data(2))
+        insertStatement.setObject(rowIndex * 7 + 4, row.data(3))
+        insertStatement.setObject(rowIndex * 7 + 5, row.data(4))
+        insertStatement.setObject(rowIndex * 7 + 6, row.data(5))
+        insertStatement.setObject(rowIndex * 7 + 7, row.data(6))
       }
 
       insertStatement.execute()
@@ -323,7 +323,7 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
 
     val rows = ArrayBuffer.empty[Row]
     while (resultSet.next()) {
-      val row: Row = Array(
+      val data: Array[Any] = Array(
         resultSet.getObject(1),
         resultSet.getObject(2),
         resultSet.getObject(3),
@@ -332,7 +332,7 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
         resultSet.getObject(6),
         resultSet.getObject(7)
       )
-      rows += row
+      rows += new Row(data)
     }
     rows.toVector
   }
