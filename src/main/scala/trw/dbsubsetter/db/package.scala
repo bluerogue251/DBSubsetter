@@ -18,7 +18,7 @@ package object db {
   class SchemaInfo(
     val tablesByName: Map[(SchemaName, TableName), Table],
     val colsByTableOrdered: Map[Table, Vector[Column]],
-    val pksByTableOrdered: Map[Table, Vector[Column]],
+    val pksByTable: Map[Table, PrimaryKey],
     val fksOrdered: Array[ForeignKey],
     val fksFromTable: Map[Table, Vector[ForeignKey]],
     val fksToTable: Map[Table, Vector[ForeignKey]]
@@ -36,6 +36,8 @@ package object db {
     val ordinalPosition: Int,
     val dataType: ColumnType
   )
+
+  class PrimaryKey(val columns: Seq[Column])
 
   class ForeignKey(
     val fromCols: Vector[Column],
@@ -57,6 +59,17 @@ package object db {
   // Foreign keys can be multi-column. Therefore a single foreign key value is a sequence of individual column values.
   class ForeignKeyValue(val individualColumnValues: Seq[Any]) {
     val isEmpty: Boolean = individualColumnValues.forall(_ == null)
+  }
+
+  // Represents a single row in the origin database including only primary and foreign key columns
+  class Keys(data: Array[Any]) {
+    def getValue(primaryKey: PrimaryKey): PrimaryKeyValue = {
+      ???
+    }
+
+    def getValue(foreignKey: ForeignKey): ForeignKeyValue = {
+      ???
+    }
   }
 
   implicit class VendorAwareJdbcConnection(private val conn: Connection) {

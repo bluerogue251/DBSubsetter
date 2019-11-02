@@ -114,7 +114,7 @@ private[this] object OffHeapTaskQueueTest {
     new SchemaInfo(
       tablesByName = Map.empty,
       colsByTableOrdered = Map.empty,
-      pksByTableOrdered = Map.empty,
+      pksByTable = Map.empty,
       fksOrdered = Array(foreignKey),
       fksFromTable = Map.empty,
       fksToTable = Map.empty

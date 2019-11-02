@@ -2,7 +2,7 @@ package unit
 
 import org.scalatest.FunSuite
 import trw.dbsubsetter.config.Config
-import trw.dbsubsetter.db.{Column, PrimaryKeyValue, SchemaInfo, Table}
+import trw.dbsubsetter.db.{Column, PrimaryKey, PrimaryKeyValue, SchemaInfo, Table}
 import trw.dbsubsetter.primarykeystore._
 
 class PkStoreTest extends FunSuite {
@@ -26,7 +26,7 @@ class PkStoreTest extends FunSuite {
       new SchemaInfo(
         tablesByName = Map.empty,
         colsByTableOrdered = Map.empty,
-        pksByTableOrdered = Map(table -> Vector(pkCol)),
+        pksByTable = Map(table -> new PrimaryKey(Seq(pkCol))),
         fksOrdered = Array.empty,
         fksFromTable = Map.empty,
         fksToTable = Map.empty

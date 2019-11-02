@@ -8,7 +8,7 @@ import trw.dbsubsetter.db.ColumnTypes.ColumnType
 // scalastyle:off
 object SchemaInfoRetrieval {
   def getSchemaInfo(config: Config): SchemaInfo = {
-    val DbMetadataQueryResult(tables, columns, primaryKeys, foreignKeys, dbVendor) = DbMetadataQueries.queryDb(config)
+    val DbMetadataQueryResult(tables, columns, primaryKeyMetadataRows, foreignKeys, dbVendor) = DbMetadataQueries.queryDb(config)
 
     val tablesByName = tables.map { t =>
       val hasSqlServerAutoincrement = columns.exists(c => c.schema == t.schema && c.table == t.name && c.isSqlServerAutoincrement)
@@ -30,13 +30,13 @@ object SchemaInfoRetrieval {
       colsByTableAndName.map { case (table, map) => table -> map.values.toVector.sortBy(_.ordinalPosition) }
     }
 
-    val pksByTableOrdered: Map[Table, Vector[Column]] = {
-      primaryKeys
+    val pksByTable: Map[Table, PrimaryKey] = {
+      primaryKeyMetadataRows
         .groupBy(pk => tablesByName(pk.schema, pk.table))
-        .map { case (table, pks) =>
-          val pkColNames = pks.map(_.column).toSet
-          val pkCols = colsByTableOrdered(table).filter(c => pkColNames.contains(c.name))
-          table -> pkCols
+        .map { case (table, singleTablePrimaryKeyMetadataRows) =>
+          val columnNames = singleTablePrimaryKeyMetadataRows.map(_.column).toSet
+          val orderedColumns = colsByTableOrdered(table).filter(c => columnNames.contains(c.name))
+          table -> new PrimaryKey(orderedColumns)
         }
     }
 
@@ -70,7 +70,7 @@ object SchemaInfoRetrieval {
             }
           }
 
-          val pointsToPk = pksByTableOrdered.get(toTable).fold(false)(pkCols => pkCols == toCols)
+          val pointsToPk = pksByTable.get(toTable).fold(false)(pk => pk.columns == toCols)
 
         new ForeignKey(fromCols, toCols, pointsToPk, 0)
       }
@@ -92,7 +92,7 @@ object SchemaInfoRetrieval {
     new SchemaInfo(
       tablesByName,
       colsByTableOrdered,
-      pksByTableOrdered,
+      pksByTable,
       foreignKeysOrdered,
       fksFromTable,
       fksToTable
