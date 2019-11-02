@@ -12,7 +12,8 @@ package object db {
   type TypeName = String
   type Row = Array[Any]
   type SqlQuery = String
-  type SqlTemplates = Map[(ForeignKey, Table), SqlQuery]
+  type ForeignKeySqlTemplates = Map[(ForeignKey, Table), SqlQuery]
+  type PrimaryKeySqlTemplates = Map[(Table, Short), SqlQuery]
 
   class SchemaInfo(
     val tablesByName: Map[(SchemaName, TableName), Table],
@@ -50,6 +51,9 @@ package object db {
       i = index
     }
   }
+
+  // Primary keys can be multi-column. Therefore a single primary key value is a sequence of individual column values.
+  class PrimaryKeyValue(val individualColumnValues: Seq[Any])
 
   implicit class VendorAwareJdbcConnection(private val conn: Connection) {
     private val vendorName: String = conn.getMetaData.getDatabaseProductName

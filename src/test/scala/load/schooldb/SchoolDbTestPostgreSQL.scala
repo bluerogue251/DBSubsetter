@@ -17,7 +17,7 @@ class SchoolDbTestPostgreSQL extends AbstractPostgresqlEndToEndTest with LoadTes
    * only catching major performance degradations. For more rigorous testing, do load testing on AWS.
    * See the load-test directory for details.
    */
-  override val singleThreadedRuntimeLimitMillis: Long = 120000 // 120 seconds
+  override val singleThreadedRuntimeLimitMillis: Long = 200000 // 200 seconds
 
   override val akkaStreamsRuntimeLimitMillis: Long = 25000 // 25 seconds
 
@@ -56,7 +56,6 @@ class SchoolDbTestPostgreSQL extends AbstractPostgresqlEndToEndTest with LoadTes
     "--baseQuery", "school_db.Students ::: student_id % 100 = 0 ::: includeChildren",
     "--baseQuery", "school_db.standalone_table ::: id < 4 ::: includeChildren",
     "--excludeColumns", "school_db.schools(mascot)",
-    "--excludeTable", "school_db.empty_table_2",
-    "--preTargetBufferSize", "10000"
+    "--excludeTable", "school_db.empty_table_2"
   )
 }

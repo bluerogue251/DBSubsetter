@@ -154,15 +154,6 @@ object CommandLineParser {
           |                           Can be specified multiple times
           |""".stripMargin)
 
-    opt[Int]("preTargetBufferSize")
-      .valueName("<int>")
-      .action((int, c) => c.copy(preTargetBufferSize = int))
-      .text(
-        """Buffer up to this many target database insert statements in memory
-          |                           This can sometimes improve performance at the cost of an increased memory footprint
-          |                           The default buffer size is 100
-          |""".stripMargin)
-
     opt[File]("taskQueueDir")
       .valueName("</path/to/task/queue/dir>")
       .action((dir, c) => c.copy(taskQueueDirOpt = Some(dir)))

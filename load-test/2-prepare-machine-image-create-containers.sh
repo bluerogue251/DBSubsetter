@@ -24,14 +24,14 @@ sudo docker run \
   --volume /home/ubuntu/tmp-data:/tmp-data \
   -p 5432:5432 \
   postgres:9.6.3 \
-  postgres -c 'max_connections=15'
+  postgres -c 'max_connections=20'
 
 sudo docker create \
   --name pg_target \
   --volume /home/ubuntu/tmp-data:/tmp-data \
   -p 5433:5432 \
   postgres:9.6.3 \
-  postgres -c 'max_connections=15' -c 'maintenance_work_mem=3GB'
+  postgres -c 'max_connections=10' -c 'maintenance_work_mem=3GB'
 
 # TODO Here we currently manually upload prometheus-config.yml
 mkdir --mode 777 prometheus-data

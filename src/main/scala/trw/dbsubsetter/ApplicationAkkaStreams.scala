@@ -5,6 +5,7 @@ import akka.actor.{ActorRef, ActorSystem}
 import akka.stream.ActorMaterializer
 import trw.dbsubsetter.akkastreams.{PkStoreActor, Subsetting}
 import trw.dbsubsetter.config.Config
+import trw.dbsubsetter.datacopyqueue.{DataCopyQueue, DataCopyQueueFactory}
 import trw.dbsubsetter.db.{DbAccessFactory, SchemaInfo}
 import trw.dbsubsetter.metrics.Metrics
 import trw.dbsubsetter.workflow._
@@ -23,6 +24,7 @@ object ApplicationAkkaStreams {
     val dbAccessFactory: DbAccessFactory = new DbAccessFactory(config, schemaInfo)
     val fkTaskCreationWorkflow: FkTaskCreationWorkflow = new FkTaskCreationWorkflow(schemaInfo)
     val fkTaskQueue: OffHeapFkTaskQueue = OffHeapFkTaskQueueFactory.buildOffHeapFkTaskQueue(config, schemaInfo)
+    val dataCopyQueue: DataCopyQueue = DataCopyQueueFactory.buildDataCopyQueue(config, schemaInfo)
 
     if (config.exposeMetrics) {
       Metrics.PendingTasksGauge.inc(config.baseQueries.size)
@@ -30,7 +32,7 @@ object ApplicationAkkaStreams {
 
     val subsettingFuture: Future[Done] =
       Subsetting
-        .runnableGraph(config, schemaInfo, baseQueries, pkStore, dbAccessFactory, fkTaskCreationWorkflow, fkTaskQueue)
+        .runnableGraph(config, schemaInfo, baseQueries, pkStore, dbAccessFactory, fkTaskCreationWorkflow, fkTaskQueue, dataCopyQueue)
         .run()
         .map { success =>
           dbAccessFactory.closeAllConnections()

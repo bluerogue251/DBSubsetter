@@ -10,7 +10,7 @@ private[db] class TargetDbAccessImpl(connStr: String, sch: SchemaInfo, connectio
   private[this] val connection: Connection =
     connectionFactory.getConnectionWithWritePrivileges(connStr)
 
-  private[this] val statements = Sql.preparedInsertStatementStrings(sch).map { case (table, sqlStr) =>
+  private[this] val statements = Sql.insertSqlTemplates(sch).map { case (table, sqlStr) =>
     table -> connection.prepareStatement(sqlStr)
   }
 

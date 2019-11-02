@@ -7,6 +7,7 @@ import trw.dbsubsetter.workflow._
 import trw.dbsubsetter.workflow.offheap.OffHeapFkTaskQueue
 
 // Adapted from https://github.com/torodb/akka-chronicle-queue
+// TODO refactor to enable code sharing with DataCopyBufferFlow
 private[akkastreams] final class FkTaskBufferFlow(fkTaskQueue: OffHeapFkTaskQueue) extends GraphStage[FlowShape[NewTasks, ForeignKeyTask]] {
 
   private[this] val in: Inlet[NewTasks] = Inlet.create[NewTasks]("FkTaskBufferFlow.in")
