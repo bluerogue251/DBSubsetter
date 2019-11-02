@@ -1,4 +1,4 @@
-package trw.dbsubsetter.queue
+package trw.dbsubsetter.akkastreams
 
 /**
   * A queue which may transform its input elements into a different type before outputting them

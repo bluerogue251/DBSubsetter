@@ -2,7 +2,6 @@ package trw.dbsubsetter.akkastreams
 
 import akka.stream._
 import akka.stream.stage._
-import trw.dbsubsetter.queue.TransformingQueue
 
 
 /**

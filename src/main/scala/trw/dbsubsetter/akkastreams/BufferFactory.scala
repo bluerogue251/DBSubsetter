@@ -4,7 +4,6 @@ import akka.stream.FlowShape
 import akka.stream.stage.GraphStage
 import trw.dbsubsetter.datacopyqueue.DataCopyQueue
 import trw.dbsubsetter.db.{ForeignKey, ForeignKeyValue}
-import trw.dbsubsetter.queue.TransformingQueue
 import trw.dbsubsetter.workflow.offheap.OffHeapFkTaskQueue
 import trw.dbsubsetter.workflow.{DataCopyTask, ForeignKeyTask, NewTasks, PksAdded}
 
