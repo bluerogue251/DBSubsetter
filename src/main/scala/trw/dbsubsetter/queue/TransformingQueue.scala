@@ -11,3 +11,21 @@ trait TransformingQueue[T, U] {
   def dequeue(): Option[U]
   def isEmpty(): Boolean
 }
+
+object TransformingQueue {
+  def from[T, U](enqueueFunc: T => Unit, dequeueFunc: () => Option[U], isEmptyFunc: () => Boolean): TransformingQueue[T, U] = {
+    new TransformingQueue[T, U] {
+      override def enqueue(element: T): Unit = {
+        enqueueFunc(element)
+      }
+
+      override def dequeue(): Option[U] = {
+        dequeueFunc()
+      }
+
+      override def isEmpty(): Boolean = {
+        isEmptyFunc()
+      }
+    }
+  }
+}

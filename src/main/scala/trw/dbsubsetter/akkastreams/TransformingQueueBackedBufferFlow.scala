@@ -5,7 +5,11 @@ import akka.stream.stage._
 import trw.dbsubsetter.queue.TransformingQueue
 
 
-// Partially adapted from https://github.com/torodb/akka-chronicle-queue
+/**
+  * Partially adapted from https://github.com/torodb/akka-chronicle-queue
+  * Refer to akka.stream.impl.fusing.Buffer for onUpstreamFinish logic
+  * Relevant docs: https://doc.akka.io/docs/akka/current/stream/stream-customize.html
+  */
 private[akkastreams] final class TransformingQueueBackedBufferFlow[T, U](backingQueue: TransformingQueue[T, U]) extends GraphStage[FlowShape[T, U]] {
 
   private[this] val in: Inlet[T] = Inlet.create[T]("TransformingQueueBackedBufferFlow.in")

@@ -33,10 +33,10 @@ object Subsetting {
     // TODO try to turn this broadcast into a typesafe Partition stage with two output ports, each output port with a different type
     val broadcastPkExistResult = b.add(Broadcast[PkQueryResult](2))
     val broadcastPksAdded = b.add(Broadcast[PksAdded](2))
-    val dataCopyBufferFlow = b.add(new DataCopyBufferFlow(dataCopyQueue).async)
+    val dataCopyBufferFlow = b.add(BufferFactory.dataCopyBuffer(dataCopyQueue).async)
     val balanceTargetDb = b.add(Balance[DataCopyTask](config.targetDbParallelism, waitForAllDownstreams = true))
     val mergeTargetDbResults = b.add(Merge[Unit](config.targetDbParallelism))
-    val fkTaskBufferFlow = b.add(new FkTaskBufferFlow(fkTaskQueue).async)
+    val fkTaskBufferFlow = b.add(BufferFactory.fkTaskBuffer(fkTaskQueue).async)
     val mergeToOutstandingTaskCounter = b.add(Merge[NewTasks](2))
 
     // Start everything off
