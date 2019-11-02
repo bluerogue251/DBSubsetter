@@ -8,15 +8,21 @@ import trw.dbsubsetter.db.ColumnTypes.ColumnType
 // scalastyle:off
 object SchemaInfoRetrieval {
   def getSchemaInfo(config: Config): SchemaInfo = {
-    val DbMetadataQueryResult(tables, columns, primaryKeyMetadataRows, foreignKeys, dbVendor) = DbMetadataQueries.queryDb(config)
+    val DbMetadataQueryResult(
+      tableMetadataRows,
+      columnMetadataRows,
+      primaryKeyMetadataRows,
+      foreignKeyMetadataRows,
+      dbVendor
+    ) = DbMetadataQueries.queryDb(config)
 
-    val tablesByName = tables.map { t =>
-      val hasSqlServerAutoincrement = columns.exists(c => c.schema == t.schema && c.table == t.name && c.isSqlServerAutoincrement)
+    val tablesByName = tableMetadataRows.map { t =>
+      val hasSqlServerAutoincrement = columnMetadataRows.exists(c => c.schema == t.schema && c.table == t.name && c.isSqlServerAutoincrement)
       (t.schema, t.name) -> new Table(t.schema, t.name, hasSqlServerAutoincrement)
     }.toMap
 
     val colsByTableAndName: Map[Table, Map[ColumnName, Column]] = {
-      columns
+      columnMetadataRows
         .groupBy(c => tablesByName(c.schema, c.table))
         .map { case (table, cols) =>
           table -> cols.zipWithIndex.map { case (c, i) =>
@@ -48,7 +54,7 @@ object SchemaInfoRetrieval {
     }
 
     val foreignKeysOrdered: Array[ForeignKey] = {
-      val fksUnordered = foreignKeys
+      val fksUnordered = foreignKeyMetadataRows
         .groupBy(fkm => (fkm.fromSchema, fkm.fromTable, fkm.toSchema, fkm.toTable))
         .map { case ((fromSchemaName, fromTableName, toSchemaName, toTableName), partialForeignKeys) =>
           val fromTable = tablesByName(fromSchemaName, fromTableName)
