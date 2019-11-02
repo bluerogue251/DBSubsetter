@@ -33,7 +33,10 @@ package object db {
   class Column(
     val table: Table,
     val name: ColumnName,
-    // The 0-indexed location of this column in query results where only primary and foreign key columns are included
+    /*
+     * The 0-indexed location of this column in query results where only primary and foreign key columns are included
+     * -1 if this column is not part of a primary or foreign key, as this column would not be included in that query
+     */
     val keyOrdinalPosition: Int,
     // The 0-indexed location of this column in query results where all columns are included
     val dataOrdinalPosition: Int,
