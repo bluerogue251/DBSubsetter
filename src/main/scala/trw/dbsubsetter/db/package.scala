@@ -10,7 +10,20 @@ package object db {
   type ColumnName = String
   type WhereClause = String
   type TypeName = String
-  type Row = Array[Any]
+
+  // Represents a single row fetched from the origin database with only primary and foreign key columns included
+  class KeyData(data: Array[Any]) {
+    def get(column: Column): Any = {
+      data(column.keysOrdinalPosition)
+    }
+  }
+  // Represents a single row fetched from the origin database with all columns included
+  class RowData(data: Array[Any]) {
+    def get(column: Column): Any = {
+      data(column.dataOrdinalPosition)
+    }
+  }
+
   type SqlQuery = String
   type ForeignKeySqlTemplates = Map[(ForeignKey, Table), SqlQuery]
   type PrimaryKeySqlTemplates = Map[(Table, Short), SqlQuery]
@@ -33,7 +46,10 @@ package object db {
   class Column(
     val table: Table,
     val name: ColumnName,
-    val ordinalPosition: Int,
+    // The ordinal position of the column if only primary and foreign key columns are included, or -1 if the column is not a key column.
+    val keysOrdinalPosition: Int,
+    // The ordinal position of the column if all columns are included
+    val dataOrdinalPosition: Int,
     val dataType: ColumnType
   )
 
