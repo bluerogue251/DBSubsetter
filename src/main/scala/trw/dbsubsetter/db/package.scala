@@ -17,7 +17,10 @@ package object db {
 
   class SchemaInfo(
     val tablesByName: Map[(SchemaName, TableName), Table],
-    val colsByTableOrdered: Map[Table, Vector[Column]],
+    // Only those columns involved in a primary or foreign key
+    val keyColumnsByTableOrdered: Map[Table, Vector[Column]],
+    // All columns, even those uninvolved in a primary or foreign key
+    val dataColumnsByTableOrdered: Map[Table, Vector[Column]],
     val pksByTable: Map[Table, PrimaryKey],
     val fksOrdered: Array[ForeignKey],
     val fksFromTable: Map[Table, Vector[ForeignKey]],
@@ -33,7 +36,13 @@ package object db {
   class Column(
     val table: Table,
     val name: ColumnName,
-    val ordinalPosition: Int,
+    /*
+     * The 0-indexed location of this column in query results where only primary and foreign key columns are included
+     * -1 if this column is not part of a primary or foreign key, as this column would not be included in that query
+     */
+    val keyOrdinalPosition: Int,
+    // The 0-indexed location of this column in query results where all columns are included
+    val dataOrdinalPosition: Int,
     val dataType: ColumnType
   )
 
@@ -61,8 +70,20 @@ package object db {
     val isEmpty: Boolean = individualColumnValues.forall(_ == null)
   }
 
-  // Represents a single row in the origin database including only primary and foreign key columns
-  class Keys(val data: Array[Any])
+  // Represents a single row from the origin database including only primary and foreign key columns
+  class Keys(data: Array[Any]) {
+    def getValue(pk: PrimaryKey): PrimaryKeyValue = {
+      val individualColumnValues: Seq[Any] = pk.columns.map(_.keyOrdinalPosition).map(data)
+      new PrimaryKeyValue(individualColumnValues)
+    }
+
+    def getValue(fk: ForeignKey, confusingTechDebt: Boolean): ForeignKeyValue = {
+      val columns: Seq[Column] = if (confusingTechDebt) fk.toCols else fk.fromCols
+      val individualColumnOrdinals: Seq[Int] = columns.map(_.keyOrdinalPosition)
+      val individualColumnValues: Seq[Any] = individualColumnOrdinals.map(data)
+      new ForeignKeyValue(individualColumnValues)
+    }
+  }
 
   implicit class VendorAwareJdbcConnection(private val conn: Connection) {
     private val vendorName: String = conn.getMetaData.getDatabaseProductName

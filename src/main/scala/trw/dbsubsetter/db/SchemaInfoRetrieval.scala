@@ -21,13 +21,20 @@ object SchemaInfoRetrieval {
         .map { case (table, cols) =>
           table -> cols.zipWithIndex.map { case (c, i) =>
             val columnType: ColumnType = ColumnTypes.fromRawInfo(c.jdbcType, c.typeName, dbVendor)
-            c.name -> new Column(table, c.name, i, columnType)
+            val column: Column = new Column(
+              table = table,
+              name = c.name,
+              keyOrdinalPosition = i, // TODO separate keyOrdinalPosition from dataOrdinalPosition
+              dataOrdinalPosition = i,
+              dataType = columnType
+            )
+            c.name -> column
           }.toMap
         }
     }
 
-    val colsByTableOrdered: Map[Table, Vector[Column]] = {
-      colsByTableAndName.map { case (table, map) => table -> map.values.toVector.sortBy(_.ordinalPosition) }
+    val allColumnsByTableOrdered: Map[Table, Vector[Column]] = {
+      colsByTableAndName.map { case (table, map) => table -> map.values.toVector.sortBy(_.dataOrdinalPosition) }
     }
 
     val pksByTable: Map[Table, PrimaryKey] = {
@@ -35,7 +42,7 @@ object SchemaInfoRetrieval {
         .groupBy(pk => tablesByName(pk.schema, pk.table))
         .map { case (table, singleTablePrimaryKeyMetadataRows) =>
           val columnNames = singleTablePrimaryKeyMetadataRows.map(_.column).toSet
-          val orderedColumns = colsByTableOrdered(table).filter(c => columnNames.contains(c.name))
+          val orderedColumns = allColumnsByTableOrdered(table).filter(c => columnNames.contains(c.name))
           table -> new PrimaryKey(orderedColumns)
         }
     }
@@ -90,12 +97,13 @@ object SchemaInfoRetrieval {
     }
 
     new SchemaInfo(
-      tablesByName,
-      colsByTableOrdered,
-      pksByTable,
-      foreignKeysOrdered,
-      fksFromTable,
-      fksToTable
+      tablesByName = tablesByName,
+      keyColumnsByTableOrdered = allColumnsByTableOrdered, // TODO replace this with just the key columns
+      dataColumnsByTableOrdered = allColumnsByTableOrdered,
+      pksByTable = pksByTable,
+      fksOrdered = foreignKeysOrdered,
+      fksFromTable = fksFromTable,
+      fksToTable = fksToTable
     )
   }
 }

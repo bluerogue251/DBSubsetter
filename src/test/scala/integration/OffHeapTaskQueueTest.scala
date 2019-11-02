@@ -83,7 +83,8 @@ private[this] object OffHeapTaskQueueTest {
     new Column(
       table = parentTable,
       name = "id",
-      ordinalPosition = 4,
+      keyOrdinalPosition = 4,
+      dataOrdinalPosition = -1, // n/a
       ColumnTypes.Long
     )
 
@@ -98,7 +99,8 @@ private[this] object OffHeapTaskQueueTest {
     new Column(
       table = childTable,
       name = "parentId",
-      ordinalPosition = 7,
+      keyOrdinalPosition = 7,
+      dataOrdinalPosition = -1, // n/a
       ColumnTypes.Long
     )
 
@@ -113,7 +115,8 @@ private[this] object OffHeapTaskQueueTest {
   private val schemaInfo: SchemaInfo =
     new SchemaInfo(
       tablesByName = Map.empty,
-      colsByTableOrdered = Map.empty,
+      keyColumnsByTableOrdered = Map.empty,
+      dataColumnsByTableOrdered = Map.empty,
       pksByTable = Map.empty,
       fksOrdered = Array(foreignKey),
       fksFromTable = Map.empty,

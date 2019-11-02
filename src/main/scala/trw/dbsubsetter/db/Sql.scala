@@ -18,23 +18,26 @@ private[db] object Sql {
       val whereClause: String =
         makeSimpleWhereClause(whereClauseColumns)
 
-      (fk, table) -> makeQueryString(table, whereClause, sch)
+      val selectColumns: Seq[Column] =
+        sch.keyColumnsByTableOrdered(table)
+
+      (fk, table) -> makeQueryString(table, selectColumns, whereClause, sch)
     }.toMap
   }
 
   def queryByPkSqlTemplates(sch: SchemaInfo): PrimaryKeySqlTemplates = {
     sch.pksByTable.flatMap { case (table, primaryKey) =>
       Constants.dataCopyBatchSizes.map(batchSize => {
-        val columns: Seq[Column] = primaryKey.columns
-        val whereClause: String = makeCompositeWhereClause(columns, batchSize)
-        (table, batchSize) -> makeQueryString(table, whereClause, sch)
+        val whereClause: String = makeCompositeWhereClause(primaryKey.columns, batchSize)
+        val selectColumns: Seq[Column] = sch.dataColumnsByTableOrdered(table)
+        (table, batchSize) -> makeQueryString(table, selectColumns, whereClause, sch)
       })
     }
   }
 
   def insertSqlTemplates(sch: SchemaInfo): Map[Table, SqlQuery] = {
     sch.tablesByName.map { case (_, table) =>
-      val cols = sch.colsByTableOrdered(table)
+      val cols = sch.dataColumnsByTableOrdered(table)
       val sqlString =
         s"""insert into ${quote(table)}
            |${cols.map(quote).mkString("(", ",", ")")}
@@ -48,9 +51,11 @@ private[db] object Sql {
     }
   }
 
-  def makeQueryString(table: Table, whereClause: WhereClause, sch: SchemaInfo): SqlQuery = {
-    val selectCols = sch.colsByTableOrdered(table).map(quoteFullyQualified).mkString(", ")
-    s"""select $selectCols
+  def makeQueryString(table: Table, selectColumns: Seq[Column], whereClause: WhereClause, sch: SchemaInfo): SqlQuery = {
+    val selectClause: String =
+      selectColumns.map(quoteFullyQualified).mkString(", ")
+
+    s"""select $selectClause
        | from ${quote(table)}
        | where $whereClause
        | """.stripMargin

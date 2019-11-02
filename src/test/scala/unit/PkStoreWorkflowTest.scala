@@ -19,14 +19,16 @@ class PkStoreWorkflowTest extends FunSuite {
       new Column(
         table = table,
         name = null,
-        ordinalPosition = 0,
+        keyOrdinalPosition = 0,
+        dataOrdinalPosition = -1, // n/a
         dataType = null
       )
 
     val schemaInfo: SchemaInfo =
       new SchemaInfo(
         tablesByName = Map.empty,
-        colsByTableOrdered = Map.empty,
+        keyColumnsByTableOrdered = Map.empty,
+        dataColumnsByTableOrdered = Map.empty,
         pksByTable = Map(table -> new PrimaryKey(Seq(pkCol))),
         fksOrdered = Array.empty,
         fksFromTable = Map.empty,
@@ -83,14 +85,16 @@ class PkStoreWorkflowTest extends FunSuite {
       new Column(
         table = table,
         name = null,
-        ordinalPosition = 0,
+        keyOrdinalPosition = 0,
+        dataOrdinalPosition = -1, // n/a
         dataType = null
       )
 
     val schemaInfo: SchemaInfo =
       new SchemaInfo(
         tablesByName = Map.empty,
-        colsByTableOrdered = Map.empty,
+        keyColumnsByTableOrdered = Map.empty,
+        dataColumnsByTableOrdered = Map.empty,
         pksByTable = Map(table -> new PrimaryKey(Seq(primaryKeyColumn))),
         fksOrdered = Array.empty,
         fksFromTable = Map.empty,
