@@ -42,7 +42,7 @@ private[offheap] final class ChronicleQueueFkTaskQueue(config: Config, schemaInf
         new TaskQueueWriter(fk.i, fk.fromCols.map(_.dataType))
       }
 
-  override def enqueue(fkOrdinal: Short, fkValue: Any, fetchChildren: Boolean): Unit = {
+  override def enqueue(fkOrdinal: Short, fkValue: ForeignKeyValue, fetchChildren: Boolean): Unit = {
     val writer: TaskQueueWriter =
       if (fetchChildren) {
         childFkWriters(fkOrdinal)

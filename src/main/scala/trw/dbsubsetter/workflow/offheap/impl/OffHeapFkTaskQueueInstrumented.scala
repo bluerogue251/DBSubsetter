@@ -1,5 +1,6 @@
 package trw.dbsubsetter.workflow.offheap.impl
 
+import trw.dbsubsetter.db.ForeignKeyValue
 import trw.dbsubsetter.metrics.Metrics
 import trw.dbsubsetter.workflow.ForeignKeyTask
 import trw.dbsubsetter.workflow.offheap.OffHeapFkTaskQueue
@@ -12,7 +13,7 @@ private[offheap] final class OffHeapFkTaskQueueInstrumented(delegatee: OffHeapFk
 
   private[this] val taskDequeueDuration = Metrics.TaskDequeueDuration
 
-  override def enqueue(fkOrdinal: Short, fkValue: Any, fetchChildren: Boolean): Unit = {
+  override def enqueue(fkOrdinal: Short, fkValue: ForeignKeyValue, fetchChildren: Boolean): Unit = {
     val runnable: Runnable = () => delegatee.enqueue(fkOrdinal, fkValue, fetchChildren)
     taskEnqueueDuration.time(runnable)
     pendingTaskCount.inc()
