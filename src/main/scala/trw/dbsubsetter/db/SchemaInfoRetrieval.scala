@@ -30,7 +30,7 @@ object SchemaInfoRetrieval {
             val column: Column = new Column(
               table = table,
               name = c.name,
-              keyOrdinalPosition = i, // TODO separate keyOrdinalPosition from dataOrdinalPosition
+              keyOrdinalPosition = i, // Placeholder value that will be mutated (corrected) later
               dataOrdinalPosition = i,
               dataType = columnType
             )
@@ -39,7 +39,7 @@ object SchemaInfoRetrieval {
         }
     }
 
-    val allColumnsByTableOrdered: Map[Table, Vector[Column]] = {
+    val dataColumnsByTableOrdered: Map[Table, Vector[Column]] = {
       colsByTableAndName.map { case (table, map) => table -> map.values.toVector.sortBy(_.dataOrdinalPosition) }
     }
 
@@ -48,7 +48,7 @@ object SchemaInfoRetrieval {
         .groupBy(pk => tablesByName(pk.schema, pk.table))
         .map { case (table, singleTablePrimaryKeyMetadataRows) =>
           val columnNames = singleTablePrimaryKeyMetadataRows.map(_.column).toSet
-          val orderedColumns = allColumnsByTableOrdered(table).filter(c => columnNames.contains(c.name))
+          val orderedColumns = dataColumnsByTableOrdered(table).filter(c => columnNames.contains(c.name))
           table -> new PrimaryKey(orderedColumns)
         }
     }
@@ -102,10 +102,32 @@ object SchemaInfoRetrieval {
       foreignKeysOrdered.toVector.groupBy(_.toTable).withDefaultValue(Vector.empty)
     }
 
+    val keyColumnsByTableOrdered: Map[Table, Vector[Column]] = {
+      dataColumnsByTableOrdered.map { case (table, allColumns) =>
+        val primaryKey: PrimaryKey = pksByTable(table)
+        val foreignKeysFromTable: Seq[ForeignKey] = fksFromTable(table)
+        val foreignKeysToTable: Seq[ForeignKey] = fksToTable(table)
+
+        def isKeyColumn(col: Column): Boolean = {
+          primaryKey.columns.contains(col) ||
+            foreignKeysFromTable.exists(_.fromCols.contains(col)) ||
+            foreignKeysToTable.exists(_.toCols.contains(col))
+        }
+
+        val keyColumns: Seq[Column] = allColumns.filter(isKeyColumn)
+
+        keyColumns.zipWithIndex.foreach { case (keyColumn, i) =>
+          keyColumn.keyOrdinalPosition = i
+        }
+
+        table -> allColumns.filter(isKeyColumn)
+      }
+    }
+
     new SchemaInfo(
       tablesByName = tablesByName,
-      keyColumnsByTableOrdered = allColumnsByTableOrdered, // TODO replace this with just the key columns
-      dataColumnsByTableOrdered = allColumnsByTableOrdered,
+      keyColumnsByTableOrdered = keyColumnsByTableOrdered,
+      dataColumnsByTableOrdered = dataColumnsByTableOrdered,
       pksByTable = pksByTable,
       fksOrdered = foreignKeysOrdered,
       fksFromTable = fksFromTable,
