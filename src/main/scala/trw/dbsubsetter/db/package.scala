@@ -61,6 +61,17 @@ package object db {
     val isEmpty: Boolean = individualColumnValues.forall(_ == null)
   }
 
+  // Represents a single row in the origin database including only primary and foreign key columns
+  class Keys(data: Array[Any]) {
+    def getValue(primaryKey: PrimaryKey): PrimaryKeyValue = {
+      ???
+    }
+
+    def getValue(foreignKey: ForeignKey): ForeignKeyValue = {
+      ???
+    }
+  }
+
   implicit class VendorAwareJdbcConnection(private val conn: Connection) {
     private val vendorName: String = conn.getMetaData.getDatabaseProductName
 
