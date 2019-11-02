@@ -16,7 +16,11 @@ object BatchingUtil {
       throw new IllegalArgumentException()
     }
 
-    batchInternal(elements, batchSizes, ArrayBuffer[Seq[T]]())
+    if (batchSizes.contains(elements.size)) {
+      Seq(elements)
+    } else {
+      batchInternal(elements, batchSizes, ArrayBuffer[Seq[T]]())
+    }
   }
 
   @tailrec

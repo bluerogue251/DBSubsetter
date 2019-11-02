@@ -3,7 +3,7 @@ package trw.dbsubsetter.datacopyqueue.impl
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.datacopyqueue.DataCopyQueue
 import trw.dbsubsetter.db.ColumnTypes.ColumnType
-import trw.dbsubsetter.db.{PrimaryKeyValue, Row, SchemaInfo, Table}
+import trw.dbsubsetter.db.{Constants, PrimaryKeyValue, Row, SchemaInfo, Table}
 import trw.dbsubsetter.workflow.{DataCopyTask, PksAdded}
 
 import scala.collection.mutable
@@ -59,15 +59,17 @@ private[datacopyqueue] final class DataCopyQueueImpl(config: Config, schemaInfo:
     if (tablesWithQueuedValues.isEmpty) {
       None
     } else {
-      val table: Table = tablesWithQueuedValues.head
+      // TODO would be nice to eventually make this stuff constant time
+      val table: Table = tablesWithQueuedValues.maxBy(tablesToQueuedValueCounts)
+      val totalQuantityAvailable: Long = tablesToQueuedValueCounts(table)
+      val dequeueQuantity = Constants.dataCopyBatchSizes.filter(_ <= totalQuantityAvailable).max
 
       val chronicleQueueAccess: ChronicleQueueAccess = tablesToChronicleQueues(table)
-      val primaryKeyValues: Seq[PrimaryKeyValue] = chronicleQueueAccess.read(1)
+      val primaryKeyValues: Seq[PrimaryKeyValue] = chronicleQueueAccess.read(dequeueQuantity)
       val dataCopyTask = new DataCopyTask(table, primaryKeyValues)
 
-      val previousCount: Long = tablesToQueuedValueCounts(table)
-      tablesToQueuedValueCounts.update(table, previousCount - 1)
-      if (previousCount == 1L) {
+      tablesToQueuedValueCounts.update(table, totalQuantityAvailable - dequeueQuantity)
+      if (totalQuantityAvailable == dequeueQuantity) {
         tablesWithQueuedValues.remove(table)
       }
 
