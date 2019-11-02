@@ -4,7 +4,7 @@ import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.datacopyqueue.DataCopyQueue
 import trw.dbsubsetter.db.ColumnTypes.ColumnType
 import trw.dbsubsetter.db.{Constants, PrimaryKeyValue, Row, SchemaInfo, Table}
-import trw.dbsubsetter.pkvalueextraction.PkValueExtractionUtil
+import trw.dbsubsetter.keyextraction.KeyExtractionUtil
 import trw.dbsubsetter.workflow.{DataCopyTask, PksAdded}
 
 import scala.collection.mutable
@@ -37,7 +37,7 @@ private[datacopyqueue] final class DataCopyQueueImpl(config: Config, schemaInfo:
   }
 
   private[this] val pkValueExtractionFunctions: Map[Table, Row => PrimaryKeyValue] =
-    PkValueExtractionUtil.pkValueExtractionFunctionsByTable(schemaInfo)
+    KeyExtractionUtil.pkExtractionFunctions(schemaInfo)
 
   override def enqueue(pksAdded: PksAdded): Unit = {
     val rows: Vector[Row] = pksAdded.rowsNeedingParentTasks

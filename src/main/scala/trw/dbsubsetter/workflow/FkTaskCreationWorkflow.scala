@@ -1,10 +1,17 @@
 package trw.dbsubsetter.workflow
 
 import trw.dbsubsetter.db._
+import trw.dbsubsetter.keyextraction.KeyExtractionUtil
+
+// TODO consider a test case for a child foreign key value for a business key which is nullable, and rows exist in the child
+//   table that are null, which don't belong to the parent with the null business key...
 
 // TODO reconsider name (or the way this works) since this does not actually create any `FkTask`s. (It creates `NewTasks`).
 // TODO do the same reconsideration for the Akka Streams Flow that calls this.
 final class FkTaskCreationWorkflow(schemaInfo: SchemaInfo) {
+
+  private[this] val fkExtractionFunctions: Map[(ForeignKey, Boolean), Row => ForeignKeyValue] =
+    KeyExtractionUtil.fkExtractionFunctions(schemaInfo)
 
   def createFkTasks(pksAdded: PksAdded): NewTasks = {
     val PksAdded(table, rowsNeedingParentTasks, rowsNeedingChildTasks, viaTableOpt) = pksAdded
@@ -24,48 +31,26 @@ final class FkTaskCreationWorkflow(schemaInfo: SchemaInfo) {
     // `distinct` and `viaTableOpt` only apply for calculating parent tasks, not child tasks.
     // Both of these seem necessary for avoiding always needing to store PKs for all parents
     //
-    // `filterNot(_ == null)` should also only be necessary for parent tasks, not child tasks
+    // `filterNot(_.isEmpty)` should also only be necessary for parent tasks, not child tasks
     val allForeignKeys = schemaInfo.fksFromTable(table)
     val useForeignKeys = viaTableOpt.fold(allForeignKeys)(viaTable => allForeignKeys.filterNot(fk => fk.toTable == viaTable))
-    val newTasksInfo: Map[(ForeignKey, Boolean), Array[Any]] = useForeignKeys.map { fk =>
-      val fkValueExtractionFunction: Row => Any = FkTaskCreationWorkflow.buildFkValueExtractionFunction(fk.fromCols)
-      val fkValues: Array[Any] = rows.map(fkValueExtractionFunction).toArray
-      val distinctFkValues: Array[Any] = fkValues.distinct.filterNot(_ == null)
-      (fk, false) -> distinctFkValues
-    }.toMap
+    val newTasksInfo: Map[(ForeignKey, Boolean), Array[ForeignKeyValue]] =
+      useForeignKeys.map { fk =>
+        val fkValueExtractionFunction: Row => ForeignKeyValue = fkExtractionFunctions(fk, false)
+        val fkValues: Seq[ForeignKeyValue] = rows.map(fkValueExtractionFunction)
+        val distinctFkValues: Seq[ForeignKeyValue] = fkValues.filterNot(_.isEmpty)
+        (fk, false) -> distinctFkValues
+      }.toMap
     NewTasks(newTasksInfo)
   }
 
   private[this] def calcChildTasks(table: Table, rows: Vector[Row]): NewTasks = {
     val allForeignKeys = schemaInfo.fksToTable(table)
     val newTasksInfo: Map[(ForeignKey, Boolean), Array[Any]] = allForeignKeys.map { fk =>
-      val fkValueExtractionFunction: Row => Any = FkTaskCreationWorkflow.buildFkValueExtractionFunction(fk.toCols)
+      val fkValueExtractionFunction: Row => ForeignKeyValue = fkExtractionFunctions(fk, true)
       val fkValues: Array[Any] = rows.map(fkValueExtractionFunction).toArray
       (fk, true) -> fkValues
     }.toMap
     NewTasks(newTasksInfo)
-  }
-}
-
-private[this] object FkTaskCreationWorkflow {
-
-  /*
-   * Require IndexedSeq to ensure O(1) access for calls to `length`
-   * TODO -- consider somehow moving this function onto the ForeignKey class or some other similar class
-   * rather than calculating it here (might need to create this class, it could be called `TargetColumns` or
-   * something, representing the columns pointed to from a foreign key)
-   */
-  private def buildFkValueExtractionFunction(foreignKeyColumns: IndexedSeq[Column]): Row => Any = {
-    val isSingleColumnForeignKey: Boolean = foreignKeyColumns.length == 1
-
-    if (isSingleColumnForeignKey) {
-      val ordinalPosition = foreignKeyColumns.head.ordinalPosition
-      val function: Row => Any = row => row(ordinalPosition)
-      function
-    } else {
-      val ordinalPositions = foreignKeyColumns.map(_.ordinalPosition)
-      val function: Row => Array[Any] = row => ordinalPositions.map(row).toArray
-      function
-    }
   }
 }

@@ -55,7 +55,9 @@ package object db {
   class PrimaryKeyValue(val individualColumnValues: Seq[Any])
 
   // Foreign keys can be multi-column. Therefore a single foreign key value is a sequence of individual column values.
-  class ForeignKeyValue(val individualColumnValues: Seq[Any])
+  class ForeignKeyValue(val individualColumnValues: Seq[Any]) {
+    val isEmpty: Boolean = individualColumnValues.forall(_ == null)
+  }
 
   implicit class VendorAwareJdbcConnection(private val conn: Connection) {
     private val vendorName: String = conn.getMetaData.getDatabaseProductName

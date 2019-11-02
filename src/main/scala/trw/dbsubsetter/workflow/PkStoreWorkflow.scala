@@ -1,14 +1,14 @@
 package trw.dbsubsetter.workflow
 
 import trw.dbsubsetter.db.{PrimaryKeyValue, Row, SchemaInfo, Table}
-import trw.dbsubsetter.pkvalueextraction.PkValueExtractionUtil
+import trw.dbsubsetter.keyextraction.KeyExtractionUtil
 import trw.dbsubsetter.primarykeystore.{AlreadySeenWithoutChildren, FirstTimeSeen, PrimaryKeyStore, WriteOutcome}
 
 
 final class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
 
   private[this] val pkValueExtractionFunctions: Map[Table, Row => PrimaryKeyValue] =
-    PkValueExtractionUtil.pkValueExtractionFunctionsByTable(schemaInfo)
+    KeyExtractionUtil.pkExtractionFunctions(schemaInfo)
 
   def add(req: OriginDbResult): PksAdded = {
     val OriginDbResult(table, rows, viaTableOpt, fetchChildren) = req

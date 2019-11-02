@@ -2,7 +2,7 @@ package trw.dbsubsetter
 
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.{DbAccessFactory, PrimaryKeyValue, Row, SchemaInfo, Table}
-import trw.dbsubsetter.pkvalueextraction.PkValueExtractionUtil
+import trw.dbsubsetter.keyextraction.KeyExtractionUtil
 import trw.dbsubsetter.primarykeystore.{PrimaryKeyStore, PrimaryKeyStoreFactory}
 import trw.dbsubsetter.taskqueue.{TaskQueue, TaskQueueFactory}
 import trw.dbsubsetter.workflow._
@@ -18,7 +18,7 @@ object ApplicationSingleThreaded {
     val fkTaskCreationWorkflow: FkTaskCreationWorkflow = new FkTaskCreationWorkflow(schemaInfo)
 
     val pkValueExtractionFunctions: Map[Table, Row => PrimaryKeyValue] =
-      PkValueExtractionUtil.pkValueExtractionFunctionsByTable(schemaInfo)
+      KeyExtractionUtil.pkExtractionFunctions(schemaInfo)
 
     // Set up task queue
     val taskQueue: TaskQueue = TaskQueueFactory.buildTaskQueue(config)
