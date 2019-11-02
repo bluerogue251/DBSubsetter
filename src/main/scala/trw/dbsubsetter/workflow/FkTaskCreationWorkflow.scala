@@ -45,9 +45,9 @@ final class FkTaskCreationWorkflow(schemaInfo: SchemaInfo) {
 
   private[this] def calcChildTasks(table: Table, rows: Vector[Row]): NewTasks = {
     val allForeignKeys = schemaInfo.fksToTable(table)
-    val newTasksInfo: Map[(ForeignKey, Boolean), Array[Any]] = allForeignKeys.map { fk =>
+    val newTasksInfo: Map[(ForeignKey, Boolean), Seq[ForeignKeyValue]] = allForeignKeys.map { fk =>
       val fkValueExtractionFunction: Row => ForeignKeyValue = fkExtractionFunctions(fk, true)
-      val fkValues: Array[Any] = rows.map(fkValueExtractionFunction).toArray
+      val fkValues: Seq[ForeignKeyValue] = rows.map(fkValueExtractionFunction)
       (fk, true) -> fkValues
     }.toMap
     NewTasks(newTasksInfo)

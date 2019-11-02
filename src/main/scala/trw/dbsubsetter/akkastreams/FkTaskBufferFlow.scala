@@ -21,7 +21,7 @@ private[akkastreams] final class FkTaskBufferFlow(fkTaskQueue: OffHeapFkTaskQueu
     setHandler(in, new InHandler {
       override def onPush(): Unit = {
         val newTasks: NewTasks = grab(in)
-        val newTaskMap: Map[(ForeignKey, Boolean), Array[ForeignKeyValue]] = newTasks.taskInfo
+        val newTaskMap: Map[(ForeignKey, Boolean), Seq[ForeignKeyValue]] = newTasks.taskInfo
         newTaskMap.foreach { case ((fk, fetchChildren), fkValues) =>
           fkValues.foreach(fkValue => fkTaskQueue.enqueue(fk.i, fkValue, fetchChildren))
         }
