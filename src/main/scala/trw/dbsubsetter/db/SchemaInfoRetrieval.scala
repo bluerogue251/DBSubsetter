@@ -8,15 +8,21 @@ import trw.dbsubsetter.db.ColumnTypes.ColumnType
 // scalastyle:off
 object SchemaInfoRetrieval {
   def getSchemaInfo(config: Config): SchemaInfo = {
-    val DbMetadataQueryResult(tables, columns, primaryKeyMetadataRows, foreignKeys, dbVendor) = DbMetadataQueries.queryDb(config)
+    val DbMetadataQueryResult(
+      tableMetadataRows,
+      columnMetadataRows,
+      primaryKeyMetadataRows,
+      foreignKeyMetadataRows,
+      dbVendor
+    ) = DbMetadataQueries.queryDb(config)
 
-    val tablesByName = tables.map { t =>
-      val hasSqlServerAutoincrement = columns.exists(c => c.schema == t.schema && c.table == t.name && c.isSqlServerAutoincrement)
+    val tablesByName = tableMetadataRows.map { t =>
+      val hasSqlServerAutoincrement = columnMetadataRows.exists(c => c.schema == t.schema && c.table == t.name && c.isSqlServerAutoincrement)
       (t.schema, t.name) -> new Table(t.schema, t.name, hasSqlServerAutoincrement)
     }.toMap
 
     val colsByTableAndName: Map[Table, Map[ColumnName, Column]] = {
-      columns
+      columnMetadataRows
         .groupBy(c => tablesByName(c.schema, c.table))
         .map { case (table, cols) =>
           table -> cols.zipWithIndex.map { case (c, i) =>
@@ -24,7 +30,7 @@ object SchemaInfoRetrieval {
             val column: Column = new Column(
               table = table,
               name = c.name,
-              keyOrdinalPosition = i, // TODO separate keyOrdinalPosition from dataOrdinalPosition
+              keyOrdinalPosition = -1, // Placeholder value that will be mutated (corrected) later
               dataOrdinalPosition = i,
               dataType = columnType
             )
@@ -48,7 +54,7 @@ object SchemaInfoRetrieval {
     }
 
     val foreignKeysOrdered: Array[ForeignKey] = {
-      val fksUnordered = foreignKeys
+      val fksUnordered = foreignKeyMetadataRows
         .groupBy(fkm => (fkm.fromSchema, fkm.fromTable, fkm.toSchema, fkm.toTable))
         .map { case ((fromSchemaName, fromTableName, toSchemaName, toTableName), partialForeignKeys) =>
           val fromTable = tablesByName(fromSchemaName, fromTableName)
@@ -96,9 +102,31 @@ object SchemaInfoRetrieval {
       foreignKeysOrdered.toVector.groupBy(_.toTable).withDefaultValue(Vector.empty)
     }
 
+    val keyColumnsByTableOrdered: Map[Table, Vector[Column]] = {
+      allColumnsByTableOrdered.map { case (table, allColumns) =>
+        val primaryKey: PrimaryKey = pksByTable(table)
+        val foreignKeysFromTable: Seq[ForeignKey] = fksFromTable(table)
+        val foreignKeysToTable: Seq[ForeignKey] = fksToTable(table)
+
+        def isKeyColumn(col: Column): Boolean = {
+          primaryKey.columns.contains(col) ||
+            foreignKeysFromTable.exists(_.fromCols.contains(col)) ||
+            foreignKeysToTable.exists(_.toCols.contains(col))
+        }
+
+        val keyColumns: Vector[Column] = allColumns.filter(isKeyColumn)
+
+        keyColumns.zipWithIndex.foreach { case (keyColumn, i) =>
+          keyColumn.keyOrdinalPosition = i
+        }
+
+        table -> keyColumns
+      }
+    }
+
     new SchemaInfo(
       tablesByName = tablesByName,
-      keyColumnsByTableOrdered = allColumnsByTableOrdered, // TODO replace this with just the key columns
+      keyColumnsByTableOrdered = keyColumnsByTableOrdered,
       dataColumnsByTableOrdered = allColumnsByTableOrdered,
       pksByTable = pksByTable,
       fksOrdered = foreignKeysOrdered,
