@@ -1,6 +1,6 @@
 package trw.dbsubsetter.primarykeystore.impl
 
-import trw.dbsubsetter.db.{SchemaInfo, Table}
+import trw.dbsubsetter.db.{PrimaryKeyValue, SchemaInfo, Table}
 import trw.dbsubsetter.primarykeystore._
 
 import scala.collection.mutable
@@ -24,7 +24,7 @@ private[primarykeystore] final class InMemoryPrimaryKeyStore(schemaInfo: SchemaI
   private[this] val seenWithChildrenStorage: Map[Table, mutable.HashSet[Any]] =
     InMemoryPrimaryKeyStore.buildStorage(schemaInfo)
 
-  override def markSeen(table: Table, primaryKeyValue: Any): WriteOutcome = {
+  override def markSeen(table: Table, primaryKeyValue: PrimaryKeyValue): WriteOutcome = {
     val alreadySeenWithChildren: Boolean =
       seenWithChildrenStorage(table).contains(primaryKeyValue)
 
@@ -41,7 +41,7 @@ private[primarykeystore] final class InMemoryPrimaryKeyStore(schemaInfo: SchemaI
     }
   }
 
-  override def markSeenWithChildren(table: Table, primaryKeyValue: Any): WriteOutcome = {
+  override def markSeenWithChildren(table: Table, primaryKeyValue: PrimaryKeyValue): WriteOutcome = {
     val alreadySeenWithChildren: Boolean =
       !seenWithChildrenStorage(table).add(primaryKeyValue)
 
@@ -58,7 +58,7 @@ private[primarykeystore] final class InMemoryPrimaryKeyStore(schemaInfo: SchemaI
     }
   }
 
-  override def alreadySeen(table: Table, primaryKeyValue: Any): Boolean = {
+  override def alreadySeen(table: Table, primaryKeyValue: PrimaryKeyValue): Boolean = {
     seenWithChildrenStorage(table).contains(primaryKeyValue) ||
       seenWithoutChildrenStorage(table).contains(primaryKeyValue)
   }
@@ -70,3 +70,5 @@ private object InMemoryPrimaryKeyStore {
     tables.map { t => t -> mutable.HashSet.empty[Any] }.toMap
   }
 }
+
+// I wonder if the primary key storage is broken for multi-column primary keys, since how can you do a HashMap of an Array properly?
