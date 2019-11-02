@@ -9,8 +9,8 @@ package object workflow {
   case class BaseQuery(table: Table, sql: SqlQuery, fetchChildren: Boolean) extends OriginDbRequest
 
   sealed trait ForeignKeyTask extends OriginDbRequest
-  case class FetchParentTask(parentTable: Table, fk: ForeignKey, fkValueFromChild: Any) extends ForeignKeyTask
-  case class FetchChildrenTask(childTable: Table, viaParentTable: Table, fk: ForeignKey, fkValueFromParent: Any) extends ForeignKeyTask
+  case class FetchParentTask(parentTable: Table, fk: ForeignKey, fkValueFromChild: ForeignKeyValue) extends ForeignKeyTask
+  case class FetchChildrenTask(childTable: Table, viaParentTable: Table, fk: ForeignKey, fkValueFromParent: ForeignKeyValue) extends ForeignKeyTask
 
   case class OriginDbResult(table: Table, rows: Vector[Row], viaTableOpt: Option[Table], fetchChildren: Boolean)
 
@@ -22,6 +22,6 @@ package object workflow {
   case object AlreadySeen extends PkQueryResult
   case class NotAlreadySeen(task: FetchParentTask) extends PkQueryResult
 
-  case class NewTasks(taskInfo: Map[(ForeignKey, Boolean), Array[Any]])
+  case class NewTasks(taskInfo: Map[(ForeignKey, Boolean), Array[ForeignKeyValue]])
   val EmptyNewTasks = NewTasks(Map.empty)
 }

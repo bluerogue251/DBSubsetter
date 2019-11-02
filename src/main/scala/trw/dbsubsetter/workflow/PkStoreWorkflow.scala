@@ -1,21 +1,21 @@
 package trw.dbsubsetter.workflow
 
-import trw.dbsubsetter.db.{KeyData, PrimaryKeyValue, SchemaInfo, Table}
+import trw.dbsubsetter.db.{PrimaryKeyValue, Row, SchemaInfo, Table}
 import trw.dbsubsetter.pkvalueextraction.PkValueExtractionUtil
 import trw.dbsubsetter.primarykeystore.{AlreadySeenWithoutChildren, FirstTimeSeen, PrimaryKeyStore, WriteOutcome}
 
 
 final class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
 
-  private[this] val pkValueExtractionFunctions: Map[Table, KeyData => PrimaryKeyValue] =
+  private[this] val pkValueExtractionFunctions: Map[Table, Row => PrimaryKeyValue] =
     PkValueExtractionUtil.pkValueExtractionFunctionsByTable(schemaInfo)
 
   def add(req: OriginDbResult): PksAdded = {
     val OriginDbResult(table, rows, viaTableOpt, fetchChildren) = req
-    val pkValueExtractionFunction: KeyData => PrimaryKeyValue = pkValueExtractionFunctions(table)
+    val pkValueExtractionFunction: Row => PrimaryKeyValue = pkValueExtractionFunctions(table)
 
     if (fetchChildren) {
-      val outcomes: Vector[(WriteOutcome, KeyData)] = rows.map(row => {
+      val outcomes: Vector[(WriteOutcome, Row)] = rows.map(row => {
         val pkValue: PrimaryKeyValue = pkValueExtractionFunction(row)
         val outcome: WriteOutcome = pkStore.markSeenWithChildren(table, pkValue)
         outcome -> row
