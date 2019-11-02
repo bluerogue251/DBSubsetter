@@ -19,7 +19,7 @@ object KeyExtractionUtil {
     schemaInfo.fksOrdered.flatMap { foreignKey =>
 
       val parentExtractionOrdinalPositions =
-        foreignKey.toCols.map(_.ordinalPosition)
+        foreignKey.fromCols.map(_.ordinalPosition)
       val parentExtractionFunction: Row => ForeignKeyValue =
         row => new ForeignKeyValue(parentExtractionOrdinalPositions.map(row))
 
