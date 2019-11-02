@@ -70,5 +70,3 @@ private object InMemoryPrimaryKeyStore {
     tables.map { t => t -> mutable.HashSet.empty[Any] }.toMap
   }
 }
-
-// I wonder if the primary key storage is broken for multi-column primary keys, since how can you do a HashMap of an Array properly?

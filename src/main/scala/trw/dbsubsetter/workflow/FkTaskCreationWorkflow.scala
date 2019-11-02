@@ -3,8 +3,6 @@ package trw.dbsubsetter.workflow
 import trw.dbsubsetter.db._
 import trw.dbsubsetter.keyextraction.KeyExtractionUtil
 
-// TODO consider a test case for a child foreign key value for a business key which is nullable, and rows exist in the child
-//   table that are null, which don't belong to the parent with the null business key...
 
 // TODO reconsider name (or the way this works) since this does not actually create any `FkTask`s. (It creates `NewTasks`).
 // TODO do the same reconsideration for the Akka Streams Flow that calls this.
