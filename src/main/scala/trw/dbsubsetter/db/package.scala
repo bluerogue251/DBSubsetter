@@ -10,7 +10,6 @@ package object db {
   type ColumnName = String
   type WhereClause = String
   type TypeName = String
-  type Row = Array[Any]
   type SqlQuery = String
   type ForeignKeySqlTemplates = Map[(ForeignKey, Table), SqlQuery]
   type PrimaryKeySqlTemplates = Map[(Table, Short), SqlQuery]
@@ -69,6 +68,9 @@ package object db {
   class ForeignKeyValue(val individualColumnValues: Seq[Any]) {
     val isEmpty: Boolean = individualColumnValues.forall(_ == null)
   }
+
+  // Represents a single row from the origin database including all columns
+  class Row(val data: Array[Any])
 
   // Represents a single row from the origin database including only primary and foreign key columns
   class Keys(data: Array[Any]) {
