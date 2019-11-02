@@ -1,11 +1,11 @@
 package trw.dbsubsetter.primarykeystore
 
-import trw.dbsubsetter.db.Table
+import trw.dbsubsetter.db.{PrimaryKeyValue, Table}
 
 trait PrimaryKeyStore {
   def markSeen(table: Table, primaryKeyValue: Any): WriteOutcome
-  def markSeenWithChildren(table: Table, primaryKeyValue: Any): WriteOutcome
-  def alreadySeen(table: Table, primaryKeyValue: Any): Boolean
+  def markSeenWithChildren(table: Table, primaryKeyValue: PrimaryKeyValue): WriteOutcome
+  def alreadySeen(table: Table, primaryKeyValue: PrimaryKeyValue): Boolean
 }
 
 sealed trait WriteOutcome

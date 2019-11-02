@@ -1,32 +1,33 @@
 package trw.dbsubsetter.workflow
 
-import trw.dbsubsetter.db.{Row, SchemaInfo, Table}
+import trw.dbsubsetter.db.{KeyData, PrimaryKeyValue, SchemaInfo, Table}
+import trw.dbsubsetter.pkvalueextraction.PkValueExtractionUtil
 import trw.dbsubsetter.primarykeystore.{AlreadySeenWithoutChildren, FirstTimeSeen, PrimaryKeyStore, WriteOutcome}
 
 
 final class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
 
-  private[this] val pkValueExtractionFunctions: Map[Table, Row => Any] =
-    PkStoreWorkflow.buildPkValueExtractionFunctions(schemaInfo)
+  private[this] val pkValueExtractionFunctions: Map[Table, KeyData => PrimaryKeyValue] =
+    PkValueExtractionUtil.pkValueExtractionFunctionsByTable(schemaInfo)
 
   def add(req: OriginDbResult): PksAdded = {
     val OriginDbResult(table, rows, viaTableOpt, fetchChildren) = req
-    val pkValueExtractionFunction: Row => Any = pkValueExtractionFunctions(table)
+    val pkValueExtractionFunction: KeyData => PrimaryKeyValue = pkValueExtractionFunctions(table)
 
     if (fetchChildren) {
-      val outcomes: Vector[(WriteOutcome, Row)] = rows.map(row => {
-        val pkValue: Any = pkValueExtractionFunction(row)
+      val outcomes: Vector[(WriteOutcome, KeyData)] = rows.map(row => {
+        val pkValue: PrimaryKeyValue = pkValueExtractionFunction(row)
         val outcome: WriteOutcome = pkStore.markSeenWithChildren(table, pkValue)
         outcome -> row
       })
 
-      val outcomeMap: Map[WriteOutcome, Vector[Row]] =
+      val outcomeMap: Map[WriteOutcome, Vector[Any]] =
         outcomes.foldLeft(PkStoreWorkflow.EmptyMap) { case (map, (outcome, row)) =>
           map.updated(outcome, map(outcome) :+ row)
         }
 
-      val parentsNotYetFetched: Vector[Row] = outcomeMap(FirstTimeSeen)
-      val childrenNotYetFetched: Vector[Row] = parentsNotYetFetched ++ outcomeMap(AlreadySeenWithoutChildren)
+      val parentsNotYetFetched: Vector[Any] = outcomeMap(FirstTimeSeen)
+      val childrenNotYetFetched: Vector[Any] = parentsNotYetFetched ++ outcomeMap(AlreadySeenWithoutChildren)
 
       PksAdded(table, parentsNotYetFetched, childrenNotYetFetched, viaTableOpt)
     } else {
@@ -47,14 +48,4 @@ private[this] object PkStoreWorkflow {
   private val EmptyMap: Map[WriteOutcome, Vector[Row]] =
     Map.empty[WriteOutcome, Vector[Row]]
       .withDefaultValue(Vector.empty[Row])
-
-  // TODO consider deduplication with similar logic in DataCopyQueueImpl and ApplicationSingleThreaded
-  private def buildPkValueExtractionFunctions(schemaInfo: SchemaInfo): Map[Table, Row => Any] = {
-    schemaInfo.pksByTableOrdered.map { case (table, pkColumns) =>
-        val pkOrdinals: Vector[Int] = pkColumns.map(_.ordinalPosition)
-        val isSingleColPk: Boolean = pkOrdinals.lengthCompare(1) == 0
-        val function: Row => Any = if (isSingleColPk) row => row(pkOrdinals.head) else row => pkOrdinals.map(row)
-        table -> function
-    }
-  }
 }
