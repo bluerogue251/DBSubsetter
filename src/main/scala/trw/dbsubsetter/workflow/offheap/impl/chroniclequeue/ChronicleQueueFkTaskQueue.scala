@@ -3,7 +3,7 @@ package trw.dbsubsetter.workflow.offheap.impl.chroniclequeue
 import net.openhft.chronicle.queue.impl.single.SingleChronicleQueue
 import net.openhft.chronicle.wire.WriteMarshallable
 import trw.dbsubsetter.config.Config
-import trw.dbsubsetter.db.{ForeignKey, SchemaInfo}
+import trw.dbsubsetter.db.{ForeignKey, ForeignKeyValue, SchemaInfo}
 import trw.dbsubsetter.workflow.offheap.OffHeapFkTaskQueue
 import trw.dbsubsetter.workflow.{ForeignKeyTask, RawTaskToForeignKeyTaskMapper}
 
@@ -76,7 +76,7 @@ private[offheap] final class ChronicleQueueFkTaskQueue(config: Config, schemaInf
           parentReaders(fkOrdinal)
         }
 
-      val fkValue: Any = reader.read(in)
+      val fkValue: ForeignKeyValue = reader.read(in)
 
       val foreignKey: ForeignKey = schemaInfo.fksOrdered(fkOrdinal)
 

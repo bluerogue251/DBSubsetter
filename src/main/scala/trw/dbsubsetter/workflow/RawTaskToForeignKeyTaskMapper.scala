@@ -4,7 +4,7 @@ import trw.dbsubsetter.db._
 
 object RawTaskToForeignKeyTaskMapper {
 
-  def map(rawForeignKey: ForeignKey, rawFetchChildren: Boolean, rawForeignKeyValue: Any): ForeignKeyTask = {
+  def map(rawForeignKey: ForeignKey, rawFetchChildren: Boolean, rawForeignKeyValue: ForeignKeyValue): ForeignKeyTask = {
     if (rawFetchChildren) {
       FetchChildrenTask(
         childTable = rawForeignKey.fromTable,

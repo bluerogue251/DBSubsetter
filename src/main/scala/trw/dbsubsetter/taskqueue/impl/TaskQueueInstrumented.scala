@@ -10,8 +10,8 @@ private[taskqueue] final class TaskQueueInstrumented(delegatee: TaskQueue) exten
 
   override def nonEmpty: Boolean = delegatee.nonEmpty
 
-  override def enqueue(tasks: IndexedSeq[OriginDbRequest]): Unit = {
-    metrics.inc(tasks.length)
+  override def enqueue(tasks: Seq[OriginDbRequest]): Unit = {
+    metrics.inc(tasks.size)
     delegatee.enqueue(tasks)
   }
 

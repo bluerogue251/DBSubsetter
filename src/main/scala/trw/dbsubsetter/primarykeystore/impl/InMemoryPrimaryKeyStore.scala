@@ -25,12 +25,14 @@ private[primarykeystore] final class InMemoryPrimaryKeyStore(schemaInfo: SchemaI
     InMemoryPrimaryKeyStore.buildStorage(schemaInfo)
 
   override def markSeen(table: Table, primaryKeyValue: PrimaryKeyValue): WriteOutcome = {
+    val rawValue: Any = InMemoryPrimaryKeyStore.extract(primaryKeyValue)
+
     val alreadySeenWithChildren: Boolean =
-      seenWithChildrenStorage(table).contains(primaryKeyValue)
+      seenWithChildrenStorage(table).contains(rawValue)
 
     // Purposely lazy -- only do this extra work if logically necessary
     lazy val alreadySeenWithoutChildren =
-      !seenWithoutChildrenStorage(table).add(primaryKeyValue)
+      !seenWithoutChildrenStorage(table).add(rawValue)
 
     if (alreadySeenWithChildren) {
       AlreadySeenWithChildren
@@ -42,12 +44,14 @@ private[primarykeystore] final class InMemoryPrimaryKeyStore(schemaInfo: SchemaI
   }
 
   override def markSeenWithChildren(table: Table, primaryKeyValue: PrimaryKeyValue): WriteOutcome = {
+    val rawValue: Any = InMemoryPrimaryKeyStore.extract(primaryKeyValue)
+
     val alreadySeenWithChildren: Boolean =
-      !seenWithChildrenStorage(table).add(primaryKeyValue)
+      !seenWithChildrenStorage(table).add(rawValue)
 
     // Purposely lazy -- only do this extra work if logically necessary
     lazy val alreadySeenWithoutChildren: Boolean =
-      seenWithoutChildrenStorage(table).remove(primaryKeyValue)
+      seenWithoutChildrenStorage(table).remove(rawValue)
 
     if (alreadySeenWithChildren) {
       AlreadySeenWithChildren
@@ -59,8 +63,10 @@ private[primarykeystore] final class InMemoryPrimaryKeyStore(schemaInfo: SchemaI
   }
 
   override def alreadySeen(table: Table, primaryKeyValue: PrimaryKeyValue): Boolean = {
-    seenWithChildrenStorage(table).contains(primaryKeyValue) ||
-      seenWithoutChildrenStorage(table).contains(primaryKeyValue)
+    val rawValue: Any = InMemoryPrimaryKeyStore.extract(primaryKeyValue)
+
+    seenWithChildrenStorage(table).contains(rawValue) ||
+      seenWithoutChildrenStorage(table).contains(rawValue)
   }
 }
 
@@ -68,5 +74,13 @@ private object InMemoryPrimaryKeyStore {
   private def buildStorage(schemaInfo: SchemaInfo): Map[Table, mutable.HashSet[Any]] = {
     val tables: Iterable[Table] = schemaInfo.pksByTableOrdered.keys
     tables.map { t => t -> mutable.HashSet.empty[Any] }.toMap
+  }
+
+  private def extract(primaryKeyValue: PrimaryKeyValue): Any = {
+    if (primaryKeyValue.individualColumnValues.size == 1) {
+      primaryKeyValue.individualColumnValues.head
+    } else {
+      primaryKeyValue.individualColumnValues
+    }
   }
 }

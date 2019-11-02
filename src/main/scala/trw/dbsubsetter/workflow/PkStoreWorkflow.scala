@@ -21,18 +21,18 @@ final class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
         outcome -> row
       })
 
-      val outcomeMap: Map[WriteOutcome, Vector[Any]] =
+      val outcomeMap: Map[WriteOutcome, Vector[Row]] =
         outcomes.foldLeft(PkStoreWorkflow.EmptyMap) { case (map, (outcome, row)) =>
           map.updated(outcome, map(outcome) :+ row)
         }
 
-      val parentsNotYetFetched: Vector[Any] = outcomeMap(FirstTimeSeen)
-      val childrenNotYetFetched: Vector[Any] = parentsNotYetFetched ++ outcomeMap(AlreadySeenWithoutChildren)
+      val parentsNotYetFetched: Vector[Row] = outcomeMap(FirstTimeSeen)
+      val childrenNotYetFetched: Vector[Row] = parentsNotYetFetched ++ outcomeMap(AlreadySeenWithoutChildren)
 
       PksAdded(table, parentsNotYetFetched, childrenNotYetFetched, viaTableOpt)
     } else {
       val newRows = rows.filter(row => {
-        val pkValue: Any = pkValueExtractionFunction(row)
+        val pkValue: PrimaryKeyValue = pkValueExtractionFunction(row)
         pkStore.markSeen(table, pkValue) match {
           case FirstTimeSeen => true
           case _ => false
