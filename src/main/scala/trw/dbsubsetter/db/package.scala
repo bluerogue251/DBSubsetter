@@ -45,7 +45,6 @@ package object db {
   ) {
     val fromTable: Table = fromCols.head.table
     val toTable: Table = toCols.head.table
-    val isSingleCol: Boolean = fromCols.size == 1
     // TODO Refactor to remove mutability
     def setIndex(index: Short): Unit = {
       i = index
