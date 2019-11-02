@@ -2,24 +2,33 @@ package trw.dbsubsetter.db.impl.mapper
 
 import java.sql.ResultSet
 
-import trw.dbsubsetter.db.{Keys, Row, SchemaInfo, Table}
+import trw.dbsubsetter.db.{Column, Keys, Row, SchemaInfo, Table}
 
 import scala.collection.mutable.ArrayBuffer
 
 private[db] class JdbcResultConverterImpl(schemaInfo: SchemaInfo) extends JdbcResultConverter {
 
   def convertToRows(jdbcResultSet: ResultSet, table: Table): Vector[Row] = {
-    val cols = schemaInfo.dataColumnsByTableOrdered(table).size
-    val rows = ArrayBuffer.empty[Row]
-    while (jdbcResultSet.next()) {
-      val row = new Row(cols)
-      (1 to cols).foreach(i => row(i - 1) = jdbcResultSet.getObject(i))
-      rows += row
-    }
-    rows.toVector
+    val cols: Seq[Column] = schemaInfo.dataColumnsByTableOrdered(table)
+    val multipleRowsRawData = extractMultiRowRawData(jdbcResultSet, cols.size)
+    multipleRowsRawData.toVector
   }
 
   override def convertToKeys(jdbcResultSet: ResultSet, table: Table): Vector[Keys] = {
-    convertToRows(jdbcResultSet, table).map(data => new Keys(data))
+    val cols: Seq[Column] = schemaInfo.keyColumnsByTableOrdered(table)
+    val multipleRowsRawData = extractMultiRowRawData(jdbcResultSet, cols.size)
+    multipleRowsRawData.map(singleRowRawData => new Keys(singleRowRawData)).toVector
+  }
+
+  private[this] def extractMultiRowRawData(jdbcResultSet: ResultSet, columnCount: Int): Seq[Array[Any]] = {
+    val multipleRowsRawData = ArrayBuffer.empty[Array[Any]]
+    while (jdbcResultSet.next()) {
+      val singleRowRawData = new Array[Any](columnCount)
+      (1 to columnCount).foreach { i =>
+        singleRowRawData(i - 1) = jdbcResultSet.getObject(i)
+      }
+      multipleRowsRawData += singleRowRawData
+    }
+    multipleRowsRawData
   }
 }
