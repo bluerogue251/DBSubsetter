@@ -2,7 +2,7 @@ package unit
 
 import org.scalatest.FunSuite
 import trw.dbsubsetter.config.Config
-import trw.dbsubsetter.db.{Column, SchemaInfo, Table}
+import trw.dbsubsetter.db.{Column, PrimaryKeyValue, SchemaInfo, Table}
 import trw.dbsubsetter.primarykeystore._
 
 class PkStoreTest extends FunSuite {
@@ -35,7 +35,7 @@ class PkStoreTest extends FunSuite {
     val pkStore: PrimaryKeyStore =
       PrimaryKeyStoreFactory.buildPrimaryKeyStore(Config(), schemaInfo)
 
-    val pkValue: String = "pkValue"
+    val pkValue: PrimaryKeyValue = new PrimaryKeyValue(Seq[String]("pkValue"))
 
     // Add the PK to the pkStore, noting that we are not planning to fetch its children at this time
     val writeOutcome1 = pkStore.markSeen(table, pkValue)
