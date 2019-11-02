@@ -34,12 +34,11 @@ final class FkTaskCreationWorkflow(schemaInfo: SchemaInfo) {
     // `filterNot(_.isEmpty)` should also only be necessary for parent tasks, not child tasks
     val allForeignKeys = schemaInfo.fksFromTable(table)
     val useForeignKeys = viaTableOpt.fold(allForeignKeys)(viaTable => allForeignKeys.filterNot(fk => fk.toTable == viaTable))
-    val newTasksInfo: Map[(ForeignKey, Boolean), Array[ForeignKeyValue]] =
+    val newTasksInfo: Map[(ForeignKey, Boolean), Seq[ForeignKeyValue]] =
       useForeignKeys.map { fk =>
         val fkValueExtractionFunction: Row => ForeignKeyValue = fkExtractionFunctions(fk, false)
-        val fkValues: Seq[ForeignKeyValue] = rows.map(fkValueExtractionFunction)
-        val distinctFkValues: Seq[ForeignKeyValue] = fkValues.filterNot(_.isEmpty)
-        (fk, false) -> distinctFkValues
+        val fkValues: Seq[ForeignKeyValue] = rows.map(fkValueExtractionFunction).filterNot(_.isEmpty)
+        (fk, false) -> fkValues
       }.toMap
     NewTasks(newTasksInfo)
   }
