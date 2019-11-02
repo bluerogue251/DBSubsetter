@@ -1,7 +1,7 @@
 package trw.dbsubsetter
 
 import trw.dbsubsetter.config.Config
-import trw.dbsubsetter.db.{DbAccessFactory, PrimaryKeyValue, Row, SchemaInfo, Table}
+import trw.dbsubsetter.db.{DbAccessFactory, Keys, PrimaryKeyValue, SchemaInfo, Table}
 import trw.dbsubsetter.keyextraction.KeyExtractionUtil
 import trw.dbsubsetter.primarykeystore.{PrimaryKeyStore, PrimaryKeyStoreFactory}
 import trw.dbsubsetter.taskqueue.{TaskQueue, TaskQueueFactory}
@@ -17,7 +17,7 @@ object ApplicationSingleThreaded {
     val pkWorkflow: PkStoreWorkflow = new PkStoreWorkflow(pkStore, schemaInfo)
     val fkTaskCreationWorkflow: FkTaskCreationWorkflow = new FkTaskCreationWorkflow(schemaInfo)
 
-    val pkValueExtractionFunctions: Map[Table, Row => PrimaryKeyValue] =
+    val pkValueExtractionFunctions: Map[Table, Keys => PrimaryKeyValue] =
       KeyExtractionUtil.pkExtractionFunctions(schemaInfo)
 
     // Set up task queue
@@ -35,7 +35,7 @@ object ApplicationSingleThreaded {
       taskOpt.foreach { task =>
         val dbResult = originDbWorkflow.process(task)
         val pksAdded = pkWorkflow.add(dbResult)
-        val extractPkValue: Row => PrimaryKeyValue = pkValueExtractionFunctions(pksAdded.table)
+        val extractPkValue: Keys => PrimaryKeyValue = pkValueExtractionFunctions(pksAdded.table)
         val pkValues: Seq[PrimaryKeyValue] = pksAdded.rowsNeedingParentTasks.map(extractPkValue)
         val dataCopyTask = new DataCopyTask(pksAdded.table, pkValues)
         targetDbWorkflow.process(dataCopyTask)

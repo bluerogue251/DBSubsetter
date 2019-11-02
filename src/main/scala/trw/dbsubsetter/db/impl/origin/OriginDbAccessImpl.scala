@@ -4,7 +4,7 @@ import java.sql.PreparedStatement
 
 import trw.dbsubsetter.db.impl.connection.ConnectionFactory
 import trw.dbsubsetter.db.impl.mapper.JdbcResultConverter
-import trw.dbsubsetter.db.{ForeignKey, ForeignKeyValue, OriginDbAccess, PrimaryKeyValue, Row, SchemaInfo, Sql, SqlQuery, Table}
+import trw.dbsubsetter.db.{ForeignKey, ForeignKeyValue, Keys, OriginDbAccess, PrimaryKeyValue, Row, SchemaInfo, Sql, SqlQuery, Table}
 
 
 // TODO fix this so the line is shorter and re-enable scalastyle
@@ -24,7 +24,7 @@ private[db] class OriginDbAccessImpl(connStr: String, sch: SchemaInfo, mapper: J
       tableWithBatchSize -> conn.prepareStatement(sqlString)
     }
 
-  override def getRowsFromForeignKeyValue(fk: ForeignKey, table: Table, fkValue: ForeignKeyValue): Vector[Row] = {
+  override def getRowsFromForeignKeyValue(fk: ForeignKey, table: Table, fkValue: ForeignKeyValue): Vector[Keys] = {
     val stmt = foreignKeyTemplateStatements(fk, table)
     stmt.clearParameters()
 
@@ -33,7 +33,7 @@ private[db] class OriginDbAccessImpl(connStr: String, sch: SchemaInfo, mapper: J
     }
 
     val jdbcResult = stmt.executeQuery()
-    mapper.convert(jdbcResult, table)
+    mapper.convertToKeys(jdbcResult, table)
   }
 
   override def getRowsFromPrimaryKeyValues(table: Table, primaryKeyValues: Seq[PrimaryKeyValue]): Vector[Row] = {
@@ -49,11 +49,11 @@ private[db] class OriginDbAccessImpl(connStr: String, sch: SchemaInfo, mapper: J
     }
 
     val jdbcResult = stmt.executeQuery()
-    mapper.convert(jdbcResult, table)
+    mapper.convertToRows(jdbcResult, table)
   }
 
-  override def getRows(query: SqlQuery, table: Table): Vector[Row] = {
+  override def getRows(query: SqlQuery, table: Table): Vector[Keys] = {
     val jdbcResult = conn.createStatement().executeQuery(query)
-    mapper.convert(jdbcResult, table)
+    mapper.convertToKeys(jdbcResult, table)
   }
 }

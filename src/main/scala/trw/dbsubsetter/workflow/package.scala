@@ -12,9 +12,9 @@ package object workflow {
   case class FetchParentTask(parentTable: Table, fk: ForeignKey, fkValueFromChild: ForeignKeyValue) extends ForeignKeyTask
   case class FetchChildrenTask(childTable: Table, viaParentTable: Table, fk: ForeignKey, fkValueFromParent: ForeignKeyValue) extends ForeignKeyTask
 
-  case class OriginDbResult(table: Table, rows: Vector[Row], viaTableOpt: Option[Table], fetchChildren: Boolean)
+  case class OriginDbResult(table: Table, rows: Vector[Keys], viaTableOpt: Option[Table], fetchChildren: Boolean)
 
-  case class PksAdded(table: Table, rowsNeedingParentTasks: Vector[Row], rowsNeedingChildTasks: Vector[Row], viaTableOpt: Option[Table])
+  case class PksAdded(table: Table, rowsNeedingParentTasks: Vector[Keys], rowsNeedingChildTasks: Vector[Keys], viaTableOpt: Option[Table])
 
   class DataCopyTask(val table: Table, val pkValues: Seq[PrimaryKeyValue])
 

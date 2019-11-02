@@ -1,33 +1,33 @@
 package trw.dbsubsetter.workflow
 
-import trw.dbsubsetter.db.{PrimaryKeyValue, Row, SchemaInfo, Table}
+import trw.dbsubsetter.db.{Keys, PrimaryKeyValue, SchemaInfo, Table}
 import trw.dbsubsetter.keyextraction.KeyExtractionUtil
 import trw.dbsubsetter.primarykeystore.{AlreadySeenWithoutChildren, FirstTimeSeen, PrimaryKeyStore, WriteOutcome}
 
 
 final class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
 
-  private[this] val pkValueExtractionFunctions: Map[Table, Row => PrimaryKeyValue] =
+  private[this] val pkValueExtractionFunctions: Map[Table, Keys => PrimaryKeyValue] =
     KeyExtractionUtil.pkExtractionFunctions(schemaInfo)
 
   def add(req: OriginDbResult): PksAdded = {
     val OriginDbResult(table, rows, viaTableOpt, fetchChildren) = req
-    val pkValueExtractionFunction: Row => PrimaryKeyValue = pkValueExtractionFunctions(table)
+    val pkValueExtractionFunction: Keys => PrimaryKeyValue = pkValueExtractionFunctions(table)
 
     if (fetchChildren) {
-      val outcomes: Vector[(WriteOutcome, Row)] = rows.map(row => {
+      val outcomes: Vector[(WriteOutcome, Keys)] = rows.map(row => {
         val pkValue: PrimaryKeyValue = pkValueExtractionFunction(row)
         val outcome: WriteOutcome = pkStore.markSeenWithChildren(table, pkValue)
         outcome -> row
       })
 
-      val outcomeMap: Map[WriteOutcome, Vector[Row]] =
+      val outcomeMap: Map[WriteOutcome, Vector[Keys]] =
         outcomes.foldLeft(PkStoreWorkflow.EmptyMap) { case (map, (outcome, row)) =>
           map.updated(outcome, map(outcome) :+ row)
         }
 
-      val parentsNotYetFetched: Vector[Row] = outcomeMap(FirstTimeSeen)
-      val childrenNotYetFetched: Vector[Row] = parentsNotYetFetched ++ outcomeMap(AlreadySeenWithoutChildren)
+      val parentsNotYetFetched: Vector[Keys] = outcomeMap(FirstTimeSeen)
+      val childrenNotYetFetched: Vector[Keys] = parentsNotYetFetched ++ outcomeMap(AlreadySeenWithoutChildren)
 
       PksAdded(table, parentsNotYetFetched, childrenNotYetFetched, viaTableOpt)
     } else {
@@ -45,7 +45,7 @@ final class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
 
 private[this] object PkStoreWorkflow {
 
-  private val EmptyMap: Map[WriteOutcome, Vector[Row]] =
-    Map.empty[WriteOutcome, Vector[Row]]
-      .withDefaultValue(Vector.empty[Row])
+  private val EmptyMap: Map[WriteOutcome, Vector[Keys]] =
+    Map.empty[WriteOutcome, Vector[Keys]]
+      .withDefaultValue(Vector.empty[Keys])
 }
