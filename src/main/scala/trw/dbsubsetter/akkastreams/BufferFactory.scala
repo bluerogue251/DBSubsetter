@@ -14,8 +14,8 @@ object BufferFactory {
     val backingQueue: TransformingQueue[PksAdded, DataCopyTask] =
       TransformingQueue.from[PksAdded, DataCopyTask](
         dataCopyQueue.enqueue,
-        dataCopyQueue.dequeue,
-        dataCopyQueue.isEmpty
+        dataCopyQueue.dequeue _,
+        dataCopyQueue.isEmpty _
       )
 
     new TransformingQueueBackedBufferFlow[PksAdded, DataCopyTask](backingQueue)
