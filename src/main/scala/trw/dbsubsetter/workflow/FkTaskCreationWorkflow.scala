@@ -19,17 +19,12 @@ final class FkTaskCreationWorkflow(schemaInfo: SchemaInfo) {
   }
 
   private[this] def calcParentTasks(table: Table, rows: Vector[Row], viaTableOpt: Option[Table]): NewTasks = {
-    // Re: `distinct`
-    // It is (hopefully) a performance improvement which prevents duplicate tasks from being created
-    //
     // Re: `viaTableOpt`
     // If we know that the reason we fetched a row to begin with is that it is the child of some row we've
     // already fetched, then we know that we don't need to go fetch that particular parent row again
     //
-    // `distinct` and `viaTableOpt` only apply for calculating parent tasks, not child tasks.
-    // Both of these seem necessary for avoiding always needing to store PKs for all parents
-    //
-    // `filterNot(_.isEmpty)` should also only be necessary for parent tasks, not child tasks
+    // `viaTableOpt` only applies for calculating parent tasks, not child tasks. `filterNot(_.isEmpty)`
+    // should also only be necessary for parent tasks, not child tasks.
     val allForeignKeys = schemaInfo.fksFromTable(table)
     val useForeignKeys = viaTableOpt.fold(allForeignKeys)(viaTable => allForeignKeys.filterNot(fk => fk.toTable == viaTable))
     val newTasksInfo: Map[(ForeignKey, Boolean), Seq[ForeignKeyValue]] =
