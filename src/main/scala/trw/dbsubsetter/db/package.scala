@@ -33,7 +33,10 @@ package object db {
   class Column(
     val table: Table,
     val name: ColumnName,
-    val ordinalPosition: Int,
+    // The 0-indexed location of this column in query results where only primary and foreign key columns are included
+    val keyOrdinalPosition: Int,
+    // The 0-indexed location of this column in query results where all columns are included
+    val dataOrdinalPosition: Int,
     val dataType: ColumnType
   )
 
@@ -62,7 +65,21 @@ package object db {
   }
 
   // Represents a single row in the origin database including only primary and foreign key columns
-  class Keys(val data: Array[Any])
+  class Keys(data: Array[Any]) {
+    def getValue(pk: PrimaryKey): PrimaryKeyValue = {
+      val individualColumnValues: Seq[Any] =
+        pk.columns.map(_.keyOrdinalPosition).map(data)
+
+      new PrimaryKeyValue(individualColumnValues)
+    }
+
+    def getValue(fk: ForeignKey, confusingTechDebt: Boolean): ForeignKeyValue = {
+      val columns: Seq[Column] = if (confusingTechDebt) fk.toCols else fk.fromCols
+      val individualColumnOrdinals: Seq[Int] = columns.map(_.keyOrdinalPosition)
+      val individualColumnValues: Seq[Any] = individualColumnOrdinals.map(data)
+      new ForeignKeyValue(individualColumnValues)
+    }
+  }
 
   implicit class VendorAwareJdbcConnection(private val conn: Connection) {
     private val vendorName: String = conn.getMetaData.getDatabaseProductName

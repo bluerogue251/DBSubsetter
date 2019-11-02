@@ -83,7 +83,7 @@ private[this] object OffHeapTaskQueueTest {
     new Column(
       table = parentTable,
       name = "id",
-      ordinalPosition = 4,
+      dataOrdinalPosition = 4,
       ColumnTypes.Long
     )
 
@@ -98,7 +98,7 @@ private[this] object OffHeapTaskQueueTest {
     new Column(
       table = childTable,
       name = "parentId",
-      ordinalPosition = 7,
+      dataOrdinalPosition = 7,
       ColumnTypes.Long
     )
 

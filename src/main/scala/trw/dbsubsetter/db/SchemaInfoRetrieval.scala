@@ -27,7 +27,7 @@ object SchemaInfoRetrieval {
     }
 
     val colsByTableOrdered: Map[Table, Vector[Column]] = {
-      colsByTableAndName.map { case (table, map) => table -> map.values.toVector.sortBy(_.ordinalPosition) }
+      colsByTableAndName.map { case (table, map) => table -> map.values.toVector.sortBy(_.dataOrdinalPosition) }
     }
 
     val pksByTable: Map[Table, PrimaryKey] = {
