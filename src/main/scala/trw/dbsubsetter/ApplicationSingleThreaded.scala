@@ -28,7 +28,6 @@ object ApplicationSingleThreaded {
     while (taskQueue.nonEmpty) {
       val taskOpt: Option[OriginDbRequest] = taskQueue.dequeue() match {
         case t: FetchParentTask if FkTaskPreCheck.shouldPrecheck(t) =>
-          // BUT a foreign key might not point to the primary key... so this might not be checking anything...
           if (pkStore.alreadySeen(t.parentTable, new PrimaryKeyValue(t.fkValueFromChild.individualColumnValues))) None else Some(t)
         case t =>
           Some(t)
