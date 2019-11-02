@@ -9,11 +9,11 @@ import akka.stream.stage._
   * Refer to akka.stream.impl.fusing.Buffer for onUpstreamFinish logic
   * Relevant docs: https://doc.akka.io/docs/akka/current/stream/stream-customize.html
   */
-private[akkastreams] final class TransformingQueueBackedBufferFlow[T, U](backingQueue: TransformingQueue[T, U]) extends GraphStage[FlowShape[T, U]] {
+private[akkastreams] final class QueueBackedBufferFlow[T, U](backingQueue: TransformingQueue[T, U]) extends GraphStage[FlowShape[T, U]] {
 
-  private[this] val in: Inlet[T] = Inlet.create[T]("TransformingQueueBackedBufferFlow.in")
+  private[this] val in: Inlet[T] = Inlet.create[T]("QueueBackedBufferFlow.in")
 
-  private[this] val out: Outlet[U] = Outlet.create[U]("TransformingQueueBackedBufferFlow.out")
+  private[this] val out: Outlet[U] = Outlet.create[U]("QueueBackedBufferFlow.out")
 
   override val shape: FlowShape[T, U] = FlowShape.of(in, out)
 

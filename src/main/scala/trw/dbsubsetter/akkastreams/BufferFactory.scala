@@ -17,11 +17,10 @@ object BufferFactory {
         dataCopyQueue.isEmpty _
       )
 
-    new TransformingQueueBackedBufferFlow[PksAdded, DataCopyTask](backingQueue)
+    new QueueBackedBufferFlow[PksAdded, DataCopyTask](backingQueue)
   }
 
   def fkTaskBuffer(fkTaskQueue: OffHeapFkTaskQueue): GraphStage[FlowShape[NewTasks, ForeignKeyTask]] = {
-
     val backingQueue: TransformingQueue[NewTasks, ForeignKeyTask] =
       new TransformingQueue[NewTasks, ForeignKeyTask] {
 
@@ -29,6 +28,7 @@ object BufferFactory {
 
         override def enqueue(element: NewTasks): Unit = {
           val newTaskMap: Map[(ForeignKey, Boolean), Seq[ForeignKeyValue]] = element.taskInfo
+
           newTaskMap.foreach { case ((fk, fetchChildren), fkValues) =>
             fkValues.foreach { fkValue =>
               elementCount += 1
@@ -48,6 +48,6 @@ object BufferFactory {
         }
       }
 
-    new TransformingQueueBackedBufferFlow[NewTasks, ForeignKeyTask](backingQueue)
+    new QueueBackedBufferFlow[NewTasks, ForeignKeyTask](backingQueue)
   }
 }
