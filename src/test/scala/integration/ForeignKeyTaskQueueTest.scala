@@ -15,11 +15,11 @@ import trw.dbsubsetter.workflow.{FetchParentTask, ForeignKeyTask}
  *   - Schemas with multiple foreign keys
  *   - etc.
  */
-class OffHeapTaskQueueTest extends FunSuite {
+class ForeignKeyTaskQueueTest extends FunSuite {
 
   test("OffHeapTaskQueue returns an Option#None with no exception thrown when there is no data to read") {
     val config: Config = Config()
-    val schemaInfo: SchemaInfo = OffHeapTaskQueueTest.schemaInfo
+    val schemaInfo: SchemaInfo = ForeignKeyTaskQueueTest.schemaInfo
     val queue = ForeignKeyTaskQueueFactory.build(config, schemaInfo)
     // Dequeue several times -- it should always return `None` and should never throw an exception
     assert(queue.dequeue() === None)
@@ -29,14 +29,14 @@ class OffHeapTaskQueueTest extends FunSuite {
 
   test("OffHeapTaskQueue can succesfully write values and read them back (single column foreign key)") {
     val config: Config = Config()
-    val schemaInfo: SchemaInfo = OffHeapTaskQueueTest.schemaInfo
+    val schemaInfo: SchemaInfo = ForeignKeyTaskQueueTest.schemaInfo
     val queue = ForeignKeyTaskQueueFactory.build(config, schemaInfo)
 
     val fkValue1: ForeignKeyValue = new ForeignKeyValue(Seq[Long](7))
     val fkValue2: ForeignKeyValue = new ForeignKeyValue(Seq[Long](10))
     val fkValue3: ForeignKeyValue = new ForeignKeyValue(Seq[Long](23))
 
-    val fk: ForeignKey = OffHeapTaskQueueTest.foreignKey
+    val fk: ForeignKey = ForeignKeyTaskQueueTest.foreignKey
 
     val task1: ForeignKeyTask = FetchParentTask(fk, fkValue1)
     val task2: ForeignKeyTask = FetchParentTask(fk, fkValue2)
@@ -53,8 +53,8 @@ class OffHeapTaskQueueTest extends FunSuite {
     assert(queue.dequeue() === None)
 
     Seq(firstTask, secondTask, thirdTask).foreach{ dequeuedTask =>
-      assert(dequeuedTask.fk === OffHeapTaskQueueTest.foreignKey)
-      assert(dequeuedTask.fk.toTable === OffHeapTaskQueueTest.parentTable)
+      assert(dequeuedTask.fk === ForeignKeyTaskQueueTest.foreignKey)
+      assert(dequeuedTask.fk.toTable === ForeignKeyTaskQueueTest.parentTable)
     }
 
     assert(firstTask.fkValueFromChild.individualColumnValues === fkValue1.individualColumnValues)
@@ -67,7 +67,7 @@ class OffHeapTaskQueueTest extends FunSuite {
  * The large amount of static data needed to set this unit test up (data a lot of which is not even
  * directly used by the unit test itself) shows that our implementation should eventually be cleaned up
  */
-private[this] object OffHeapTaskQueueTest {
+private[this] object ForeignKeyTaskQueueTest {
 
   private val parentTable: Table =
     new Table(
