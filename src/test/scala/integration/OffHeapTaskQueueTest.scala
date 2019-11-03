@@ -3,8 +3,8 @@ package integration
 import org.scalatest.FunSuite
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.{Column, ColumnTypes, ForeignKey, ForeignKeyValue, SchemaInfo, Table}
-import trw.dbsubsetter.workflow.FetchParentTask
 import trw.dbsubsetter.workflow.offheap.OffHeapFkTaskQueueFactory
+import trw.dbsubsetter.workflow.{FetchParentTask, ForeignKeyTask}
 
 /*
  * TODO add more test cases covering various combinations of:
@@ -36,17 +36,14 @@ class OffHeapTaskQueueTest extends FunSuite {
     val fkValue2: ForeignKeyValue = new ForeignKeyValue(Seq[Long](10))
     val fkValue3: ForeignKeyValue = new ForeignKeyValue(Seq[Long](23))
 
-    val fetchChildren: Boolean = false
+    val fk: ForeignKey = OffHeapTaskQueueTest.foreignKey
 
-    queue.enqueue(OffHeapTaskQueueTest.foreignKey.i, fkValue1, fetchChildren)
-    queue.enqueue(OffHeapTaskQueueTest.foreignKey.i, fkValue2, fetchChildren)
-    queue.enqueue(OffHeapTaskQueueTest.foreignKey.i, fkValue3, fetchChildren)
-
-    val baseTask: FetchParentTask = FetchParentTask(
-      parentTable = OffHeapTaskQueueTest.parentTable,
-      fk = OffHeapTaskQueueTest.foreignKey,
-      fkValueFromChild = new ForeignKeyValue(Seq[String]("placeholder")),
-    )
+    val task1: ForeignKeyTask = FetchParentTask(fk.toTable, fk, fkValue1)
+    val task2: ForeignKeyTask = FetchParentTask(fk.toTable, fk, fkValue2)
+    val task3: ForeignKeyTask = FetchParentTask(fk.toTable, fk, fkValue3)
+    queue.enqueue(task1)
+    queue.enqueue(task2)
+    queue.enqueue(task3)
 
     // Dequeue the three FkTasks
     val firstTask: FetchParentTask = queue.dequeue().get.asInstanceOf[FetchParentTask]
