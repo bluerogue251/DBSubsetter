@@ -1,4 +1,4 @@
-package trw.dbsubsetter.workflow.offheap.impl.chroniclequeue
+package trw.dbsubsetter.chronicle
 
 import java.math.BigInteger
 import java.util.UUID

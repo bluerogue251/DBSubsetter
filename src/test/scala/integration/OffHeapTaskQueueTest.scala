@@ -3,7 +3,7 @@ package integration
 import org.scalatest.FunSuite
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.{Column, ColumnTypes, ForeignKey, ForeignKeyValue, SchemaInfo, Table}
-import trw.dbsubsetter.workflow.offheap.OffHeapFkTaskQueueFactory
+import trw.dbsubsetter.fktaskqueue.ForeignKeyTaskQueueFactory
 import trw.dbsubsetter.workflow.{FetchParentTask, ForeignKeyTask}
 
 /*
@@ -20,7 +20,7 @@ class OffHeapTaskQueueTest extends FunSuite {
   test("OffHeapTaskQueue returns an Option#None with no exception thrown when there is no data to read") {
     val config: Config = Config()
     val schemaInfo: SchemaInfo = OffHeapTaskQueueTest.schemaInfo
-    val queue = OffHeapFkTaskQueueFactory.buildOffHeapFkTaskQueue(config, schemaInfo)
+    val queue = ForeignKeyTaskQueueFactory.build(config, schemaInfo)
     // Dequeue several times -- it should always return `None` and should never throw an exception
     assert(queue.dequeue() === None)
     assert(queue.dequeue() === None)
@@ -30,7 +30,7 @@ class OffHeapTaskQueueTest extends FunSuite {
   test("OffHeapTaskQueue can succesfully write values and read them back (single column foreign key)") {
     val config: Config = Config()
     val schemaInfo: SchemaInfo = OffHeapTaskQueueTest.schemaInfo
-    val queue = OffHeapFkTaskQueueFactory.buildOffHeapFkTaskQueue(config, schemaInfo)
+    val queue = ForeignKeyTaskQueueFactory.build(config, schemaInfo)
 
     val fkValue1: ForeignKeyValue = new ForeignKeyValue(Seq[Long](7))
     val fkValue2: ForeignKeyValue = new ForeignKeyValue(Seq[Long](10))

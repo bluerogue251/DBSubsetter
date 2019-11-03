@@ -1,17 +1,18 @@
-package trw.dbsubsetter.workflow.offheap.impl.chroniclequeue
+package trw.dbsubsetter.fktaskqueue.impl
 
 import net.openhft.chronicle.queue.impl.single.SingleChronicleQueue
 import net.openhft.chronicle.wire.WriteMarshallable
+import trw.dbsubsetter.chronicle.ChronicleQueueFactory
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.{ForeignKey, ForeignKeyValue, SchemaInfo}
-import trw.dbsubsetter.workflow.offheap.OffHeapFkTaskQueue
+import trw.dbsubsetter.fktaskqueue.ForeignKeyTaskQueue
 import trw.dbsubsetter.workflow.{FetchChildrenTask, FetchParentTask, ForeignKeyTask}
 
 
 /**
   * WARNING: this class is not threadsafe
   */
-private[offheap] final class ChronicleQueueFkTaskQueue(config: Config, schemaInfo: SchemaInfo) extends OffHeapFkTaskQueue {
+private[fktaskqueue] final class ForeignKeyTaskChronicleQueue(config: Config, schemaInfo: SchemaInfo) extends ForeignKeyTaskQueue {
 
   private[this] var queuedTaskCount: Long = 0L
 

@@ -3,7 +3,7 @@ package trw.dbsubsetter.akkastreams
 import akka.stream.FlowShape
 import akka.stream.stage.GraphStage
 import trw.dbsubsetter.datacopyqueue.DataCopyQueue
-import trw.dbsubsetter.workflow.offheap.OffHeapFkTaskQueue
+import trw.dbsubsetter.fktaskqueue.ForeignKeyTaskQueue
 import trw.dbsubsetter.workflow.{DataCopyTask, ForeignKeyTask, PksAdded}
 
 object BufferFactory {
@@ -19,7 +19,7 @@ object BufferFactory {
     new QueueBackedBufferFlow[PksAdded, DataCopyTask](backingQueue)
   }
 
-  def fkTaskBuffer(fkTaskQueue: OffHeapFkTaskQueue): GraphStage[FlowShape[ForeignKeyTask, ForeignKeyTask]] = {
+  def fkTaskBuffer(fkTaskQueue: ForeignKeyTaskQueue): GraphStage[FlowShape[ForeignKeyTask, ForeignKeyTask]] = {
     val backingQueue: TransformingQueue[ForeignKeyTask, ForeignKeyTask] =
       TransformingQueue.from[ForeignKeyTask, ForeignKeyTask](
         fkTaskQueue.enqueue,
