@@ -4,7 +4,8 @@ DBSubsetter is a tool for taking a logically consistent subset of a relational d
 
 Starting with a base condition specifying a set of rows from one or more tables, it respects foreign key constraints by recursively fetching the "parents" and (optionally) the "children" of those rows.
 
-This is useful for local development and testing or for exporting all the data belonging to a particular set of users or customers for debugging and sharing.
+This is useful for creating local development and testing datasets.
+It can also be used to export the data belonging to a particular set of users for debugging or sharing purposes.
 
 
 ## Project Goals
@@ -25,7 +26,7 @@ Please reach out by opening a GitHub ticket if you would like support for a diff
 
 ## Download and Usage Instructions
 
-1. Start with ample disk space, as DBSubsetter needs space to store intermediate results in tempfiles
+1. Start with ample disk space, as DBSubsetter needs space to store intermediate results in tempfiles.
 
 2. Load an empty schema from your "origin" database into your "target" database. See vendor-specific instructions for [Postgres](docs/pre_subset_postgres.md), [MySQL](docs/pre_subset_mysql.md), and [Microsoft SQL Server](docs/pre_subset_ms_sql_server.md).
  
@@ -59,7 +60,7 @@ Contributions of all kinds are welcome!
 
 Whether it is to fix a typo, improve the documentation, report or fix a bug, add a new feature, or whatever else you have in mind, feel free to open an issue or a pull request on the project [GitHub page](https://github.com/bluerogue251/DBSubsetter).
 
-The only condition for contributing to this project is to follow our [code of conduct](CODE_OF_CONDUCT.md) so that everyone is treated with respect.
+All contributors are asked to follow our [code of conduct](CODE_OF_CONDUCT.md).
 
 
 ## Related Projects

@@ -15,7 +15,7 @@ case class Config(
   cmdLinePrimaryKeys: List[CmdLinePrimaryKey] = List.empty,
   excludeColumns: Map[(SchemaName, TableName), Set[ColumnName]] = Map.empty.withDefaultValue(Set.empty),
   excludeTables: Set[(SchemaName, TableName)] = Set.empty,
-  tempfileStorageDirOpt: Option[File] = None,
+  tempfileStorageDirectoryOpt: Option[File] = None,
   isSingleThreadedDebugMode: Boolean = false,
   exposeMetrics: Boolean = false
 )

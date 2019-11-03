@@ -70,6 +70,7 @@ object CommandLineParser {
       .action((dbp, c) => c.copy(keyCalculationDbConnectionCount = dbp))
       .text(
         """Number of concurrent connections to the full-size origin DB
+          |                           For use in calculating dependencies between primary and foreign keys
           |                           A good starting value is the number of CPU cores on your origin database machine
         """.stripMargin)
 
@@ -77,7 +78,8 @@ object CommandLineParser {
       .valueName("<int>")
       .action((dbp, c) => c.copy(dataCopyDbConnectionCount = dbp))
       .text(
-        """Number of concurrent connections to the smaller target DB
+        """Number of concurrent connections to both the full-size origin DB and the smaller target DB
+          |                           For use in copying full row data between the origin and target DBs
           |                           A good starting value is the number of CPU cores on your target database machine
         """.stripMargin)
 
@@ -154,21 +156,21 @@ object CommandLineParser {
           |                           Can be specified multiple times
           |""".stripMargin)
 
-    opt[File]("tempfileStorageDir")
-      .valueName("</path/to/task/queue/dir>")
-      .action((dir, c) => c.copy(tempfileStorageDirOpt = Some(dir)))
+    opt[File]("tempfileStorageDirectory")
+      .valueName("</path/to/tempfile/storage/directory>")
+      .action((dir, c) => c.copy(tempfileStorageDirectoryOpt = Some(dir)))
       .validate { dir =>
         if (!dir.exists()) dir.mkdir()
         if (!dir.isDirectory) {
-          failure("--tempfileStorageDir must be a directory")
+          failure("--tempfileStorageDirectory must be a directory")
         } else if (dir.listFiles().nonEmpty) {
-          failure("--tempfileStorageDir must be an empty directory")
+          failure("--tempfileStorageDirectory must be an empty directory")
         } else {
           success
         }
       }
       .text(
-        """Directory in which DBSubsetter will store its queue of outstanding tasks
+        """Directory in which DBSubsetter will store tempfiles containing intermediate results
           |                           Defaults to the standard tempfile location of your OS
           |""".stripMargin)
 
