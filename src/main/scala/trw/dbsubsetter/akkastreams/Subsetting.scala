@@ -65,7 +65,7 @@ object Subsetting {
       mergeToOutstandingTaskCounter
 
     mergeToOutstandingTaskCounter ~>
-      OutstandingTaskCounter.statefulCounter(baseQueries.size) ~>
+      OutstandingTaskCounter.counter(baseQueries.size) ~>
       fkTaskBufferFlow
 
     // Do we need a small in-memory buffer so the many targetDbs never wait on the single chronicle queue?
