@@ -1,55 +1,87 @@
 package trw.dbsubsetter
 
 import trw.dbsubsetter.config.Config
-import trw.dbsubsetter.db.{DbAccessFactory, Keys, PrimaryKeyValue, SchemaInfo, Table}
-import trw.dbsubsetter.keyextraction.KeyExtractionUtil
+import trw.dbsubsetter.datacopyqueue.{DataCopyQueue, DataCopyQueueFactory}
+import trw.dbsubsetter.db.{DbAccessFactory, PrimaryKeyValue, SchemaInfo, Table}
 import trw.dbsubsetter.primarykeystore.{PrimaryKeyStore, PrimaryKeyStoreFactory}
-import trw.dbsubsetter.taskqueue.{TaskQueue, TaskQueueFactory}
 import trw.dbsubsetter.workflow._
+import trw.dbsubsetter.workflow.offheap.{OffHeapFkTaskQueue, OffHeapFkTaskQueueFactory}
 
-object ApplicationSingleThreaded {
-  def run(config: Config, schemaInfo: SchemaInfo, baseQueries: Vector[BaseQuery]): Unit = {
-    // Set up workflow objects
-    val dbAccessFactory = new DbAccessFactory(config, schemaInfo)
-    val originDbWorkflow = new OriginDbWorkflow(config, schemaInfo, dbAccessFactory)
-    val targetDbWorkflow = new TargetDbWorkflow(dbAccessFactory)
-    val pkStore: PrimaryKeyStore = PrimaryKeyStoreFactory.buildPrimaryKeyStore(config, schemaInfo)
-    val pkWorkflow: PkStoreWorkflow = new PkStoreWorkflow(pkStore, schemaInfo)
-    val fkTaskCreationWorkflow: FkTaskCreationWorkflow = new FkTaskCreationWorkflow(schemaInfo)
 
-    val pkValueExtractionFunctions: Map[Table, Keys => PrimaryKeyValue] =
-      KeyExtractionUtil.pkExtractionFunctions(schemaInfo)
+class ApplicationSingleThreaded(config: Config, schemaInfo: SchemaInfo, baseQueries: Vector[BaseQuery]) {
 
-    // Set up task queue
-    val taskQueue: TaskQueue = TaskQueueFactory.buildTaskQueue(config)
-    taskQueue.enqueue(baseQueries)
+  private[this] val dbAccessFactory =
+    new DbAccessFactory(config, schemaInfo)
 
-    // Run task queue until empty
-    while (taskQueue.nonEmpty) {
-      val taskOpt: Option[OriginDbRequest] =
-        taskQueue.dequeue() match {
-          case t: FetchParentTask if FkTaskPreCheck.shouldPrecheck(t) =>
-            if (pkStore.alreadySeen(t.parentTable, new PrimaryKeyValue(t.fkValueFromChild.individualColumnValues))) None else Some(t)
-          case t =>
-            Some(t)
-        }
+  private[this] val originDbWorkflow =
+    new OriginDbWorkflow(config, schemaInfo, dbAccessFactory)
 
-      taskOpt.foreach { task =>
-        val dbResult: OriginDbResult = originDbWorkflow.process(task)
+  private[this] val targetDbWorkflow =
+    new TargetDbWorkflow(dbAccessFactory)
 
-        val pksAdded: PksAdded = pkWorkflow.add(dbResult)
+  private[this] val pkStore: PrimaryKeyStore =
+    PrimaryKeyStoreFactory.buildPrimaryKeyStore(config, schemaInfo)
 
-        val pkValueExtractionFunction: Keys => PrimaryKeyValue = pkValueExtractionFunctions(pksAdded.table)
-        val pkValuesForDataCopy: Seq[PrimaryKeyValue] = pksAdded.rowsNeedingParentTasks.map(pkValueExtractionFunction)
-        val dataCopyTask: DataCopyTask = new DataCopyTask(pksAdded.table, pkValuesForDataCopy)
-        targetDbWorkflow.process(dataCopyTask)
+  private[this] val pkWorkflow: PkStoreWorkflow =
+    new PkStoreWorkflow(pkStore, schemaInfo)
 
-        val newForeignKeyTasks: IndexedSeq[ForeignKeyTask] = fkTaskCreationWorkflow.createFkTasks(pksAdded)
-        taskQueue.enqueue(newForeignKeyTasks)
-      }
+  private[this] val fkTaskCreationWorkflow: FkTaskCreationWorkflow =
+    new FkTaskCreationWorkflow(schemaInfo)
+
+  private[this] val fkTaskQueue: OffHeapFkTaskQueue =
+    OffHeapFkTaskQueueFactory.buildOffHeapFkTaskQueue(config, schemaInfo)
+
+  private[this] val dataCopyQueue: DataCopyQueue =
+    DataCopyQueueFactory.buildDataCopyQueue(config, schemaInfo)
+
+  def run(): Unit = {
+    // Handle all key calculation from base queries
+    baseQueries.foreach(handleKeyCalculationTask)
+
+    // Handle all key calculation foreign key tasks
+    while (!fkTaskQueue.isEmpty()) {
+      val fkTask: ForeignKeyTask = fkTaskQueue.dequeue().get
+      handleFkTask(fkTask)
+    }
+
+    // Populate target db with data
+    while (!dataCopyQueue.isEmpty()) {
+      val dataCopyTask: DataCopyTask = dataCopyQueue.dequeue().get
+      targetDbWorkflow.process(dataCopyTask)
     }
 
     // Ensure all SQL connections get closed
     dbAccessFactory.closeAllConnections()
+  }
+
+  private def handleFkTask(task: ForeignKeyTask): Unit = {
+    val isDuplicate: Boolean =
+      task match {
+        case fetchParentTask: FetchParentTask if FkTaskPreCheck.shouldPrecheck(fetchParentTask) => {}
+          val tableToCheck: Table = fetchParentTask.parentTable
+          val primaryKeyValueToCheck: PrimaryKeyValue = new PrimaryKeyValue(fetchParentTask.fkValueFromChild.individualColumnValues)
+          pkStore.alreadySeen(tableToCheck, primaryKeyValueToCheck)
+        case _ => false
+      }
+
+    if (!isDuplicate) {
+      handleKeyCalculationTask(task)
+    }
+  }
+
+  private def handleKeyCalculationTask(task: OriginDbRequest): Unit = {
+    // Query the origin database
+    val dbResult: OriginDbResult = originDbWorkflow.process(task)
+
+    // Calculate which rows we've seen already
+    val pksAdded: PksAdded = pkWorkflow.add(dbResult)
+
+    // Queue up the newly seen rows to be copied into the target database
+    dataCopyQueue.enqueue(pksAdded)
+
+    // Queue up any new tasks resulting from this stage
+    fkTaskCreationWorkflow
+      .createFkTasks(pksAdded)
+      .foreach(fkTaskQueue.enqueue)
   }
 }
