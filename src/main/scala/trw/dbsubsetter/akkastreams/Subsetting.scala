@@ -37,7 +37,7 @@ object Subsetting {
     val balanceTargetDb = b.add(Balance[DataCopyTask](config.targetDbParallelism, waitForAllDownstreams = true))
     val mergeTargetDbResults = b.add(Merge[Unit](config.targetDbParallelism))
     val fkTaskBufferFlow = b.add(BufferFactory.fkTaskBuffer(fkTaskQueue).async)
-    val mergeToOutstandingTaskCounter = b.add(Merge[NewTasks](2))
+    val mergeToOutstandingTaskCounter = b.add(Merge[IndexedSeq[ForeignKeyTask]](2))
 
     // Start everything off
     Source(baseQueries) ~>
@@ -65,7 +65,8 @@ object Subsetting {
       mergeToOutstandingTaskCounter
 
     mergeToOutstandingTaskCounter ~>
-      OutstandingTaskCounter.counter(baseQueries.size) ~>
+      TaskCountCircuitBreaker.statefulCounter(baseQueries.size) ~>
+      Flow[IndexedSeq[ForeignKeyTask]].mapConcat(_.to[collection.immutable.Iterable]) ~>
       fkTaskBufferFlow
 
     // Do we need a small in-memory buffer so the many targetDbs never wait on the single chronicle queue?
@@ -91,7 +92,7 @@ object Subsetting {
       mergeOriginDbRequests
 
     broadcastPkExistResult ~>
-      Flow[PkQueryResult].collect { case AlreadySeen => EmptyNewTasks } ~>
+      Flow[PkQueryResult].collect { case AlreadySeen => IndexedSeq.empty[ForeignKeyTask] } ~>
       mergeToOutstandingTaskCounter
 
     mergeTargetDbResults.out ~> sink

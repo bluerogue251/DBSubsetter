@@ -4,9 +4,10 @@ import java.sql.{Connection, DriverManager}
 
 import scala.collection.mutable
 
-/*
- * CAREFUL: NOT THREADSAFE
- */
+
+/**
+  * WARNING: this class is not threadsafe
+  */
 private[db] class ConnectionFactory {
 
   /*

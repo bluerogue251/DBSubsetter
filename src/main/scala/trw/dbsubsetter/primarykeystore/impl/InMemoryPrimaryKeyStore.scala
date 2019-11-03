@@ -5,9 +5,10 @@ import trw.dbsubsetter.primarykeystore._
 
 import scala.collection.mutable
 
-/*
- * CAREFUL -- NOT THREADSAFE
- */
+
+/**
+  * WARNING: this class is not threadsafe
+  */
 private[primarykeystore] final class InMemoryPrimaryKeyStore(schemaInfo: SchemaInfo) extends PrimaryKeyStore {
 
   /*

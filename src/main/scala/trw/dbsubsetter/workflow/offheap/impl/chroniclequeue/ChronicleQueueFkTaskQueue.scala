@@ -5,10 +5,15 @@ import net.openhft.chronicle.wire.WriteMarshallable
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.{ForeignKey, ForeignKeyValue, SchemaInfo}
 import trw.dbsubsetter.workflow.offheap.OffHeapFkTaskQueue
-import trw.dbsubsetter.workflow.{ForeignKeyTask, RawTaskToForeignKeyTaskMapper}
+import trw.dbsubsetter.workflow.{FetchChildrenTask, FetchParentTask, ForeignKeyTask, RawTaskToForeignKeyTaskMapper}
 
 
+/**
+  * WARNING: this class is not threadsafe
+  */
 private[offheap] final class ChronicleQueueFkTaskQueue(config: Config, schemaInfo: SchemaInfo) extends OffHeapFkTaskQueue {
+
+  private[this] var queuedTaskCount: Long = 0L
 
   private[this] val queue: SingleChronicleQueue = ChronicleQueueFactory.createQueue(config)
 
@@ -42,18 +47,23 @@ private[offheap] final class ChronicleQueueFkTaskQueue(config: Config, schemaInf
         new TaskQueueWriter(fk.i, fk.fromCols.map(_.dataType))
       }
 
-  override def enqueue(fkOrdinal: Short, fkValue: ForeignKeyValue, fetchChildren: Boolean): Unit = {
-    val writer: TaskQueueWriter =
-      if (fetchChildren) {
-        childFkWriters(fkOrdinal)
-      } else {
-        parentFkWriters(fkOrdinal)
-      }
+  override def enqueue(foreignKeyTask: ForeignKeyTask): Unit = {
+    foreignKeyTask match {
+      case FetchChildrenTask(_, _, fk, fkValue) =>
+        write(
+          writer = childFkWriters(fk.i),
+          fetchChildren = true,
+          value = fkValue
+        )
+      case FetchParentTask(_, fk, fkValue) =>
+        write(
+          writer = parentFkWriters(fk.i),
+          fetchChildren = false,
+          value = fkValue
+        )
+    }
 
-    val writeMarshallable: WriteMarshallable =
-      writer.writeHandler(fetchChildren, fkValue)
-
-    appender.writeDocument(writeMarshallable)
+    queuedTaskCount += 1L
   }
 
   override def dequeue(): Option[ForeignKeyTask] = {
@@ -83,9 +93,19 @@ private[offheap] final class ChronicleQueueFkTaskQueue(config: Config, schemaInf
       val task: ForeignKeyTask =
         RawTaskToForeignKeyTaskMapper.map(foreignKey, fetchChildren, fkValue)
 
+      queuedTaskCount -= 1L
       optionalTask = Some(task)
     }
 
     optionalTask
+  }
+
+  override def isEmpty(): Boolean = {
+    queuedTaskCount == 0L
+  }
+
+  private[this] def write(writer: TaskQueueWriter, fetchChildren: Boolean, value: ForeignKeyValue): Unit = {
+    val writeMarshallable: WriteMarshallable = writer.writeHandler(fetchChildren, value)
+    appender.writeDocument(writeMarshallable)
   }
 }
