@@ -1,7 +1,7 @@
 package trw.dbsubsetter.workflow
 
 import trw.dbsubsetter.config.Config
-import trw.dbsubsetter.db.{DbAccessFactory, SchemaInfo}
+import trw.dbsubsetter.db.{DbAccessFactory, SchemaInfo, Table}
 
 
 final class OriginDbWorkflow(config: Config, schemaInfo: SchemaInfo, dbAccessFactory: DbAccessFactory) {
@@ -10,12 +10,14 @@ final class OriginDbWorkflow(config: Config, schemaInfo: SchemaInfo, dbAccessFac
 
   def process(request: OriginDbRequest): OriginDbResult = {
     val result = request match {
-      case FetchParentTask(parentTable, foreignKey, fkValueFromChild) =>
-        val rows = dbAccess.getRowsFromForeignKeyValue(foreignKey, parentTable, fkValueFromChild)
-        OriginDbResult(parentTable, rows, viaTableOpt = None, fetchChildren = false)
-      case FetchChildrenTask(childTable, viaParentTable, foreignKey, fkValueFromParent) =>
-        val rows = dbAccess.getRowsFromForeignKeyValue(foreignKey, childTable, fkValueFromParent)
-        OriginDbResult(childTable, rows, viaTableOpt = Some(viaParentTable), fetchChildren = true)
+      case FetchParentTask(foreignKey, fkValueFromChild) =>
+        val table: Table = foreignKey.toTable
+        val rows = dbAccess.getRowsFromForeignKeyValue(foreignKey, table, fkValueFromChild)
+        OriginDbResult(table, rows, viaTableOpt = None, fetchChildren = false)
+      case FetchChildrenTask(foreignKey, fkValueFromParent) =>
+        val table: Table = foreignKey.fromTable
+        val rows = dbAccess.getRowsFromForeignKeyValue(foreignKey, table, fkValueFromParent)
+        OriginDbResult(table, rows, viaTableOpt = Some(foreignKey.toTable), fetchChildren = true)
       case BaseQuery(table, sql, fetchChildren) =>
         val rows = dbAccess.getRows(sql, table)
         OriginDbResult(table, rows, viaTableOpt = None, fetchChildren)

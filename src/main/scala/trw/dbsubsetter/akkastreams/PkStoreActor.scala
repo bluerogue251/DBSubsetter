@@ -15,8 +15,8 @@ private[this] class PkStoreActor(config: Config, schemaInfo: SchemaInfo) extends
 
   override def receive: Receive = {
     // If it's a FetchParentTask, then we are being asked to pre-check to make sure we haven't done it already
-    case task @ FetchParentTask(parentTable, _, fkValueFromChild) =>
-      val alreadySeen: Boolean = pkStore.alreadySeen(parentTable, new PrimaryKeyValue(fkValueFromChild.individualColumnValues))
+    case task @ FetchParentTask(fk, fkValueFromChild) =>
+      val alreadySeen: Boolean = pkStore.alreadySeen(fk.toTable, new PrimaryKeyValue(fkValueFromChild.individualColumnValues))
       val response: PkQueryResult = if (alreadySeen) AlreadySeen else NotAlreadySeen(task)
       sender() ! response
     // If it's an OriginDbResult, then we are being asked to add the new primary key values to the PkStore

@@ -38,9 +38,9 @@ class OffHeapTaskQueueTest extends FunSuite {
 
     val fk: ForeignKey = OffHeapTaskQueueTest.foreignKey
 
-    val task1: ForeignKeyTask = FetchParentTask(fk.toTable, fk, fkValue1)
-    val task2: ForeignKeyTask = FetchParentTask(fk.toTable, fk, fkValue2)
-    val task3: ForeignKeyTask = FetchParentTask(fk.toTable, fk, fkValue3)
+    val task1: ForeignKeyTask = FetchParentTask(fk, fkValue1)
+    val task2: ForeignKeyTask = FetchParentTask(fk, fkValue2)
+    val task3: ForeignKeyTask = FetchParentTask(fk, fkValue3)
     queue.enqueue(task1)
     queue.enqueue(task2)
     queue.enqueue(task3)
@@ -54,7 +54,7 @@ class OffHeapTaskQueueTest extends FunSuite {
 
     Seq(firstTask, secondTask, thirdTask).foreach{ dequeuedTask =>
       assert(dequeuedTask.fk === OffHeapTaskQueueTest.foreignKey)
-      assert(dequeuedTask.parentTable === OffHeapTaskQueueTest.parentTable)
+      assert(dequeuedTask.fk.toTable === OffHeapTaskQueueTest.parentTable)
     }
 
     assert(firstTask.fkValueFromChild.individualColumnValues === fkValue1.individualColumnValues)
