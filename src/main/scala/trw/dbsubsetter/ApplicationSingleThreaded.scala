@@ -38,10 +38,10 @@ object ApplicationSingleThreaded {
         val dbResult: OriginDbResult = originDbWorkflow.process(task)
 
         val pksAdded: PksAdded = pkWorkflow.add(dbResult)
-        val pkValueExtractionFunction: Keys => PrimaryKeyValue = pkValueExtractionFunctions(pksAdded.table)
-        val pkValues: Seq[PrimaryKeyValue] = pksAdded.rowsNeedingParentTasks.map(pkValueExtractionFunction)
 
-        val dataCopyTask: DataCopyTask = new DataCopyTask(pksAdded.table, pkValues)
+        val pkValueExtractionFunction: Keys => PrimaryKeyValue = pkValueExtractionFunctions(pksAdded.table)
+        val pkValuesForDataCopy: Seq[PrimaryKeyValue] = pksAdded.rowsNeedingParentTasks.map(pkValueExtractionFunction)
+        val dataCopyTask: DataCopyTask = new DataCopyTask(pksAdded.table, pkValuesForDataCopy)
         targetDbWorkflow.process(dataCopyTask)
 
         val newForeignKeyTasks: IndexedSeq[ForeignKeyTask] = fkTaskCreationWorkflow.createFkTasks(pksAdded)
