@@ -26,26 +26,27 @@ object ApplicationSingleThreaded {
 
     // Run task queue until empty
     while (taskQueue.nonEmpty) {
-      val taskOpt: Option[OriginDbRequest] = taskQueue.dequeue() match {
-        case t: FetchParentTask if FkTaskPreCheck.shouldPrecheck(t) =>
-          if (pkStore.alreadySeen(t.parentTable, new PrimaryKeyValue(t.fkValueFromChild.individualColumnValues))) None else Some(t)
-        case t =>
-          Some(t)
-      }
-      taskOpt.foreach { task =>
-        val dbResult = originDbWorkflow.process(task)
-        val pksAdded = pkWorkflow.add(dbResult)
-        val extractPkValue: Keys => PrimaryKeyValue = pkValueExtractionFunctions(pksAdded.table)
-        val pkValues: Seq[PrimaryKeyValue] = pksAdded.rowsNeedingParentTasks.map(extractPkValue)
-        val dataCopyTask = new DataCopyTask(pksAdded.table, pkValues)
-        targetDbWorkflow.process(dataCopyTask)
-        val newTasks = fkTaskCreationWorkflow.createFkTasks(pksAdded)
-        newTasks.taskInfo.foreach { case ((foreignKey, fetchChildren), fkValues) =>
-          val tasks = fkValues.map { fkValue =>
-            RawTaskToForeignKeyTaskMapper.map(foreignKey, fetchChildren, fkValue)
-          }
-          taskQueue.enqueue(tasks)
+      val taskOpt: Option[OriginDbRequest] =
+        taskQueue.dequeue() match {
+          case t: FetchParentTask if FkTaskPreCheck.shouldPrecheck(t) =>
+            if (pkStore.alreadySeen(t.parentTable, new PrimaryKeyValue(t.fkValueFromChild.individualColumnValues))) None else Some(t)
+          case t =>
+            Some(t)
         }
+
+      taskOpt.foreach { task =>
+        val dbResult: OriginDbResult = originDbWorkflow.process(task)
+
+        val pksAdded: PksAdded = pkWorkflow.add(dbResult)
+
+        val pkValueExtractionFunction: Keys => PrimaryKeyValue = pkValueExtractionFunctions(pksAdded.table)
+        val pkValues: Seq[PrimaryKeyValue] = pksAdded.rowsNeedingParentTasks.map(pkValueExtractionFunction)
+
+        val dataCopyTask: DataCopyTask = new DataCopyTask(pksAdded.table, pkValues)
+        targetDbWorkflow.process(dataCopyTask)
+
+        val newForeignKeyTasks: IndexedSeq[ForeignKeyTask] = fkTaskCreationWorkflow.createFkTasks(pksAdded)
+        taskQueue.enqueue(newForeignKeyTasks)
       }
     }
 
