@@ -1,9 +1,9 @@
 package trw.dbsubsetter.workflow.offheap.impl
 
-import trw.dbsubsetter.db.ForeignKeyValue
 import trw.dbsubsetter.metrics.Metrics
 import trw.dbsubsetter.workflow.ForeignKeyTask
 import trw.dbsubsetter.workflow.offheap.OffHeapFkTaskQueue
+
 
 private[offheap] final class OffHeapFkTaskQueueInstrumented(delegatee: OffHeapFkTaskQueue) extends OffHeapFkTaskQueue {
 
@@ -13,8 +13,8 @@ private[offheap] final class OffHeapFkTaskQueueInstrumented(delegatee: OffHeapFk
 
   private[this] val taskDequeueDuration = Metrics.TaskDequeueDuration
 
-  override def enqueue(fkOrdinal: Short, fkValue: ForeignKeyValue, fetchChildren: Boolean): Unit = {
-    val runnable: Runnable = () => delegatee.enqueue(fkOrdinal, fkValue, fetchChildren)
+  override def enqueue(foreignKeyTask: ForeignKeyTask): Unit = {
+    val runnable: Runnable = () => delegatee.enqueue(foreignKeyTask)
     taskEnqueueDuration.time(runnable)
     pendingTaskCount.inc()
   }
@@ -23,5 +23,9 @@ private[offheap] final class OffHeapFkTaskQueueInstrumented(delegatee: OffHeapFk
     val optionalTask: Option[ForeignKeyTask] = taskDequeueDuration.time(() => delegatee.dequeue())
     optionalTask.foreach(_ => pendingTaskCount.dec())
     optionalTask
+  }
+
+  override def isEmpty(): Boolean = {
+    delegatee.isEmpty()
   }
 }

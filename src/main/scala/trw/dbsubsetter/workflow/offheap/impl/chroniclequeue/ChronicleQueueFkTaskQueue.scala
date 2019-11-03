@@ -8,6 +8,9 @@ import trw.dbsubsetter.workflow.offheap.OffHeapFkTaskQueue
 import trw.dbsubsetter.workflow.{ForeignKeyTask, RawTaskToForeignKeyTaskMapper}
 
 
+/**
+  * WARNING: this class is not threadsafe
+  */
 private[offheap] final class ChronicleQueueFkTaskQueue(config: Config, schemaInfo: SchemaInfo) extends OffHeapFkTaskQueue {
 
   private[this] val queue: SingleChronicleQueue = ChronicleQueueFactory.createQueue(config)
