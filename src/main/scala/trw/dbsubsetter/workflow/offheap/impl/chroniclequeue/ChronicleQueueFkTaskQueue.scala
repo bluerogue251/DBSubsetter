@@ -5,7 +5,7 @@ import net.openhft.chronicle.wire.WriteMarshallable
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.{ForeignKey, ForeignKeyValue, SchemaInfo}
 import trw.dbsubsetter.workflow.offheap.OffHeapFkTaskQueue
-import trw.dbsubsetter.workflow.{FetchChildrenTask, FetchParentTask, ForeignKeyTask, RawTaskToForeignKeyTaskMapper}
+import trw.dbsubsetter.workflow.{FetchChildrenTask, FetchParentTask, ForeignKeyTask}
 
 
 /**
@@ -49,13 +49,13 @@ private[offheap] final class ChronicleQueueFkTaskQueue(config: Config, schemaInf
 
   override def enqueue(foreignKeyTask: ForeignKeyTask): Unit = {
     foreignKeyTask match {
-      case FetchChildrenTask(_, _, fk, fkValue) =>
+      case FetchChildrenTask(fk, fkValue) =>
         write(
           writer = childFkWriters(fk.i),
           fetchChildren = true,
           value = fkValue
         )
-      case FetchParentTask(_, fk, fkValue) =>
+      case FetchParentTask(fk, fkValue) =>
         write(
           writer = parentFkWriters(fk.i),
           fetchChildren = false,
@@ -91,7 +91,11 @@ private[offheap] final class ChronicleQueueFkTaskQueue(config: Config, schemaInf
       val foreignKey: ForeignKey = schemaInfo.fksOrdered(fkOrdinal)
 
       val task: ForeignKeyTask =
-        RawTaskToForeignKeyTaskMapper.map(foreignKey, fetchChildren, fkValue)
+        if (fetchChildren) {
+          FetchChildrenTask(foreignKey, fkValue)
+        } else {
+          FetchParentTask(foreignKey, fkValue)
+        }
 
       queuedTaskCount -= 1L
       optionalTask = Some(task)

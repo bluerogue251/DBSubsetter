@@ -28,7 +28,7 @@ final class FkTaskCreationWorkflow(schemaInfo: SchemaInfo) {
     useForeignKeys.flatMap { foreignKey =>
       val extractionFunction: Keys => ForeignKeyValue = fkExtractionFunctions(foreignKey, false)
       val fkValues: Seq[ForeignKeyValue] = rows.map(extractionFunction).filterNot(_.isEmpty)
-      fkValues.map(fkValue => FetchParentTask(foreignKey.toTable, foreignKey, fkValue))
+      fkValues.map(fkValue => FetchParentTask(foreignKey, fkValue))
     }
   }
 
@@ -37,7 +37,7 @@ final class FkTaskCreationWorkflow(schemaInfo: SchemaInfo) {
     allForeignKeys.flatMap { foreignKey =>
       val extractionFunction: Keys => ForeignKeyValue = fkExtractionFunctions(foreignKey, true)
       val fkValues: Seq[ForeignKeyValue] = rows.map(extractionFunction)
-      fkValues.map(fkValue => FetchChildrenTask(foreignKey.fromTable, table, foreignKey, fkValue))
+      fkValues.map(fkValue => FetchChildrenTask(foreignKey, fkValue))
     }
   }
 }

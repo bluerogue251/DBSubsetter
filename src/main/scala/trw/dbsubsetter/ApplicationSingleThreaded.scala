@@ -58,7 +58,7 @@ class ApplicationSingleThreaded(config: Config, schemaInfo: SchemaInfo, baseQuer
     val isDuplicate: Boolean =
       task match {
         case fetchParentTask: FetchParentTask if FkTaskPreCheck.shouldPrecheck(fetchParentTask) =>
-          val tableToCheck: Table = fetchParentTask.parentTable
+          val tableToCheck: Table = fetchParentTask.fk.toTable
           val primaryKeyValueToCheck: PrimaryKeyValue = new PrimaryKeyValue(fetchParentTask.fkValueFromChild.individualColumnValues)
           pkStore.alreadySeen(tableToCheck, primaryKeyValueToCheck)
         case _ => false

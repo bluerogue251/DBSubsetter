@@ -9,8 +9,8 @@ package object workflow {
   case class BaseQuery(table: Table, sql: SqlQuery, fetchChildren: Boolean) extends OriginDbRequest
 
   sealed trait ForeignKeyTask extends OriginDbRequest
-  case class FetchParentTask(parentTable: Table, fk: ForeignKey, fkValueFromChild: ForeignKeyValue) extends ForeignKeyTask
-  case class FetchChildrenTask(childTable: Table, viaParentTable: Table, fk: ForeignKey, fkValueFromParent: ForeignKeyValue) extends ForeignKeyTask
+  case class FetchParentTask(fk: ForeignKey, fkValueFromChild: ForeignKeyValue) extends ForeignKeyTask
+  case class FetchChildrenTask(fk: ForeignKey, fkValueFromParent: ForeignKeyValue) extends ForeignKeyTask
 
   case class OriginDbResult(table: Table, rows: Vector[Keys], viaTableOpt: Option[Table], fetchChildren: Boolean)
 
