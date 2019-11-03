@@ -69,20 +69,18 @@ object CommandLineParser {
       .valueName("<int>")
       .action((dbp, c) => c.copy(keyCalculationDbConnectionCount = dbp))
       .text(
-        """Number of concurrent connections to the full-size origin DB
-          |                           For use in calculating dependencies between primary and foreign keys
-          |                           A good starting value is the number of CPU cores on your origin database machine
-          |                           (Note the total origin DB connection count is equal to --keyCalculationDbConnectionCount + --dataCopyDbConnectionCount)
+        """Concurrent connections to the Origin DB for calculating primary and foreign key dependencies
+          |                           A reasonable starting value is half the number of CPU cores on your origin database machine
+          |                           (Note the total Origin DB connection count is --keyCalculationDbConnectionCount + --dataCopyDbConnectionCount)
         """.stripMargin)
 
     opt[Int]("dataCopyDbConnectionCount")
       .valueName("<int>")
       .action((dbp, c) => c.copy(dataCopyDbConnectionCount = dbp))
       .text(
-        """Number of concurrent connections to both the full-size origin DB and the smaller target DB
-          |                           For use in copying full row data between the origin and target DBs
-          |                           A good starting value is the number of CPU cores on your target database machine
-          |                           (Note the total origin DB connection count is equal to --keyCalculationDbConnectionCount + --dataCopyDbConnectionCount)
+        """Concurrent connections to both the Origin DB and the Target DB for copying over full row data
+          |                           A reasonable starting value is half the number of CPU cores on your target database machine
+          |                           (Note the total Origin DB connection count is --keyCalculationDbConnectionCount + --dataCopyDbConnectionCount)
         """.stripMargin)
 
     opt[String]("foreignKey")

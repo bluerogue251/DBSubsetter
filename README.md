@@ -26,7 +26,7 @@ Please reach out by opening a GitHub ticket if you would like support for a diff
 
 ## Download and Usage Instructions
 
-1. Start with ample disk space, as DBSubsetter needs space to store intermediate results in tempfiles.
+1. Start with ample disk space, as DBSubsetter stores intermediate results in tempfiles.
 
 2. Load an empty schema from your "origin" database into your "target" database. See vendor-specific instructions for [Postgres](docs/pre_subset_postgres.md), [MySQL](docs/pre_subset_mysql.md), and [Microsoft SQL Server](docs/pre_subset_ms_sql_server.md).
  
@@ -51,7 +51,7 @@ $ java -jar /path/to/DBSubsetter.jar \
     --dataCopyDbConnectionCount 8
 ```
 
-4. After DBSubsetter exits, do any last steps as necessary. See vendor-specific instructions for [Postgres](docs/post_subset_postgres.md), [MySQL](docs/post_subset_mysql.md), and [Microsoft SQL Server](docs/post_subset_ms_sql_server.md).
+4. After DBSubsetter exits, follow vendor-specific instructions for [Postgres](docs/post_subset_postgres.md), [MySQL](docs/post_subset_mysql.md), and [Microsoft SQL Server](docs/post_subset_ms_sql_server.md).
 
 
 ## Contributing
@@ -60,7 +60,7 @@ Contributions of all kinds are welcome!
 
 Whether it is to fix a typo, improve the documentation, report or fix a bug, add a new feature, or whatever else you have in mind, feel free to open an issue or a pull request on the project [GitHub page](https://github.com/bluerogue251/DBSubsetter).
 
-All contributors are asked to follow our [code of conduct](CODE_OF_CONDUCT.md).
+Please follow our [code of conduct](CODE_OF_CONDUCT.md) when contributing.
 
 
 ## Related Projects
