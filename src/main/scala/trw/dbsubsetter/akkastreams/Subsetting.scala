@@ -24,8 +24,8 @@ object Subsetting {
     // Infrastructure: Timeouts, Merges, Balances, Partitions, Broadcasts
     implicit val askTimeout: Timeout = Timeout(48, TimeUnit.HOURS) // For `mapAsyncUnordered`. The need for this timeout may be a code smell.
     val mergeOriginDbRequests = b.add(Merge[OriginDbRequest](3))
-    val balanceOriginDb = b.add(Balance[OriginDbRequest](config.originDbParallelism, waitForAllDownstreams = true))
-    val mergeOriginDbResults = b.add(Merge[OriginDbResult](config.originDbParallelism))
+    val balanceOriginDb = b.add(Balance[OriginDbRequest](config.keyCalculationDbConnectionCount, waitForAllDownstreams = true))
+    val mergeOriginDbResults = b.add(Merge[OriginDbResult](config.keyCalculationDbConnectionCount))
     val partitionFkTasks = b.add(Partition[ForeignKeyTask](2, {
       case t: FetchParentTask => if (FkTaskPreCheck.shouldPrecheck(t)) 1 else 0
       case _ => 0
@@ -34,8 +34,8 @@ object Subsetting {
     val broadcastPkExistResult = b.add(Broadcast[PkQueryResult](2))
     val broadcastPksAdded = b.add(Broadcast[PksAdded](2))
     val dataCopyBufferFlow = b.add(BufferFactory.dataCopyBuffer(dataCopyQueue).async)
-    val balanceTargetDb = b.add(Balance[DataCopyTask](config.targetDbParallelism, waitForAllDownstreams = true))
-    val mergeTargetDbResults = b.add(Merge[Unit](config.targetDbParallelism))
+    val balanceTargetDb = b.add(Balance[DataCopyTask](config.dataCopyDbConnectionCount, waitForAllDownstreams = true))
+    val mergeTargetDbResults = b.add(Merge[Unit](config.dataCopyDbConnectionCount))
     val fkTaskBufferFlow = b.add(BufferFactory.fkTaskBuffer(fkTaskQueue).async)
     val mergeToOutstandingTaskCounter = b.add(Merge[IndexedSeq[ForeignKeyTask]](2))
 
@@ -45,12 +45,12 @@ object Subsetting {
 
     // Process Origin DB Queries in Parallel
     mergeOriginDbRequests.out ~> balanceOriginDb
-    for (_ <- 0 until config.originDbParallelism) {
+    for (_ <- 0 until config.keyCalculationDbConnectionCount) {
       balanceOriginDb ~> OriginDb.query(config, schemaInfo, dbAccessFactory).async ~> mergeOriginDbResults
     }
 
     // Process Target DB Inserts in Parallel
-    for (_ <- 0 until config.targetDbParallelism) {
+    for (_ <- 0 until config.dataCopyDbConnectionCount) {
       balanceTargetDb ~> TargetDb.insert(dbAccessFactory).async ~> mergeTargetDbResults
     }
 

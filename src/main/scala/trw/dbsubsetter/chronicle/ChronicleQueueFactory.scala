@@ -10,7 +10,7 @@ object ChronicleQueueFactory {
 
   def createQueue(config: Config): SingleChronicleQueue = {
     val storageDir =
-      config.taskQueueDirOpt match {
+      config.tempfileStorageDirectoryOpt match {
         case Some(dir) => dir.toPath
         case None => Files.createTempDirectory("DBSubsetter-")
       }

@@ -18,8 +18,8 @@ echo "Running load test of school_db"
 java -Xmx4G -jar DBSubsetter.jar \
   --originDbConnStr "jdbc:postgresql://0.0.0.0:5432/school_db?user=postgres" \
   --targetDbConnStr "jdbc:postgresql://0.0.0.0:5433/school_db?user=postgres" \
-  --originDbParallelism 8 \
-  --targetDbParallelism 8 \
+  --keyCalculationDbConnectionCount 8 \
+  --dataCopyDbConnectionCount 8 \
   --schemas "school_db,Audit" \
   --baseQuery "school_db.Students ::: student_id % 25 = 0 ::: includeChildren" \
   --baseQuery "school_db.standalone_table ::: id < 4 ::: includeChildren" \
@@ -36,8 +36,8 @@ echo "Running load test of physics_db"
 nohup java -Xmx4G -jar DBSubsetter.jar \
   --originDbConnStr "jdbc:postgresql://0.0.0.0:5432/physics_db?user=postgres" \
   --targetDbConnStr "jdbc:postgresql://0.0.0.0:5433/physics_db?user=postgres" \
-  --originDbParallelism 8 \
-  --targetDbParallelism 8 \
+  --keyCalculationDbConnectionCount 8 \
+  --dataCopyDbConnectionCount 8 \
   --schemas "public" \
   --baseQuery "public.scientists ::: id in (2) ::: includeChildren" \
   --exposeMetrics &

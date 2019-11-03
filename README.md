@@ -4,7 +4,8 @@ DBSubsetter is a tool for taking a logically consistent subset of a relational d
 
 Starting with a base condition specifying a set of rows from one or more tables, it respects foreign key constraints by recursively fetching the "parents" and (optionally) the "children" of those rows.
 
-This is useful for local development and testing or for exporting all the data belonging to a particular set of users or customers for debugging and sharing.
+This is useful for creating local development and testing datasets.
+It can also be used to export the data belonging to a particular set of users for debugging or sharing purposes.
 
 
 ## Project Goals
@@ -25,9 +26,11 @@ Please reach out by opening a GitHub ticket if you would like support for a diff
 
 ## Download and Usage Instructions
 
-1. Load an empty schema from your "origin" database into your "target" database. See vendor-specific instructions for [Postgres](docs/pre_subset_postgres.md), [MySQL](docs/pre_subset_mysql.md), and [Microsoft SQL Server](docs/pre_subset_ms_sql_server.md).
+1. Start with ample disk space, as DBSubsetter stores intermediate results in tempfiles.
+
+2. Load an empty schema from your "origin" database into your "target" database. See vendor-specific instructions for [Postgres](docs/pre_subset_postgres.md), [MySQL](docs/pre_subset_mysql.md), and [Microsoft SQL Server](docs/pre_subset_ms_sql_server.md).
  
-2. Download the DBSubsetter.jar file from our [latest release](https://github.com/bluerogue251/DBSubsetter/releases/latest) and run it with Java 8:
+3. Download the DBSubsetter.jar file from our [latest release](https://github.com/bluerogue251/DBSubsetter/releases/latest) and run it with Java 8:
 
 ```bash
 # Download the DBSubsetter.jar file
@@ -44,22 +47,12 @@ $ java -jar /path/to/DBSubsetter.jar \
     --originDbConnStr "jdbc:<driverName>://<originConnectionString>" \
     --targetDbConnStr "jdbc:<driverName>://<targetConnectionString>" \
     --baseQuery "your_schema.users ::: id % 100 = 0 ::: includeChildren" \
-    --originDbParallelism 8 \
-    --targetDbParallelism 8
+    --keyCalculationDbConnectionCount 8 \
+    --dataCopyDbConnectionCount 8
 ```
 
-3. After DBSubsetter exits, do any last steps as necessary. See vendor-specific instructions for [Postgres](docs/post_subset_postgres.md), [MySQL](docs/post_subset_mysql.md), and [Microsoft SQL Server](docs/post_subset_ms_sql_server.md).
+4. After DBSubsetter exits, follow vendor-specific instructions for [Postgres](docs/post_subset_postgres.md), [MySQL](docs/post_subset_mysql.md), and [Microsoft SQL Server](docs/post_subset_ms_sql_server.md).
 
-
-## Resource Consumption
-
-Memory usage in the worst case will be proportional to the sum of:
-
-* The size of all primary keys in the target database.
-* The size of your largest single query result multiplied by 
-  (`--originDbParallelism` + `--targetDbParallelism`)
-
-Disk usage (in tempfiles) will be proportional to the size of all foreign keys in the target database.
 
 ## Contributing
 
@@ -67,7 +60,7 @@ Contributions of all kinds are welcome!
 
 Whether it is to fix a typo, improve the documentation, report or fix a bug, add a new feature, or whatever else you have in mind, feel free to open an issue or a pull request on the project [GitHub page](https://github.com/bluerogue251/DBSubsetter).
 
-The only condition for contributing to this project is to follow our [code of conduct](CODE_OF_CONDUCT.md) so that everyone is treated with respect.
+Please follow our [code of conduct](CODE_OF_CONDUCT.md) when contributing.
 
 
 ## Related Projects
