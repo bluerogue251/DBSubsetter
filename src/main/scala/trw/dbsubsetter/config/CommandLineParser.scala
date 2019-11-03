@@ -65,17 +65,17 @@ object CommandLineParser {
           |                           Can be specified multiple times
           |""".stripMargin)
 
-    opt[Int]("originDbParallelism")
+    opt[Int]("keyCalculationDbConnectionCount")
       .valueName("<int>")
-      .action((dbp, c) => c.copy(originDbParallelism = dbp))
+      .action((dbp, c) => c.copy(keyCalculationDbConnectionCount = dbp))
       .text(
         """Number of concurrent connections to the full-size origin DB
           |                           A good starting value is the number of CPU cores on your origin database machine
         """.stripMargin)
 
-    opt[Int]("targetDbParallelism")
+    opt[Int]("dataCopyDbConnectionCount")
       .valueName("<int>")
-      .action((dbp, c) => c.copy(targetDbParallelism = dbp))
+      .action((dbp, c) => c.copy(dataCopyDbConnectionCount = dbp))
       .text(
         """Number of concurrent connections to the smaller target DB
           |                           A good starting value is the number of CPU cores on your target database machine
@@ -154,15 +154,15 @@ object CommandLineParser {
           |                           Can be specified multiple times
           |""".stripMargin)
 
-    opt[File]("taskQueueDir")
+    opt[File]("tempfileStorageDir")
       .valueName("</path/to/task/queue/dir>")
-      .action((dir, c) => c.copy(taskQueueDirOpt = Some(dir)))
+      .action((dir, c) => c.copy(tempfileStorageDirOpt = Some(dir)))
       .validate { dir =>
         if (!dir.exists()) dir.mkdir()
         if (!dir.isDirectory) {
-          failure("--taskQueueDir must be a directory")
+          failure("--tempfileStorageDir must be a directory")
         } else if (dir.listFiles().nonEmpty) {
-          failure("--taskQueueDir must be an empty directory")
+          failure("--tempfileStorageDir must be an empty directory")
         } else {
           success
         }
@@ -178,7 +178,7 @@ object CommandLineParser {
         """Run DBSubsetter in debug mode (NOT recommended)
           |                           Uses a simplified, single-threaded architecture
           |                           Avoids using Akka Streams and Chronicle-Queue
-          |                           Ignores `--originDbParallelism` and `--targetDbParallelism` and uses one connection per database
+          |                           Ignores `--keyCalculationDbConnectionCount` and `--dataCopyDbConnectionCount` and uses one connection per database
           |                           Subsetting may be significantly slower
           |                           The resulting subset should be exactly the same as in regular mode
           |""".stripMargin)
@@ -202,8 +202,8 @@ object CommandLineParser {
         |        --originDbConnStr "jdbc:postgresql://localhost:5450/origin_db_name?user=yourUser&password=yourPassword" \
         |        --targetDbConnStr "jdbc:postgresql://localhost:5451/target_db_name?user=yourUser&password=yourPassword" \
         |        --baseQuery "public.users ::: id % 100 = 0 ::: includeChildren" \
-        |        --originDbParallelism 10 \
-        |        --targetDbParallelism 10
+        |        --keyCalculationDbConnectionCount 10 \
+        |        --dataCopyDbConnectionCount 10
         |
         |
         |   # Multiple starting conditions (a.k.a. multiple "base queries"):
@@ -214,8 +214,8 @@ object CommandLineParser {
         |        --baseQuery "public.students ::: student_id in (select v.student_id from valedictorians as v where v.year = 2017) ::: includeChildren", \
         |        --baseQuery "public.users ::: random() < 0.001 ::: includeChildren", \
         |        --baseQuery "finance.transactions ::: created_at < '2017-12-25' ::: excludeChildren" \
-        |        --originDbParallelism 15 \
-        |        --targetDbParallelism 20
+        |        --keyCalculationDbConnectionCount 15 \
+        |        --dataCopyDbConnectionCount 20
         |
         |
         |   # Specifying missing foreign and primary keys at the command line (keys can have one or more columns):
@@ -228,8 +228,8 @@ object CommandLineParser {
         |        --foreignKey "HistorySchema.EventLogTable(userId, employeeType) ::: AdventureWorksSchema.users(Id, employeeType))" \
         |        --primaryKey "HistorySchema.EventLogTable(Id)" \
         |        --primaryKey "AdventureWorksSchema.UsersRolesJoinTable(UserId, RoleId)" \
-        |        --originDbParallelism 1 \
-        |        --targetDbParallelism 1
+        |        --keyCalculationDbConnectionCount 1 \
+        |        --dataCopyDbConnectionCount 1
         |
         |
         |   # Allowing DBSubsetter to use up to 8 gigabytes of memory:

@@ -25,9 +25,11 @@ Please reach out by opening a GitHub ticket if you would like support for a diff
 
 ## Download and Usage Instructions
 
-1. Load an empty schema from your "origin" database into your "target" database. See vendor-specific instructions for [Postgres](docs/pre_subset_postgres.md), [MySQL](docs/pre_subset_mysql.md), and [Microsoft SQL Server](docs/pre_subset_ms_sql_server.md).
+1. Start with ample disk space, as DBSubsetter needs space to store intermediate results in tempfiles
+
+2. Load an empty schema from your "origin" database into your "target" database. See vendor-specific instructions for [Postgres](docs/pre_subset_postgres.md), [MySQL](docs/pre_subset_mysql.md), and [Microsoft SQL Server](docs/pre_subset_ms_sql_server.md).
  
-2. Download the DBSubsetter.jar file from our [latest release](https://github.com/bluerogue251/DBSubsetter/releases/latest) and run it with Java 8:
+3. Download the DBSubsetter.jar file from our [latest release](https://github.com/bluerogue251/DBSubsetter/releases/latest) and run it with Java 8:
 
 ```bash
 # Download the DBSubsetter.jar file
@@ -44,22 +46,12 @@ $ java -jar /path/to/DBSubsetter.jar \
     --originDbConnStr "jdbc:<driverName>://<originConnectionString>" \
     --targetDbConnStr "jdbc:<driverName>://<targetConnectionString>" \
     --baseQuery "your_schema.users ::: id % 100 = 0 ::: includeChildren" \
-    --originDbParallelism 8 \
-    --targetDbParallelism 8
+    --keyCalculationDbConnectionCount 8 \
+    --dataCopyDbConnectionCount 8
 ```
 
-3. After DBSubsetter exits, do any last steps as necessary. See vendor-specific instructions for [Postgres](docs/post_subset_postgres.md), [MySQL](docs/post_subset_mysql.md), and [Microsoft SQL Server](docs/post_subset_ms_sql_server.md).
+4. After DBSubsetter exits, do any last steps as necessary. See vendor-specific instructions for [Postgres](docs/post_subset_postgres.md), [MySQL](docs/post_subset_mysql.md), and [Microsoft SQL Server](docs/post_subset_ms_sql_server.md).
 
-
-## Resource Consumption
-
-Memory usage in the worst case will be proportional to the sum of:
-
-* The size of all primary keys in the target database.
-* The size of your largest single query result multiplied by 
-  (`--originDbParallelism` + `--targetDbParallelism`)
-
-Disk usage (in tempfiles) will be proportional to the size of all foreign keys in the target database.
 
 ## Contributing
 
