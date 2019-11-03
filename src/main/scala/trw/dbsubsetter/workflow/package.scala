@@ -21,7 +21,4 @@ package object workflow {
   sealed trait PkQueryResult
   case object AlreadySeen extends PkQueryResult
   case class NotAlreadySeen(task: FetchParentTask) extends PkQueryResult
-
-  case class NewTasks(taskInfo: Map[(ForeignKey, Boolean), Seq[ForeignKeyValue]])
-  val EmptyNewTasks = NewTasks(Map.empty)
 }

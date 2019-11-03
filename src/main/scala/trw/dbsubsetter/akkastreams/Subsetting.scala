@@ -91,7 +91,7 @@ object Subsetting {
       mergeOriginDbRequests
 
     broadcastPkExistResult ~>
-      Flow[PkQueryResult].collect { case AlreadySeen => EmptyNewTasks } ~>
+      Flow[PkQueryResult].collect { case AlreadySeen => IndexedSeq.empty[ForeignKeyTask] } ~>
       mergeToOutstandingTaskCounter
 
     mergeTargetDbResults.out ~> sink
