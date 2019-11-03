@@ -1,9 +1,9 @@
-package trw.dbsubsetter.workflow.offheap
+package trw.dbsubsetter.fktaskqueue
 
 import trw.dbsubsetter.workflow.ForeignKeyTask
 
 
-trait OffHeapFkTaskQueue {
+trait ForeignKeyTaskQueue {
   def enqueue(foreignKeyTask: ForeignKeyTask): Unit
   def dequeue(): Option[ForeignKeyTask]
   def isEmpty(): Boolean

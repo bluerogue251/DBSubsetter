@@ -3,9 +3,9 @@ package trw.dbsubsetter
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.datacopyqueue.{DataCopyQueue, DataCopyQueueFactory}
 import trw.dbsubsetter.db.{DbAccessFactory, PrimaryKeyValue, SchemaInfo, Table}
+import trw.dbsubsetter.fktaskqueue.{ForeignKeyTaskQueue, ForeignKeyTaskQueueFactory}
 import trw.dbsubsetter.primarykeystore.{PrimaryKeyStore, PrimaryKeyStoreFactory}
 import trw.dbsubsetter.workflow._
-import trw.dbsubsetter.workflow.offheap.{OffHeapFkTaskQueue, OffHeapFkTaskQueueFactory}
 
 
 class ApplicationSingleThreaded(config: Config, schemaInfo: SchemaInfo, baseQueries: Vector[BaseQuery]) {
@@ -28,8 +28,8 @@ class ApplicationSingleThreaded(config: Config, schemaInfo: SchemaInfo, baseQuer
   private[this] val fkTaskCreationWorkflow: FkTaskCreationWorkflow =
     new FkTaskCreationWorkflow(schemaInfo)
 
-  private[this] val fkTaskQueue: OffHeapFkTaskQueue =
-    OffHeapFkTaskQueueFactory.buildOffHeapFkTaskQueue(config, schemaInfo)
+  private[this] val fkTaskQueue: ForeignKeyTaskQueue =
+    ForeignKeyTaskQueueFactory.build(config, schemaInfo)
 
   private[this] val dataCopyQueue: DataCopyQueue =
     DataCopyQueueFactory.buildDataCopyQueue(config, schemaInfo)

@@ -1,17 +1,18 @@
-package trw.dbsubsetter.workflow.offheap.impl.chroniclequeue
+package trw.dbsubsetter.fktaskqueue.impl
 
 import net.openhft.chronicle.queue.impl.single.SingleChronicleQueue
 import net.openhft.chronicle.wire.WriteMarshallable
+import trw.dbsubsetter.chronicle.ChronicleQueueFactory
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.{ForeignKey, ForeignKeyValue, SchemaInfo}
-import trw.dbsubsetter.workflow.offheap.OffHeapFkTaskQueue
+import trw.dbsubsetter.fktaskqueue.ForeignKeyTaskQueue
 import trw.dbsubsetter.workflow.{FetchChildrenTask, FetchParentTask, ForeignKeyTask}
 
 
 /**
   * WARNING: this class is not threadsafe
   */
-private[offheap] final class ChronicleQueueFkTaskQueue(config: Config, schemaInfo: SchemaInfo) extends OffHeapFkTaskQueue {
+private[fktaskqueue] final class ForeignKeyTaskChronicleQueue(config: Config, schemaInfo: SchemaInfo) extends ForeignKeyTaskQueue {
 
   private[this] var queuedTaskCount: Long = 0L
 
@@ -25,26 +26,26 @@ private[offheap] final class ChronicleQueueFkTaskQueue(config: Config, schemaInf
     schemaInfo
       .fksOrdered
       .map { fk =>
-        new TaskQueueReader(fk.fromCols.map(_.dataType))
+        new ChronicleQueueFkTaskReader(fk.fromCols.map(_.dataType))
       }
 
   private[this] val parentReaders =
     schemaInfo.fksOrdered.map { fk =>
-      new TaskQueueReader(fk.toCols.map(_.dataType))
+      new ChronicleQueueFkTaskReader(fk.toCols.map(_.dataType))
     }
 
   private[this] val parentFkWriters =
     schemaInfo
       .fksOrdered
       .map { fk =>
-        new TaskQueueWriter(fk.i, fk.toCols.map(_.dataType))
+        new ChronicleQueueFkTaskWriter(fk.i, fk.toCols.map(_.dataType))
       }
 
   private[this] val childFkWriters =
     schemaInfo
       .fksOrdered
       .map { fk =>
-        new TaskQueueWriter(fk.i, fk.fromCols.map(_.dataType))
+        new ChronicleQueueFkTaskWriter(fk.i, fk.fromCols.map(_.dataType))
       }
 
   override def enqueue(foreignKeyTask: ForeignKeyTask): Unit = {
@@ -79,7 +80,7 @@ private[offheap] final class ChronicleQueueFkTaskQueue(config: Config, schemaInf
       val fetchChildren: Boolean = in.bool()
       val fkOrdinal: Short = in.int16()
 
-      val reader: TaskQueueReader =
+      val reader: ChronicleQueueFkTaskReader =
         if (fetchChildren) {
           childReaders(fkOrdinal)
         } else {
@@ -108,7 +109,7 @@ private[offheap] final class ChronicleQueueFkTaskQueue(config: Config, schemaInf
     queuedTaskCount == 0L
   }
 
-  private[this] def write(writer: TaskQueueWriter, fetchChildren: Boolean, value: ForeignKeyValue): Unit = {
+  private[this] def write(writer: ChronicleQueueFkTaskWriter, fetchChildren: Boolean, value: ForeignKeyValue): Unit = {
     val writeMarshallable: WriteMarshallable = writer.writeHandler(fetchChildren, value)
     appender.writeDocument(writeMarshallable)
   }

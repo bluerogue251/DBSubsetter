@@ -4,10 +4,10 @@ import java.util.function.BiConsumer
 
 import net.openhft.chronicle.queue.impl.single.SingleChronicleQueue
 import net.openhft.chronicle.wire.{ValueIn, ValueOut, WireOut}
+import trw.dbsubsetter.chronicle.{ChronicleQueueFactory, ChronicleQueueFunctions}
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.ColumnTypes.ColumnType
 import trw.dbsubsetter.db.PrimaryKeyValue
-import trw.dbsubsetter.workflow.offheap.impl.chroniclequeue.{ChronicleQueueFactory, ChronicleQueueFunctions}
 
 
 private[impl] final class ChronicleQueueAccess(config: Config, columnTypes: Seq[ColumnType]) {

@@ -1,11 +1,11 @@
-package trw.dbsubsetter.workflow.offheap.impl
+package trw.dbsubsetter.fktaskqueue.impl
 
+import trw.dbsubsetter.fktaskqueue.ForeignKeyTaskQueue
 import trw.dbsubsetter.metrics.Metrics
 import trw.dbsubsetter.workflow.ForeignKeyTask
-import trw.dbsubsetter.workflow.offheap.OffHeapFkTaskQueue
 
 
-private[offheap] final class OffHeapFkTaskQueueInstrumented(delegatee: OffHeapFkTaskQueue) extends OffHeapFkTaskQueue {
+private[fktaskqueue] final class ForeignKeyTaskQueueInstrumented(delegatee: ForeignKeyTaskQueue) extends ForeignKeyTaskQueue {
 
   private[this] val pendingTaskCount = Metrics.PendingTasksGauge
 
