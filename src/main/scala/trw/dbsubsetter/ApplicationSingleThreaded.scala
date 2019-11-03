@@ -38,7 +38,6 @@ object ApplicationSingleThreaded {
         val dbResult: OriginDbResult = originDbWorkflow.process(task)
 
         val pksAdded: PksAdded = pkWorkflow.add(dbResult)
-
         val pkValueExtractionFunction: Keys => PrimaryKeyValue = pkValueExtractionFunctions(pksAdded.table)
         val pkValues: Seq[PrimaryKeyValue] = pksAdded.rowsNeedingParentTasks.map(pkValueExtractionFunction)
 
