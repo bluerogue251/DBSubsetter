@@ -37,7 +37,7 @@ final class FkTaskCreationWorkflow(schemaInfo: SchemaInfo) {
     allForeignKeys.flatMap { foreignKey =>
       val extractionFunction: Keys => ForeignKeyValue = fkExtractionFunctions(foreignKey, true)
       val fkValues: Seq[ForeignKeyValue] = rows.map(extractionFunction)
-      fkValues.map(fkValue => FetchChildrenTask(foreignKey.toTable, table, foreignKey, fkValue))
+      fkValues.map(fkValue => FetchChildrenTask(foreignKey.fromTable, table, foreignKey, fkValue))
     }
   }
 }
