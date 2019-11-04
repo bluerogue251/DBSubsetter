@@ -254,10 +254,10 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "PendingTasks",
+            "expr": "PendingForeignKeyTasks",
             "format": "time_series",
             "intervalFactor": 1,
-            "legendFormat": "Pending Task Count",
+            "legendFormat": "Pending Foreign Key Task Count",
             "refId": "A"
           }
         ],
@@ -265,7 +265,7 @@
         "timeFrom": null,
         "timeRegions": [],
         "timeShift": null,
-        "title": "Pending Tasks",
+        "title": "Pending Foreign Key Task Count",
         "tooltip": {
           "shared": true,
           "sort": 0,
@@ -637,18 +637,32 @@
             "refId": "C"
           },
           {
-            "expr": "rate(TaskEnqueueDuration_sum[1s]) / rate(TaskEnqueueDuration_count[1s])",
+            "expr": "rate(ForeignKeyTaskEnqueueDuration_sum[1s]) / rate(ForeignKeyTaskEnqueueDuration_count[1s])",
             "format": "time_series",
             "intervalFactor": 1,
-            "legendFormat": "FkTask Buffer Enqueue",
+            "legendFormat": "Foreign Key Task Buffer Enqueue",
             "refId": "D"
           },
           {
-            "expr": "rate(TaskDequeueDuration_sum[1s]) / rate(TaskDequeueDuration_count[1s])",
+            "expr": "rate(ForeignKeyTaskDequeueDuration_sum[1s]) / rate(ForeignKeyTaskDequeueDuration_count[1s])",
             "format": "time_series",
             "intervalFactor": 1,
-            "legendFormat": "FkTask Buffer Dequeue",
+            "legendFormat": "Foreign Key Task Buffer Dequeue",
             "refId": "E"
+          },
+          {
+            "expr": "rate(DataCopyTaskEnqueueDuration_sum[1s]) / rate(DataCopyTaskEnqueueDuration_count[1s])",
+            "format": "time_series",
+            "intervalFactor": 1,
+            "legendFormat": "Data Copy Task Buffer Enqueue",
+            "refId": "F"
+          },
+          {
+            "expr": "rate(DataCopyTaskDequeueDuration_sum[1s]) / rate(DataCopyTaskDequeueDuration_count[1s])",
+            "format": "time_series",
+            "intervalFactor": 1,
+            "legendFormat": "Data Copy Task Buffer Dequeue",
+            "refId": "G"
           }
         ],
         "thresholds": [],

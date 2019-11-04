@@ -7,11 +7,11 @@ import trw.dbsubsetter.workflow.ForeignKeyTask
 
 private[fktaskqueue] final class ForeignKeyTaskQueueInstrumented(delegatee: ForeignKeyTaskQueue) extends ForeignKeyTaskQueue {
 
-  private[this] val pendingTaskCount = Metrics.PendingTasksGauge
+  private[this] val pendingTaskCount = Metrics.PendingForeignKeyTasks
 
-  private[this] val taskEnqueueDuration = Metrics.TaskEnqueueDuration
+  private[this] val taskEnqueueDuration = Metrics.ForeignKeyTaskEnqueueDuration
 
-  private[this] val taskDequeueDuration = Metrics.TaskDequeueDuration
+  private[this] val taskDequeueDuration = Metrics.ForeignKeyTaskDequeueDuration
 
   override def enqueue(foreignKeyTask: ForeignKeyTask): Unit = {
     val runnable: Runnable = () => delegatee.enqueue(foreignKeyTask)
