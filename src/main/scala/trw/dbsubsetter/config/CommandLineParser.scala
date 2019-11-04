@@ -7,7 +7,7 @@ import trw.dbsubsetter.db.{ColumnName, SchemaName, TableName}
 
 object CommandLineParser {
   val parser: OptionParser[Config] = new OptionParser[Config]("DBSubsetter") {
-    head("DBSubsetter", "v1.0.0-beta.3")
+    head("DBSubsetter", "v1.0.0-beta.4")
     help("help").text("Prints this usage text\n")
     version("version").text("Prints the application version\n")
 
