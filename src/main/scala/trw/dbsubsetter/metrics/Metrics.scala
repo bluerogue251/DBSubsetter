@@ -90,25 +90,25 @@ object Metrics {
       .buckets(dbDurationPerRowBuckets: _*)
       .register()
 
-  val PendingTasksGauge: Gauge =
+  val PendingForeignKeyTasks: Gauge =
     Gauge
       .build()
-      .name("PendingTasks")
+      .name("PendingForeignKeyTasks")
       .help("n/a")
       .register()
 
-  val TaskEnqueueDuration: Histogram =
+  val ForeignKeyTaskEnqueueDuration: Histogram =
     Histogram
       .build()
-      .name("TaskEnqueueDuration")
+      .name("ForeignKeyTaskEnqueueDuration")
       .help("n/a")
       .buckets(offHeapQueueDurationBuckets: _*)
       .register()
 
-  val TaskDequeueDuration: Histogram =
+  val ForeignKeyTaskDequeueDuration: Histogram =
     Histogram
       .build()
-      .name("TaskDequeueDuration")
+      .name("ForeignKeyTaskDequeueDuration")
       .help("n/a")
       .buckets(offHeapQueueDurationBuckets: _*)
       .register()

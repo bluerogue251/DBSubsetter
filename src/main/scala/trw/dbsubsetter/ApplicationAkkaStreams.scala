@@ -8,7 +8,6 @@ import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.datacopyqueue.{DataCopyQueue, DataCopyQueueFactory}
 import trw.dbsubsetter.db.{DbAccessFactory, SchemaInfo}
 import trw.dbsubsetter.fktaskqueue.{ForeignKeyTaskQueue, ForeignKeyTaskQueueFactory}
-import trw.dbsubsetter.metrics.Metrics
 import trw.dbsubsetter.workflow._
 
 import scala.concurrent.duration.Duration
@@ -25,10 +24,6 @@ object ApplicationAkkaStreams {
     val fkTaskCreationWorkflow: FkTaskCreationWorkflow = new FkTaskCreationWorkflow(schemaInfo)
     val fkTaskQueue: ForeignKeyTaskQueue = ForeignKeyTaskQueueFactory.build(config, schemaInfo)
     val dataCopyQueue: DataCopyQueue = DataCopyQueueFactory.buildDataCopyQueue(config, schemaInfo)
-
-    if (config.exposeMetrics) {
-      Metrics.PendingTasksGauge.inc(config.baseQueries.size)
-    }
 
     val subsettingFuture: Future[Done] =
       Subsetting

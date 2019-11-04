@@ -5,7 +5,7 @@ DBSubsetter is a tool for taking a logically consistent subset of a relational d
 Starting with a base condition specifying a set of rows from one or more tables, it respects foreign key constraints by recursively fetching the "parents" and (optionally) the "children" of those rows.
 
 This is useful for creating local development and testing datasets.
-It can also be used to export the data belonging to a particular set of users for debugging or sharing purposes.
+It can also be used to export the data belonging to a particular set of users.
 
 
 ## Project Goals
@@ -26,11 +26,9 @@ Please reach out by opening a GitHub ticket if you would like support for a diff
 
 ## Download and Usage Instructions
 
-1. Start with ample disk space, as DBSubsetter stores intermediate results in tempfiles.
-
-2. Load an empty schema from your "origin" database into your "target" database. See vendor-specific instructions for [Postgres](docs/pre_subset_postgres.md), [MySQL](docs/pre_subset_mysql.md), and [Microsoft SQL Server](docs/pre_subset_ms_sql_server.md).
+1. Load an empty schema from your "origin" database into your "target" database. See vendor-specific instructions for [Postgres](docs/pre_subset_postgres.md), [MySQL](docs/pre_subset_mysql.md), and [Microsoft SQL Server](docs/pre_subset_ms_sql_server.md).
  
-3. Download the DBSubsetter.jar file from our [latest release](https://github.com/bluerogue251/DBSubsetter/releases/latest) and run it with Java 8:
+2. Download the DBSubsetter.jar file from our [latest release](https://github.com/bluerogue251/DBSubsetter/releases/latest) and run it with Java 8:
 
 ```bash
 # Download the DBSubsetter.jar file
@@ -51,14 +49,13 @@ $ java -jar /path/to/DBSubsetter.jar \
     --dataCopyDbConnectionCount 8
 ```
 
-4. After DBSubsetter exits, follow vendor-specific instructions for [Postgres](docs/post_subset_postgres.md), [MySQL](docs/post_subset_mysql.md), and [Microsoft SQL Server](docs/post_subset_ms_sql_server.md).
+3. After DBSubsetter exits, follow vendor-specific instructions for [Postgres](docs/post_subset_postgres.md), [MySQL](docs/post_subset_mysql.md), and [Microsoft SQL Server](docs/post_subset_ms_sql_server.md).
 
 
 ## Contributing
 
 Contributions of all kinds are welcome!
-
-Whether it is to fix a typo, improve the documentation, report or fix a bug, add a new feature, or whatever else you have in mind, feel free to open an issue or a pull request on the project [GitHub page](https://github.com/bluerogue251/DBSubsetter).
+Feel free to open an issue or a pull request on the project [GitHub page](https://github.com/bluerogue251/DBSubsetter).
 
 Please follow our [code of conduct](CODE_OF_CONDUCT.md) when contributing.
 
