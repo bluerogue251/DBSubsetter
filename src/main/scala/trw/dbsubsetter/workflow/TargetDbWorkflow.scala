@@ -23,6 +23,14 @@ final class TargetDbWorkflow(dbAccessFactory: DbAccessFactory) {
     val rowsToInsert: Vector[Row] =
       originDbAccess.getRowsFromPrimaryKeyValues(dataCopyTask.table, pkValues)
 
+    if (!rowsToInsert.size.equals(pkValues.size)) {
+      val message: String =
+        s"Number of rows fetched did not equal number of primary keys. " +
+          s"Rows fetched: ${rowsToInsert.size}. " +
+          s"Primary keys to fetch by: ${pkValues.size}"
+      throw new IllegalStateException(message)
+    }
+
     targetDbAccess.insertRows(dataCopyTask.table, rowsToInsert)
   }
 }
