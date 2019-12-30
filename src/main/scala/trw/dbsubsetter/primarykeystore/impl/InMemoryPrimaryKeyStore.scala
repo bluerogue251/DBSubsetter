@@ -81,7 +81,7 @@ private object InMemoryPrimaryKeyStore {
     if (primaryKeyValue.individualColumnValues.size == 1) {
       primaryKeyValue.individualColumnValues.head
     } else {
-      primaryKeyValue.individualColumnValues
+      primaryKeyValue.individualColumnValues.toArray
     }
   }
 }
