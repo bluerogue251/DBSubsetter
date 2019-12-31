@@ -14,23 +14,25 @@ import scala.concurrent.{ExecutionContext, Future}
 
 // scalastyle:off
 object DataCopyGraphFactory {
-  def build(config: Config, schemaInfo: SchemaInfo, dbAccessFactory: DbAccessFactory, dataCopyQueue: DataCopyQueue)(implicit ec: ExecutionContext): RunnableGraph[Future[Done]] = RunnableGraph.fromGraph(GraphDSL.create(Sink.ignore) { implicit b =>sink =>
-    val dataCopyBufferSource = b.add(BufferFactory.dataCopyBufferSource(dataCopyQueue))
-    val balanceTargetDb = b.add(Balance[DataCopyTask](config.dataCopyDbConnectionCount, waitForAllDownstreams = true))
-    val mergeTargetDbResults = b.add(Merge[Unit](config.dataCopyDbConnectionCount))
+  def build(config: Config, schemaInfo: SchemaInfo, dbAccessFactory: DbAccessFactory, dataCopyQueue: DataCopyQueue)(implicit ec: ExecutionContext): RunnableGraph[Future[Done]] = {
+    RunnableGraph.fromGraph(GraphDSL.create(Sink.ignore) { implicit b => sink =>
+      val dataCopyBufferSource = b.add(BufferFactory.dataCopyBufferSource(dataCopyQueue))
+      val balanceTargetDb = b.add(Balance[DataCopyTask](config.dataCopyDbConnectionCount, waitForAllDownstreams = true))
+      val mergeTargetDbResults = b.add(Merge[Unit](config.dataCopyDbConnectionCount))
 
-    // Dequeue Target DB insert requests
-    dataCopyBufferSource ~>
-      balanceTargetDb
+      // Dequeue Target DB insert requests
+      dataCopyBufferSource ~>
+        balanceTargetDb
 
-    // Process Target DB inserts in parallel
-    for (_ <- 0 until config.dataCopyDbConnectionCount) {
-      balanceTargetDb ~> TargetDb.insert(dbAccessFactory).async ~> mergeTargetDbResults
-    }
+      // Process Target DB inserts in parallel
+      for (_ <- 0 until config.dataCopyDbConnectionCount) {
+        balanceTargetDb ~> TargetDb.insert(dbAccessFactory).async ~> mergeTargetDbResults
+      }
 
-    // And ignore all successful insert results
-    mergeTargetDbResults.out ~> sink
+      // And ignore all successful insert results
+      mergeTargetDbResults.out ~> sink
 
-    ClosedShape
-  })
+      ClosedShape
+    })
+  }
 }
