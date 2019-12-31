@@ -14,7 +14,7 @@ import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, ExecutionContext, Future}
 
 object ApplicationAkkaStreams {
-  def run(config: Config, schemaInfo: SchemaInfo, baseQueries: Vector[BaseQuery]): Future[Done] = {
+  def run(config: Config, schemaInfo: SchemaInfo, baseQueries: Vector[BaseQuery]): Unit = {
     implicit val system: ActorSystem = ActorSystem("DbSubsetter")
     implicit val materializer: ActorMaterializer = ActorMaterializer()
     implicit val ec: ExecutionContext = system.dispatcher
@@ -29,12 +29,12 @@ object ApplicationAkkaStreams {
       Subsetting
         .runnableGraph(config, schemaInfo, baseQueries, pkStore, dbAccessFactory, fkTaskCreationWorkflow, fkTaskQueue, dataCopyQueue)
         .run()
-        .map { success =>
-          dbAccessFactory.closeAllConnections()
-          system.terminate()
-          success
-        }
 
-    Await.ready(subsettingFuture, Duration.Inf)
+    // Wait for subsetting to complete. Use `result` rather than `ready` to ensure an exception is thrown on failure.
+    Await.result(subsettingFuture, Duration.Inf)
+
+    // Clean up after successful subsetting run
+    dbAccessFactory.closeAllConnections()
+    system.terminate()
   }
 }
