@@ -20,74 +20,72 @@ import scala.concurrent.{ExecutionContext, Future}
 
 // scalastyle:off
 object KeyQueryGraphFactory {
-  def build(config: Config, schemaInfo: SchemaInfo, baseQueries: Vector[BaseQuery], pkStore: ActorRef, dbAccessFactory: DbAccessFactory, fkTaskCreationWorkflow: FkTaskCreationWorkflow, fkTaskQueue: ForeignKeyTaskQueue, dataCopyQueue: DataCopyQueue)(implicit ec: ExecutionContext): RunnableGraph[Future[Done]] = {
-    RunnableGraph.fromGraph(GraphDSL.create(BufferFactory.dataCopyBufferSink(dataCopyQueue)) { implicit b => dataCopyBufferSink =>
-      // Infrastructure: Timeouts, Merges, Balances, Partitions, Broadcasts
-      implicit val askTimeout: Timeout = Timeout(48, TimeUnit.HOURS) // For `mapAsyncUnordered`. The need for this timeout may be a code smell.
-      val mergeOriginDbRequests = b.add(Merge[OriginDbRequest](3))
-      val balanceOriginDb = b.add(Balance[OriginDbRequest](config.keyCalculationDbConnectionCount, waitForAllDownstreams = true))
-      val mergeOriginDbResults = b.add(Merge[OriginDbResult](config.keyCalculationDbConnectionCount))
-      val partitionFkTasks = b.add(Partition[ForeignKeyTask](2, {
-        case t: FetchParentTask => if (FkTaskPreCheck.shouldPrecheck(t)) 1 else 0
-        case _ => 0
-      }))
-      // TODO try to turn this broadcast into a typesafe Partition stage with two output ports, each output port with a different type
-      val broadcastPkExistResult = b.add(Broadcast[PkQueryResult](2))
-      val broadcastPksAdded = b.add(Broadcast[PksAdded](2))
-      val fkTaskBufferFlow = b.add(BufferFactory.fkTaskBuffer(fkTaskQueue).async)
-      val mergeToOutstandingTaskCounter = b.add(Merge[IndexedSeq[ForeignKeyTask]](2))
+  def build(config: Config, schemaInfo: SchemaInfo, baseQueries: Vector[BaseQuery], pkStore: ActorRef, dbAccessFactory: DbAccessFactory, fkTaskCreationWorkflow: FkTaskCreationWorkflow, fkTaskQueue: ForeignKeyTaskQueue, dataCopyQueue: DataCopyQueue)(implicit ec: ExecutionContext): RunnableGraph[Future[Done]] = RunnableGraph.fromGraph(GraphDSL.create(BufferFactory.dataCopyBufferSink(dataCopyQueue)) { implicit b => dataCopyBufferSink =>
+    // Infrastructure: Timeouts, Merges, Balances, Partitions, Broadcasts
+    implicit val askTimeout: Timeout = Timeout(48, TimeUnit.HOURS) // For `mapAsyncUnordered`. The need for this timeout may be a code smell.
+    val mergeOriginDbRequests = b.add(Merge[OriginDbRequest](3))
+    val balanceOriginDb = b.add(Balance[OriginDbRequest](config.keyCalculationDbConnectionCount, waitForAllDownstreams = true))
+    val mergeOriginDbResults = b.add(Merge[OriginDbResult](config.keyCalculationDbConnectionCount))
+    val partitionFkTasks = b.add(Partition[ForeignKeyTask](2, {
+      case t: FetchParentTask => if (FkTaskPreCheck.shouldPrecheck(t)) 1 else 0
+      case _ => 0
+    }))
+    // TODO try to turn this broadcast into a typesafe Partition stage with two output ports, each output port with a different type
+    val broadcastPkExistResult = b.add(Broadcast[PkQueryResult](2))
+    val broadcastPksAdded = b.add(Broadcast[PksAdded](2))
+    val fkTaskBufferFlow = b.add(BufferFactory.fkTaskBuffer(fkTaskQueue).async)
+    val mergeToOutstandingTaskCounter = b.add(Merge[IndexedSeq[ForeignKeyTask]](2))
 
-      // Start everything off
-      Source(baseQueries) ~>
-        mergeOriginDbRequests
+    // Start everything off
+    Source(baseQueries) ~>
+      mergeOriginDbRequests
 
-      // Process Origin DB Queries in Parallel
-      mergeOriginDbRequests.out ~> balanceOriginDb
-      for (_ <- 0 until config.keyCalculationDbConnectionCount) {
-        balanceOriginDb ~> OriginDb.query(config, schemaInfo, dbAccessFactory).async ~> mergeOriginDbResults
-      }
+    // Process Origin DB Queries in Parallel
+    mergeOriginDbRequests.out ~> balanceOriginDb
+    for (_ <- 0 until config.keyCalculationDbConnectionCount) {
+      balanceOriginDb ~> OriginDb.query(config, schemaInfo, dbAccessFactory).async ~> mergeOriginDbResults
+    }
 
-      // TODO try to understand if it's really necessary for pkStore to be in an actor... given that we should
-      //   only be writing to it from one place, are we really worried about threadsafety?
-      mergeOriginDbResults ~>
-        Flow[OriginDbResult].mapAsyncUnordered(10)(dbResult => (pkStore ? dbResult).mapTo[PksAdded]) ~>
-        broadcastPksAdded
+    // TODO try to understand if it's really necessary for pkStore to be in an actor... given that we should
+    //   only be writing to it from one place, are we really worried about threadsafety?
+    mergeOriginDbResults ~>
+      Flow[OriginDbResult].mapAsyncUnordered(10)(dbResult => (pkStore ? dbResult).mapTo[PksAdded]) ~>
+      broadcastPksAdded
 
-      broadcastPksAdded ~>
-        FkTaskCreation.flow(fkTaskCreationWorkflow) ~>
-        mergeToOutstandingTaskCounter
+    broadcastPksAdded ~>
+      FkTaskCreation.flow(fkTaskCreationWorkflow) ~>
+      mergeToOutstandingTaskCounter
 
-      mergeToOutstandingTaskCounter ~>
-        TaskCountCircuitBreaker.statefulCounter(baseQueries.size) ~>
-        Flow[IndexedSeq[ForeignKeyTask]].mapConcat(_.to[collection.immutable.Iterable]) ~>
-        fkTaskBufferFlow
+    mergeToOutstandingTaskCounter ~>
+      TaskCountCircuitBreaker.statefulCounter(baseQueries.size) ~>
+      Flow[IndexedSeq[ForeignKeyTask]].mapConcat(_.to[collection.immutable.Iterable]) ~>
+      fkTaskBufferFlow
 
-      // Do we need a small in-memory buffer so the many targetDbs never wait on the single chronicle queue?
-      broadcastPksAdded ~>
-        dataCopyBufferSink
+    // Do we need a small in-memory buffer so the many targetDbs never wait on the single chronicle queue?
+    broadcastPksAdded ~>
+      dataCopyBufferSink
 
-      // FkTasks ~> cannotBePrechecked       ~>        OriginDbRequest
-      // FkTasks ~> canBePrechecked ~> PkStoreQuery ~> OriginDbRequest
-      //                                            ~> DuplicateTask
-      fkTaskBufferFlow ~>
-        partitionFkTasks
+    // FkTasks ~> cannotBePrechecked       ~>        OriginDbRequest
+    // FkTasks ~> canBePrechecked ~> PkStoreQuery ~> OriginDbRequest
+    //                                            ~> DuplicateTask
+    fkTaskBufferFlow ~>
+      partitionFkTasks
 
-      partitionFkTasks.out(0) ~>
-        mergeOriginDbRequests
+    partitionFkTasks.out(0) ~>
+      mergeOriginDbRequests
 
-      partitionFkTasks.out(1) ~>
-        Flow[ForeignKeyTask].mapAsyncUnordered(10)(req => (pkStore ? req).mapTo[PkQueryResult]) ~>
-        broadcastPkExistResult
+    partitionFkTasks.out(1) ~>
+      Flow[ForeignKeyTask].mapAsyncUnordered(10)(req => (pkStore ? req).mapTo[PkQueryResult]) ~>
+      broadcastPkExistResult
 
-      broadcastPkExistResult ~>
-        Flow[PkQueryResult].collect { case NotAlreadySeen(fkTask) => fkTask } ~>
-        mergeOriginDbRequests
+    broadcastPkExistResult ~>
+      Flow[PkQueryResult].collect { case NotAlreadySeen(fkTask) => fkTask } ~>
+      mergeOriginDbRequests
 
-      broadcastPkExistResult ~>
-        Flow[PkQueryResult].collect { case AlreadySeen => IndexedSeq.empty[ForeignKeyTask] } ~>
-        mergeToOutstandingTaskCounter
+    broadcastPkExistResult ~>
+      Flow[PkQueryResult].collect { case AlreadySeen => IndexedSeq.empty[ForeignKeyTask] } ~>
+      mergeToOutstandingTaskCounter
 
-      ClosedShape
-    })
-  }
+    ClosedShape
+  })
 }
