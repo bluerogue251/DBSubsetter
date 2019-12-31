@@ -15,12 +15,12 @@ import scala.concurrent.{ExecutionContext, Future}
 // scalastyle:off
 object DataCopyGraphFactory {
   def build(config: Config, schemaInfo: SchemaInfo, dbAccessFactory: DbAccessFactory, dataCopyQueue: DataCopyQueue)(implicit ec: ExecutionContext): RunnableGraph[Future[Done]] = RunnableGraph.fromGraph(GraphDSL.create(Sink.ignore) { implicit b =>sink =>
-    val dataCopyBufferFlow = b.add(BufferFactory.dataCopyBuffer(dataCopyQueue).async)
+    val dataCopyBufferSource = b.add(BufferFactory.dataCopyBufferSource(dataCopyQueue))
     val balanceTargetDb = b.add(Balance[DataCopyTask](config.dataCopyDbConnectionCount, waitForAllDownstreams = true))
     val mergeTargetDbResults = b.add(Merge[Unit](config.dataCopyDbConnectionCount))
 
     // Dequeue Target DB insert requests
-    dataCopyBufferFlow ~>
+    dataCopyBufferSource ~>
       balanceTargetDb
 
     // Process Target DB inserts in parallel

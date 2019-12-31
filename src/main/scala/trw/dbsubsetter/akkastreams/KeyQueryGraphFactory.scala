@@ -33,7 +33,7 @@ object KeyQueryGraphFactory {
     // TODO try to turn this broadcast into a typesafe Partition stage with two output ports, each output port with a different type
     val broadcastPkExistResult = b.add(Broadcast[PkQueryResult](2))
     val broadcastPksAdded = b.add(Broadcast[PksAdded](2))
-    val dataCopyBufferFlow = b.add(BufferFactory.dataCopyBuffer(dataCopyQueue).async)
+    val dataCopyBufferSink = b.add(BufferFactory.dataCopyBufferSink(dataCopyQueue))
     val fkTaskBufferFlow = b.add(BufferFactory.fkTaskBuffer(fkTaskQueue).async)
     val mergeToOutstandingTaskCounter = b.add(Merge[IndexedSeq[ForeignKeyTask]](2))
 
@@ -64,7 +64,7 @@ object KeyQueryGraphFactory {
 
     // Do we need a small in-memory buffer so the many targetDbs never wait on the single chronicle queue?
     broadcastPksAdded ~>
-      dataCopyBufferFlow
+      dataCopyBufferSink
 
     // FkTasks ~> cannotBePrechecked       ~>        OriginDbRequest
     // FkTasks ~> canBePrechecked ~> PkStoreQuery ~> OriginDbRequest
