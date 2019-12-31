@@ -3,7 +3,7 @@ package trw.dbsubsetter
 import akka.Done
 import akka.actor.{ActorRef, ActorSystem}
 import akka.stream.ActorMaterializer
-import trw.dbsubsetter.akkastreams.{PkStoreActor, Subsetting}
+import trw.dbsubsetter.akkastreams.{DataCopyGraphFactory, KeyQueryGraphFactory, PkStoreActor}
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.datacopyqueue.{DataCopyQueue, DataCopyQueueFactory}
 import trw.dbsubsetter.db.{DbAccessFactory, SchemaInfo}
@@ -25,13 +25,21 @@ object ApplicationAkkaStreams {
     val fkTaskQueue: ForeignKeyTaskQueue = ForeignKeyTaskQueueFactory.build(config, schemaInfo)
     val dataCopyQueue: DataCopyQueue = DataCopyQueueFactory.buildDataCopyQueue(config, schemaInfo)
 
-    val subsettingFuture: Future[Done] =
-      Subsetting
-        .runnableGraph(config, schemaInfo, baseQueries, pkStore, dbAccessFactory, fkTaskCreationWorkflow, fkTaskQueue, dataCopyQueue)
+    val keyQueryPhase: Future[Done] =
+      KeyQueryGraphFactory
+        .build(config, schemaInfo, baseQueries, pkStore, dbAccessFactory, fkTaskCreationWorkflow, fkTaskQueue, dataCopyQueue)
         .run()
 
-    // Wait for subsetting to complete. Use `result` rather than `ready` to ensure an exception is thrown on failure.
-    Await.result(subsettingFuture, Duration.Inf)
+    // Wait for the key query phase to complete. Use `result` rather than `ready` to ensure an exception is thrown on failure.
+    Await.result(keyQueryPhase, Duration.Inf)
+
+    val dataCopyPhase: Future[Done] =
+      DataCopyGraphFactory
+        .build(config, schemaInfo, dbAccessFactory, dataCopyQueue)
+        .run()
+
+    // Wait for the data copy phase to complete. Use `result` rather than `ready` to ensure an exception is thrown on failure.
+    Await.result(dataCopyPhase, Duration.Inf)
 
     // Clean up after successful subsetting run
     dbAccessFactory.closeAllConnections()
