@@ -57,8 +57,10 @@ private[datacopy] final class PostgresOptimizedDataCopyWorkflowImpl(dbAccessFact
 
     val selectStatement: String =
       s"""
-         | COPY (select $allColumnNamesSql from "${dataCopyTask.table.schema}"."${dataCopyTask.table.name}"
-         | where $pkColumnNamesSql in ($allPkValuesSql))
+         | COPY (
+         |   select $allColumnNamesSql from "${dataCopyTask.table.schema}"."${dataCopyTask.table.name}"
+         |   where $pkColumnNamesSql in ($allPkValuesSql)
+         | )
          | TO STDOUT (FORMAT BINARY)
          | """.stripMargin
 

@@ -15,7 +15,7 @@ sudo docker exec pg_origin pg_dump --user postgres --dbname physics_db --section
   sudo docker exec --interactive pg_target psql --user postgres --dbname physics_db
 
 echo "Running load test of school_db"
-java -Xmx4G -jar master.jar \
+java -Xmx4G -jar DBSubsetter.jar \
   --originDbConnStr "jdbc:postgresql://0.0.0.0:5432/school_db?user=postgres" \
   --targetDbConnStr "jdbc:postgresql://0.0.0.0:5433/school_db?user=postgres" \
   --keyCalculationDbConnectionCount 6 \
@@ -33,7 +33,7 @@ sleep 90
 # TODO: fix so that some experiment plans have no scientist. Then consider using this base query.
 # "--baseQuery", "public.experiment_plans ::: id % 35 = 0 ::: includeChildren",
 echo "Running load test of physics_db"
-nohup java -Xmx4G -jar master.jar \
+nohup java -Xmx4G -jar DBSubsetter.jar \
   --originDbConnStr "jdbc:postgresql://0.0.0.0:5432/physics_db?user=postgres" \
   --targetDbConnStr "jdbc:postgresql://0.0.0.0:5433/physics_db?user=postgres" \
   --keyCalculationDbConnectionCount 6 \
