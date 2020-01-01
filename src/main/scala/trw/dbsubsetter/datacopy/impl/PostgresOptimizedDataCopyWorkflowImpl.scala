@@ -11,9 +11,8 @@ import trw.dbsubsetter.workflow.DataCopyTask
 
 import scala.concurrent.{ExecutionContext, Future}
 
-// scalastyle:off
+
 private[datacopy] final class PostgresOptimizedDataCopyWorkflowImpl(dbAccessFactory: DbAccessFactory, schemaInfo: SchemaInfo) extends DataCopyWorkflow {
-// scalastyle:on
 
   private[this] val originCopyManager: CopyManager =
     dbAccessFactory.buildOriginPostgresCopyManager()
@@ -60,8 +59,8 @@ private[datacopy] final class PostgresOptimizedDataCopyWorkflowImpl(dbAccessFact
       s"""
          | COPY (select $allColumnNamesSql from "${dataCopyTask.table.schema}"."${dataCopyTask.table.name}"
          | where $pkColumnNamesSql in ($allPkValuesSql))
-         | TO STDOUT (FORMAT BINARY)"""
-        .stripMargin
+         | TO STDOUT (FORMAT BINARY)
+         | """.stripMargin
 
     // The targetWriteStream receives data from the originReadStream. See https://stackoverflow.com/a/23874232
     val originReadStream: java.io.PipedOutputStream = new PipedOutputStream()
@@ -74,7 +73,11 @@ private[datacopy] final class PostgresOptimizedDataCopyWorkflowImpl(dbAccessFact
 
     future.failed.foreach(e => throw e)(copyOutExecutionContext)
 
-    val copyToTargetSql = s"""COPY "${dataCopyTask.table.schema}"."${dataCopyTask.table.name}"($allColumnNamesSql) FROM STDIN (FORMAT BINARY)"""
+    val copyToTargetSql =
+      s"""
+         | COPY "${dataCopyTask.table.schema}"."${dataCopyTask.table.name}"($allColumnNamesSql)
+         | FROM STDIN (FORMAT BINARY)
+         | """.stripMargin
     targetCopyManager.copyIn(copyToTargetSql, targetWriteStream)
     targetWriteStream.close()
   }

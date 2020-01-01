@@ -5,6 +5,7 @@ import java.sql.Connection
 import org.postgresql.copy.CopyManager
 import org.postgresql.core.BaseConnection
 import trw.dbsubsetter.config.Config
+import trw.dbsubsetter.db.impl.ConnectionFactory
 import trw.dbsubsetter.db.impl.mapper.{JdbcResultConverter, JdbcResultConverterImpl, JdbcResultConverterTimed}
 import trw.dbsubsetter.db.impl.origin.{InstrumentedOriginDbAccess, OriginDbAccessImpl}
 import trw.dbsubsetter.db.impl.target.{InstrumentedTargetDbAccess, TargetDbAccessImpl}
@@ -47,23 +48,13 @@ final class DbAccessFactory(config: Config, schemaInfo: SchemaInfo) {
   }
 
   def buildOriginPostgresCopyManager(): CopyManager = {
-    connectionFactory.getDbVendor(config.originDbConnectionString) match {
-      case DbVendor.PostgreSQL =>
-        val connection: Connection = connectionFactory.getReadOnlyConnection(config.originDbConnectionString)
-        new CopyManager(connection.asInstanceOf[BaseConnection])
-      case _ =>
-        throw new RuntimeException("Postgres COPY not supported for this database")
-    }
+    val connection: Connection = connectionFactory.getReadOnlyConnection(config.originDbConnectionString)
+    new CopyManager(connection.asInstanceOf[BaseConnection])
   }
 
   def buildTargetPostgresCopyManager(): CopyManager = {
-    connectionFactory.getDbVendor(config.targetDbConnectionString) match {
-      case DbVendor.PostgreSQL =>
-        val connection: Connection = connectionFactory.getReadWriteConnection(config.targetDbConnectionString)
-        new CopyManager(connection.asInstanceOf[BaseConnection])
-      case _ =>
-        throw new RuntimeException("Postgres COPY not supported for this database")
-    }
+    val connection: Connection = connectionFactory.getReadWriteConnection(config.targetDbConnectionString)
+    new CopyManager(connection.asInstanceOf[BaseConnection])
   }
 
   def closeAllConnections(): Unit = {
