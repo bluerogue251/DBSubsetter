@@ -1,34 +1,94 @@
 package trw.dbsubsetter.datacopy.impl
 
+import java.io.{PipedInputStream, PipedOutputStream}
+import java.sql.Connection
+import java.util.UUID
+
+import org.postgresql.copy.CopyManager
+import org.postgresql.core.BaseConnection
 import trw.dbsubsetter.datacopy.DataCopyWorkflow
-import trw.dbsubsetter.db.{Constants, DbAccessFactory, PrimaryKeyValue, Row}
+import trw.dbsubsetter.db.{ConnectionFactory, Constants, SchemaInfo}
 import trw.dbsubsetter.workflow.DataCopyTask
 
+import scala.concurrent.Future
 
-final class PostgresOptimizedDataCopyWorkflowImpl(dbAccessFactory: DbAccessFactory) extends DataCopyWorkflow {
+// scalastyle:off
+private[datacopy] final class PostgresOptimizedDataCopyWorkflowImpl(connectionFactory: ConnectionFactory, originConnectionString: String, targetConnectionString: String, schemaInfo: SchemaInfo) extends DataCopyWorkflow {
+// scalastyle:on
 
-  private[this] val originDbAccess = dbAccessFactory.buildOriginDbAccess()
+  private[this] val originConnection: Connection =
+    connectionFactory.getReadOnlyConnection(originConnectionString)
 
-  private[this] val targetDbAccess = dbAccessFactory.buildTargetDbAccess()
+  private[this] val originCopyManager: CopyManager =
+    new CopyManager(originConnection.asInstanceOf[BaseConnection])
 
+  private[this] val targetConnection: Connection =
+    connectionFactory.getReadWriteConnection(targetConnectionString)
+  targetConnection.setAutoCommit(false)
+
+  private[this] val targetCopyManager: CopyManager =
+    new CopyManager(targetConnection.asInstanceOf[BaseConnection])
+
+  // scalastyle:off
   def process(dataCopyTask: DataCopyTask): Unit = {
-    val pkValues: Seq[PrimaryKeyValue] = dataCopyTask.pkValues
-
-    if (!Constants.dataCopyBatchSizes.contains(pkValues.size)) {
-      throw new IllegalArgumentException(s"Unsupported data copy batch size: ${pkValues.size}")
+    if (!Constants.dataCopyBatchSizes.contains(dataCopyTask.pkValues.size)) {
+      throw new IllegalArgumentException(s"Unsupported data copy batch size: ${dataCopyTask.pkValues.size}")
     }
 
-    val rowsToInsert: Vector[Row] =
-      originDbAccess.getRowsFromPrimaryKeyValues(dataCopyTask.table, pkValues)
+    val allColumnNamesSql: String =
+      schemaInfo
+      .dataColumnsByTableOrdered(dataCopyTask.table)
+      .map(col => s""""${col.name}"""")
+      .mkString(", ")
 
-    if (!rowsToInsert.size.equals(pkValues.size)) {
-      val message: String =
-        s"Number of rows fetched did not equal number of primary keys. " +
-          s"Rows fetched: ${rowsToInsert.size}. " +
-          s"Primary keys to fetch by: ${pkValues.size}"
-      throw new IllegalStateException(message)
+    val pkColumnNamesSql: String =
+      schemaInfo
+        .pksByTable(dataCopyTask.table)
+        .columns
+        .map(col => s""""${col.name}"""")
+        .mkString(", ")
+
+    val individualPkValuesSql: Seq[String] =
+      dataCopyTask
+        .pkValues
+        .map(pkValue => {
+          pkValue
+            .individualColumnValues
+            .map(quote)
+            .mkString("(", ",", ")")
+        })
+
+    val allPkValuesSql: String = individualPkValuesSql.mkString(",")
+
+    val selectStatement: String =
+      s"""
+         | COPY (select $allColumnNamesSql from "${dataCopyTask.table.schema}"."${dataCopyTask.table.name})"
+         | where $pkColumnNamesSql in ($allPkValuesSql))
+         | TO STDOUT (FORMAT BINARY)"""
+        .stripMargin
+
+    // The targetWriteStream receives data from the originReadStream. See https://stackoverflow.com/a/23874232
+    val originReadStream: java.io.PipedOutputStream = new PipedOutputStream()
+    val targetWriteStream: java.io.PipedInputStream = new PipedInputStream(originReadStream)
+
+    import scala.concurrent.ExecutionContext.Implicits.global
+    val future = Future {
+      originCopyManager.copyOut(selectStatement, originReadStream)
+      originReadStream.close()
     }
+    future.failed.foreach(e => throw e)
 
-    targetDbAccess.insertRows(dataCopyTask.table, rowsToInsert)
+    val copyToTargetSql = s"""COPY "${dataCopyTask.table.schema}"."${dataCopyTask.table.name}"($allColumnNamesSql) FROM STDIN (FORMAT BINARY)"""
+    targetCopyManager.copyIn(copyToTargetSql, targetWriteStream)
+    targetWriteStream.close()
+    targetConnection.commit()
+  }
+
+  private[this] def quote(value: Any): String = {
+    if (value.isInstanceOf[UUID] || value.isInstanceOf[String]) {
+      s"'$value'"
+    } else {
+      value.toString
+    }
   }
 }

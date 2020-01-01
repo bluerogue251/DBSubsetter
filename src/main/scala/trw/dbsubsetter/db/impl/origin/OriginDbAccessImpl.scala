@@ -2,9 +2,8 @@ package trw.dbsubsetter.db.impl.origin
 
 import java.sql.PreparedStatement
 
-import trw.dbsubsetter.db.impl.connection.ConnectionFactory
 import trw.dbsubsetter.db.impl.mapper.JdbcResultConverter
-import trw.dbsubsetter.db.{ForeignKey, ForeignKeyValue, Keys, OriginDbAccess, PrimaryKeyValue, Row, SchemaInfo, Sql, SqlQuery, Table}
+import trw.dbsubsetter.db.{ConnectionFactory, ForeignKey, ForeignKeyValue, Keys, OriginDbAccess, PrimaryKeyValue, Row, SchemaInfo, Sql, SqlQuery, Table}
 
 
 // TODO fix this so the line is shorter and re-enable scalastyle
