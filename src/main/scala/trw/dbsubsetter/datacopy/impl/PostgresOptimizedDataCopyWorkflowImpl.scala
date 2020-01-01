@@ -3,6 +3,7 @@ package trw.dbsubsetter.datacopy.impl
 import java.io.{PipedInputStream, PipedOutputStream}
 import java.sql.Connection
 import java.util.UUID
+import java.util.concurrent.Executors
 
 import org.postgresql.copy.CopyManager
 import org.postgresql.core.BaseConnection
@@ -10,7 +11,7 @@ import trw.dbsubsetter.datacopy.DataCopyWorkflow
 import trw.dbsubsetter.db.{ConnectionFactory, Constants, SchemaInfo}
 import trw.dbsubsetter.workflow.DataCopyTask
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 // scalastyle:off
 private[datacopy] final class PostgresOptimizedDataCopyWorkflowImpl(connectionFactory: ConnectionFactory, originConnectionString: String, targetConnectionString: String, schemaInfo: SchemaInfo) extends DataCopyWorkflow {
@@ -28,6 +29,9 @@ private[datacopy] final class PostgresOptimizedDataCopyWorkflowImpl(connectionFa
 
   private[this] val targetCopyManager: CopyManager =
     new CopyManager(targetConnection.asInstanceOf[BaseConnection])
+
+  private[this] val copyOutExecutionContext: ExecutionContext =
+    ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(2))
 
   // scalastyle:off
   def process(dataCopyTask: DataCopyTask): Unit = {
@@ -58,7 +62,8 @@ private[datacopy] final class PostgresOptimizedDataCopyWorkflowImpl(connectionFa
             .mkString("(", ",", ")")
         })
 
-    val allPkValuesSql: String = individualPkValuesSql.mkString(",")
+    val allPkValuesSql: String =
+      individualPkValuesSql.mkString(",")
 
     val selectStatement: String =
       s"""
@@ -71,18 +76,19 @@ private[datacopy] final class PostgresOptimizedDataCopyWorkflowImpl(connectionFa
     val originReadStream: java.io.PipedOutputStream = new PipedOutputStream()
     val targetWriteStream: java.io.PipedInputStream = new PipedInputStream(originReadStream)
 
-    import scala.concurrent.ExecutionContext.Implicits.global
     val future = Future {
       originCopyManager.copyOut(selectStatement, originReadStream)
       originReadStream.close()
-    }
-    future.failed.foreach(e => throw e)
+    }(copyOutExecutionContext)
+
+    future.failed.foreach(e => throw e)(copyOutExecutionContext)
 
     val copyToTargetSql = s"""COPY "${dataCopyTask.table.schema}"."${dataCopyTask.table.name}"($allColumnNamesSql) FROM STDIN (FORMAT BINARY)"""
     targetCopyManager.copyIn(copyToTargetSql, targetWriteStream)
     targetWriteStream.close()
     targetConnection.commit()
   }
+  // scalastyle:on
 
   private[this] def quote(value: Any): String = {
     if (value.isInstanceOf[UUID] || value.isInstanceOf[String]) {
