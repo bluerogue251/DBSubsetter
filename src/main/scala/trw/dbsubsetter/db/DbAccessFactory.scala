@@ -13,6 +13,10 @@ final class DbAccessFactory(config: Config, schemaInfo: SchemaInfo) {
 
   private[this] val connectionFactory: ConnectionFactory = new ConnectionFactory
 
+  def getDbVendor(): DbVendor = {
+    connectionFactory.getDbVendor(config.originDbConnectionString)
+  }
+
   def buildOriginDbAccess(): OriginDbAccess = {
     var mapper: JdbcResultConverter =
       new JdbcResultConverterImpl(schemaInfo)

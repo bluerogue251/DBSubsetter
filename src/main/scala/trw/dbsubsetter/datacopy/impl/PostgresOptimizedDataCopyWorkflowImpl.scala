@@ -13,7 +13,7 @@ import trw.dbsubsetter.workflow.DataCopyTask
 import scala.concurrent.{ExecutionContext, Future}
 
 // scalastyle:off
-private[datacopy] final class PostgresOptimizedDataCopyWorkflowImpl(dbAccessFactory: DbAccessFactory, originConnectionString: String, targetConnectionString: String, schemaInfo: SchemaInfo) extends DataCopyWorkflow {
+private[datacopy] final class PostgresOptimizedDataCopyWorkflowImpl(dbAccessFactory: DbAccessFactory, schemaInfo: SchemaInfo) extends DataCopyWorkflow {
 // scalastyle:on
 
   private[this] val originCopyManager: CopyManager =

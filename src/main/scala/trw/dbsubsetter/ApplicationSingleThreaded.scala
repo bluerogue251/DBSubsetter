@@ -18,10 +18,7 @@ class ApplicationSingleThreaded(config: Config, schemaInfo: SchemaInfo, baseQuer
     new OriginDbWorkflow(config, schemaInfo, dbAccessFactory)
 
   private[this] val dataCopyWorkflow =
-    DataCopyWorkflowFactory.build(
-      dbAccessFactory,
-
-    )
+    DataCopyWorkflowFactory.build(dbAccessFactory, schemaInfo)
 
   private[this] val pkStore: PrimaryKeyStore =
     PrimaryKeyStoreFactory.buildPrimaryKeyStore(config, schemaInfo)
@@ -51,7 +48,7 @@ class ApplicationSingleThreaded(config: Config, schemaInfo: SchemaInfo, baseQuer
     // Populate target db with data
     while (!dataCopyQueue.isEmpty()) {
       val dataCopyTask: DataCopyTask = dataCopyQueue.dequeue().get
-      targetDbWorkflow.process(dataCopyTask)
+      dataCopyWorkflow.process(dataCopyTask)
     }
 
     // Ensure all SQL connections get closed

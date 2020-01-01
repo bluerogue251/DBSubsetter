@@ -9,10 +9,8 @@ object DataCopyWorkflowFactory {
   // scalastyle:off
   def build(dbAccessFactory: DbAccessFactory, schemaInfo: SchemaInfo): DataCopyWorkflow = {
   // scalastyle:on
-    val vendor: DbVendor = connectionFactory.getDbVendor(originConnectionString)
-
-    vendor match {
-      case DbVendor.PostgreSQL => new PostgresOptimizedDataCopyWorkflowImpl(connectionFactory, originConnectionString, targetConnectionString, schemaInfo)
+    dbAccessFactory.getDbVendor() match {
+      case DbVendor.PostgreSQL => new PostgresOptimizedDataCopyWorkflowImpl(dbAccessFactory, schemaInfo)
       case _ => new GenericDataCopyWorkflowImpl(dbAccessFactory)
     }
   }
