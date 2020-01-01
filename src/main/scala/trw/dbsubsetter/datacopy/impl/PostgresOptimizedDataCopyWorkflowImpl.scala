@@ -41,7 +41,7 @@ private[datacopy] final class PostgresOptimizedDataCopyWorkflowImpl(dbAccessFact
         .pksByTable(dataCopyTask.table)
         .columns
         .map(col => s""""${col.name}"""")
-        .mkString(", ")
+        .mkString("(", ",", ")")
 
     val individualPkValuesSql: Seq[String] =
       dataCopyTask
