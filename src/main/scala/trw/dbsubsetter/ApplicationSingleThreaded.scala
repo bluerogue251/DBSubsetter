@@ -20,7 +20,6 @@ class ApplicationSingleThreaded(config: Config, schemaInfo: SchemaInfo, baseQuer
   private[this] val dataCopyWorkflow =
     DataCopyWorkflowFactory.build(
       dbAccessFactory,
-      connectionFactory,
 
     )
 

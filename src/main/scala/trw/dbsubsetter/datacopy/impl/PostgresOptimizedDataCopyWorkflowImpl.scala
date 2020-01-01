@@ -6,29 +6,21 @@ import java.util.UUID
 import java.util.concurrent.Executors
 
 import org.postgresql.copy.CopyManager
-import org.postgresql.core.BaseConnection
 import trw.dbsubsetter.datacopy.DataCopyWorkflow
-import trw.dbsubsetter.db.{ConnectionFactory, Constants, SchemaInfo}
+import trw.dbsubsetter.db.{Constants, DbAccessFactory, SchemaInfo}
 import trw.dbsubsetter.workflow.DataCopyTask
 
 import scala.concurrent.{ExecutionContext, Future}
 
 // scalastyle:off
-private[datacopy] final class PostgresOptimizedDataCopyWorkflowImpl(connectionFactory: ConnectionFactory, originConnectionString: String, targetConnectionString: String, schemaInfo: SchemaInfo) extends DataCopyWorkflow {
+private[datacopy] final class PostgresOptimizedDataCopyWorkflowImpl(dbAccessFactory: DbAccessFactory, originConnectionString: String, targetConnectionString: String, schemaInfo: SchemaInfo) extends DataCopyWorkflow {
 // scalastyle:on
 
-  private[this] val originConnection: Connection =
-    connectionFactory.getReadOnlyConnection(originConnectionString)
-
   private[this] val originCopyManager: CopyManager =
-    new CopyManager(originConnection.asInstanceOf[BaseConnection])
+    dbAccessFactory.buildOriginPostgresCopyManager()
 
-  private[this] val targetConnection: Connection =
-    connectionFactory.getReadWriteConnection(targetConnectionString)
-  targetConnection.setAutoCommit(false)
-
-  private[this] val targetCopyManager: CopyManager =
-    new CopyManager(targetConnection.asInstanceOf[BaseConnection])
+  private[this] val (targetConnection, targetCopyManager): (Connection, CopyManager) =
+    dbAccessFactory.buildTargetPostgresCopyManager()
 
   private[this] val copyOutExecutionContext: ExecutionContext =
     ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(2))
@@ -86,7 +78,7 @@ private[datacopy] final class PostgresOptimizedDataCopyWorkflowImpl(connectionFa
     val copyToTargetSql = s"""COPY "${dataCopyTask.table.schema}"."${dataCopyTask.table.name}"($allColumnNamesSql) FROM STDIN (FORMAT BINARY)"""
     targetCopyManager.copyIn(copyToTargetSql, targetWriteStream)
     targetWriteStream.close()
-    targetConnection.commit()
+    targetConnection.commit() // necessary?
   }
   // scalastyle:on
 
