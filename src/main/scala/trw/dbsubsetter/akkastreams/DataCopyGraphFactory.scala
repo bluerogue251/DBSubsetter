@@ -26,7 +26,7 @@ object DataCopyGraphFactory {
 
       // Process Target DB inserts in parallel
       for (_ <- 0 until config.dataCopyDbConnectionCount) {
-        balanceTargetDb ~> TargetDb.insert(dbAccessFactory).async ~> mergeTargetDbResults
+        balanceTargetDb ~> TargetDb.insert(dbAccessFactory, schemaInfo).async ~> mergeTargetDbResults
       }
 
       // And ignore all successful insert results

@@ -56,11 +56,11 @@ final class DbAccessFactory(config: Config, schemaInfo: SchemaInfo) {
     }
   }
 
-  def buildTargetPostgresCopyManager(): (Connection, CopyManager) = {
+  def buildTargetPostgresCopyManager(): CopyManager = {
     connectionFactory.getDbVendor(config.targetDbConnectionString) match {
       case DbVendor.PostgreSQL =>
         val connection: Connection = connectionFactory.getReadWriteConnection(config.targetDbConnectionString)
-        (connection, new CopyManager(connection.asInstanceOf[BaseConnection]))
+        new CopyManager(connection.asInstanceOf[BaseConnection])
       case _ =>
         throw new RuntimeException("Postgres COPY not supported for this database")
     }

@@ -1,7 +1,6 @@
 package trw.dbsubsetter.datacopy.impl
 
 import java.io.{PipedInputStream, PipedOutputStream}
-import java.sql.Connection
 import java.util.UUID
 import java.util.concurrent.Executors
 
@@ -19,7 +18,7 @@ private[datacopy] final class PostgresOptimizedDataCopyWorkflowImpl(dbAccessFact
   private[this] val originCopyManager: CopyManager =
     dbAccessFactory.buildOriginPostgresCopyManager()
 
-  private[this] val (targetConnection, targetCopyManager): (Connection, CopyManager) =
+  private[this] val targetCopyManager: CopyManager =
     dbAccessFactory.buildTargetPostgresCopyManager()
 
   private[this] val copyOutExecutionContext: ExecutionContext =
@@ -59,7 +58,7 @@ private[datacopy] final class PostgresOptimizedDataCopyWorkflowImpl(dbAccessFact
 
     val selectStatement: String =
       s"""
-         | COPY (select $allColumnNamesSql from "${dataCopyTask.table.schema}"."${dataCopyTask.table.name})"
+         | COPY (select $allColumnNamesSql from "${dataCopyTask.table.schema}"."${dataCopyTask.table.name}"
          | where $pkColumnNamesSql in ($allPkValuesSql))
          | TO STDOUT (FORMAT BINARY)"""
         .stripMargin
@@ -78,7 +77,6 @@ private[datacopy] final class PostgresOptimizedDataCopyWorkflowImpl(dbAccessFact
     val copyToTargetSql = s"""COPY "${dataCopyTask.table.schema}"."${dataCopyTask.table.name}"($allColumnNamesSql) FROM STDIN (FORMAT BINARY)"""
     targetCopyManager.copyIn(copyToTargetSql, targetWriteStream)
     targetWriteStream.close()
-    targetConnection.commit() // necessary?
   }
   // scalastyle:on
 
