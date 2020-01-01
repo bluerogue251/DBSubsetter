@@ -80,7 +80,10 @@ private[datacopy] final class PostgresOptimizedDataCopyWorkflowImpl(dbAccessFact
          | COPY "${dataCopyTask.table.schema}"."${dataCopyTask.table.name}"($allColumnNamesSql)
          | FROM STDIN (FORMAT BINARY)
          | """.stripMargin
-    targetCopyManager.copyIn(copyToTargetSql, targetWriteStream)
+
+    // Use 4 times the default buffer size
+    val bufferSizeInBytes: Int = 262144
+    targetCopyManager.copyIn(copyToTargetSql, targetWriteStream, bufferSizeInBytes)
     targetWriteStream.close()
   }
   // scalastyle:on
