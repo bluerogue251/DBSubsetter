@@ -25,8 +25,7 @@
   test running on the EC2 instance.
   
 * Eventually we should have publicly available snapshots of prometheus data showing what baseline
-  performance looks like, so we can evaluate whether the given changes are improvements
-  or deteriorations.
+  performance looks like, so we can evaluate whether a given changes is an improvement or deterioration.
 
 ## Changing how load tests work
 

@@ -1,22 +1,30 @@
 package trw.dbsubsetter.akkastreams
 
 import akka.stream.FlowShape
+import akka.stream.scaladsl.{Sink, Source}
 import akka.stream.stage.GraphStage
+import akka.{Done, NotUsed}
 import trw.dbsubsetter.datacopyqueue.DataCopyQueue
 import trw.dbsubsetter.fktaskqueue.ForeignKeyTaskQueue
 import trw.dbsubsetter.workflow.{DataCopyTask, ForeignKeyTask, PksAdded}
 
+import scala.concurrent.Future
+
 object BufferFactory {
 
-  def dataCopyBuffer(dataCopyQueue: DataCopyQueue): GraphStage[FlowShape[PksAdded, DataCopyTask]] = {
-    val backingQueue: TransformingQueue[PksAdded, DataCopyTask] =
-      TransformingQueue.from[PksAdded, DataCopyTask](
-        dataCopyQueue.enqueue,
-        dataCopyQueue.dequeue _,
-        dataCopyQueue.isEmpty _
-      )
+  def dataCopyBufferSink(dataCopyQueue: DataCopyQueue): Sink[PksAdded, Future[Done]] = {
+    Sink.foreach(dataCopyQueue.enqueue)
+  }
 
-    new QueueBackedBufferFlow[PksAdded, DataCopyTask](backingQueue)
+  def dataCopyBufferSource(dataCopyQueue: DataCopyQueue): Source[DataCopyTask, NotUsed] = {
+    val iterator: Iterator[DataCopyTask] =
+      new Iterator[DataCopyTask] {
+        override def hasNext: Boolean = !dataCopyQueue.isEmpty()
+
+        override def next(): DataCopyTask = dataCopyQueue.dequeue().get
+      }
+
+    Source.fromIterator[DataCopyTask](() => iterator)
   }
 
   def fkTaskBuffer(fkTaskQueue: ForeignKeyTaskQueue): GraphStage[FlowShape[ForeignKeyTask, ForeignKeyTask]] = {

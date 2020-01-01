@@ -7,7 +7,7 @@ import akka.actor.ActorRef
 import akka.pattern.ask
 import akka.stream.ClosedShape
 import akka.stream.scaladsl.GraphDSL.Implicits._
-import akka.stream.scaladsl.{Balance, Broadcast, Flow, GraphDSL, Merge, Partition, RunnableGraph, Sink, Source}
+import akka.stream.scaladsl.{Balance, Broadcast, Flow, GraphDSL, Merge, Partition, RunnableGraph, Source}
 import akka.util.Timeout
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.datacopyqueue.DataCopyQueue
@@ -19,8 +19,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 
 // scalastyle:off
-object Subsetting {
-  def runnableGraph(config: Config, schemaInfo: SchemaInfo, baseQueries: Vector[BaseQuery], pkStore: ActorRef, dbAccessFactory: DbAccessFactory, fkTaskCreationWorkflow: FkTaskCreationWorkflow, fkTaskQueue: ForeignKeyTaskQueue, dataCopyQueue: DataCopyQueue)(implicit ec: ExecutionContext): RunnableGraph[Future[Done]] = RunnableGraph.fromGraph(GraphDSL.create(Sink.ignore) { implicit b => sink =>
+object KeyQueryGraphFactory {
+  def build(config: Config, schemaInfo: SchemaInfo, baseQueries: Vector[BaseQuery], pkStore: ActorRef, dbAccessFactory: DbAccessFactory, fkTaskCreationWorkflow: FkTaskCreationWorkflow, fkTaskQueue: ForeignKeyTaskQueue, dataCopyQueue: DataCopyQueue)(implicit ec: ExecutionContext): RunnableGraph[Future[Done]] = RunnableGraph.fromGraph(GraphDSL.create(BufferFactory.dataCopyBufferSink(dataCopyQueue)) { implicit b => dataCopyBufferSink =>
     // Infrastructure: Timeouts, Merges, Balances, Partitions, Broadcasts
     implicit val askTimeout: Timeout = Timeout(48, TimeUnit.HOURS) // For `mapAsyncUnordered`. The need for this timeout may be a code smell.
     val mergeOriginDbRequests = b.add(Merge[OriginDbRequest](3))
@@ -33,9 +33,6 @@ object Subsetting {
     // TODO try to turn this broadcast into a typesafe Partition stage with two output ports, each output port with a different type
     val broadcastPkExistResult = b.add(Broadcast[PkQueryResult](2))
     val broadcastPksAdded = b.add(Broadcast[PksAdded](2))
-    val dataCopyBufferFlow = b.add(BufferFactory.dataCopyBuffer(dataCopyQueue).async)
-    val balanceTargetDb = b.add(Balance[DataCopyTask](config.dataCopyDbConnectionCount, waitForAllDownstreams = true))
-    val mergeTargetDbResults = b.add(Merge[Unit](config.dataCopyDbConnectionCount))
     val fkTaskBufferFlow = b.add(BufferFactory.fkTaskBuffer(fkTaskQueue).async)
     val mergeToOutstandingTaskCounter = b.add(Merge[IndexedSeq[ForeignKeyTask]](2))
 
@@ -47,11 +44,6 @@ object Subsetting {
     mergeOriginDbRequests.out ~> balanceOriginDb
     for (_ <- 0 until config.keyCalculationDbConnectionCount) {
       balanceOriginDb ~> OriginDb.query(config, schemaInfo, dbAccessFactory).async ~> mergeOriginDbResults
-    }
-
-    // Process Target DB Inserts in Parallel
-    for (_ <- 0 until config.dataCopyDbConnectionCount) {
-      balanceTargetDb ~> TargetDb.insert(dbAccessFactory).async ~> mergeTargetDbResults
     }
 
     // TODO try to understand if it's really necessary for pkStore to be in an actor... given that we should
@@ -71,8 +63,7 @@ object Subsetting {
 
     // Do we need a small in-memory buffer so the many targetDbs never wait on the single chronicle queue?
     broadcastPksAdded ~>
-      dataCopyBufferFlow ~>
-      balanceTargetDb
+      dataCopyBufferSink
 
     // FkTasks ~> cannotBePrechecked       ~>        OriginDbRequest
     // FkTasks ~> canBePrechecked ~> PkStoreQuery ~> OriginDbRequest
@@ -94,8 +85,6 @@ object Subsetting {
     broadcastPkExistResult ~>
       Flow[PkQueryResult].collect { case AlreadySeen => IndexedSeq.empty[ForeignKeyTask] } ~>
       mergeToOutstandingTaskCounter
-
-    mergeTargetDbResults.out ~> sink
 
     ClosedShape
   })
