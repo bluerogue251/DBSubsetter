@@ -26,11 +26,7 @@ class PostgreSQLDataTypesTest extends AbstractPostgresqlEndToEndTest {
     "--baseQuery", "public.times_table ::: true ::: includeChildren",
     "--baseQuery", "public.uuid_child_table ::: true ::: includeChildren",
     "--baseQuery", "public.xml_table ::: true ::: includeChildren",
-    "--baseQuery", "public.citext_table ::: true ::: includeChildren",
-    // The following data types are unfortunately not working yet
-    "--excludeColumns", "public.money_table(money)",
-    "--excludeColumns", "public.enum_table(enum)",
-    "--excludeColumns", "public.bit_string_table(bit_1, bit_5)"
+    "--baseQuery", "public.citext_table ::: true ::: includeChildren"
   )
 
   test("No error was thrown during subsetting -- TODO add more detailed assertions") {

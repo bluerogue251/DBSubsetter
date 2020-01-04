@@ -1,6 +1,7 @@
 package trw.dbsubsetter
 
 import trw.dbsubsetter.config.Config
+import trw.dbsubsetter.datacopy.DataCopyWorkflowFactory
 import trw.dbsubsetter.datacopyqueue.{DataCopyQueue, DataCopyQueueFactory}
 import trw.dbsubsetter.db.{DbAccessFactory, PrimaryKeyValue, SchemaInfo, Table}
 import trw.dbsubsetter.fktaskqueue.{ForeignKeyTaskQueue, ForeignKeyTaskQueueFactory}
@@ -16,8 +17,8 @@ class ApplicationSingleThreaded(config: Config, schemaInfo: SchemaInfo, baseQuer
   private[this] val originDbWorkflow =
     new OriginDbWorkflow(config, schemaInfo, dbAccessFactory)
 
-  private[this] val targetDbWorkflow =
-    new TargetDbWorkflow(dbAccessFactory)
+  private[this] val dataCopyWorkflow =
+    DataCopyWorkflowFactory.build(dbAccessFactory, schemaInfo)
 
   private[this] val pkStore: PrimaryKeyStore =
     PrimaryKeyStoreFactory.buildPrimaryKeyStore(config, schemaInfo)
@@ -47,7 +48,7 @@ class ApplicationSingleThreaded(config: Config, schemaInfo: SchemaInfo, baseQuer
     // Populate target db with data
     while (!dataCopyQueue.isEmpty()) {
       val dataCopyTask: DataCopyTask = dataCopyQueue.dequeue().get
-      targetDbWorkflow.process(dataCopyTask)
+      dataCopyWorkflow.process(dataCopyTask)
     }
 
     // Ensure all SQL connections get closed

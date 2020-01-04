@@ -1,13 +1,11 @@
-package trw.dbsubsetter.workflow
+package trw.dbsubsetter.datacopy.impl
 
+import trw.dbsubsetter.datacopy.DataCopyWorkflow
 import trw.dbsubsetter.db.{Constants, DbAccessFactory, PrimaryKeyValue, Row}
+import trw.dbsubsetter.workflow.DataCopyTask
 
 
-/*
- * TODO rename this to something more along the lines of "Data Copy Workflow" (as opposed to "Key Query Workflow"),
- *  since it involves both the origin and target dbs, not just the target db.
- */
-final class TargetDbWorkflow(dbAccessFactory: DbAccessFactory) {
+private[datacopy] final class GenericDataCopyWorkflowImpl(dbAccessFactory: DbAccessFactory) extends DataCopyWorkflow {
 
   private[this] val originDbAccess = dbAccessFactory.buildOriginDbAccess()
 

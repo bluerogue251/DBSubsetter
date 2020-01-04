@@ -15,7 +15,7 @@ class ForeignKeyToNonPrimaryKeyDDL(val profile: JdbcProfile) {
     def * = (id, businessKey) <> (ReferencedTableRow.tupled, ReferencedTableRow.unapply)
 
     val id: Rep[Int] = column[Int]("id", O.PrimaryKey)
-    val businessKey: Rep[String] = column[String]("businessKey", O.Length(40, varying = true), O.Unique)
+    val businessKey: Rep[String] = column[String]("business_key", O.Length(40, varying = true), O.Unique)
   }
 
   lazy val ReferencedTable = new TableQuery(tag => new ReferencedTable(tag))
