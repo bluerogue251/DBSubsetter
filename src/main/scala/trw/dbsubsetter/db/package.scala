@@ -5,7 +5,7 @@ import java.sql.Connection
 import trw.dbsubsetter.db.ColumnTypes.ColumnType
 
 package object db {
-  type SchemaName = String
+  case class Schema(name: String)
   type TableName = String
   type ColumnName = String
   type WhereClause = String
@@ -15,22 +15,18 @@ package object db {
   type PrimaryKeySqlTemplates = Map[(Table, Short), SqlQuery]
 
   class SchemaInfo(
-    val tablesByName: Map[(SchemaName, TableName), Table],
-    // Only those columns involved in a primary or foreign key
-    val keyColumnsByTableOrdered: Map[Table, Vector[Column]],
-    // All columns, even those uninvolved in a primary or foreign key
-    val dataColumnsByTableOrdered: Map[Table, Vector[Column]],
-    val pksByTable: Map[Table, PrimaryKey],
-    val fksOrdered: Array[ForeignKey],
-    val fksFromTable: Map[Table, Vector[ForeignKey]],
-    val fksToTable: Map[Table, Vector[ForeignKey]]
+                    val tablesByName: Map[(Schema, TableName), Table],
+                    // Only those columns involved in a primary or foreign key
+                    val keyColumnsByTableOrdered: Map[Table, Vector[Column]],
+                    // All columns, even those uninvolved in a primary or foreign key
+                    val dataColumnsByTableOrdered: Map[Table, Vector[Column]],
+                    val pksByTable: Map[Table, PrimaryKey],
+                    val fksOrdered: Array[ForeignKey],
+                    val fksFromTable: Map[Table, Vector[ForeignKey]],
+                    val fksToTable: Map[Table, Vector[ForeignKey]]
   )
 
-  class Table(
-    val schema: SchemaName,
-    val name: TableName,
-    val hasSqlServerAutoIncrement: Boolean
-  )
+  case class Table(schema: Schema, name: String, hasSqlServerAutoIncrement: Boolean)
 
   class Column(
     val table: Table,

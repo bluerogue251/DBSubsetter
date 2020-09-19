@@ -3,7 +3,7 @@ package trw.dbsubsetter.config
 import java.io.File
 
 import scopt.OptionParser
-import trw.dbsubsetter.db.{ColumnName, SchemaName, TableName}
+import trw.dbsubsetter.db.{ColumnName, Schema, Table, TableName}
 
 object CommandLineParser {
   val parser: OptionParser[Config] = new OptionParser[Config]("DBSubsetter") {
@@ -46,9 +46,11 @@ object CommandLineParser {
       .action { case (bq, c) =>
         val r = """^\s*(.+)\.(.+)\s+:::\s+(.+)\s+:::\s+(includeChildren|excludeChildren)\s*$""".r
         bq match {
-          case r(schema, table, whereClause, fetchChildren) =>
+          case r(schemaName, tableName, whereClause, fetchChildren) =>
             val fc = fetchChildren == "includeChildren"
-            c.copy(baseQueries = c.baseQueries :+ ((schema.trim, table.trim), whereClause.trim, fc))
+            val schema = Schema(schemaName)
+            val table = Table(schema = ???, name = ???, hasSqlServerAutoIncrement = ???)
+            c.copy(baseQueries = c.baseQueries :+ (Table(schemaName.trim, tableName.trim), whereClause.trim, fc))
           case _ => throw new RuntimeException()
         }
       }
@@ -260,13 +262,13 @@ object CommandLineParser {
   }
 }
 
-case class CmdLineForeignKey(fromSchema: SchemaName,
+case class CmdLineForeignKey(fromSchema: Schema,
                              fromTable: TableName,
                              fromColumns: List[ColumnName],
-                             toSchema: SchemaName,
+                             toSchema: Schema,
                              toTable: TableName,
                              toColumns: List[ColumnName])
 
-case class CmdLinePrimaryKey(schema: SchemaName,
+case class CmdLinePrimaryKey(schema: Schema,
                              table: TableName,
                              columns: List[ColumnName])
