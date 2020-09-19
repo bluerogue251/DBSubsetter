@@ -49,7 +49,7 @@ object CommandLineParser {
           case r(schemaName, tableName, whereClause, fetchChildren) =>
             val fc = fetchChildren == "includeChildren"
             val schema = Schema(schemaName)
-            val table = Table(schema = ???, name = ???, hasSqlServerAutoIncrement = ???)
+            val table = Table(schema = schema, name = tableName, hasSqlServerAutoIncrement = false)
             c.copy(baseQueries = c.baseQueries :+ (Table(schemaName.trim, tableName.trim), whereClause.trim, fc))
           case _ => throw new RuntimeException()
         }
