@@ -48,8 +48,7 @@ object CommandLineParser {
         val r = """^\s*(.+)\.(.+)\s+:::\s+(.+)\s+:::\s+(includeChildren|excludeChildren)\s*$""".r
         bq match {
           case r(schemaName, tableName, whereClause, includeChildren) =>
-            val schema = Schema(schemaName)
-            val table = Table(schema = schema, name = tableName, hasSqlServerAutoIncrement = false)
+            val table = normalizedTable(schemaName, tableName)
             val baseQuery = CmdLineBaseQuery(table, whereClause.trim, includeChildren == "includeChildren")
             c.copy(baseQueries = c.baseQueries :+ baseQuery)
           case _ => throw new RuntimeException()
@@ -93,8 +92,10 @@ object CommandLineParser {
         val regex = """^(.+)\.(.+)\((.+)\)\s+:::\s+(.+)\.(.+)\((.+)\)\s*$""".r
 
         fk match {
-          case regex(fromSch, fromTbl, fromCols, toSch, toTbl, toCols) =>
-            val fk = CmdLineForeignKey(fromSch.trim, fromTbl.trim, fromCols.split(",").toList.map(_.trim), toSch.trim, toTbl.trim, toCols.split(",").toList.map(_.trim))
+          case regex(fromSchemaName, fromTableName, fromCols, toSchemaName, toTableName, toCols) =>
+            val fromTable = normalizedTable(fromSchemaName, fromTableName)
+            val toTable = normalizedTable(toSchemaName, toTableName)
+            val fk = CmdLineForeignKey(fromTable, trimCsvs(fromCols), toTable, trimCsvs(toCols))
             c.copy(cmdLineForeignKeys = fk :: c.cmdLineForeignKeys)
           case _ => throw new RuntimeException()
         }
@@ -110,9 +111,10 @@ object CommandLineParser {
       .action { case (fk, c) =>
         val regex = """^\s*(.+)\.(.+)\((.+)\)\s*$""".r
         fk match {
-          case regex(sch, tbl, cols) =>
-            val pk = CmdLinePrimaryKey(sch.trim, tbl.trim, cols.split(",").toList.map(_.trim))
-            c.copy(cmdLinePrimaryKeys = pk :: c.cmdLinePrimaryKeys)
+          case regex(schemaName, tableName, cols) =>
+            val table = normalizedTable(schemaName, tableName)
+            val cmdLinePrimaryKey = CmdLinePrimaryKey(table, trimCsvs(cols))
+            c.copy(cmdLinePrimaryKeys = c.cmdLinePrimaryKeys :+ cmdLinePrimaryKey)
           case _ => throw new RuntimeException()
         }
       }
@@ -127,8 +129,9 @@ object CommandLineParser {
       .action { (str, c) =>
         val regex = """^\s*(.+)\.(.+)\s*$""".r
         str match {
-          case regex(schema, table) =>
-            c.copy(excludeTables = c.excludeTables ++ Set((schema, table)))
+          case regex(schemaName, tableName) =>
+            val table = normalizedTable(schemaName, tableName)
+            c.copy(excludeTables = c.excludeTables + table)
           case _ => throw new RuntimeException
         }
       }
@@ -144,10 +147,11 @@ object CommandLineParser {
       .action { (ic, c) =>
         val regex = """^\s*(.+)\.(.+)\((.+)\)\s*$""".r
         ic match {
-          case regex(schema, table, columnListString) =>
-            val alreadyExcluded = c.excludeColumns((schema.trim, table.trim))
-            val newlyExcluded = columnListString.split(",").map(_.trim).toSet
-            c.copy(excludeColumns = c.excludeColumns.updated((schema.trim, table.trim), alreadyExcluded ++ newlyExcluded))
+          case regex(schemaName, tableName, cols) =>
+            val table = normalizedTable(schemaName, tableName)
+            val alreadyExcluded = c.excludeColumns(table)
+            val newlyExcluded = trimCsvs(cols).toSet
+            c.copy(excludeColumns = c.excludeColumns.updated((schemaName.trim, tableName.trim), alreadyExcluded ++ newlyExcluded))
           case _ => throw new RuntimeException
 
         }
@@ -261,6 +265,15 @@ object CommandLineParser {
         |""".stripMargin
     note(usageExamples)
   }
+
+  private def normalizedTable(schemaName: String, tableName: String): Table = {
+    val schema = Schema(schemaName.trim)
+    Table(schema = schema, name = tableName.trim, hasSqlServerAutoIncrement = false)
+  }
+
+  private def trimCsvs(untrimmedCsvs: String): Seq[String] = {
+    untrimmedCsvs.split(",").map(_.trim)
+  }
 }
 
 case class CmdLineBaseQuery(
@@ -271,12 +284,12 @@ case class CmdLineBaseQuery(
 
 case class CmdLineForeignKey(
     fromTable: Table,
-    fromColumns: List[ColumnName],
+    fromColumns: Seq[ColumnName],
     toTable: Table,
-    toColumns: List[ColumnName]
+    toColumns: Seq[ColumnName]
 )
 
 case class CmdLinePrimaryKey(
     table: Table,
-    columns: List[ColumnName]
+    columns: Seq[ColumnName]
 )
