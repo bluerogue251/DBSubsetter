@@ -6,7 +6,6 @@ import trw.dbsubsetter.config.Config
 
 import scala.collection.mutable.ArrayBuffer
 
-
 // scalastyle:off
 private[db] object DbMetadataQueries {
   def queryDb(config: Config): DbMetadataQueryResult = {
@@ -136,33 +135,49 @@ private[db] object DbMetadataQueries {
     //
     conn.close()
 
-    DbMetadataQueryResult(tables.toVector, columns.toVector, pks.toVector, fks.toVector, dbVendor)
+    DbMetadataQueryResult(
+      tables.toVector,
+      columns.toVector,
+      pks.toVector,
+      fks.toVector,
+      dbVendor
+    )
   }
 }
 
-private[db] case class DbMetadataQueryResult(tables: Vector[TableQueryRow],
-                                             columns: Vector[ColumnQueryRow],
-                                             pks: Vector[PrimaryKeyQueryRow],
-                                             fks: Vector[ForeignKeyQueryRow],
-                                             vendor: DbVendor)
+private[db] case class DbMetadataQueryResult(
+    tables: Vector[TableQueryRow],
+    columns: Vector[ColumnQueryRow],
+    pks: Vector[PrimaryKeyQueryRow],
+    fks: Vector[ForeignKeyQueryRow],
+    vendor: DbVendor
+)
 
-private[this] case class TableQueryRow(schema: Schema,
-                                       name: TableName)
+private[this] case class TableQueryRow(
+    schema: Schema,
+    name: TableName
+)
 
-private[this] case class ColumnQueryRow(schema: Schema,
-                                        table: TableName,
-                                        name: ColumnName,
-                                        jdbcType: JDBCType,
-                                        typeName: String,
-                                        isSqlServerAutoincrement: Boolean)
+private[this] case class ColumnQueryRow(
+    schema: Schema,
+    table: TableName,
+    name: ColumnName,
+    jdbcType: JDBCType,
+    typeName: String,
+    isSqlServerAutoincrement: Boolean
+)
 
-private[this] case class PrimaryKeyQueryRow(schema: Schema,
-                                            table: TableName,
-                                            column: ColumnName)
+private[this] case class PrimaryKeyQueryRow(
+    schema: Schema,
+    table: TableName,
+    column: ColumnName
+)
 
-private[this] case class ForeignKeyQueryRow(fromSchema: Schema,
-                                            fromTable: TableName,
-                                            fromColumn: ColumnName,
-                                            toSchema: Schema,
-                                            toTable: TableName,
-                                            toColumn: ColumnName)
+private[this] case class ForeignKeyQueryRow(
+    fromSchema: Schema,
+    fromTable: TableName,
+    fromColumn: ColumnName,
+    toSchema: Schema,
+    toTable: TableName,
+    toColumn: ColumnName
+)
