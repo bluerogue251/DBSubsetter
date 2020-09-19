@@ -262,13 +262,17 @@ object CommandLineParser {
   }
 }
 
-case class CmdLineForeignKey(fromSchema: Schema,
-                             fromTable: TableName,
-                             fromColumns: List[ColumnName],
-                             toSchema: Schema,
-                             toTable: TableName,
-                             toColumns: List[ColumnName])
+case class CmdLineForeignKey(
+    fromSchema: Schema,
+    fromTable: TableName,
+    fromColumns: List[ColumnName],
+    toSchema: Schema,
+    toTable: TableName,
+    toColumns: List[ColumnName]
+)
 
-case class CmdLinePrimaryKey(schema: Schema,
-                             table: TableName,
-                             columns: List[ColumnName])
+case class CmdLinePrimaryKey(
+    schema: Schema,
+    table: TableName,
+    columns: List[ColumnName]
+)
