@@ -95,8 +95,8 @@ object CommandLineParser {
           case regex(fromSchemaName, fromTableName, fromCols, toSchemaName, toTableName, toCols) =>
             val fromTable = normalizeTable(fromSchemaName, fromTableName)
             val toTable = normalizeTable(toSchemaName, toTableName)
-            val fk = CmdLineForeignKey(fromTable, trimCsvs(fromCols), toTable, trimCsvs(toCols))
-            c.copy(cmdLineForeignKeys = fk :: c.cmdLineForeignKeys)
+            val cmdLineForeignKey = CmdLineForeignKey(fromTable, trimCsvs(fromCols), toTable, trimCsvs(toCols))
+            c.copy(extraForeignKeys = c.extraForeignKeys :+ cmdLineForeignKey)
           case _ => throw new RuntimeException()
         }
       }
@@ -114,7 +114,7 @@ object CommandLineParser {
           case regex(schemaName, tableName, cols) =>
             val table = normalizeTable(schemaName, tableName)
             val cmdLinePrimaryKey = CmdLinePrimaryKey(table, trimCsvs(cols))
-            c.copy(cmdLinePrimaryKeys = c.cmdLinePrimaryKeys :+ cmdLinePrimaryKey)
+            c.copy(extraPrimaryKeys = c.extraPrimaryKeys :+ cmdLinePrimaryKey)
           case _ => throw new RuntimeException()
         }
       }
@@ -151,9 +151,9 @@ object CommandLineParser {
             val table = normalizeTable(schemaName, tableName)
             val alreadyExcluded = c.excludeColumns(table)
             val newlyExcluded = trimCsvs(cols).toSet
-            c.copy(excludeColumns = c.excludeColumns.updated((schemaName.trim, tableName.trim), alreadyExcluded ++ newlyExcluded))
+            val totalExcluded = alreadyExcluded ++ newlyExcluded
+            c.copy(excludeColumns = c.excludeColumns.updated(table, totalExcluded))
           case _ => throw new RuntimeException
-
         }
       }
       .text(
@@ -165,7 +165,7 @@ object CommandLineParser {
 
     opt[File]("tempfileStorageDirectory")
       .valueName("</path/to/tempfile/storage/directory>")
-      .action((dir, c) => c.copy(tempfileStorageDirectoryOpt = Some(dir)))
+      .action((dir, c) => c.copy(tempfileStorageDirectoryOverride = Some(dir)))
       .validate { dir =>
         if (!dir.exists()) dir.mkdir()
         if (!dir.isDirectory) {
@@ -182,7 +182,7 @@ object CommandLineParser {
           |""".stripMargin)
 
     opt[Unit]("singleThreadedDebugMode")
-      .action((_, c) => c.copy(isSingleThreadedDebugMode = true))
+      .action((_, c) => c.copy(singleThreadDebugMode = true))
       .text(
         """Run DBSubsetter in debug mode (NOT recommended)
           |                           Uses a simplified, single-threaded architecture

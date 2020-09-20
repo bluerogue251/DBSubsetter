@@ -31,7 +31,7 @@ object ApplicationRunner {
             None
           }
 
-        if (config.isSingleThreadedDebugMode) {
+        if (config.singleThreadDebugMode) {
           new ApplicationSingleThreaded(config, schemaInfo, baseQueries).run()
         } else {
           ApplicationAkkaStreams.run(config, schemaInfo, baseQueries)

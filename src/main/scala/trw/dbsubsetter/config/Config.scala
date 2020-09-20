@@ -11,11 +11,11 @@ case class Config(
     baseQueries: Seq[CmdLineBaseQuery] = Seq.empty,
     keyCalculationDbConnectionCount: Int = 1,
     dataCopyDbConnectionCount: Int = 1,
-    cmdLineForeignKeys: Seq[CmdLineForeignKey] = Seq.empty,
-    cmdLinePrimaryKeys: Seq[CmdLinePrimaryKey] = Seq.empty,
+    extraForeignKeys: Seq[CmdLineForeignKey] = Seq.empty,
+    extraPrimaryKeys: Seq[CmdLinePrimaryKey] = Seq.empty,
     excludeColumns: Map[Table, Set[ColumnName]] = Map.empty.withDefaultValue(Set.empty),
     excludeTables: Set[Table] = Set.empty,
-    tempfileStorageDirectoryOpt: Option[File] = None,
-    isSingleThreadedDebugMode: Boolean = false,
+    tempfileStorageDirectoryOverride: Option[File] = None,
+    singleThreadDebugMode: Boolean = false,
     exposeMetrics: Boolean = false
 )

@@ -2,14 +2,12 @@ package trw.dbsubsetter.db
 
 import java.sql.{DriverManager, JDBCType}
 
-import trw.dbsubsetter.config.Config
-
 import scala.collection.mutable.ArrayBuffer
 
 // scalastyle:off
 private[db] object DbMetadataQueries {
-  def queryDb(config: Config): DbMetadataQueryResult = {
-    val conn = DriverManager.getConnection(config.originDbConnectionString)
+  def retrieveSchemaMetadata(connectionString: String, schemas: Seq[Schema]): DbMetadataQueryResult = {
+    val conn = DriverManager.getConnection(connectionString)
     conn.setReadOnly(true)
     val catalog = conn.getCatalog
     val ddl = conn.getMetaData
@@ -19,28 +17,26 @@ private[db] object DbMetadataQueries {
     val pks = ArrayBuffer.empty[PrimaryKeyColumnQueryRow]
     val fks = ArrayBuffer.empty[ForeignKeyColumnQueryRow]
 
-    //
-    // Get all tables for configured schemas
-    //
-    config.schemas.foreach { schema =>
+    /*
+     * Retrieve table metadata
+     */
+    schemas.foreach { schema =>
       val tablesJdbcResultSet =
         if (conn.isMysql) {
-          ddl.getTables(schema, null, "%", Array("TABLE"))
+          ddl.getTables(schema.name, null, "%", Array("TABLE"))
         } else {
-          ddl.getTables(catalog, schema, "%", Array("TABLE"))
+          ddl.getTables(catalog, schema.name, "%", Array("TABLE"))
         }
 
       while (tablesJdbcResultSet.next()) {
-        val table = tablesJdbcResultSet.getString("TABLE_NAME")
-        if (!config.excludeTables.contains((schema, table))) {
-          tables += TableQueryRow(schema, table)
-        }
+        val tableName = tablesJdbcResultSet.getString("TABLE_NAME")
+        tables += TableQueryRow(schema.name, tableName)
       }
     }
 
-    //
-    // Fetch columns from DB
-    //
+    /*
+     * Retrieve column metadata
+     */
     tables.foreach { table =>
       val colsJdbcResultSet =
         if (conn.isMysql) {
@@ -56,16 +52,13 @@ private[db] object DbMetadataQueries {
         // If trying to generalize autoincrement across vendors, check if "YES" is what other vendors use
         // Or if it's something else like "y", "1", "true" etc.
         val isSqlServerAutoIncrement = conn.isMsSqlServer && colsJdbcResultSet.getString("IS_AUTOINCREMENT") == "YES"
-
-        if (!config.excludeColumns((table.schema, table.name)).contains(columnName)) {
-          columns += ColumnQueryRow(table.schema, table.name, columnName, jdbcType, typeName, isSqlServerAutoIncrement)
-        }
+        columns += ColumnQueryRow(table.schema, table.name, columnName, jdbcType, typeName, isSqlServerAutoIncrement)
       }
     }
 
-    //
-    // Fetch primary keys from DB
-    //
+    /*
+     * Retrieve primary key metadata
+     */
     tables.foreach { table =>
       val pksJdbcResultSet =
         if (conn.isMysql) {
@@ -83,16 +76,9 @@ private[db] object DbMetadataQueries {
       }
     }
 
-    //
-    // Add primary keys configured by user
-    //
-    config.cmdLinePrimaryKeys.foreach { clpk =>
-      clpk.columns.foreach(c => pks += PrimaryKeyQueryRow(clpk.schema, clpk.table, c))
-    }
-
-    //
-    // Fetch foreign keys from DB
-    //
+    /*
+     * Retrieve foreign key metadata
+     */
     tables.foreach { table =>
       val foreignKeysJdbcResultSet =
         if (conn.isMysql) {
@@ -109,30 +95,18 @@ private[db] object DbMetadataQueries {
         val toSchema = if (conn.isMysql) foreignKeysJdbcResultSet.getString("PKTABLE_CAT") else foreignKeysJdbcResultSet.getString("PKTABLE_SCHEM")
         val toTable = foreignKeysJdbcResultSet.getString("PKTABLE_NAME")
         val toColumn = foreignKeysJdbcResultSet.getString("PKCOLUMN_NAME")
-
-        if (!config.excludeTables.contains((fromSchema, fromTable)) && !config.excludeTables.contains((toSchema, toTable))) {
-          fks += ForeignKeyColumnQueryRow(fromSchema, fromTable, fromColumn, toSchema, toTable, toColumn)
-        }
+        fks += ForeignKeyColumnQueryRow(fromSchema, fromTable, fromColumn, toSchema, toTable, toColumn)
       }
     }
 
-    //
-    // Add foreign keys configured by user
-    //
-    config.cmdLineForeignKeys.foreach { cfk =>
-      cfk.fromColumns.zip(cfk.toColumns).foreach { case (fromCol, toCol) =>
-        fks += ForeignKeyQueryRow(cfk.fromSchema, cfk.fromTable, fromCol, cfk.toSchema, cfk.toTable, toCol)
-      }
-    }
-
-    //
-    // Fetch DB Vendor info
-    //
+    /*
+     * Fetch DB Vendor info
+     */
     val dbVendor = conn.dbVendor
 
-    //
-    // Close DB connection
-    //
+    /*
+     * Close DB connection
+     */
     conn.close()
 
     DbMetadataQueryResult(
