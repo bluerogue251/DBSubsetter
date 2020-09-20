@@ -49,8 +49,8 @@ package object db {
   class PrimaryKey(val columns: Seq[Column])
 
   class ForeignKey(
-      val fromCols: Vector[Column],
-      val toCols: Vector[Column],
+      val fromCols: Seq[Column],
+      val toCols: Seq[Column],
       val pointsToPk: Boolean,
       var i: Short
   ) {
