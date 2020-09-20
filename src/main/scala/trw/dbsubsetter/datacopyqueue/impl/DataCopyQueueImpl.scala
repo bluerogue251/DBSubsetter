@@ -18,9 +18,8 @@ private[datacopyqueue] final class DataCopyQueueImpl(config: Config, schemaInfo:
   private[this] val tablesToQueuedValueCounts: mutable.Map[Table, Long] = {
     val elems: Seq[(Table, Long)] =
       schemaInfo.
-        tablesByName
-        .map { case ((_, _), table) => table -> 0L }
-        .toSeq
+        tables
+        .map { tableWithMetadata => tableWithMetadata.table -> 0L }
 
     mutable.Map[Table, Long](elems: _*)
   }

@@ -36,7 +36,7 @@ private[db] object Sql {
   }
 
   def insertSqlTemplates(sch: SchemaInfo): Map[Table, SqlQuery] = {
-    sch.tablesWithAutoincrementMetadata.map { case TableWithAutoincrementMetadata(table, hasSqlServerAutoIncrement) =>
+    sch.tables.map { case TableWithAutoincrementMetadata(table, hasSqlServerAutoIncrement) =>
       val cols =
         sch.dataColumnsByTableOrdered(table)
 

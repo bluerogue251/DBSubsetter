@@ -25,8 +25,7 @@ class PkStoreWorkflowTest extends FunSuite {
 
     val schemaInfo: SchemaInfo =
       new SchemaInfo(
-        tablesByName = Map.empty,
-        tablesWithAutoincrementMetadata = Seq.empty,
+        tables = Seq.empty,
         keyColumnsByTableOrdered = Map.empty,
         dataColumnsByTableOrdered = Map.empty,
         pksByTable = Map(table -> new PrimaryKey(Seq(pkCol))),
@@ -91,8 +90,7 @@ class PkStoreWorkflowTest extends FunSuite {
 
     val schemaInfo: SchemaInfo =
       new SchemaInfo(
-        tablesByName = Map.empty,
-        tablesWithAutoincrementMetadata = Seq.empty,
+        tables = Seq.empty,
         keyColumnsByTableOrdered = Map.empty,
         dataColumnsByTableOrdered = Map.empty,
         pksByTable = Map(table -> new PrimaryKey(Seq(primaryKeyColumn))),

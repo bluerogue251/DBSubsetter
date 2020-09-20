@@ -15,8 +15,7 @@ package object db {
   type PrimaryKeySqlTemplates = Map[(Table, Short), SqlQuery]
 
   class SchemaInfo(
-      val tablesByName: Map[(String, TableName), Table],
-      val tablesWithAutoincrementMetadata: Seq[TableWithAutoincrementMetadata],
+      val tables: Seq[TableWithAutoincrementMetadata],
       // Only those columns involved in a primary or foreign key
       val keyColumnsByTableOrdered: Map[Table, Vector[Column]],
       // All columns, even those uninvolved in a primary or foreign key

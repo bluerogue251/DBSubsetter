@@ -137,8 +137,7 @@ object SchemaInfoRetrieval {
     }
 
     new SchemaInfo(
-      tablesByName = tablesByName,
-      tablesWithAutoincrementMetadata = tablesWithAutoincrementMetadata,
+      tables = tablesWithAutoincrementMetadata,
       keyColumnsByTableOrdered = keyColumnsByTableOrdered,
       dataColumnsByTableOrdered = allColumnsByTableOrdered,
       pksByTable = pksByTable,
