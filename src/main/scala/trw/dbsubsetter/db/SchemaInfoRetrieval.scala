@@ -40,13 +40,14 @@ object SchemaInfoRetrieval {
     val colsByTableAndName: Map[Table, Map[XColumn, Column]] = {
       dbMetadata
         .columns
-        .filterNot { columnQueryRow =>
+        .map { columnQueryRow =>
           val schema = Schema(columnQueryRow.schema)
           val table = Table(schema, columnQueryRow.table)
-          config.excludeColumns(table).contains(columnQueryRow.name)
+          XColumn(table, columnQueryRow.name)
         }
-        .filter(c => tablesByName.contains((c.schema, c.table)))
-        .groupBy(c => tablesByName(c.schema, c.table))
+        .filterNot(config.excludeColumns)
+        .filterNot(column => config.excludeTables.contains(column.table))
+        .groupBy(_.table)
         .map { case (table, cols) =>
           table -> cols.zipWithIndex.map { case (c, i) =>
             val columnType: ColumnType = ColumnTypes.fromRawInfo(c.jdbcType, c.typeName, dbMetadata.vendor)
