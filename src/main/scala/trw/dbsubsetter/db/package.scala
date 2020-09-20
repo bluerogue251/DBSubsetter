@@ -10,7 +10,8 @@ package object db {
 
   case class Table(schema: Schema, name: String)
 
-  type ColumnName = String
+  case class XColumn(table: Table, name: String)
+
   type WhereClause = String
   type TypeName = String
   type SqlQuery = String
@@ -36,7 +37,7 @@ package object db {
 
   class Column(
       val table: Table,
-      val name: ColumnName,
+      val name: XColumn,
       /*
        * The 0-indexed location of this column in query results where only primary and foreign key columns are included
        * -1 if this column is not part of a primary or foreign key, as this column would not be included in that query.
