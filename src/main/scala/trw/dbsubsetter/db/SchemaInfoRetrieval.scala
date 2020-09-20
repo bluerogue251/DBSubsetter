@@ -8,13 +8,19 @@ import trw.dbsubsetter.db.ColumnTypes.ColumnType
 // scalastyle:off
 object SchemaInfoRetrieval {
   def getSchemaInfo(config: Config): SchemaInfo = {
+    val queryResult =
+      DbMetadataQueries.retrieveSchemaMetadata(
+        config.originDbConnectionString,
+        config.schemas
+      )
+
     val DbMetadataQueryResult(
       tableMetadataRows,
       columnMetadataRows,
       primaryKeyMetadataRows,
       foreignKeyMetadataRows,
       dbVendor
-    ) = DbMetadataQueries.retrieveSchemaMetadata(config.originDbConnectionString, config.schemas)
+    ) = queryResult
 
     val tablesByName = tableMetadataRows.map { t =>
       val hasSqlServerAutoincrement = columnMetadataRows.exists(c => c.schema == t.schema && c.table == t.name && c.isSqlServerAutoincrement)
