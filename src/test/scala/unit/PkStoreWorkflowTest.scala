@@ -2,15 +2,15 @@ package unit
 
 import org.scalatest.FunSuite
 import trw.dbsubsetter.config.Config
-import trw.dbsubsetter.db.{Column, Keys, PrimaryKey, PrimaryKeyValue, SchemaInfo, Table}
+import trw.dbsubsetter.db.{Column, Keys, PrimaryKey, PrimaryKeyValue, Schema, SchemaInfo, Table}
 import trw.dbsubsetter.primarykeystore.{PrimaryKeyStore, PrimaryKeyStoreFactory}
 import trw.dbsubsetter.workflow._
 
 class PkStoreWorkflowTest extends FunSuite {
   test("PkStoreWorkflow is conscious of fetchChildren") {
     val table: Table =
-      new Table(
-        schema = "public",
+      Table(
+        schema = Schema("public"),
         name = "users",
         hasSqlServerAutoIncrement = true
       )
@@ -75,8 +75,8 @@ class PkStoreWorkflowTest extends FunSuite {
 
   test("PkStoreWorkflow is conscious of fetchChildren part2") {
     val table: Table =
-      new Table(
-        schema = "public",
+      Table(
+        schema = Schema("public"),
         name = "users",
         hasSqlServerAutoIncrement = true
       )

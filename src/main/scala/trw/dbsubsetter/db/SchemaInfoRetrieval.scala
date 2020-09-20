@@ -18,7 +18,7 @@ object SchemaInfoRetrieval {
 
     val tablesByName = tableMetadataRows.map { t =>
       val hasSqlServerAutoincrement = columnMetadataRows.exists(c => c.schema == t.schema && c.table == t.name && c.isSqlServerAutoincrement)
-      (t.schema, t.name) -> new Table(t.schema, t.name, hasSqlServerAutoincrement)
+      (t.schema, t.name) -> Table(Schema(t.schema), t.name, hasSqlServerAutoincrement)
     }.toMap
 
     val colsByTableAndName: Map[Table, Map[ColumnName, Column]] = {
