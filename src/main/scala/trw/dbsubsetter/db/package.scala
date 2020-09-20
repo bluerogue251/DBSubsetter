@@ -5,8 +5,11 @@ import java.sql.Connection
 import trw.dbsubsetter.db.ColumnTypes.ColumnType
 
 package object db {
+
   case class Schema(name: String)
-  type TableName = String
+
+  case class Table(schema: Schema, name: String)
+
   type ColumnName = String
   type WhereClause = String
   type TypeName = String
@@ -24,11 +27,6 @@ package object db {
       val fksOrdered: Array[ForeignKey],
       val fksFromTable: Map[Table, Vector[ForeignKey]],
       val fksToTable: Map[Table, Vector[ForeignKey]]
-  )
-
-  case class Table(
-      schema: Schema,
-      name: String
   )
 
   case class TableWithAutoincrementMetadata(
