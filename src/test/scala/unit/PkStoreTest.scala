@@ -10,8 +10,7 @@ class PkStoreTest extends FunSuite {
     val table: Table =
       Table(
         schema = Schema("public"),
-        name ="users",
-        hasSqlServerAutoIncrement = true
+        name ="users"
       )
 
     val pkCol: Column =
@@ -26,6 +25,7 @@ class PkStoreTest extends FunSuite {
     val schemaInfo: SchemaInfo =
       new SchemaInfo(
         tablesByName = Map.empty,
+        tablesWithAutoincrementMetadata = Seq.empty,
         keyColumnsByTableOrdered = Map.empty,
         dataColumnsByTableOrdered = Map.empty,
         pksByTable = Map(table -> new PrimaryKey(Seq(pkCol))),

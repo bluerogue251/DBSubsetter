@@ -11,8 +11,7 @@ class PkStoreWorkflowTest extends FunSuite {
     val table: Table =
       Table(
         schema = Schema("public"),
-        name = "users",
-        hasSqlServerAutoIncrement = true
+        name = "users"
       )
 
     val pkCol: Column =
@@ -27,6 +26,7 @@ class PkStoreWorkflowTest extends FunSuite {
     val schemaInfo: SchemaInfo =
       new SchemaInfo(
         tablesByName = Map.empty,
+        tablesWithAutoincrementMetadata = Seq.empty,
         keyColumnsByTableOrdered = Map.empty,
         dataColumnsByTableOrdered = Map.empty,
         pksByTable = Map(table -> new PrimaryKey(Seq(pkCol))),
@@ -77,8 +77,7 @@ class PkStoreWorkflowTest extends FunSuite {
     val table: Table =
       Table(
         schema = Schema("public"),
-        name = "users",
-        hasSqlServerAutoIncrement = true
+        name = "users"
       )
 
     val primaryKeyColumn: Column =
@@ -93,6 +92,7 @@ class PkStoreWorkflowTest extends FunSuite {
     val schemaInfo: SchemaInfo =
       new SchemaInfo(
         tablesByName = Map.empty,
+        tablesWithAutoincrementMetadata = Seq.empty,
         keyColumnsByTableOrdered = Map.empty,
         dataColumnsByTableOrdered = Map.empty,
         pksByTable = Map(table -> new PrimaryKey(Seq(primaryKeyColumn))),

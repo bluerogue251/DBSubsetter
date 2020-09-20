@@ -72,8 +72,7 @@ private[this] object ForeignKeyTaskQueueTest {
   private val parentTable: Table =
     Table(
       schema = Schema("public"),
-      name = "parent",
-      hasSqlServerAutoIncrement = false
+      name = "parent"
     )
 
   private[this] val parentPkColumn: Column =
@@ -88,8 +87,7 @@ private[this] object ForeignKeyTaskQueueTest {
   private[this] val childTable: Table =
     Table(
       schema = Schema("public"),
-      name = "child",
-      hasSqlServerAutoIncrement = false
+      name = "child"
     )
 
   private[this] val childFkColumn: Column =
@@ -112,6 +110,7 @@ private[this] object ForeignKeyTaskQueueTest {
   private val schemaInfo: SchemaInfo =
     new SchemaInfo(
       tablesByName = Map.empty,
+      tablesWithAutoincrementMetadata = Seq.empty,
       keyColumnsByTableOrdered = Map.empty,
       dataColumnsByTableOrdered = Map.empty,
       pksByTable = Map.empty,

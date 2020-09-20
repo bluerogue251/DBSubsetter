@@ -47,7 +47,7 @@ private[db] object Sql {
 
       val sqlStringAccountingForMsSqlServer =
         if (hasSqlServerAutoIncrement) {
-          s"SET IDENTITY_INSERT [${table.schema}].[${table.name}] ON;\n" + sqlString
+          s"SET IDENTITY_INSERT [${table.schema.name}].[${table.name}] ON;\n" + sqlString
         } else {
           sqlString
         }
