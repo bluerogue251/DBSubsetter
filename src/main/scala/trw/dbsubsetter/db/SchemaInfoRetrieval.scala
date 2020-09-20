@@ -68,13 +68,27 @@ object SchemaInfoRetrieval {
     }
 
     val pksByTable: Map[Table, PrimaryKey] = {
-      dbMetadata.primaryKeyColumns
-        .groupBy(pk => tablesByName(pk.schema, pk.table))
-        .map { case (table, singleTablePrimaryKeyMetadataRows) =>
-          val columnNames = singleTablePrimaryKeyMetadataRows.map(_.column).toSet
-          val orderedColumns = allColumnsByTableOrdered(table).filter(c => columnNames.contains(c.name))
-          table -> new PrimaryKey(orderedColumns)
-        }
+      val autodetectedPrimaryKeys =
+        dbMetadata
+            .primaryKeyColumns
+            .groupBy(pk => tablesByName(pk.schema, pk.table))
+            .map { case (table, singleTablePrimaryKeyMetadataRows) =>
+              val columnNames = singleTablePrimaryKeyMetadataRows.map(_.column).toSet
+              val orderedColumns = allColumnsByTableOrdered(table).filter(c => columnNames.contains(c.name))
+              table -> new PrimaryKey(orderedColumns)
+            }
+
+      val configuredPrimaryKeys =
+          config
+            .extraPrimaryKeys
+            .map { cmdLinePrimaryKey =>
+              val table = cmdLinePrimaryKey.table
+              val columnNames = cmdLinePrimaryKey.columns.toSet
+              val orderedColumns = allColumnsByTableOrdered(table).filter(c => columnNames.contains(c.name))
+              table -> new PrimaryKey(orderedColumns)
+            }
+
+      autodetectedPrimaryKeys ++ configuredPrimaryKeys
     }
 
     val foreignKeysOrdered: Array[ForeignKey] = {
