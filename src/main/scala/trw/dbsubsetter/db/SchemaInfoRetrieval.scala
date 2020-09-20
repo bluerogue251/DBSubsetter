@@ -8,31 +8,29 @@ import trw.dbsubsetter.db.ColumnTypes.ColumnType
 // scalastyle:off
 object SchemaInfoRetrieval {
   def getSchemaInfo(dbMetadata: DbMetadataQueryResult, config: Config): SchemaInfo = {
-    val tablesByName =
+    val includedTables =
       dbMetadata
         .tables
-        .flatMap { tableQueryRow =>
+        .map { tableQueryRow =>
           val schema = Schema(tableQueryRow.schema)
-          val table = Table(schema, tableQueryRow.name)
-          if (config.excludeTables.contains(table))
-            None
-          else
-            Some((schema.name, table.name) -> table)
-        }.toMap
+          Table(schema, tableQueryRow.name)
+        }
+        .filterNot(config.excludeTables)
+
+    val tablesByName =
+      includedTables
+        .map(table => (table.schema.name, table.name) -> table)
+        .toMap
 
     val tablesWithAutoincrementMetadata =
-        dbMetadata
-          .tables
-          .map { tableQueryRow =>
-            val table =
-              tablesByName((tableQueryRow.schema, tableQueryRow.name))
-
+        includedTables
+          .map { table =>
             val hasSqlServerAutoincrement =
               dbMetadata
                 .columns
                 .exists(columnQueryRow => {
-                  columnQueryRow.schema == tableQueryRow.schema &&
-                    columnQueryRow.table == tableQueryRow.name &&
+                  columnQueryRow.schema == table.schema.name &&
+                    columnQueryRow.table == table.name &&
                     columnQueryRow.isSqlServerAutoincrement
                 })
 
