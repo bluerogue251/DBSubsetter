@@ -40,7 +40,13 @@ object SchemaInfoRetrieval {
           }
 
     val colsByTableAndName: Map[Table, Map[ColumnName, Column]] = {
-      dbMetadata.columns
+      dbMetadata
+        .columns
+        .filterNot { columnQueryRow =>
+          val schema = Schema(columnQueryRow.schema)
+          val table = Table(schema, columnQueryRow.table)
+          config.excludeColumns(table).contains(columnQueryRow.name)
+        }
         .groupBy(c => tablesByName(c.schema, c.table))
         .map { case (table, cols) =>
           table -> cols.zipWithIndex.map { case (c, i) =>
