@@ -16,6 +16,7 @@ package object db {
 
   class SchemaInfo(
       val tablesByName: Map[(String, TableName), Table],
+      val tablesWithAutoincrementMetadata: Seq[TableWithAutoincrementMetadata],
       // Only those columns involved in a primary or foreign key
       val keyColumnsByTableOrdered: Map[Table, Vector[Column]],
       // All columns, even those uninvolved in a primary or foreign key
@@ -28,7 +29,11 @@ package object db {
 
   case class Table(
       schema: Schema,
-      name: String,
+      name: String
+  )
+
+  case class TableWithAutoincrementMetadata(
+      table: Table,
       hasSqlServerAutoIncrement: Boolean
   )
 

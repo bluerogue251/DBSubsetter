@@ -36,19 +36,24 @@ private[db] object Sql {
   }
 
   def insertSqlTemplates(sch: SchemaInfo): Map[Table, SqlQuery] = {
-    sch.tablesByName.map { case (_, table) =>
-      val cols = sch.dataColumnsByTableOrdered(table)
+    sch.tablesWithAutoincrementMetadata.map { case TableWithAutoincrementMetadata(table, hasSqlServerAutoIncrement) =>
+      val cols =
+        sch.dataColumnsByTableOrdered(table)
+
       val sqlString =
         s"""insert into ${quote(table)}
            |${cols.map(quote).mkString("(", ",", ")")}
            |values ${(1 to cols.size).map(_ => '?').mkString("(", ",", ")")}""".stripMargin
-      val sqlStringAccountingForMsSqlServer = if (table.hasSqlServerAutoIncrement) {
-        s"SET IDENTITY_INSERT [${table.schema}].[${table.name}] ON;\n" + sqlString
-      } else {
-        sqlString
-      }
+
+      val sqlStringAccountingForMsSqlServer =
+        if (hasSqlServerAutoIncrement) {
+          s"SET IDENTITY_INSERT [${table.schema}].[${table.name}] ON;\n" + sqlString
+        } else {
+          sqlString
+        }
+
       table -> sqlStringAccountingForMsSqlServer
-    }
+    }.toMap
   }
 
   def makeQueryString(table: Table, selectColumns: Seq[Column], whereClause: WhereClause): SqlQuery = {
