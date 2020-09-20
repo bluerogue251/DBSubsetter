@@ -92,7 +92,28 @@ object SchemaInfoRetrieval {
     }
 
     val foreignKeysOrdered: Array[ForeignKey] = {
-      val fksUnordered = dbMetadata.foreignKeyColumns
+      val configuredForeignKeys =
+          config
+            .extraForeignKeys
+            .flatMap { efk =>
+              efk
+                .fromColumns
+                .zip(efk.toColumns)
+                .map { case (fromColumn, toColumn) =>
+                  ForeignKeyColumnQueryRow(
+                    efk.fromTable.schema.name,
+                    efk.fromTable.name,
+                    fromColumn,
+                    efk.toTable.schema.name,
+                    efk.toTable.name,
+                    toColumn
+                  )
+                }
+            }
+
+      val combinedForeignKeys = dbMetadata.foreignKeyColumns ++ configuredForeignKeys
+
+      val fksUnordered = combinedForeignKeys
         .groupBy(fkm => (fkm.fromSchema, fkm.fromTable, fkm.toSchema, fkm.toTable))
         .map { case ((fromSchemaName, fromTableName, toSchemaName, toTableName), partialForeignKeys) =>
           val fromTable = tablesByName(fromSchemaName, fromTableName)
