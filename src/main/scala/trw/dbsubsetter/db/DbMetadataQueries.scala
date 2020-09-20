@@ -14,8 +14,8 @@ object DbMetadataQueries {
 
     val tables = ArrayBuffer.empty[TableQueryRow]
     val columns = ArrayBuffer.empty[ColumnQueryRow]
-    val pks = ArrayBuffer.empty[PrimaryKeyColumnQueryRow]
-    val fks = ArrayBuffer.empty[ForeignKeyColumnQueryRow]
+    val primaryKeyColumns = ArrayBuffer.empty[PrimaryKeyColumnQueryRow]
+    val foreignKeyColumns = ArrayBuffer.empty[ForeignKeyColumnQueryRow]
 
     /*
      * Retrieve table metadata
@@ -68,7 +68,7 @@ object DbMetadataQueries {
         }
 
       while (pksJdbcResultSet.next()) {
-        pks += PrimaryKeyColumnQueryRow(
+        primaryKeyColumns += PrimaryKeyColumnQueryRow(
           table.schema,
           table.name,
           pksJdbcResultSet.getString("COLUMN_NAME")
@@ -95,7 +95,7 @@ object DbMetadataQueries {
         val toSchema = if (conn.isMysql) foreignKeysJdbcResultSet.getString("PKTABLE_CAT") else foreignKeysJdbcResultSet.getString("PKTABLE_SCHEM")
         val toTable = foreignKeysJdbcResultSet.getString("PKTABLE_NAME")
         val toColumn = foreignKeysJdbcResultSet.getString("PKCOLUMN_NAME")
-        fks += ForeignKeyColumnQueryRow(fromSchema, fromTable, fromColumn, toSchema, toTable, toColumn)
+        foreignKeyColumns += ForeignKeyColumnQueryRow(fromSchema, fromTable, fromColumn, toSchema, toTable, toColumn)
       }
     }
 
@@ -112,18 +112,18 @@ object DbMetadataQueries {
     DbMetadataQueryResult(
       tables.toVector,
       columns.toVector,
-      pks.toVector,
-      fks.toVector,
+      primaryKeyColumns,
+      foreignKeyColumns,
       dbVendor
     )
   }
 }
 
 private[db] case class DbMetadataQueryResult(
-    tables: Vector[TableQueryRow],
-    columns: Vector[ColumnQueryRow],
-    primaryKeyColumns: Vector[PrimaryKeyColumnQueryRow],
-    foreignKeyColumns: Vector[ForeignKeyColumnQueryRow],
+    tables: Seq[TableQueryRow],
+    columns: Seq[ColumnQueryRow],
+    primaryKeyColumns: Seq[PrimaryKeyColumnQueryRow],
+    foreignKeyColumns: Seq[ForeignKeyColumnQueryRow],
     vendor: DbVendor
 )
 
