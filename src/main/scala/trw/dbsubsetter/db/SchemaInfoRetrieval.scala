@@ -14,7 +14,7 @@ object SchemaInfoRetrieval {
       primaryKeyMetadataRows,
       foreignKeyMetadataRows,
       dbVendor
-    ) = DbMetadataQueries.retrieveSchemaMetadata(config)
+    ) = DbMetadataQueries.retrieveSchemaMetadata(config.originDbConnectionString, config.schemas)
 
     val tablesByName = tableMetadataRows.map { t =>
       val hasSqlServerAutoincrement = columnMetadataRows.exists(c => c.schema == t.schema && c.table == t.name && c.isSqlServerAutoincrement)

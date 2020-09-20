@@ -2,10 +2,11 @@ package trw.dbsubsetter.config
 
 import java.io.File
 
-import trw.dbsubsetter.db.{ColumnName, Table}
+import trw.dbsubsetter.db.{ColumnName, Schema, Table}
+
 
 case class Config(
-    schemas: Seq[String] = Seq.empty,
+    schemas: Seq[Schema] = Seq.empty,
     originDbConnectionString: String = "",
     targetDbConnectionString: String = "",
     baseQueries: Seq[CmdLineBaseQuery] = Seq.empty,

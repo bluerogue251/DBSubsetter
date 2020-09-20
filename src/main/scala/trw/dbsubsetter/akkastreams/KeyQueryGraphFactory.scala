@@ -20,7 +20,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 // scalastyle:off
 object KeyQueryGraphFactory {
-  def build(config: Config, schemaInfo: SchemaInfo, baseQueries: Vector[BaseQuery], pkStore: ActorRef, dbAccessFactory: DbAccessFactory, fkTaskCreationWorkflow: FkTaskCreationWorkflow, fkTaskQueue: ForeignKeyTaskQueue, dataCopyQueue: DataCopyQueue)(implicit ec: ExecutionContext): RunnableGraph[Future[Done]] = RunnableGraph.fromGraph(GraphDSL.create(BufferFactory.dataCopyBufferSink(dataCopyQueue)) { implicit b => dataCopyBufferSink =>
+  def build(config: Config, schemaInfo: SchemaInfo, baseQueries: Seq[BaseQuery], pkStore: ActorRef, dbAccessFactory: DbAccessFactory, fkTaskCreationWorkflow: FkTaskCreationWorkflow, fkTaskQueue: ForeignKeyTaskQueue, dataCopyQueue: DataCopyQueue)(implicit ec: ExecutionContext): RunnableGraph[Future[Done]] = RunnableGraph.fromGraph(GraphDSL.create(BufferFactory.dataCopyBufferSink(dataCopyQueue)) { implicit b => dataCopyBufferSink =>
     // Infrastructure: Timeouts, Merges, Balances, Partitions, Broadcasts
     implicit val askTimeout: Timeout = Timeout(48, TimeUnit.HOURS) // For `mapAsyncUnordered`. The need for this timeout may be a code smell.
     val mergeOriginDbRequests = b.add(Merge[OriginDbRequest](3))
@@ -37,7 +37,7 @@ object KeyQueryGraphFactory {
     val mergeToOutstandingTaskCounter = b.add(Merge[IndexedSeq[ForeignKeyTask]](2))
 
     // Start everything off
-    Source(baseQueries) ~>
+    Source(baseQueries.toVector) ~>
       mergeOriginDbRequests
 
     // Process Origin DB Queries in Parallel

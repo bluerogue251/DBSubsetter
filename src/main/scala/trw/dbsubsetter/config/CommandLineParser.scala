@@ -14,7 +14,7 @@ object CommandLineParser {
 
     opt[Seq[String]]("schemas")
       .valueName("<schema1>,<schema2>,<schema3>, ...")
-      .action((s, c) => c.copy(schemas = s.map(_.trim)))
+      .action((schemaNames, c) => c.copy(schemas = schemaNames.map(schemaName => Schema(schemaName.trim))))
       .required()
       .text("Names of the schemas to include when subsetting\n")
 
