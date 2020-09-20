@@ -7,32 +7,26 @@ import trw.dbsubsetter.db.ColumnTypes.ColumnType
 
 // scalastyle:off
 object SchemaInfoRetrieval {
-  def getSchemaInfo(config: Config): SchemaInfo = {
-    val queryResult =
-      DbMetadataQueries.retrieveSchemaMetadata(
-        config.originDbConnectionString,
-        config.schemas
-      )
+  def getSchemaInfo(dbMetadata: DbMetadataQueryResult, config: Config): SchemaInfo = {
+    val tablesByName = dbMetadata.tables.map { t =>
+      val hasSqlServerAutoincrement =
+        dbMetadata
+          .columns
+          .exists(c => {
+            c.schema == t.schema &&
+              c.table == t.name &&
+              c.isSqlServerAutoincrement
+          })
 
-    val DbMetadataQueryResult(
-      tableMetadataRows,
-      columnMetadataRows,
-      primaryKeyMetadataRows,
-      foreignKeyMetadataRows,
-      dbVendor
-    ) = queryResult
-
-    val tablesByName = tableMetadataRows.map { t =>
-      val hasSqlServerAutoincrement = columnMetadataRows.exists(c => c.schema == t.schema && c.table == t.name && c.isSqlServerAutoincrement)
       (t.schema, t.name) -> Table(Schema(t.schema), t.name, hasSqlServerAutoincrement)
     }.toMap
 
     val colsByTableAndName: Map[Table, Map[ColumnName, Column]] = {
-      columnMetadataRows
+      dbMetadata.columns
         .groupBy(c => tablesByName(c.schema, c.table))
         .map { case (table, cols) =>
           table -> cols.zipWithIndex.map { case (c, i) =>
-            val columnType: ColumnType = ColumnTypes.fromRawInfo(c.jdbcType, c.typeName, dbVendor)
+            val columnType: ColumnType = ColumnTypes.fromRawInfo(c.jdbcType, c.typeName, dbMetadata.vendor)
             val column: Column = new Column(
               table = table,
               name = c.name,
@@ -50,7 +44,7 @@ object SchemaInfoRetrieval {
     }
 
     val pksByTable: Map[Table, PrimaryKey] = {
-      primaryKeyMetadataRows
+      dbMetadata.primaryKeyColumns
         .groupBy(pk => tablesByName(pk.schema, pk.table))
         .map { case (table, singleTablePrimaryKeyMetadataRows) =>
           val columnNames = singleTablePrimaryKeyMetadataRows.map(_.column).toSet
@@ -60,7 +54,7 @@ object SchemaInfoRetrieval {
     }
 
     val foreignKeysOrdered: Array[ForeignKey] = {
-      val fksUnordered = foreignKeyMetadataRows
+      val fksUnordered = dbMetadata.foreignKeyColumns
         .groupBy(fkm => (fkm.fromSchema, fkm.fromTable, fkm.toSchema, fkm.toTable))
         .map { case ((fromSchemaName, fromTableName, toSchemaName, toTableName), partialForeignKeys) =>
           val fromTable = tablesByName(fromSchemaName, fromTableName)
@@ -84,8 +78,10 @@ object SchemaInfoRetrieval {
             try {
               colsByTableAndName(toTable)(pfk.toColumn)
             } catch {
-              case _: NoSuchElementException if dbVendor == DbVendor.MySQL => mysqlWorkaround(toTable)(pfk.toColumn)
-              case e: Throwable => throw e
+              case _: NoSuchElementException if dbMetadata.vendor == DbVendor.MySQL =>
+                mysqlWorkaround(toTable)(pfk.toColumn)
+              case e: Throwable =>
+                throw e
             }
           }
 

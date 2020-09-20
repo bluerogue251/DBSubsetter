@@ -5,7 +5,7 @@ import java.sql.{DriverManager, JDBCType}
 import scala.collection.mutable.ArrayBuffer
 
 // scalastyle:off
-private[db] object DbMetadataQueries {
+object DbMetadataQueries {
   def retrieveSchemaMetadata(connectionString: String, schemas: Seq[Schema]): DbMetadataQueryResult = {
     val conn = DriverManager.getConnection(connectionString)
     conn.setReadOnly(true)
@@ -122,8 +122,8 @@ private[db] object DbMetadataQueries {
 private[db] case class DbMetadataQueryResult(
     tables: Vector[TableQueryRow],
     columns: Vector[ColumnQueryRow],
-    pks: Vector[PrimaryKeyColumnQueryRow],
-    fks: Vector[ForeignKeyColumnQueryRow],
+    primaryKeyColumns: Vector[PrimaryKeyColumnQueryRow],
+    foreignKeyColumns: Vector[ForeignKeyColumnQueryRow],
     vendor: DbVendor
 )
 
