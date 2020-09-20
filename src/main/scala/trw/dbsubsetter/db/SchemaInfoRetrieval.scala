@@ -70,6 +70,7 @@ object SchemaInfoRetrieval {
       val autodetectedPrimaryKeys =
         dbMetadata
             .primaryKeyColumns
+            .filter(c => tablesByName.contains((c.schema, c.table)))
             .groupBy(pk => tablesByName(pk.schema, pk.table))
             .map { case (table, singleTablePrimaryKeyMetadataRows) =>
               val columnNames = singleTablePrimaryKeyMetadataRows.map(_.column).toSet
@@ -112,36 +113,39 @@ object SchemaInfoRetrieval {
 
       val combinedForeignKeys = dbMetadata.foreignKeyColumns ++ configuredForeignKeys
 
-      val fksUnordered = combinedForeignKeys
-        .groupBy(fkm => (fkm.fromSchema, fkm.fromTable, fkm.toSchema, fkm.toTable))
-        .map { case ((fromSchemaName, fromTableName, toSchemaName, toTableName), partialForeignKeys) =>
-          val fromTable = tablesByName(fromSchemaName, fromTableName)
-          val fromCols = partialForeignKeys.map { pfk => colsByTableAndName(fromTable)(pfk.fromColumn) }
-          val toTable = tablesByName(toSchemaName, toTableName)
-          // MySQL schema introspection has a bug where they don't properly capitalize column names of
-          // the `pointedTo` side of foreign keys.
-          //
-          // Doesn't seem to be remedied by &useInformationSchema=true in DB URL so that the `DatabaseMetaDataUsingInfoSchema` class is used
-          //
-          // This seems to be a bug at the MySQL layer, not at the JDBC Driver layer because the same
-          // issue is present in the command line program using the `show create table my_table` command
-          //
-          // This is a hacky workaround and could cause problems in a schema where the same column name
-          // is used twice in the same table with different capitalization. (This seems like it ought to be either impossible or rare though).
-          //
-          // A less hacky workaround would be to match by column ordinal rather than by name, but unfortunately that info
-          // is not included in the result of the query we make to get foreign keys.
-          lazy val mysqlWorkaround = colsByTableAndName.mapValues(nameToColMap => nameToColMap.map { case (k, v) => k.toLowerCase -> v })
-          val toCols = partialForeignKeys.map { pfk =>
-            try {
-              colsByTableAndName(toTable)(pfk.toColumn)
-            } catch {
-              case _: NoSuchElementException if dbMetadata.vendor == DbVendor.MySQL =>
-                mysqlWorkaround(toTable)(pfk.toColumn)
-              case e: Throwable =>
-                throw e
+      val fksUnordered =
+        combinedForeignKeys
+          .filter(fk => tablesByName.contains((fk.fromSchema, fk.fromTable)))
+          .filter(fk => tablesByName.contains((fk.toSchema, fk.toTable)))
+          .groupBy(fkm => (fkm.fromSchema, fkm.fromTable, fkm.toSchema, fkm.toTable))
+          .map { case ((fromSchemaName, fromTableName, toSchemaName, toTableName), partialForeignKeys) =>
+            val fromTable = tablesByName(fromSchemaName, fromTableName)
+            val fromCols = partialForeignKeys.map { pfk => colsByTableAndName(fromTable)(pfk.fromColumn) }
+            val toTable = tablesByName(toSchemaName, toTableName)
+            // MySQL schema introspection has a bug where they don't properly capitalize column names of
+            // the `pointedTo` side of foreign keys.
+            //
+            // Doesn't seem to be remedied by &useInformationSchema=true in DB URL so that the `DatabaseMetaDataUsingInfoSchema` class is used
+            //
+            // This seems to be a bug at the MySQL layer, not at the JDBC Driver layer because the same
+            // issue is present in the command line program using the `show create table my_table` command
+            //
+            // This is a hacky workaround and could cause problems in a schema where the same column name
+            // is used twice in the same table with different capitalization. (This seems like it ought to be either impossible or rare though).
+            //
+            // A less hacky workaround would be to match by column ordinal rather than by name, but unfortunately that info
+            // is not included in the result of the query we make to get foreign keys.
+            lazy val mysqlWorkaround = colsByTableAndName.mapValues(nameToColMap => nameToColMap.map { case (k, v) => k.toLowerCase -> v })
+            val toCols = partialForeignKeys.map { pfk =>
+              try {
+                colsByTableAndName(toTable)(pfk.toColumn)
+              } catch {
+                case _: NoSuchElementException if dbMetadata.vendor == DbVendor.MySQL =>
+                  mysqlWorkaround(toTable)(pfk.toColumn)
+                case e: Throwable =>
+                  throw e
+              }
             }
-          }
 
           val pointsToPk = pksByTable.get(toTable).fold(false)(pk => pk.columns == toCols)
 
