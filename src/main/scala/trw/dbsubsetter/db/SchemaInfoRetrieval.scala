@@ -9,17 +9,27 @@ import trw.dbsubsetter.db.ColumnTypes.ColumnType
 object SchemaInfoRetrieval {
   def getSchemaInfo(dbMetadata: DbMetadataQueryResult, config: Config): SchemaInfo = {
     val tablesByName = dbMetadata.tables.map { t =>
-      val hasSqlServerAutoincrement =
-        dbMetadata
-          .columns
-          .exists(c => {
-            c.schema == t.schema &&
-              c.table == t.name &&
-              c.isSqlServerAutoincrement
-          })
-
-      (t.schema, t.name) -> Table(Schema(t.schema), t.name, hasSqlServerAutoincrement)
+      (t.schema, t.name) -> Table(Schema(t.schema), t.name)
     }.toMap
+
+    val tablesWithAutoincrementMetadata =
+        dbMetadata
+          .tables
+          .map { tableQueryRow =>
+            val table =
+              tablesByName((tableQueryRow.schema, tableQueryRow.name))
+
+            val hasSqlServerAutoincrement =
+              dbMetadata
+                .columns
+                .exists(c => {
+                  c.schema == tableQueryRow.schema &&
+                    c.table == tableQueryRow.name &&
+                    c.isSqlServerAutoincrement
+                })
+
+            TableWithAutoincrementMetadata(table, hasSqlServerAutoincrement)
+          }
 
     val colsByTableAndName: Map[Table, Map[ColumnName, Column]] = {
       dbMetadata.columns
@@ -128,6 +138,7 @@ object SchemaInfoRetrieval {
 
     new SchemaInfo(
       tablesByName = tablesByName,
+      tablesWithAutoincrementMetadata = tablesWithAutoincrementMetadata,
       keyColumnsByTableOrdered = keyColumnsByTableOrdered,
       dataColumnsByTableOrdered = allColumnsByTableOrdered,
       pksByTable = pksByTable,

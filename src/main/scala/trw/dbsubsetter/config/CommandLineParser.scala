@@ -268,7 +268,7 @@ object CommandLineParser {
 
   private def normalizeTable(schemaName: String, tableName: String): Table = {
     val schema = Schema(schemaName.trim)
-    Table(schema = schema, name = tableName.trim, hasSqlServerAutoIncrement = false)
+    Table(schema = schema, name = tableName.trim)
   }
 
   private def trimCsvs(untrimmedCsvs: String): Seq[String] = {
