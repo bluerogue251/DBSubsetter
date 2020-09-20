@@ -45,6 +45,7 @@ object SchemaInfoRetrieval {
           val table = Table(schema, columnQueryRow.table)
           config.excludeColumns(table).contains(columnQueryRow.name)
         }
+        .filter(c => tablesByName.contains((c.schema, c.table)))
         .groupBy(c => tablesByName(c.schema, c.table))
         .map { case (table, cols) =>
           table -> cols.zipWithIndex.map { case (c, i) =>
