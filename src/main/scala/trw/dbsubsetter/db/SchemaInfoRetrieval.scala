@@ -7,26 +7,49 @@ import trw.dbsubsetter.db.ColumnTypes.ColumnType
 
 // scalastyle:off
 object SchemaInfoRetrieval {
-  def getSchemaInfo(config: Config): SchemaInfo = {
-    val DbMetadataQueryResult(
-      tableMetadataRows,
-      columnMetadataRows,
-      primaryKeyMetadataRows,
-      foreignKeyMetadataRows,
-      dbVendor
-    ) = DbMetadataQueries.queryDb(config)
+  def getSchemaInfo(dbMetadata: DbMetadataQueryResult, config: Config): SchemaInfo = {
+    val includedTables =
+      dbMetadata
+        .tables
+        .map { tableQueryRow =>
+          val schema = Schema(tableQueryRow.schema)
+          Table(schema, tableQueryRow.name)
+        }
+        .filterNot(config.excludeTables)
 
-    val tablesByName = tableMetadataRows.map { t =>
-      val hasSqlServerAutoincrement = columnMetadataRows.exists(c => c.schema == t.schema && c.table == t.name && c.isSqlServerAutoincrement)
-      (t.schema, t.name) -> new Table(t.schema, t.name, hasSqlServerAutoincrement)
-    }.toMap
+    val tablesByName =
+      includedTables
+        .map(table => (table.schema.name, table.name) -> table)
+        .toMap
+
+    val tablesWithAutoincrementMetadata =
+        includedTables
+          .map { table =>
+            val hasSqlServerAutoincrement =
+              dbMetadata
+                .columns
+                .exists(columnQueryRow => {
+                  columnQueryRow.schema == table.schema.name &&
+                    columnQueryRow.table == table.name &&
+                    columnQueryRow.isSqlServerAutoincrement
+                })
+
+            TableWithAutoincrementMetadata(table, hasSqlServerAutoincrement)
+          }
 
     val colsByTableAndName: Map[Table, Map[ColumnName, Column]] = {
-      columnMetadataRows
+      dbMetadata
+        .columns
+        .filterNot { columnQueryRow =>
+          val schema = Schema(columnQueryRow.schema)
+          val table = Table(schema, columnQueryRow.table)
+          config.excludeColumns(table).contains(columnQueryRow.name)
+        }
+        .filter(c => tablesByName.contains((c.schema, c.table)))
         .groupBy(c => tablesByName(c.schema, c.table))
         .map { case (table, cols) =>
           table -> cols.zipWithIndex.map { case (c, i) =>
-            val columnType: ColumnType = ColumnTypes.fromRawInfo(c.jdbcType, c.typeName, dbVendor)
+            val columnType: ColumnType = ColumnTypes.fromRawInfo(c.jdbcType, c.typeName, dbMetadata.vendor)
             val column: Column = new Column(
               table = table,
               name = c.name,
@@ -44,44 +67,85 @@ object SchemaInfoRetrieval {
     }
 
     val pksByTable: Map[Table, PrimaryKey] = {
-      primaryKeyMetadataRows
-        .groupBy(pk => tablesByName(pk.schema, pk.table))
-        .map { case (table, singleTablePrimaryKeyMetadataRows) =>
-          val columnNames = singleTablePrimaryKeyMetadataRows.map(_.column).toSet
-          val orderedColumns = allColumnsByTableOrdered(table).filter(c => columnNames.contains(c.name))
-          table -> new PrimaryKey(orderedColumns)
-        }
+      val autodetectedPrimaryKeys =
+        dbMetadata
+            .primaryKeyColumns
+            .filter(c => tablesByName.contains((c.schema, c.table)))
+            .groupBy(pk => tablesByName(pk.schema, pk.table))
+            .map { case (table, singleTablePrimaryKeyMetadataRows) =>
+              val columnNames = singleTablePrimaryKeyMetadataRows.map(_.column).toSet
+              val orderedColumns = allColumnsByTableOrdered(table).filter(c => columnNames.contains(c.name))
+              table -> new PrimaryKey(orderedColumns)
+            }
+
+      val configuredPrimaryKeys =
+          config
+            .extraPrimaryKeys
+            .map { cmdLinePrimaryKey =>
+              val table = cmdLinePrimaryKey.table
+              val columnNames = cmdLinePrimaryKey.columns.toSet
+              val orderedColumns = allColumnsByTableOrdered(table).filter(c => columnNames.contains(c.name))
+              table -> new PrimaryKey(orderedColumns)
+            }
+
+      autodetectedPrimaryKeys ++ configuredPrimaryKeys
     }
 
     val foreignKeysOrdered: Array[ForeignKey] = {
-      val fksUnordered = foreignKeyMetadataRows
-        .groupBy(fkm => (fkm.fromSchema, fkm.fromTable, fkm.toSchema, fkm.toTable))
-        .map { case ((fromSchemaName, fromTableName, toSchemaName, toTableName), partialForeignKeys) =>
-          val fromTable = tablesByName(fromSchemaName, fromTableName)
-          val fromCols = partialForeignKeys.map { pfk => colsByTableAndName(fromTable)(pfk.fromColumn) }
-          val toTable = tablesByName(toSchemaName, toTableName)
-          // MySQL schema introspection has a bug where they don't properly capitalize column names of
-          // the `pointedTo` side of foreign keys.
-          //
-          // Doesn't seem to be remedied by &useInformationSchema=true in DB URL so that the `DatabaseMetaDataUsingInfoSchema` class is used
-          //
-          // This seems to be a bug at the MySQL layer, not at the JDBC Driver layer because the same
-          // issue is present in the command line program using the `show create table my_table` command
-          //
-          // This is a hacky workaround and could cause problems in a schema where the same column name
-          // is used twice in the same table with different capitalization. (This seems like it ought to be either impossible or rare though).
-          //
-          // A less hacky workaround would be to match by column ordinal rather than by name, but unfortunately that info
-          // is not included in the result of the query we make to get foreign keys.
-          lazy val mysqlWorkaround = colsByTableAndName.mapValues(nameToColMap => nameToColMap.map { case (k, v) => k.toLowerCase -> v })
-          val toCols = partialForeignKeys.map { pfk =>
-            try {
-              colsByTableAndName(toTable)(pfk.toColumn)
-            } catch {
-              case _: NoSuchElementException if dbVendor == DbVendor.MySQL => mysqlWorkaround(toTable)(pfk.toColumn)
-              case e: Throwable => throw e
+      val configuredForeignKeys =
+          config
+            .extraForeignKeys
+            .flatMap { efk =>
+              efk
+                .fromColumns
+                .zip(efk.toColumns)
+                .map { case (fromColumn, toColumn) =>
+                  ForeignKeyColumnQueryRow(
+                    efk.fromTable.schema.name,
+                    efk.fromTable.name,
+                    fromColumn,
+                    efk.toTable.schema.name,
+                    efk.toTable.name,
+                    toColumn
+                  )
+                }
             }
-          }
+
+      val combinedForeignKeys = dbMetadata.foreignKeyColumns ++ configuredForeignKeys
+
+      val fksUnordered =
+        combinedForeignKeys
+          .filter(fk => tablesByName.contains((fk.fromSchema, fk.fromTable)))
+          .filter(fk => tablesByName.contains((fk.toSchema, fk.toTable)))
+          .groupBy(fkm => (fkm.fromSchema, fkm.fromTable, fkm.toSchema, fkm.toTable))
+          .map { case ((fromSchemaName, fromTableName, toSchemaName, toTableName), partialForeignKeys) =>
+            val fromTable = tablesByName(fromSchemaName, fromTableName)
+            val fromCols = partialForeignKeys.map { pfk => colsByTableAndName(fromTable)(pfk.fromColumn) }
+            val toTable = tablesByName(toSchemaName, toTableName)
+            // MySQL schema introspection has a bug where they don't properly capitalize column names of
+            // the `pointedTo` side of foreign keys.
+            //
+            // Doesn't seem to be remedied by &useInformationSchema=true in DB URL so that the `DatabaseMetaDataUsingInfoSchema` class is used
+            //
+            // This seems to be a bug at the MySQL layer, not at the JDBC Driver layer because the same
+            // issue is present in the command line program using the `show create table my_table` command
+            //
+            // This is a hacky workaround and could cause problems in a schema where the same column name
+            // is used twice in the same table with different capitalization. (This seems like it ought to be either impossible or rare though).
+            //
+            // A less hacky workaround would be to match by column ordinal rather than by name, but unfortunately that info
+            // is not included in the result of the query we make to get foreign keys.
+            lazy val mysqlWorkaround = colsByTableAndName.mapValues(nameToColMap => nameToColMap.map { case (k, v) => k.toLowerCase -> v })
+            val toCols = partialForeignKeys.map { pfk =>
+              try {
+                colsByTableAndName(toTable)(pfk.toColumn)
+              } catch {
+                case _: NoSuchElementException if dbMetadata.vendor == DbVendor.MySQL =>
+                  mysqlWorkaround(toTable)(pfk.toColumn)
+                case e: Throwable =>
+                  throw e
+              }
+            }
 
           val pointsToPk = pksByTable.get(toTable).fold(false)(pk => pk.columns == toCols)
 
@@ -125,7 +189,7 @@ object SchemaInfoRetrieval {
     }
 
     new SchemaInfo(
-      tablesByName = tablesByName,
+      tables = tablesWithAutoincrementMetadata,
       keyColumnsByTableOrdered = keyColumnsByTableOrdered,
       dataColumnsByTableOrdered = allColumnsByTableOrdered,
       pksByTable = pksByTable,

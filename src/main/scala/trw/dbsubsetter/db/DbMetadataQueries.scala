@@ -2,46 +2,41 @@ package trw.dbsubsetter.db
 
 import java.sql.{DriverManager, JDBCType}
 
-import trw.dbsubsetter.config.Config
-
 import scala.collection.mutable.ArrayBuffer
 
-
 // scalastyle:off
-private[db] object DbMetadataQueries {
-  def queryDb(config: Config): DbMetadataQueryResult = {
-    val conn = DriverManager.getConnection(config.originDbConnectionString)
+object DbMetadataQueries {
+  def retrieveSchemaMetadata(connectionString: String, schemas: Seq[Schema]): DbMetadataQueryResult = {
+    val conn = DriverManager.getConnection(connectionString)
     conn.setReadOnly(true)
     val catalog = conn.getCatalog
     val ddl = conn.getMetaData
 
     val tables = ArrayBuffer.empty[TableQueryRow]
     val columns = ArrayBuffer.empty[ColumnQueryRow]
-    val pks = ArrayBuffer.empty[PrimaryKeyQueryRow]
-    val fks = ArrayBuffer.empty[ForeignKeyQueryRow]
+    val primaryKeyColumns = ArrayBuffer.empty[PrimaryKeyColumnQueryRow]
+    val foreignKeyColumns = ArrayBuffer.empty[ForeignKeyColumnQueryRow]
 
-    //
-    // Get all tables for configured schemas
-    //
-    config.schemas.foreach { schema =>
+    /*
+     * Retrieve table metadata
+     */
+    schemas.foreach { schema =>
       val tablesJdbcResultSet =
         if (conn.isMysql) {
-          ddl.getTables(schema, null, "%", Array("TABLE"))
+          ddl.getTables(schema.name, null, "%", Array("TABLE"))
         } else {
-          ddl.getTables(catalog, schema, "%", Array("TABLE"))
+          ddl.getTables(catalog, schema.name, "%", Array("TABLE"))
         }
 
       while (tablesJdbcResultSet.next()) {
-        val table = tablesJdbcResultSet.getString("TABLE_NAME")
-        if (!config.excludeTables.contains((schema, table))) {
-          tables += TableQueryRow(schema, table)
-        }
+        val tableName = tablesJdbcResultSet.getString("TABLE_NAME")
+        tables += TableQueryRow(schema.name, tableName)
       }
     }
 
-    //
-    // Fetch columns from DB
-    //
+    /*
+     * Retrieve column metadata
+     */
     tables.foreach { table =>
       val colsJdbcResultSet =
         if (conn.isMysql) {
@@ -57,16 +52,13 @@ private[db] object DbMetadataQueries {
         // If trying to generalize autoincrement across vendors, check if "YES" is what other vendors use
         // Or if it's something else like "y", "1", "true" etc.
         val isSqlServerAutoIncrement = conn.isMsSqlServer && colsJdbcResultSet.getString("IS_AUTOINCREMENT") == "YES"
-
-        if (!config.excludeColumns((table.schema, table.name)).contains(columnName)) {
-          columns += ColumnQueryRow(table.schema, table.name, columnName, jdbcType, typeName, isSqlServerAutoIncrement)
-        }
+        columns += ColumnQueryRow(table.schema, table.name, columnName, jdbcType, typeName, isSqlServerAutoIncrement)
       }
     }
 
-    //
-    // Fetch primary keys from DB
-    //
+    /*
+     * Retrieve primary key metadata
+     */
     tables.foreach { table =>
       val pksJdbcResultSet =
         if (conn.isMysql) {
@@ -76,7 +68,7 @@ private[db] object DbMetadataQueries {
         }
 
       while (pksJdbcResultSet.next()) {
-        pks += PrimaryKeyQueryRow(
+        primaryKeyColumns += PrimaryKeyColumnQueryRow(
           table.schema,
           table.name,
           pksJdbcResultSet.getString("COLUMN_NAME")
@@ -84,16 +76,9 @@ private[db] object DbMetadataQueries {
       }
     }
 
-    //
-    // Add primary keys configured by user
-    //
-    config.cmdLinePrimaryKeys.foreach { clpk =>
-      clpk.columns.foreach(c => pks += PrimaryKeyQueryRow(clpk.schema, clpk.table, c))
-    }
-
-    //
-    // Fetch foreign keys from DB
-    //
+    /*
+     * Retrieve foreign key metadata
+     */
     tables.foreach { table =>
       val foreignKeysJdbcResultSet =
         if (conn.isMysql) {
@@ -110,59 +95,63 @@ private[db] object DbMetadataQueries {
         val toSchema = if (conn.isMysql) foreignKeysJdbcResultSet.getString("PKTABLE_CAT") else foreignKeysJdbcResultSet.getString("PKTABLE_SCHEM")
         val toTable = foreignKeysJdbcResultSet.getString("PKTABLE_NAME")
         val toColumn = foreignKeysJdbcResultSet.getString("PKCOLUMN_NAME")
-
-        if (!config.excludeTables.contains((fromSchema, fromTable)) && !config.excludeTables.contains((toSchema, toTable))) {
-          fks += ForeignKeyQueryRow(fromSchema, fromTable, fromColumn, toSchema, toTable, toColumn)
-        }
+        foreignKeyColumns += ForeignKeyColumnQueryRow(fromSchema, fromTable, fromColumn, toSchema, toTable, toColumn)
       }
     }
 
-    //
-    // Add foreign keys configured by user
-    //
-    config.cmdLineForeignKeys.foreach { cfk =>
-      cfk.fromColumns.zip(cfk.toColumns).foreach { case (fromCol, toCol) =>
-        fks += ForeignKeyQueryRow(cfk.fromSchema, cfk.fromTable, fromCol, cfk.toSchema, cfk.toTable, toCol)
-      }
-    }
-
-    //
-    // Fetch DB Vendor info
-    //
+    /*
+     * Fetch DB Vendor info
+     */
     val dbVendor = conn.dbVendor
 
-    //
-    // Close DB connection
-    //
+    /*
+     * Close DB connection
+     */
     conn.close()
 
-    DbMetadataQueryResult(tables.toVector, columns.toVector, pks.toVector, fks.toVector, dbVendor)
+    DbMetadataQueryResult(
+      tables.toVector,
+      columns.toVector,
+      primaryKeyColumns,
+      foreignKeyColumns,
+      dbVendor
+    )
   }
 }
 
-private[db] case class DbMetadataQueryResult(tables: Vector[TableQueryRow],
-                                             columns: Vector[ColumnQueryRow],
-                                             pks: Vector[PrimaryKeyQueryRow],
-                                             fks: Vector[ForeignKeyQueryRow],
-                                             vendor: DbVendor)
+private[db] case class DbMetadataQueryResult(
+    tables: Seq[TableQueryRow],
+    columns: Seq[ColumnQueryRow],
+    primaryKeyColumns: Seq[PrimaryKeyColumnQueryRow],
+    foreignKeyColumns: Seq[ForeignKeyColumnQueryRow],
+    vendor: DbVendor
+)
 
-private[this] case class TableQueryRow(schema: SchemaName,
-                                       name: TableName)
+private[this] case class TableQueryRow(
+    schema: String,
+    name: String
+)
 
-private[this] case class ColumnQueryRow(schema: SchemaName,
-                                        table: TableName,
-                                        name: ColumnName,
-                                        jdbcType: JDBCType,
-                                        typeName: String,
-                                        isSqlServerAutoincrement: Boolean)
+private[this] case class ColumnQueryRow(
+    schema: String,
+    table: String,
+    name: String,
+    jdbcType: JDBCType,
+    typeName: String,
+    isSqlServerAutoincrement: Boolean
+)
 
-private[this] case class PrimaryKeyQueryRow(schema: SchemaName,
-                                            table: TableName,
-                                            column: ColumnName)
+private[this] case class PrimaryKeyColumnQueryRow(
+    schema: String,
+    table: String,
+    column: String
+)
 
-private[this] case class ForeignKeyQueryRow(fromSchema: SchemaName,
-                                            fromTable: TableName,
-                                            fromColumn: ColumnName,
-                                            toSchema: SchemaName,
-                                            toTable: TableName,
-                                            toColumn: ColumnName)
+private[this] case class ForeignKeyColumnQueryRow(
+    fromSchema: String,
+    fromTable: String,
+    fromColumn: String,
+    toSchema: String,
+    toTable: String,
+    toColumn: String
+)

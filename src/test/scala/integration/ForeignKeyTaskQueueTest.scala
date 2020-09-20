@@ -2,7 +2,7 @@ package integration
 
 import org.scalatest.FunSuite
 import trw.dbsubsetter.config.Config
-import trw.dbsubsetter.db.{Column, ColumnTypes, ForeignKey, ForeignKeyValue, SchemaInfo, Table}
+import trw.dbsubsetter.db.{Column, ColumnTypes, ForeignKey, ForeignKeyValue, Schema, SchemaInfo, Table}
 import trw.dbsubsetter.fktaskqueue.ForeignKeyTaskQueueFactory
 import trw.dbsubsetter.workflow.{FetchParentTask, ForeignKeyTask}
 
@@ -70,10 +70,9 @@ class ForeignKeyTaskQueueTest extends FunSuite {
 private[this] object ForeignKeyTaskQueueTest {
 
   private val parentTable: Table =
-    new Table(
-      schema = "public",
-      name = "parent",
-      hasSqlServerAutoIncrement = false
+    Table(
+      schema = Schema("public"),
+      name = "parent"
     )
 
   private[this] val parentPkColumn: Column =
@@ -86,10 +85,9 @@ private[this] object ForeignKeyTaskQueueTest {
     )
 
   private[this] val childTable: Table =
-    new Table(
-      schema = "public",
-      name = "child",
-      hasSqlServerAutoIncrement = false
+    Table(
+      schema = Schema("public"),
+      name = "child"
     )
 
   private[this] val childFkColumn: Column =
@@ -111,7 +109,7 @@ private[this] object ForeignKeyTaskQueueTest {
 
   private val schemaInfo: SchemaInfo =
     new SchemaInfo(
-      tablesByName = Map.empty,
+      tables = Seq.empty,
       keyColumnsByTableOrdered = Map.empty,
       dataColumnsByTableOrdered = Map.empty,
       pksByTable = Map.empty,

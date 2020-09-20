@@ -2,17 +2,16 @@ package unit
 
 import org.scalatest.FunSuite
 import trw.dbsubsetter.config.Config
-import trw.dbsubsetter.db.{Column, Keys, PrimaryKey, PrimaryKeyValue, SchemaInfo, Table}
+import trw.dbsubsetter.db.{Column, Keys, PrimaryKey, PrimaryKeyValue, Schema, SchemaInfo, Table}
 import trw.dbsubsetter.primarykeystore.{PrimaryKeyStore, PrimaryKeyStoreFactory}
 import trw.dbsubsetter.workflow._
 
 class PkStoreWorkflowTest extends FunSuite {
   test("PkStoreWorkflow is conscious of fetchChildren") {
     val table: Table =
-      new Table(
-        schema = "public",
-        name = "users",
-        hasSqlServerAutoIncrement = true
+      Table(
+        schema = Schema("public"),
+        name = "users"
       )
 
     val pkCol: Column =
@@ -26,7 +25,7 @@ class PkStoreWorkflowTest extends FunSuite {
 
     val schemaInfo: SchemaInfo =
       new SchemaInfo(
-        tablesByName = Map.empty,
+        tables = Seq.empty,
         keyColumnsByTableOrdered = Map.empty,
         dataColumnsByTableOrdered = Map.empty,
         pksByTable = Map(table -> new PrimaryKey(Seq(pkCol))),
@@ -75,10 +74,9 @@ class PkStoreWorkflowTest extends FunSuite {
 
   test("PkStoreWorkflow is conscious of fetchChildren part2") {
     val table: Table =
-      new Table(
-        schema = "public",
-        name = "users",
-        hasSqlServerAutoIncrement = true
+      Table(
+        schema = Schema("public"),
+        name = "users"
       )
 
     val primaryKeyColumn: Column =
@@ -92,7 +90,7 @@ class PkStoreWorkflowTest extends FunSuite {
 
     val schemaInfo: SchemaInfo =
       new SchemaInfo(
-        tablesByName = Map.empty,
+        tables = Seq.empty,
         keyColumnsByTableOrdered = Map.empty,
         dataColumnsByTableOrdered = Map.empty,
         pksByTable = Map(table -> new PrimaryKey(Seq(primaryKeyColumn))),

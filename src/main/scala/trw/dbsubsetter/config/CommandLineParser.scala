@@ -3,7 +3,8 @@ package trw.dbsubsetter.config
 import java.io.File
 
 import scopt.OptionParser
-import trw.dbsubsetter.db.{ColumnName, SchemaName, TableName}
+import trw.dbsubsetter.db.{ColumnName, Schema, Table, WhereClause}
+
 
 object CommandLineParser {
   val parser: OptionParser[Config] = new OptionParser[Config]("DBSubsetter") {
@@ -13,7 +14,7 @@ object CommandLineParser {
 
     opt[Seq[String]]("schemas")
       .valueName("<schema1>,<schema2>,<schema3>, ...")
-      .action((s, c) => c.copy(schemas = s.map(_.trim)))
+      .action((schemaNames, c) => c.copy(schemas = schemaNames.map(schemaName => Schema(schemaName.trim))))
       .required()
       .text("Names of the schemas to include when subsetting\n")
 
@@ -46,9 +47,10 @@ object CommandLineParser {
       .action { case (bq, c) =>
         val r = """^\s*(.+)\.(.+)\s+:::\s+(.+)\s+:::\s+(includeChildren|excludeChildren)\s*$""".r
         bq match {
-          case r(schema, table, whereClause, fetchChildren) =>
-            val fc = fetchChildren == "includeChildren"
-            c.copy(baseQueries = c.baseQueries :+ ((schema.trim, table.trim), whereClause.trim, fc))
+          case r(schemaName, tableName, whereClause, includeChildren) =>
+            val table = normalizeTable(schemaName, tableName)
+            val baseQuery = CmdLineBaseQuery(table, whereClause.trim, includeChildren == "includeChildren")
+            c.copy(baseQueries = c.baseQueries :+ baseQuery)
           case _ => throw new RuntimeException()
         }
       }
@@ -90,9 +92,11 @@ object CommandLineParser {
         val regex = """^(.+)\.(.+)\((.+)\)\s+:::\s+(.+)\.(.+)\((.+)\)\s*$""".r
 
         fk match {
-          case regex(fromSch, fromTbl, fromCols, toSch, toTbl, toCols) =>
-            val fk = CmdLineForeignKey(fromSch.trim, fromTbl.trim, fromCols.split(",").toList.map(_.trim), toSch.trim, toTbl.trim, toCols.split(",").toList.map(_.trim))
-            c.copy(cmdLineForeignKeys = fk :: c.cmdLineForeignKeys)
+          case regex(fromSchemaName, fromTableName, fromCols, toSchemaName, toTableName, toCols) =>
+            val fromTable = normalizeTable(fromSchemaName, fromTableName)
+            val toTable = normalizeTable(toSchemaName, toTableName)
+            val cmdLineForeignKey = CmdLineForeignKey(fromTable, trimCsvs(fromCols), toTable, trimCsvs(toCols))
+            c.copy(extraForeignKeys = c.extraForeignKeys :+ cmdLineForeignKey)
           case _ => throw new RuntimeException()
         }
       }
@@ -107,9 +111,10 @@ object CommandLineParser {
       .action { case (fk, c) =>
         val regex = """^\s*(.+)\.(.+)\((.+)\)\s*$""".r
         fk match {
-          case regex(sch, tbl, cols) =>
-            val pk = CmdLinePrimaryKey(sch.trim, tbl.trim, cols.split(",").toList.map(_.trim))
-            c.copy(cmdLinePrimaryKeys = pk :: c.cmdLinePrimaryKeys)
+          case regex(schemaName, tableName, cols) =>
+            val table = normalizeTable(schemaName, tableName)
+            val cmdLinePrimaryKey = CmdLinePrimaryKey(table, trimCsvs(cols))
+            c.copy(extraPrimaryKeys = c.extraPrimaryKeys :+ cmdLinePrimaryKey)
           case _ => throw new RuntimeException()
         }
       }
@@ -124,8 +129,9 @@ object CommandLineParser {
       .action { (str, c) =>
         val regex = """^\s*(.+)\.(.+)\s*$""".r
         str match {
-          case regex(schema, table) =>
-            c.copy(excludeTables = c.excludeTables ++ Set((schema, table)))
+          case regex(schemaName, tableName) =>
+            val table = normalizeTable(schemaName, tableName)
+            c.copy(excludeTables = c.excludeTables + table)
           case _ => throw new RuntimeException
         }
       }
@@ -141,12 +147,13 @@ object CommandLineParser {
       .action { (ic, c) =>
         val regex = """^\s*(.+)\.(.+)\((.+)\)\s*$""".r
         ic match {
-          case regex(schema, table, columnListString) =>
-            val alreadyExcluded = c.excludeColumns((schema.trim, table.trim))
-            val newlyExcluded = columnListString.split(",").map(_.trim).toSet
-            c.copy(excludeColumns = c.excludeColumns.updated((schema.trim, table.trim), alreadyExcluded ++ newlyExcluded))
+          case regex(schemaName, tableName, cols) =>
+            val table = normalizeTable(schemaName, tableName)
+            val alreadyExcluded = c.excludeColumns(table)
+            val newlyExcluded = trimCsvs(cols).toSet
+            val totalExcluded = alreadyExcluded ++ newlyExcluded
+            c.copy(excludeColumns = c.excludeColumns.updated(table, totalExcluded))
           case _ => throw new RuntimeException
-
         }
       }
       .text(
@@ -158,7 +165,7 @@ object CommandLineParser {
 
     opt[File]("tempfileStorageDirectory")
       .valueName("</path/to/tempfile/storage/directory>")
-      .action((dir, c) => c.copy(tempfileStorageDirectoryOpt = Some(dir)))
+      .action((dir, c) => c.copy(tempfileStorageDirectoryOverride = Some(dir)))
       .validate { dir =>
         if (!dir.exists()) dir.mkdir()
         if (!dir.isDirectory) {
@@ -175,7 +182,7 @@ object CommandLineParser {
           |""".stripMargin)
 
     opt[Unit]("singleThreadedDebugMode")
-      .action((_, c) => c.copy(isSingleThreadedDebugMode = true))
+      .action((_, c) => c.copy(singleThreadDebugMode = true))
       .text(
         """Run DBSubsetter in debug mode (NOT recommended)
           |                           Uses a simplified, single-threaded architecture
@@ -258,15 +265,31 @@ object CommandLineParser {
         |""".stripMargin
     note(usageExamples)
   }
+
+  private def normalizeTable(schemaName: String, tableName: String): Table = {
+    val schema = Schema(schemaName.trim)
+    Table(schema = schema, name = tableName.trim)
+  }
+
+  private def trimCsvs(untrimmedCsvs: String): Seq[String] = {
+    untrimmedCsvs.split(",").map(_.trim)
+  }
 }
 
-case class CmdLineForeignKey(fromSchema: SchemaName,
-                             fromTable: TableName,
-                             fromColumns: List[ColumnName],
-                             toSchema: SchemaName,
-                             toTable: TableName,
-                             toColumns: List[ColumnName])
+case class CmdLineBaseQuery(
+    table: Table,
+    whereClause: WhereClause,
+    includeChildren: Boolean
+)
 
-case class CmdLinePrimaryKey(schema: SchemaName,
-                             table: TableName,
-                             columns: List[ColumnName])
+case class CmdLineForeignKey(
+    fromTable: Table,
+    fromColumns: Seq[ColumnName],
+    toTable: Table,
+    toColumns: Seq[ColumnName]
+)
+
+case class CmdLinePrimaryKey(
+    table: Table,
+    columns: Seq[ColumnName]
+)

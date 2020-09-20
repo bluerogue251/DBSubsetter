@@ -2,16 +2,15 @@ package unit
 
 import org.scalatest.FunSuite
 import trw.dbsubsetter.config.Config
-import trw.dbsubsetter.db.{Column, PrimaryKey, PrimaryKeyValue, SchemaInfo, Table}
+import trw.dbsubsetter.db.{Column, PrimaryKey, PrimaryKeyValue, Schema, SchemaInfo, Table}
 import trw.dbsubsetter.primarykeystore._
 
 class PkStoreTest extends FunSuite {
   test("PkStore is conscious of whether children have been processed yet") {
     val table: Table =
-      new Table(
-        schema = "public",
-        name ="users",
-        hasSqlServerAutoIncrement = true
+      Table(
+        schema = Schema("public"),
+        name ="users"
       )
 
     val pkCol: Column =
@@ -25,7 +24,7 @@ class PkStoreTest extends FunSuite {
 
     val schemaInfo: SchemaInfo =
       new SchemaInfo(
-        tablesByName = Map.empty,
+        tables = Seq.empty,
         keyColumnsByTableOrdered = Map.empty,
         dataColumnsByTableOrdered = Map.empty,
         pksByTable = Map(table -> new PrimaryKey(Seq(pkCol))),

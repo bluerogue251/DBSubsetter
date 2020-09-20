@@ -21,7 +21,7 @@ private[db] object Sql {
       val selectColumns: Seq[Column] =
         sch.keyColumnsByTableOrdered(table)
 
-      (fk, table) -> makeQueryString(table, selectColumns, whereClause, sch)
+      (fk, table) -> makeQueryString(table, selectColumns, whereClause)
     }.toMap
   }
 
@@ -30,28 +30,33 @@ private[db] object Sql {
       Constants.dataCopyBatchSizes.map(batchSize => {
         val whereClause: String = makeCompositeWhereClause(primaryKey.columns, batchSize)
         val selectColumns: Seq[Column] = sch.dataColumnsByTableOrdered(table)
-        (table, batchSize) -> makeQueryString(table, selectColumns, whereClause, sch)
+        (table, batchSize) -> makeQueryString(table, selectColumns, whereClause)
       })
     }
   }
 
   def insertSqlTemplates(sch: SchemaInfo): Map[Table, SqlQuery] = {
-    sch.tablesByName.map { case (_, table) =>
-      val cols = sch.dataColumnsByTableOrdered(table)
+    sch.tables.map { case TableWithAutoincrementMetadata(table, hasSqlServerAutoIncrement) =>
+      val cols =
+        sch.dataColumnsByTableOrdered(table)
+
       val sqlString =
         s"""insert into ${quote(table)}
            |${cols.map(quote).mkString("(", ",", ")")}
            |values ${(1 to cols.size).map(_ => '?').mkString("(", ",", ")")}""".stripMargin
-      val sqlStringAccountingForMsSqlServer = if (table.hasSqlServerAutoIncrement) {
-        s"SET IDENTITY_INSERT [${table.schema}].[${table.name}] ON;\n" + sqlString
-      } else {
-        sqlString
-      }
+
+      val sqlStringAccountingForMsSqlServer =
+        if (hasSqlServerAutoIncrement) {
+          s"SET IDENTITY_INSERT [${table.schema.name}].[${table.name}] ON;\n" + sqlString
+        } else {
+          sqlString
+        }
+
       table -> sqlStringAccountingForMsSqlServer
-    }
+    }.toMap
   }
 
-  def makeQueryString(table: Table, selectColumns: Seq[Column], whereClause: WhereClause, sch: SchemaInfo): SqlQuery = {
+  def makeQueryString(table: Table, selectColumns: Seq[Column], whereClause: WhereClause): SqlQuery = {
     val selectClause: String =
       selectColumns.map(quoteFullyQualified).mkString(", ")
 
@@ -75,7 +80,7 @@ private[db] object Sql {
   }
 
   private def quoteFullyQualified(col: Column): String = {
-    s""""${col.table.schema}"."${col.table.name}"."${col.name}""""
+    s""""${col.table.schema.name}"."${col.table.name}"."${col.name}""""
   }
 
   private def quote(col: Column): String = {
@@ -83,6 +88,6 @@ private[db] object Sql {
   }
 
   private def quote(table: Table): String = {
-    s""""${table.schema}"."${table.name}""""
+    s""""${table.schema.name}"."${table.name}""""
   }
 }
