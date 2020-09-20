@@ -16,8 +16,8 @@ private[db] object DbMetadataQueries {
 
     val tables = ArrayBuffer.empty[TableQueryRow]
     val columns = ArrayBuffer.empty[ColumnQueryRow]
-    val pks = ArrayBuffer.empty[PrimaryKeyQueryRow]
-    val fks = ArrayBuffer.empty[ForeignKeyQueryRow]
+    val pks = ArrayBuffer.empty[PrimaryKeyColumnQueryRow]
+    val fks = ArrayBuffer.empty[ForeignKeyColumnQueryRow]
 
     //
     // Get all tables for configured schemas
@@ -75,7 +75,7 @@ private[db] object DbMetadataQueries {
         }
 
       while (pksJdbcResultSet.next()) {
-        pks += PrimaryKeyQueryRow(
+        pks += PrimaryKeyColumnQueryRow(
           table.schema,
           table.name,
           pksJdbcResultSet.getString("COLUMN_NAME")
@@ -111,7 +111,7 @@ private[db] object DbMetadataQueries {
         val toColumn = foreignKeysJdbcResultSet.getString("PKCOLUMN_NAME")
 
         if (!config.excludeTables.contains((fromSchema, fromTable)) && !config.excludeTables.contains((toSchema, toTable))) {
-          fks += ForeignKeyQueryRow(fromSchema, fromTable, fromColumn, toSchema, toTable, toColumn)
+          fks += ForeignKeyColumnQueryRow(fromSchema, fromTable, fromColumn, toSchema, toTable, toColumn)
         }
       }
     }
@@ -148,36 +148,36 @@ private[db] object DbMetadataQueries {
 private[db] case class DbMetadataQueryResult(
     tables: Vector[TableQueryRow],
     columns: Vector[ColumnQueryRow],
-    pks: Vector[PrimaryKeyQueryRow],
-    fks: Vector[ForeignKeyQueryRow],
+    pks: Vector[PrimaryKeyColumnQueryRow],
+    fks: Vector[ForeignKeyColumnQueryRow],
     vendor: DbVendor
 )
 
 private[this] case class TableQueryRow(
-    schema: Schema,
-    name: TableName
+    schema: String,
+    name: String
 )
 
 private[this] case class ColumnQueryRow(
-    schema: Schema,
-    table: TableName,
-    name: ColumnName,
+    schema: String,
+    table: String,
+    name: String,
     jdbcType: JDBCType,
     typeName: String,
     isSqlServerAutoincrement: Boolean
 )
 
-private[this] case class PrimaryKeyQueryRow(
-    schema: Schema,
-    table: TableName,
-    column: ColumnName
+private[this] case class PrimaryKeyColumnQueryRow(
+    schema: String,
+    table: String,
+    column: String
 )
 
-private[this] case class ForeignKeyQueryRow(
-    fromSchema: Schema,
-    fromTable: TableName,
-    fromColumn: ColumnName,
-    toSchema: Schema,
-    toTable: TableName,
-    toColumn: ColumnName
+private[this] case class ForeignKeyColumnQueryRow(
+    fromSchema: String,
+    fromTable: String,
+    fromColumn: String,
+    toSchema: String,
+    toTable: String,
+    toColumn: String
 )

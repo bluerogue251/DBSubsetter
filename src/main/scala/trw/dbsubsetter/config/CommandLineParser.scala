@@ -48,7 +48,7 @@ object CommandLineParser {
         val r = """^\s*(.+)\.(.+)\s+:::\s+(.+)\s+:::\s+(includeChildren|excludeChildren)\s*$""".r
         bq match {
           case r(schemaName, tableName, whereClause, includeChildren) =>
-            val table = normalizedTable(schemaName, tableName)
+            val table = normalizeTable(schemaName, tableName)
             val baseQuery = CmdLineBaseQuery(table, whereClause.trim, includeChildren == "includeChildren")
             c.copy(baseQueries = c.baseQueries :+ baseQuery)
           case _ => throw new RuntimeException()
@@ -93,8 +93,8 @@ object CommandLineParser {
 
         fk match {
           case regex(fromSchemaName, fromTableName, fromCols, toSchemaName, toTableName, toCols) =>
-            val fromTable = normalizedTable(fromSchemaName, fromTableName)
-            val toTable = normalizedTable(toSchemaName, toTableName)
+            val fromTable = normalizeTable(fromSchemaName, fromTableName)
+            val toTable = normalizeTable(toSchemaName, toTableName)
             val fk = CmdLineForeignKey(fromTable, trimCsvs(fromCols), toTable, trimCsvs(toCols))
             c.copy(cmdLineForeignKeys = fk :: c.cmdLineForeignKeys)
           case _ => throw new RuntimeException()
@@ -112,7 +112,7 @@ object CommandLineParser {
         val regex = """^\s*(.+)\.(.+)\((.+)\)\s*$""".r
         fk match {
           case regex(schemaName, tableName, cols) =>
-            val table = normalizedTable(schemaName, tableName)
+            val table = normalizeTable(schemaName, tableName)
             val cmdLinePrimaryKey = CmdLinePrimaryKey(table, trimCsvs(cols))
             c.copy(cmdLinePrimaryKeys = c.cmdLinePrimaryKeys :+ cmdLinePrimaryKey)
           case _ => throw new RuntimeException()
@@ -130,7 +130,7 @@ object CommandLineParser {
         val regex = """^\s*(.+)\.(.+)\s*$""".r
         str match {
           case regex(schemaName, tableName) =>
-            val table = normalizedTable(schemaName, tableName)
+            val table = normalizeTable(schemaName, tableName)
             c.copy(excludeTables = c.excludeTables + table)
           case _ => throw new RuntimeException
         }
@@ -148,7 +148,7 @@ object CommandLineParser {
         val regex = """^\s*(.+)\.(.+)\((.+)\)\s*$""".r
         ic match {
           case regex(schemaName, tableName, cols) =>
-            val table = normalizedTable(schemaName, tableName)
+            val table = normalizeTable(schemaName, tableName)
             val alreadyExcluded = c.excludeColumns(table)
             val newlyExcluded = trimCsvs(cols).toSet
             c.copy(excludeColumns = c.excludeColumns.updated((schemaName.trim, tableName.trim), alreadyExcluded ++ newlyExcluded))
@@ -266,7 +266,7 @@ object CommandLineParser {
     note(usageExamples)
   }
 
-  private def normalizedTable(schemaName: String, tableName: String): Table = {
+  private def normalizeTable(schemaName: String, tableName: String): Table = {
     val schema = Schema(schemaName.trim)
     Table(schema = schema, name = tableName.trim, hasSqlServerAutoIncrement = false)
   }
