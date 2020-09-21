@@ -37,13 +37,13 @@ object SchemaInfoRetrieval {
             TableWithAutoincrementMetadata(table, hasSqlServerAutoincrement)
           }
 
-    val colsByTableAndName: Map[Table, Map[XColumn, Column]] = {
+    val colsByTableAndName: Map[Table, Map[Column, Column]] = {
       dbMetadata
         .columns
         .map { columnQueryRow =>
           val schema = Schema(columnQueryRow.schema)
           val table = Table(schema, columnQueryRow.table)
-          XColumn(table, columnQueryRow.name)
+          Column(table, columnQueryRow.name)
         }
         .filterNot(config.excludeColumns)
         .filterNot(column => config.excludeTables.contains(column.table))

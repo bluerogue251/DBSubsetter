@@ -3,7 +3,7 @@ package trw.dbsubsetter.config
 import java.io.File
 
 import scopt.OptionParser
-import trw.dbsubsetter.db.{Schema, Table, WhereClause, XColumn}
+import trw.dbsubsetter.db.{Schema, Table}
 
 
 object CommandLineParser {
@@ -272,28 +272,33 @@ object CommandLineParser {
     Table(schema = schema, name = tableName.trim)
   }
 
-  private def normalizeColumns(table: Table, untrimmedColumnCsvs: String): Seq[XColumn] = {
+  private def normalizeColumns(table: Table, untrimmedColumnCsvs: String): Seq[CmdLineColumn] = {
     untrimmedColumnCsvs
       .split(",")
       .map(_.trim)
-      .map(columnName => XColumn(table, columnName))
+      .map(columnName => CmdLineColumn(table, columnName))
   }
 }
 
 case class CmdLineBaseQuery(
     table: Table,
-    whereClause: WhereClause,
+    whereClause: String,
     includeChildren: Boolean
 )
 
 case class CmdLineForeignKey(
     fromTable: Table,
-    fromColumns: Seq[XColumn],
+    fromColumns: Seq[CmdLineColumn],
     toTable: Table,
-    toColumns: Seq[XColumn]
+    toColumns: Seq[CmdLineColumn]
 )
 
 case class CmdLinePrimaryKey(
     table: Table,
-    columns: Seq[XColumn]
+    columns: Seq[CmdLineColumn]
+)
+
+case class CmdLineColumn(
+  table: Table,
+  name: String
 )

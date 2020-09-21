@@ -2,7 +2,7 @@ package trw.dbsubsetter.config
 
 import java.io.File
 
-import trw.dbsubsetter.db.{Schema, Table, XColumn}
+import trw.dbsubsetter.db.{Schema, Table}
 
 
 case class Config(
@@ -15,7 +15,7 @@ case class Config(
     extraForeignKeys: Set[CmdLineForeignKey] = Set.empty,
     extraPrimaryKeys: Set[CmdLinePrimaryKey] = Set.empty,
     excludeTables: Set[Table] = Set.empty,
-    excludeColumns: Set[XColumn] = Set.empty,
+    excludeColumns: Set[CmdLineColumn] = Set.empty,
     tempfileStorageDirectoryOverride: Option[File] = None,
     singleThreadDebugMode: Boolean = false,
     exposeMetrics: Boolean = false

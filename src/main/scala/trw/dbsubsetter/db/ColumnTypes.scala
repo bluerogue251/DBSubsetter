@@ -17,7 +17,7 @@ object ColumnTypes {
   case object Uuid extends ColumnType
   case class Unknown(description: String) extends ColumnType
 
-  def fromRawInfo(jdbcType: JDBCType, typeName: TypeName, vendor: DbVendor): ColumnType = {
+  def fromRawInfo(jdbcType: JDBCType, typeName: String, vendor: DbVendor): ColumnType = {
     (jdbcType, typeName, vendor) match {
       case (JDBCType.TINYINT | JDBCType.SMALLINT, _, MicrosoftSQLServer) => ColumnTypes.Short
       case (JDBCType.INTEGER, "INT UNSIGNED", MySQL) => ColumnTypes.Long
