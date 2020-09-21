@@ -2,7 +2,7 @@ package trw.dbsubsetter.db
 
 import java.util.NoSuchElementException
 
-import trw.dbsubsetter.config.Config
+import trw.dbsubsetter.config.{CmdLineColumn, Config}
 import trw.dbsubsetter.db.ColumnTypes.ColumnType
 
 // scalastyle:off
@@ -37,17 +37,17 @@ object SchemaInfoRetrieval {
             TableWithAutoincrementMetadata(table, hasSqlServerAutoincrement)
           }
 
-    val colsByTableAndName: Map[Table, Map[Column, Column]] = {
+    val colsByTableAndName: Map[Table, Map[String, Column]] = {
       dbMetadata
         .columns
-        .map { columnQueryRow =>
+        .filterNot { columnQueryRow =>
           val schema = Schema(columnQueryRow.schema)
           val table = Table(schema, columnQueryRow.table)
-          Column(table, columnQueryRow.name)
+          val cmdLineColumn = CmdLineColumn(table, columnQueryRow.name)
+          config.excludeColumns.contains(cmdLineColumn)
         }
-        .filterNot(config.excludeColumns)
-        .filterNot(column => config.excludeTables.contains(column.table))
-        .groupBy(_.table)
+        .filter(c => tablesByName.contains((c.schema, c.table)))
+        .groupBy(c => tablesByName(c.schema, c.table))
         .map { case (table, cols) =>
           table -> cols.zipWithIndex.map { case (c, i) =>
             val columnType: ColumnType = ColumnTypes.fromRawInfo(c.jdbcType, c.typeName, dbMetadata.vendor)
@@ -84,7 +84,7 @@ object SchemaInfoRetrieval {
             .extraPrimaryKeys
             .map { cmdLinePrimaryKey =>
               val table = cmdLinePrimaryKey.table
-              val columnNames = cmdLinePrimaryKey.columns.toSet
+              val columnNames = cmdLinePrimaryKey.columns.map(_.name).toSet
               val orderedColumns = allColumnsByTableOrdered(table).filter(c => columnNames.contains(c.name))
               table -> new PrimaryKey(orderedColumns)
             }
@@ -104,10 +104,10 @@ object SchemaInfoRetrieval {
                   ForeignKeyColumnQueryRow(
                     efk.fromTable.schema.name,
                     efk.fromTable.name,
-                    fromColumn,
+                    fromColumn.name,
                     efk.toTable.schema.name,
                     efk.toTable.name,
-                    toColumn
+                    toColumn.name
                   )
                 }
             }
