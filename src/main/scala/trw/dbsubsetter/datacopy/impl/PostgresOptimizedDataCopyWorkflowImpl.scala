@@ -58,7 +58,7 @@ private[datacopy] final class PostgresOptimizedDataCopyWorkflowImpl(dbAccessFact
     val selectStatement: String =
       s"""
          | COPY (
-         |   select $allColumnNamesSql from "${dataCopyTask.table.schema.name}"."${dataCopyTask.table.name}"
+         |   select $allColumnNamesSql from "${dataCopyTask.table.schema}"."${dataCopyTask.table.name}"
          |   where $pkColumnNamesSql in ($allPkValuesSql)
          | )
          | TO STDOUT (FORMAT BINARY)
@@ -77,7 +77,7 @@ private[datacopy] final class PostgresOptimizedDataCopyWorkflowImpl(dbAccessFact
 
     val copyToTargetSql =
       s"""
-         | COPY "${dataCopyTask.table.schema.name}"."${dataCopyTask.table.name}"($allColumnNamesSql)
+         | COPY "${dataCopyTask.table.schema}"."${dataCopyTask.table.name}"($allColumnNamesSql)
          | FROM STDIN (FORMAT BINARY)
          | """.stripMargin
 
