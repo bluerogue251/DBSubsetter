@@ -4,7 +4,7 @@ import java.sql.{DriverManager, JDBCType}
 
 import scala.collection.mutable.ArrayBuffer
 
-// scalastyle:off
+
 object DbMetadataQueries {
   def retrieveSchemaMetadata(connectionString: String, schemas: Seq[Schema]): DbMetadataQueryResult = {
     val conn = DriverManager.getConnection(connectionString)
