@@ -3,12 +3,16 @@ package trw.dbsubsetter.datacopyqueue.impl
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.datacopyqueue.DataCopyQueue
 import trw.dbsubsetter.db.ColumnTypes.ColumnType
-import trw.dbsubsetter.db.{Constants, Keys, PrimaryKeyValue, SchemaInfo, Table}
+import trw.dbsubsetter.db.Constants
+import trw.dbsubsetter.db.Keys
+import trw.dbsubsetter.db.PrimaryKeyValue
+import trw.dbsubsetter.db.SchemaInfo
+import trw.dbsubsetter.db.Table
 import trw.dbsubsetter.keyextraction.KeyExtractionUtil
-import trw.dbsubsetter.workflow.{DataCopyTask, PksAdded}
+import trw.dbsubsetter.workflow.DataCopyTask
+import trw.dbsubsetter.workflow.PksAdded
 
 import scala.collection.mutable
-
 
 /**
   * WARNING: this class is not threadsafe
@@ -17,9 +21,11 @@ private[datacopyqueue] final class DataCopyQueueImpl(config: Config, schemaInfo:
 
   private[this] val tablesToQueuedValueCounts: mutable.Map[Table, Long] = {
     val elems: Seq[(Table, Long)] =
-      schemaInfo.
-        tables
-        .map { tableWithMetadata => tableWithMetadata.table -> 0L }
+      schemaInfo
+        .tables
+        .map { tableWithMetadata =>
+          tableWithMetadata.table -> 0L
+        }
 
     mutable.Map[Table, Long](elems: _*)
   }

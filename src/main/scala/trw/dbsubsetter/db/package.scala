@@ -57,6 +57,7 @@ package object db {
   ) {
     val fromTable: Table = fromCols.head.table
     val toTable: Table = toCols.head.table
+
     // TODO Refactor to remove mutability
     def setIndex(index: Short): Unit = {
       i = index
@@ -76,6 +77,7 @@ package object db {
 
   // Represents a single row from the origin database including only primary and foreign key columns
   class Keys(data: Array[Any]) {
+
     def getValue(pk: PrimaryKey): PrimaryKeyValue = {
       val individualColumnValues: Seq[Any] = pk.columns.map(_.keyOrdinalPosition).map(data)
       new PrimaryKeyValue(individualColumnValues)
@@ -87,6 +89,7 @@ package object db {
       val individualColumnValues: Seq[Any] = individualColumnOrdinals.map(data)
       new ForeignKeyValue(individualColumnValues)
     }
+
   }
 
   implicit class VendorAwareJdbcConnection(private val conn: Connection) {
@@ -102,4 +105,5 @@ package object db {
 
     def isMsSqlServer: Boolean = dbVendor == DbVendor.MicrosoftSQLServer
   }
+
 }

@@ -1,18 +1,24 @@
 package trw.dbsubsetter.datacopy.impl
 
-import java.io.{PipedInputStream, PipedOutputStream}
+import java.io.PipedInputStream
+import java.io.PipedOutputStream
 import java.util.UUID
 import java.util.concurrent.Executors
 
 import org.postgresql.copy.CopyManager
 import trw.dbsubsetter.datacopy.DataCopyWorkflow
-import trw.dbsubsetter.db.{Constants, DbAccessFactory, SchemaInfo}
+import trw.dbsubsetter.db.Constants
+import trw.dbsubsetter.db.DbAccessFactory
+import trw.dbsubsetter.db.SchemaInfo
 import trw.dbsubsetter.workflow.DataCopyTask
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
+import scala.concurrent.Future
 
-
-private[datacopy] final class PostgresOptimizedDataCopyWorkflowImpl(dbAccessFactory: DbAccessFactory, schemaInfo: SchemaInfo) extends DataCopyWorkflow {
+private[datacopy] final class PostgresOptimizedDataCopyWorkflowImpl(
+    dbAccessFactory: DbAccessFactory,
+    schemaInfo: SchemaInfo
+) extends DataCopyWorkflow {
 
   private[this] val originCopyManager: CopyManager =
     dbAccessFactory.buildOriginPostgresCopyManager()
@@ -30,9 +36,9 @@ private[datacopy] final class PostgresOptimizedDataCopyWorkflowImpl(dbAccessFact
 
     val allColumnNamesSql: String =
       schemaInfo
-      .dataColumnsByTableOrdered(dataCopyTask.table)
-      .map(col => s""""${col.name}"""")
-      .mkString(", ")
+        .dataColumnsByTableOrdered(dataCopyTask.table)
+        .map(col => s""""${col.name}"""")
+        .mkString(", ")
 
     val pkColumnNamesSql: String =
       schemaInfo

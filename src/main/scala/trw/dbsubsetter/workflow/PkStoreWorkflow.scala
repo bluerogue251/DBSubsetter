@@ -1,9 +1,14 @@
 package trw.dbsubsetter.workflow
 
-import trw.dbsubsetter.db.{Keys, PrimaryKeyValue, SchemaInfo, Table}
+import trw.dbsubsetter.db.Keys
+import trw.dbsubsetter.db.PrimaryKeyValue
+import trw.dbsubsetter.db.SchemaInfo
+import trw.dbsubsetter.db.Table
 import trw.dbsubsetter.keyextraction.KeyExtractionUtil
-import trw.dbsubsetter.primarykeystore.{AlreadySeenWithoutChildren, FirstTimeSeen, PrimaryKeyStore, WriteOutcome}
-
+import trw.dbsubsetter.primarykeystore.AlreadySeenWithoutChildren
+import trw.dbsubsetter.primarykeystore.FirstTimeSeen
+import trw.dbsubsetter.primarykeystore.PrimaryKeyStore
+import trw.dbsubsetter.primarykeystore.WriteOutcome
 
 final class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
 
@@ -35,7 +40,7 @@ final class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
         val pkValue: PrimaryKeyValue = pkValueExtractionFunction(row)
         pkStore.markSeen(table, pkValue) match {
           case FirstTimeSeen => true
-          case _ => false
+          case _             => false
         }
       })
       PksAdded(table, newRows, Vector.empty, viaTableOpt)
@@ -46,6 +51,7 @@ final class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
 private[this] object PkStoreWorkflow {
 
   private val EmptyMap: Map[WriteOutcome, Vector[Keys]] =
-    Map.empty[WriteOutcome, Vector[Keys]]
+    Map
+      .empty[WriteOutcome, Vector[Keys]]
       .withDefaultValue(Vector.empty[Keys])
 }

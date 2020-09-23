@@ -2,8 +2,8 @@ package trw.dbsubsetter.config
 
 import java.io.File
 
-import trw.dbsubsetter.db.{Schema, Table}
-
+import trw.dbsubsetter.db.Schema
+import trw.dbsubsetter.db.Table
 
 case class Config(
     schemas: Seq[Schema] = Seq.empty,

@@ -1,9 +1,9 @@
 package trw.dbsubsetter.primarykeystore.impl
 
-import trw.dbsubsetter.db.{PrimaryKeyValue, Table}
+import trw.dbsubsetter.db.PrimaryKeyValue
+import trw.dbsubsetter.db.Table
 import trw.dbsubsetter.metrics.Metrics
 import trw.dbsubsetter.primarykeystore._
-
 
 private[primarykeystore] final class InstrumentedPrimaryKeyStore(delegatee: PrimaryKeyStore) extends PrimaryKeyStore {
 
@@ -25,7 +25,7 @@ private[primarykeystore] final class InstrumentedPrimaryKeyStore(delegatee: Prim
 
     writeOutcome match {
       case FirstTimeSeen =>
-      case _ => duplicateOriginDbRowsDiscarded.inc()
+      case _             => duplicateOriginDbRowsDiscarded.inc()
     }
 
     writeOutcome
@@ -39,7 +39,7 @@ private[primarykeystore] final class InstrumentedPrimaryKeyStore(delegatee: Prim
 
     writeOutcome match {
       case FirstTimeSeen =>
-      case _ => duplicateOriginDbRowsDiscarded.inc()
+      case _             => duplicateOriginDbRowsDiscarded.inc()
     }
 
     writeOutcome
@@ -55,4 +55,3 @@ private[primarykeystore] final class InstrumentedPrimaryKeyStore(delegatee: Prim
     alreadySeen
   }
 }
-

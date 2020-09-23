@@ -2,12 +2,17 @@ package trw.dbsubsetter
 
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.datacopy.DataCopyWorkflowFactory
-import trw.dbsubsetter.datacopyqueue.{DataCopyQueue, DataCopyQueueFactory}
-import trw.dbsubsetter.db.{DbAccessFactory, PrimaryKeyValue, SchemaInfo, Table}
-import trw.dbsubsetter.fktaskqueue.{ForeignKeyTaskQueue, ForeignKeyTaskQueueFactory}
-import trw.dbsubsetter.primarykeystore.{PrimaryKeyStore, PrimaryKeyStoreFactory}
+import trw.dbsubsetter.datacopyqueue.DataCopyQueue
+import trw.dbsubsetter.datacopyqueue.DataCopyQueueFactory
+import trw.dbsubsetter.db.DbAccessFactory
+import trw.dbsubsetter.db.PrimaryKeyValue
+import trw.dbsubsetter.db.SchemaInfo
+import trw.dbsubsetter.db.Table
+import trw.dbsubsetter.fktaskqueue.ForeignKeyTaskQueue
+import trw.dbsubsetter.fktaskqueue.ForeignKeyTaskQueueFactory
+import trw.dbsubsetter.primarykeystore.PrimaryKeyStore
+import trw.dbsubsetter.primarykeystore.PrimaryKeyStoreFactory
 import trw.dbsubsetter.workflow._
-
 
 class ApplicationSingleThreaded(config: Config, schemaInfo: SchemaInfo, baseQueries: Seq[BaseQuery]) {
 
@@ -60,7 +65,8 @@ class ApplicationSingleThreaded(config: Config, schemaInfo: SchemaInfo, baseQuer
       task match {
         case fetchParentTask: FetchParentTask if FkTaskPreCheck.shouldPrecheck(fetchParentTask) =>
           val tableToCheck: Table = fetchParentTask.fk.toTable
-          val primaryKeyValueToCheck: PrimaryKeyValue = new PrimaryKeyValue(fetchParentTask.fkValueFromChild.individualColumnValues)
+          val primaryKeyValueToCheck: PrimaryKeyValue =
+            new PrimaryKeyValue(fetchParentTask.fkValueFromChild.individualColumnValues)
           pkStore.alreadySeen(tableToCheck, primaryKeyValueToCheck)
         case _ => false
       }

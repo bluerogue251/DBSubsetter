@@ -3,7 +3,9 @@ package trw.dbsubsetter.chronicle
 import java.math.BigInteger
 import java.util.UUID
 
-import net.openhft.chronicle.wire.{ValueIn, ValueOut, WireOut}
+import net.openhft.chronicle.wire.ValueIn
+import net.openhft.chronicle.wire.ValueOut
+import net.openhft.chronicle.wire.WireOut
 import trw.dbsubsetter.db.ColumnTypes
 import trw.dbsubsetter.db.ColumnTypes.ColumnType
 

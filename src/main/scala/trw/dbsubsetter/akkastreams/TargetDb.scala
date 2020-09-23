@@ -3,7 +3,8 @@ package trw.dbsubsetter.akkastreams
 import akka.NotUsed
 import akka.stream.scaladsl.Flow
 import trw.dbsubsetter.datacopy.DataCopyWorkflowFactory
-import trw.dbsubsetter.db.{DbAccessFactory, SchemaInfo}
+import trw.dbsubsetter.db.DbAccessFactory
+import trw.dbsubsetter.db.SchemaInfo
 import trw.dbsubsetter.workflow._
 
 private[akkastreams] object TargetDb {

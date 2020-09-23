@@ -1,9 +1,9 @@
 package trw.dbsubsetter.db
 
-import java.sql.{DriverManager, JDBCType}
+import java.sql.DriverManager
+import java.sql.JDBCType
 
 import scala.collection.mutable.ArrayBuffer
-
 
 object DbMetadataQueries {
   def retrieveSchemaMetadata(connectionString: String, schemas: Seq[Schema]): DbMetadataQueryResult = {
@@ -88,11 +88,21 @@ object DbMetadataQueries {
         }
 
       while (foreignKeysJdbcResultSet.next()) {
-        val fromSchema = if (conn.isMysql) foreignKeysJdbcResultSet.getString("FKTABLE_CAT") else foreignKeysJdbcResultSet.getString("FKTABLE_SCHEM")
+        val fromSchema =
+          if (conn.isMysql)
+            foreignKeysJdbcResultSet.getString("FKTABLE_CAT")
+          else
+            foreignKeysJdbcResultSet.getString("FKTABLE_SCHEM")
+
         val fromTable = foreignKeysJdbcResultSet.getString("FKTABLE_NAME")
         val fromColumn = foreignKeysJdbcResultSet.getString("FKCOLUMN_NAME")
 
-        val toSchema = if (conn.isMysql) foreignKeysJdbcResultSet.getString("PKTABLE_CAT") else foreignKeysJdbcResultSet.getString("PKTABLE_SCHEM")
+        val toSchema =
+          if (conn.isMysql)
+            foreignKeysJdbcResultSet.getString("PKTABLE_CAT")
+          else
+            foreignKeysJdbcResultSet.getString("PKTABLE_SCHEM")
+
         val toTable = foreignKeysJdbcResultSet.getString("PKTABLE_NAME")
         val toColumn = foreignKeysJdbcResultSet.getString("PKCOLUMN_NAME")
         foreignKeyColumns += ForeignKeyColumnQueryRow(fromSchema, fromTable, fromColumn, toSchema, toTable, toColumn)

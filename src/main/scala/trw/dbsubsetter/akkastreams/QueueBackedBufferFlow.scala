@@ -3,7 +3,6 @@ package trw.dbsubsetter.akkastreams
 import akka.stream._
 import akka.stream.stage._
 
-
 /**
   * Partially adapted from https://github.com/torodb/akka-chronicle-queue
   * Refer to akka.stream.impl.fusing.Buffer for onUpstreamFinish logic

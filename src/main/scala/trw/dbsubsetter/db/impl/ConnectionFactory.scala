@@ -1,11 +1,11 @@
 package trw.dbsubsetter.db.impl
 
-import java.sql.{Connection, DriverManager}
+import java.sql.Connection
+import java.sql.DriverManager
 
 import trw.dbsubsetter.db.DbVendor
 
 import scala.collection.mutable
-
 
 /**
   * WARNING: this class is not threadsafe

@@ -2,8 +2,11 @@ package trw.dbsubsetter
 
 import io.prometheus.client.exporter.HTTPServer
 import io.prometheus.client.hotspot.DefaultExports
-import trw.dbsubsetter.config.{CommandLineParser, Config}
-import trw.dbsubsetter.db.{BaseQueries, DbMetadataQueries, SchemaInfoRetrieval}
+import trw.dbsubsetter.config.CommandLineParser
+import trw.dbsubsetter.config.Config
+import trw.dbsubsetter.db.BaseQueries
+import trw.dbsubsetter.db.DbMetadataQueries
+import trw.dbsubsetter.db.SchemaInfoRetrieval
 import trw.dbsubsetter.util.Util
 
 /**
@@ -11,7 +14,7 @@ import trw.dbsubsetter.util.Util
   * call this object rather than calling the real Application object. This is because
   * the real Application object appears to have some non-threadsafe behavior which
   * can cause tests to fail nondeterministically when executed in parallel.
- */
+  */
 object ApplicationRunner {
   def run(args: Array[String]): Unit = {
     val startingTime = System.nanoTime()

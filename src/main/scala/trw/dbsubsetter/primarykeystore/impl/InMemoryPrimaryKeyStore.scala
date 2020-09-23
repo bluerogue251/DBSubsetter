@@ -1,10 +1,11 @@
 package trw.dbsubsetter.primarykeystore.impl
 
-import trw.dbsubsetter.db.{PrimaryKeyValue, SchemaInfo, Table}
+import trw.dbsubsetter.db.PrimaryKeyValue
+import trw.dbsubsetter.db.SchemaInfo
+import trw.dbsubsetter.db.Table
 import trw.dbsubsetter.primarykeystore._
 
 import scala.collection.mutable
-
 
 /**
   * WARNING: this class is not threadsafe
@@ -65,9 +66,7 @@ private[primarykeystore] final class InMemoryPrimaryKeyStore(schemaInfo: SchemaI
 
   override def alreadySeen(table: Table, primaryKeyValue: PrimaryKeyValue): Boolean = {
     val rawValue: Any = InMemoryPrimaryKeyStore.extract(primaryKeyValue)
-
-    seenWithChildrenStorage(table).contains(rawValue) ||
-      seenWithoutChildrenStorage(table).contains(rawValue)
+    seenWithChildrenStorage(table).contains(rawValue) || seenWithoutChildrenStorage(table).contains(rawValue)
   }
 }
 

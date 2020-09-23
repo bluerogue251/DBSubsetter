@@ -6,9 +6,13 @@ import org.postgresql.copy.CopyManager
 import org.postgresql.core.BaseConnection
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.impl.ConnectionFactory
-import trw.dbsubsetter.db.impl.mapper.{JdbcResultConverter, JdbcResultConverterImpl, JdbcResultConverterTimed}
-import trw.dbsubsetter.db.impl.origin.{InstrumentedOriginDbAccess, OriginDbAccessImpl}
-import trw.dbsubsetter.db.impl.target.{InstrumentedTargetDbAccess, TargetDbAccessImpl}
+import trw.dbsubsetter.db.impl.mapper.JdbcResultConverter
+import trw.dbsubsetter.db.impl.mapper.JdbcResultConverterImpl
+import trw.dbsubsetter.db.impl.mapper.JdbcResultConverterTimed
+import trw.dbsubsetter.db.impl.origin.InstrumentedOriginDbAccess
+import trw.dbsubsetter.db.impl.origin.OriginDbAccessImpl
+import trw.dbsubsetter.db.impl.target.InstrumentedTargetDbAccess
+import trw.dbsubsetter.db.impl.target.TargetDbAccessImpl
 
 final class DbAccessFactory(config: Config, schemaInfo: SchemaInfo) {
 
@@ -41,7 +45,7 @@ final class DbAccessFactory(config: Config, schemaInfo: SchemaInfo) {
       new TargetDbAccessImpl(config.targetDbConnectionString, schemaInfo, connectionFactory)
 
     if (config.exposeMetrics) {
-       targetDbAccess = new InstrumentedTargetDbAccess(targetDbAccess)
+      targetDbAccess = new InstrumentedTargetDbAccess(targetDbAccess)
     }
 
     targetDbAccess

@@ -3,7 +3,6 @@ package trw.dbsubsetter.workflow
 import trw.dbsubsetter.db._
 import trw.dbsubsetter.keyextraction.KeyExtractionUtil
 
-
 final class FkTaskCreationWorkflow(schemaInfo: SchemaInfo) {
 
   private[this] val fkExtractionFunctions: Map[(ForeignKey, Boolean), Keys => ForeignKeyValue] =
@@ -24,7 +23,8 @@ final class FkTaskCreationWorkflow(schemaInfo: SchemaInfo) {
      * parent tasks, not child tasks.
      */
     val allForeignKeys = schemaInfo.fksFromTable(table)
-    val useForeignKeys = viaTableOpt.fold(allForeignKeys)(viaTable => allForeignKeys.filterNot(fk => fk.toTable == viaTable))
+    val useForeignKeys =
+      viaTableOpt.fold(allForeignKeys)(viaTable => allForeignKeys.filterNot(fk => fk.toTable == viaTable))
     useForeignKeys.flatMap { foreignKey =>
       val extractionFunction: Keys => ForeignKeyValue = fkExtractionFunctions(foreignKey, false)
       val fkValues: Seq[ForeignKeyValue] = rows.map(extractionFunction).filterNot(_.isEmpty)
@@ -40,4 +40,5 @@ final class FkTaskCreationWorkflow(schemaInfo: SchemaInfo) {
       fkValues.map(fkValue => FetchChildrenTask(foreignKey, fkValue))
     }
   }
+
 }

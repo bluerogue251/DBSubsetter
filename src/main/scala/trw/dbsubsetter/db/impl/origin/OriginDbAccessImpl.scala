@@ -4,10 +4,23 @@ import java.sql.PreparedStatement
 
 import trw.dbsubsetter.db.impl.ConnectionFactory
 import trw.dbsubsetter.db.impl.mapper.JdbcResultConverter
-import trw.dbsubsetter.db.{ForeignKey, ForeignKeyValue, Keys, OriginDbAccess, PrimaryKeyValue, Row, SchemaInfo, Sql, SqlQuery, Table}
+import trw.dbsubsetter.db.ForeignKey
+import trw.dbsubsetter.db.ForeignKeyValue
+import trw.dbsubsetter.db.Keys
+import trw.dbsubsetter.db.OriginDbAccess
+import trw.dbsubsetter.db.PrimaryKeyValue
+import trw.dbsubsetter.db.Row
+import trw.dbsubsetter.db.SchemaInfo
+import trw.dbsubsetter.db.Sql
+import trw.dbsubsetter.db.SqlQuery
+import trw.dbsubsetter.db.Table
 
-
-private[db] class OriginDbAccessImpl(connStr: String, sch: SchemaInfo, mapper: JdbcResultConverter, connectionFactory: ConnectionFactory) extends OriginDbAccess {
+private[db] class OriginDbAccessImpl(
+    connStr: String,
+    sch: SchemaInfo,
+    mapper: JdbcResultConverter,
+    connectionFactory: ConnectionFactory
+) extends OriginDbAccess {
 
   private[this] val conn = connectionFactory.getReadOnlyConnection(connStr)
 

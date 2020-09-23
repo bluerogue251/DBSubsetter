@@ -3,7 +3,8 @@ package trw.dbsubsetter.chronicle
 import java.nio.file.Files
 
 import net.openhft.chronicle.queue.RollCycles
-import net.openhft.chronicle.queue.impl.single.{SingleChronicleQueue, SingleChronicleQueueBuilder}
+import net.openhft.chronicle.queue.impl.single.SingleChronicleQueue
+import net.openhft.chronicle.queue.impl.single.SingleChronicleQueueBuilder
 import trw.dbsubsetter.config.Config
 
 object ChronicleQueueFactory {
@@ -12,7 +13,7 @@ object ChronicleQueueFactory {
     val storageDir =
       config.tempfileStorageDirectoryOverride match {
         case Some(dir) => dir.toPath
-        case None => Files.createTempDirectory("DBSubsetter-")
+        case None      => Files.createTempDirectory("DBSubsetter-")
       }
 
     SingleChronicleQueueBuilder
