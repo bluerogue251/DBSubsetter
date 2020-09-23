@@ -52,7 +52,7 @@ private[db] object Sql {
           sqlString
         }
 
-      table -> sqlStringAccountingForMsSqlServer
+      table -> SqlQuery(sqlStringAccountingForMsSqlServer)
     }.toMap
   }
 
@@ -60,10 +60,13 @@ private[db] object Sql {
     val selectClause: String =
       selectColumns.map(quoteFullyQualified).mkString(", ")
 
-    s"""select $selectClause
+    val query =
+      s"""select $selectClause
        | from ${quote(table)}
        | where $whereClause
        | """.stripMargin
+
+    SqlQuery(query)
   }
 
   private def makeSimpleWhereClause(columns: Seq[Column]): String = {

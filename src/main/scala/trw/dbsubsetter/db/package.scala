@@ -10,7 +10,8 @@ package object db {
 
   case class Table(schema: Schema, name: String)
 
-  type SqlQuery = String
+  case class SqlQuery(value: String)
+
   type ForeignKeySqlTemplates = Map[(ForeignKey, Table), SqlQuery]
   type PrimaryKeySqlTemplates = Map[(Table, Short), SqlQuery]
 
