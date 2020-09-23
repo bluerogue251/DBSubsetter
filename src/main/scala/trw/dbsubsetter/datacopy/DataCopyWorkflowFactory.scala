@@ -8,7 +8,7 @@ object DataCopyWorkflowFactory {
   def build(dbAccessFactory: DbAccessFactory, schemaInfo: SchemaInfo): DataCopyWorkflow = {
     dbAccessFactory.getDbVendor() match {
       case DbVendor.PostgreSQL => new PostgresOptimizedDataCopyWorkflowImpl(dbAccessFactory, schemaInfo)
-      case _ => new GenericDataCopyWorkflowImpl(dbAccessFactory)
+      case _                   => new GenericDataCopyWorkflowImpl(dbAccessFactory)
     }
   }
 }

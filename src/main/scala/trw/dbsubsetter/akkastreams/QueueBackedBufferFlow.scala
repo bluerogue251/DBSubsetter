@@ -9,7 +9,7 @@ import akka.stream.stage._
   * Relevant docs: https://doc.akka.io/docs/akka/current/stream/stream-customize.html
   */
 private[akkastreams] final class QueueBackedBufferFlow[T, U](backingQueue: TransformingQueue[T, U])
-  extends GraphStage[FlowShape[T, U]] {
+    extends GraphStage[FlowShape[T, U]] {
 
   private[this] val in: Inlet[T] = Inlet.create[T]("QueueBackedBufferFlow.in")
 

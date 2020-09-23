@@ -15,7 +15,11 @@ final class FkTaskCreationWorkflow(schemaInfo: SchemaInfo) {
     parentTasks ++ childTasks
   }
 
-  private[this] def calcParentTasks(table: Table, rows: Vector[Keys], viaTableOpt: Option[Table]): IndexedSeq[ForeignKeyTask] = {
+  private[this] def calcParentTasks(
+      table: Table,
+      rows: Vector[Keys],
+      viaTableOpt: Option[Table]
+  ): IndexedSeq[ForeignKeyTask] = {
     /*
      * Re: `viaTableOpt`, if we know that the reason we fetched a row to begin with is that it is the child of some row
      * we've already fetched, then we know that we don't need to go fetch that particular parent row again. This only
