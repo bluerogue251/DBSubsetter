@@ -23,7 +23,6 @@ private[datacopy] final class PostgresOptimizedDataCopyWorkflowImpl(dbAccessFact
   private[this] val copyOutExecutionContext: ExecutionContext =
     ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(2))
 
-  // scalastyle:off
   def process(dataCopyTask: DataCopyTask): Unit = {
     if (!Constants.dataCopyBatchSizes.contains(dataCopyTask.pkValues.size)) {
       throw new IllegalArgumentException(s"Unsupported data copy batch size: ${dataCopyTask.pkValues.size}")
@@ -86,7 +85,6 @@ private[datacopy] final class PostgresOptimizedDataCopyWorkflowImpl(dbAccessFact
     targetCopyManager.copyIn(copyToTargetSql, targetWriteStream, bufferSizeInBytes)
     targetWriteStream.close()
   }
-  // scalastyle:on
 
   private[this] def quote(value: Any): String = {
     if (value.isInstanceOf[UUID] || value.isInstanceOf[String]) {

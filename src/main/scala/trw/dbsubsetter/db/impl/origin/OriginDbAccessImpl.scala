@@ -7,10 +7,7 @@ import trw.dbsubsetter.db.impl.mapper.JdbcResultConverter
 import trw.dbsubsetter.db.{ForeignKey, ForeignKeyValue, Keys, OriginDbAccess, PrimaryKeyValue, Row, SchemaInfo, Sql, SqlQuery, Table}
 
 
-// TODO fix this so the line is shorter and re-enable scalastyle
-// scalastyle:off
 private[db] class OriginDbAccessImpl(connStr: String, sch: SchemaInfo, mapper: JdbcResultConverter, connectionFactory: ConnectionFactory) extends OriginDbAccess {
-// scalastyle:on
 
   private[this] val conn = connectionFactory.getReadOnlyConnection(connStr)
 
