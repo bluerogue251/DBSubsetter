@@ -12,8 +12,9 @@ package object db {
 
   case class SqlQuery(value: String)
 
-  type ForeignKeySqlTemplates = Map[(ForeignKey, Table), SqlQuery]
-  type PrimaryKeySqlTemplates = Map[(Table, Short), SqlQuery]
+  case class ForeignKeySqlTemplates(data: Map[(ForeignKey, Table), SqlQuery])
+
+  case class PrimaryKeySqlTemplates(data: Map[(Table, Short), SqlQuery])
 
   class SchemaInfo(
       val tables: Seq[TableWithAutoincrementMetadata],
