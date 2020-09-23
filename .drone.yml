@@ -1,7 +1,8 @@
 ---
+
 # Whenever this file is modified, we must re-sign it for Drone:
 # $ drone sign bluerogue251/DBSubsetter --save
----
+
 kind: pipeline
 type: docker
 name: default
@@ -78,6 +79,6 @@ steps:
 
 ---
 kind: signature
-hmac: a9e93667b9af8ff5f83c846c4610fec0f0f58684c5965b26acf44efac593f5a0
+hmac: 6ebd6b7ed6308914b200559fd9f835cf7e1036d0c00f83f6d4e2af3e731bd0b7
 
 ...
