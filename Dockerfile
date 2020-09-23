@@ -1,3 +1,10 @@
+# Currently on version 7. To build and publish version 8, use:
+#
+# $ docker build --tag bluerogue251/db-subsetter-ci:8 .
+# $ docker push bluerogue251/db-subsetter-ci:8
+#
+# Then update .drone.yml from db-subsetter-ci:7 --> db-subsetter-ci:8
+
 FROM openjdk:8-jdk-stretch
 
 RUN apt-get update

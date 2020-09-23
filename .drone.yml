@@ -37,27 +37,27 @@ services:
 
 steps:
   - name: code_style_check
-    image: bluerogue251/db-subsetter-ci:6
+    image: bluerogue251/db-subsetter-ci:7
     commands:
       - sbt scalafmtCheckAll
 
   - name: compile
-    image: bluerogue251/db-subsetter-ci:6
+    image: bluerogue251/db-subsetter-ci:7
     commands:
       - sbt compile test:compile
 
   - name: unit_tests
-    image: bluerogue251/db-subsetter-ci:6
+    image: bluerogue251/db-subsetter-ci:7
     commands:
       - sbt "testOnly unit.*"
 
   - name: integration_tests
-    image: bluerogue251/db-subsetter-ci:6
+    image: bluerogue251/db-subsetter-ci:7
     commands:
       - sbt "testOnly integration.*"
 
   - name: end_to_end_tests
-    image: bluerogue251/db-subsetter-ci:6
+    image: bluerogue251/db-subsetter-ci:7
     environment:
       DB_SUBSETTER_POSTGRES_HOST: postgres
       DB_SUBSETTER_SQL_SERVER_HOST: sql_server
@@ -71,7 +71,7 @@ steps:
       - sbt "testOnly e2e.*"
 
   - name: load_test
-    image: bluerogue251/db-subsetter-ci:6
+    image: bluerogue251/db-subsetter-ci:7
     environment:
       DB_SUBSETTER_POSTGRES_HOST: postgres
     commands:
@@ -79,6 +79,6 @@ steps:
 
 ---
 kind: signature
-hmac: 6ebd6b7ed6308914b200559fd9f835cf7e1036d0c00f83f6d4e2af3e731bd0b7
+hmac: b690d82be9a7663c6150cf39e3e407fc83f41260020b2da64e5949989ca15ee5
 
 ...
