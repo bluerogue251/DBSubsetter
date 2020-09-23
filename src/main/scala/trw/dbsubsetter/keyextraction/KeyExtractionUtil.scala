@@ -1,11 +1,6 @@
 package trw.dbsubsetter.keyextraction
 
-import trw.dbsubsetter.db.ForeignKey
-import trw.dbsubsetter.db.ForeignKeyValue
-import trw.dbsubsetter.db.Keys
-import trw.dbsubsetter.db.PrimaryKeyValue
-import trw.dbsubsetter.db.SchemaInfo
-import trw.dbsubsetter.db.Table
+import trw.dbsubsetter.db.{ForeignKey, ForeignKeyValue, Keys, PrimaryKeyValue, SchemaInfo, Table}
 
 object KeyExtractionUtil {
 

@@ -1,7 +1,6 @@
 package trw.dbsubsetter.datacopyqueue
 
-import trw.dbsubsetter.workflow.DataCopyTask
-import trw.dbsubsetter.workflow.PksAdded
+import trw.dbsubsetter.workflow.{DataCopyTask, PksAdded}
 
 trait DataCopyQueue {
 

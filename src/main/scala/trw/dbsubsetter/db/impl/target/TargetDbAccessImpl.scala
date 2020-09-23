@@ -2,12 +2,8 @@ package trw.dbsubsetter.db.impl.target
 
 import java.sql.Connection
 
+import trw.dbsubsetter.db.{Row, SchemaInfo, Sql, Table, TargetDbAccess}
 import trw.dbsubsetter.db.impl.ConnectionFactory
-import trw.dbsubsetter.db.Row
-import trw.dbsubsetter.db.SchemaInfo
-import trw.dbsubsetter.db.Sql
-import trw.dbsubsetter.db.Table
-import trw.dbsubsetter.db.TargetDbAccess
 
 private[db] class TargetDbAccessImpl(connStr: String, sch: SchemaInfo, connectionFactory: ConnectionFactory)
     extends TargetDbAccess {

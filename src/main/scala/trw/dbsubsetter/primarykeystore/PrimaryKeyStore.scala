@@ -1,7 +1,6 @@
 package trw.dbsubsetter.primarykeystore
 
-import trw.dbsubsetter.db.PrimaryKeyValue
-import trw.dbsubsetter.db.Table
+import trw.dbsubsetter.db.{PrimaryKeyValue, Table}
 
 trait PrimaryKeyStore {
   def markSeen(table: Table, primaryKeyValue: PrimaryKeyValue): WriteOutcome

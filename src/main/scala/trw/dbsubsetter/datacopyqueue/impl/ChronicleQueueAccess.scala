@@ -3,11 +3,8 @@ package trw.dbsubsetter.datacopyqueue.impl
 import java.util.function.BiConsumer
 
 import net.openhft.chronicle.queue.impl.single.SingleChronicleQueue
-import net.openhft.chronicle.wire.ValueIn
-import net.openhft.chronicle.wire.ValueOut
-import net.openhft.chronicle.wire.WireOut
-import trw.dbsubsetter.chronicle.ChronicleQueueFactory
-import trw.dbsubsetter.chronicle.ChronicleQueueFunctions
+import net.openhft.chronicle.wire.{ValueIn, ValueOut, WireOut}
+import trw.dbsubsetter.chronicle.{ChronicleQueueFactory, ChronicleQueueFunctions}
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.ColumnTypes.ColumnType
 import trw.dbsubsetter.db.PrimaryKeyValue

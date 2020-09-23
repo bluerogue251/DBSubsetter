@@ -1,8 +1,6 @@
 package trw.dbsubsetter.metrics
 
-import io.prometheus.client.Counter
-import io.prometheus.client.Gauge
-import io.prometheus.client.Histogram
+import io.prometheus.client.{Counter, Gauge, Histogram}
 
 object Metrics {
 

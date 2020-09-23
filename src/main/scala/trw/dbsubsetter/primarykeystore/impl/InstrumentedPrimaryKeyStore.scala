@@ -1,7 +1,6 @@
 package trw.dbsubsetter.primarykeystore.impl
 
-import trw.dbsubsetter.db.PrimaryKeyValue
-import trw.dbsubsetter.db.Table
+import trw.dbsubsetter.db.{PrimaryKeyValue, Table}
 import trw.dbsubsetter.metrics.Metrics
 import trw.dbsubsetter.primarykeystore._
 

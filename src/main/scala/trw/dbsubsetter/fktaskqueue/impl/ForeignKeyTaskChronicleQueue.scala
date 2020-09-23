@@ -4,13 +4,9 @@ import net.openhft.chronicle.queue.impl.single.SingleChronicleQueue
 import net.openhft.chronicle.wire.WriteMarshallable
 import trw.dbsubsetter.chronicle.ChronicleQueueFactory
 import trw.dbsubsetter.config.Config
-import trw.dbsubsetter.db.ForeignKey
-import trw.dbsubsetter.db.ForeignKeyValue
-import trw.dbsubsetter.db.SchemaInfo
+import trw.dbsubsetter.db.{ForeignKey, ForeignKeyValue, SchemaInfo}
 import trw.dbsubsetter.fktaskqueue.ForeignKeyTaskQueue
-import trw.dbsubsetter.workflow.FetchChildrenTask
-import trw.dbsubsetter.workflow.FetchParentTask
-import trw.dbsubsetter.workflow.ForeignKeyTask
+import trw.dbsubsetter.workflow.{FetchChildrenTask, FetchParentTask, ForeignKeyTask}
 
 /**
   * WARNING: this class is not threadsafe

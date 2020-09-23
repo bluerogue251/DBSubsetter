@@ -1,8 +1,6 @@
 package trw.dbsubsetter.fktaskqueue.impl
 
-import net.openhft.chronicle.wire.ValueOut
-import net.openhft.chronicle.wire.WireOut
-import net.openhft.chronicle.wire.WriteMarshallable
+import net.openhft.chronicle.wire.{ValueOut, WireOut, WriteMarshallable}
 import trw.dbsubsetter.chronicle.ChronicleQueueFunctions
 import trw.dbsubsetter.db.ColumnTypes.ColumnType
 import trw.dbsubsetter.db.ForeignKeyValue

@@ -3,8 +3,7 @@ package trw.dbsubsetter.akkastreams
 import akka.NotUsed
 import akka.stream.scaladsl.Flow
 import trw.dbsubsetter.config.Config
-import trw.dbsubsetter.db.DbAccessFactory
-import trw.dbsubsetter.db.SchemaInfo
+import trw.dbsubsetter.db.{DbAccessFactory, SchemaInfo}
 import trw.dbsubsetter.workflow._
 
 private[akkastreams] object OriginDb {

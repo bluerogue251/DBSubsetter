@@ -2,9 +2,7 @@ package trw.dbsubsetter.db
 
 import java.sql.JDBCType
 
-import trw.dbsubsetter.db.DbVendor.MicrosoftSQLServer
-import trw.dbsubsetter.db.DbVendor.MySQL
-import trw.dbsubsetter.db.DbVendor.PostgreSQL
+import trw.dbsubsetter.db.DbVendor.{MicrosoftSQLServer, MySQL, PostgreSQL}
 
 object ColumnTypes {
   sealed trait ColumnType

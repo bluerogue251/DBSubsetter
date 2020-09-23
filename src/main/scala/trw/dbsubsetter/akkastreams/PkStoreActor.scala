@@ -1,12 +1,9 @@
 package trw.dbsubsetter.akkastreams
 
-import akka.actor.Actor
-import akka.actor.Props
+import akka.actor.{Actor, Props}
 import trw.dbsubsetter.config.Config
-import trw.dbsubsetter.db.PrimaryKeyValue
-import trw.dbsubsetter.db.SchemaInfo
-import trw.dbsubsetter.primarykeystore.PrimaryKeyStore
-import trw.dbsubsetter.primarykeystore.PrimaryKeyStoreFactory
+import trw.dbsubsetter.db.{PrimaryKeyValue, SchemaInfo}
+import trw.dbsubsetter.primarykeystore.{PrimaryKeyStore, PrimaryKeyStoreFactory}
 import trw.dbsubsetter.workflow._
 
 // Only accessing the PrimaryKeyStore from inside this actor allows the PrimaryKeyStore to be non-threadsafe

@@ -1,7 +1,6 @@
 package trw.dbsubsetter.db
 
-import java.sql.DriverManager
-import java.sql.JDBCType
+import java.sql.{DriverManager, JDBCType}
 
 import scala.collection.mutable.ArrayBuffer
 

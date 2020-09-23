@@ -2,14 +2,7 @@ package trw.dbsubsetter.db.impl.origin
 
 import io.prometheus.client.Histogram
 import io.prometheus.client.Histogram.Timer
-import trw.dbsubsetter.db.ForeignKey
-import trw.dbsubsetter.db.ForeignKeyValue
-import trw.dbsubsetter.db.Keys
-import trw.dbsubsetter.db.OriginDbAccess
-import trw.dbsubsetter.db.PrimaryKeyValue
-import trw.dbsubsetter.db.Row
-import trw.dbsubsetter.db.SqlQuery
-import trw.dbsubsetter.db.Table
+import trw.dbsubsetter.db.{ForeignKey, ForeignKeyValue, Keys, OriginDbAccess, PrimaryKeyValue, Row, SqlQuery, Table}
 import trw.dbsubsetter.metrics.Metrics
 
 private[db] class InstrumentedOriginDbAccess(delegatee: OriginDbAccess) extends OriginDbAccess {

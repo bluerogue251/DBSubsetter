@@ -1,8 +1,6 @@
 package trw.dbsubsetter.primarykeystore.impl
 
-import trw.dbsubsetter.db.PrimaryKeyValue
-import trw.dbsubsetter.db.SchemaInfo
-import trw.dbsubsetter.db.Table
+import trw.dbsubsetter.db.{PrimaryKeyValue, SchemaInfo, Table}
 import trw.dbsubsetter.primarykeystore._
 
 import scala.collection.mutable

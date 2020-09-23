@@ -2,8 +2,7 @@ package trw.dbsubsetter.db
 
 import java.util.NoSuchElementException
 
-import trw.dbsubsetter.config.CmdLineColumn
-import trw.dbsubsetter.config.Config
+import trw.dbsubsetter.config.{CmdLineColumn, Config}
 import trw.dbsubsetter.db.ColumnTypes.ColumnType
 
 object SchemaInfoRetrieval {

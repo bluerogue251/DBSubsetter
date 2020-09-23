@@ -1,25 +1,16 @@
 package trw.dbsubsetter
 
 import akka.Done
-import akka.actor.ActorRef
-import akka.actor.ActorSystem
-import akka.actor.PoisonPill
+import akka.actor.{ActorRef, ActorSystem, PoisonPill}
 import akka.stream.ActorMaterializer
-import trw.dbsubsetter.akkastreams.DataCopyGraphFactory
-import trw.dbsubsetter.akkastreams.KeyQueryGraphFactory
-import trw.dbsubsetter.akkastreams.PkStoreActor
+import trw.dbsubsetter.akkastreams.{DataCopyGraphFactory, KeyQueryGraphFactory, PkStoreActor}
 import trw.dbsubsetter.config.Config
-import trw.dbsubsetter.datacopyqueue.DataCopyQueue
-import trw.dbsubsetter.datacopyqueue.DataCopyQueueFactory
-import trw.dbsubsetter.db.DbAccessFactory
-import trw.dbsubsetter.db.SchemaInfo
-import trw.dbsubsetter.fktaskqueue.ForeignKeyTaskQueue
-import trw.dbsubsetter.fktaskqueue.ForeignKeyTaskQueueFactory
+import trw.dbsubsetter.datacopyqueue.{DataCopyQueue, DataCopyQueueFactory}
+import trw.dbsubsetter.db.{DbAccessFactory, SchemaInfo}
+import trw.dbsubsetter.fktaskqueue.{ForeignKeyTaskQueue, ForeignKeyTaskQueueFactory}
 import trw.dbsubsetter.workflow._
 
-import scala.concurrent.Await
-import scala.concurrent.ExecutionContext
-import scala.concurrent.Future
+import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration.Duration
 
 object ApplicationAkkaStreams {

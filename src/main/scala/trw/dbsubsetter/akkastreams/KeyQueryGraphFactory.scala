@@ -7,25 +7,15 @@ import akka.actor.ActorRef
 import akka.pattern.ask
 import akka.stream.ClosedShape
 import akka.stream.scaladsl.GraphDSL.Implicits._
-import akka.stream.scaladsl.Balance
-import akka.stream.scaladsl.Broadcast
-import akka.stream.scaladsl.Flow
-import akka.stream.scaladsl.GraphDSL
-import akka.stream.scaladsl.Merge
-import akka.stream.scaladsl.Partition
-import akka.stream.scaladsl.RunnableGraph
-import akka.stream.scaladsl.Source
+import akka.stream.scaladsl.{Balance, Broadcast, Flow, GraphDSL, Merge, Partition, RunnableGraph, Source}
 import akka.util.Timeout
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.datacopyqueue.DataCopyQueue
-import trw.dbsubsetter.db.DbAccessFactory
-import trw.dbsubsetter.db.SchemaInfo
+import trw.dbsubsetter.db.{DbAccessFactory, SchemaInfo}
 import trw.dbsubsetter.fktaskqueue.ForeignKeyTaskQueue
-import trw.dbsubsetter.workflow.AlreadySeen
-import trw.dbsubsetter.workflow._
+import trw.dbsubsetter.workflow.{AlreadySeen, _}
 
-import scala.concurrent.ExecutionContext
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 object KeyQueryGraphFactory {
 

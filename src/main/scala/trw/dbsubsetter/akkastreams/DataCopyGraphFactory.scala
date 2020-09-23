@@ -3,19 +3,13 @@ package trw.dbsubsetter.akkastreams
 import akka.Done
 import akka.stream.ClosedShape
 import akka.stream.scaladsl.GraphDSL.Implicits._
-import akka.stream.scaladsl.Balance
-import akka.stream.scaladsl.GraphDSL
-import akka.stream.scaladsl.Merge
-import akka.stream.scaladsl.RunnableGraph
-import akka.stream.scaladsl.Sink
+import akka.stream.scaladsl.{Balance, GraphDSL, Merge, RunnableGraph, Sink}
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.datacopyqueue.DataCopyQueue
-import trw.dbsubsetter.db.DbAccessFactory
-import trw.dbsubsetter.db.SchemaInfo
+import trw.dbsubsetter.db.{DbAccessFactory, SchemaInfo}
 import trw.dbsubsetter.workflow._
 
-import scala.concurrent.ExecutionContext
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 object DataCopyGraphFactory {
   def build(config: Config, schemaInfo: SchemaInfo, dbAccessFactory: DbAccessFactory, dataCopyQueue: DataCopyQueue)(

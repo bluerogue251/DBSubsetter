@@ -3,8 +3,7 @@ package trw.dbsubsetter.chronicle
 import java.nio.file.Files
 
 import net.openhft.chronicle.queue.RollCycles
-import net.openhft.chronicle.queue.impl.single.SingleChronicleQueue
-import net.openhft.chronicle.queue.impl.single.SingleChronicleQueueBuilder
+import net.openhft.chronicle.queue.impl.single.{SingleChronicleQueue, SingleChronicleQueueBuilder}
 import trw.dbsubsetter.config.Config
 
 object ChronicleQueueFactory {

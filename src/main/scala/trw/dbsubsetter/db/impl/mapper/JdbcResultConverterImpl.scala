@@ -2,11 +2,7 @@ package trw.dbsubsetter.db.impl.mapper
 
 import java.sql.ResultSet
 
-import trw.dbsubsetter.db.Column
-import trw.dbsubsetter.db.Keys
-import trw.dbsubsetter.db.Row
-import trw.dbsubsetter.db.SchemaInfo
-import trw.dbsubsetter.db.Table
+import trw.dbsubsetter.db.{Column, Keys, Row, SchemaInfo, Table}
 
 import scala.collection.mutable.ArrayBuffer
 

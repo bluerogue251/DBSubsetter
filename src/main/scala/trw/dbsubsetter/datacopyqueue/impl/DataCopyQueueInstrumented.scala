@@ -2,8 +2,7 @@ package trw.dbsubsetter.datacopyqueue.impl
 
 import trw.dbsubsetter.datacopyqueue.DataCopyQueue
 import trw.dbsubsetter.metrics.Metrics
-import trw.dbsubsetter.workflow.DataCopyTask
-import trw.dbsubsetter.workflow.PksAdded
+import trw.dbsubsetter.workflow.{DataCopyTask, PksAdded}
 
 private[datacopyqueue] final class DataCopyQueueInstrumented(delegatee: DataCopyQueue) extends DataCopyQueue {
 

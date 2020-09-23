@@ -1,7 +1,6 @@
 package trw.dbsubsetter.db.impl
 
-import java.sql.Connection
-import java.sql.DriverManager
+import java.sql.{Connection, DriverManager}
 
 import trw.dbsubsetter.db.DbVendor
 

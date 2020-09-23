@@ -2,11 +2,8 @@ package trw.dbsubsetter
 
 import io.prometheus.client.exporter.HTTPServer
 import io.prometheus.client.hotspot.DefaultExports
-import trw.dbsubsetter.config.CommandLineParser
-import trw.dbsubsetter.config.Config
-import trw.dbsubsetter.db.BaseQueries
-import trw.dbsubsetter.db.DbMetadataQueries
-import trw.dbsubsetter.db.SchemaInfoRetrieval
+import trw.dbsubsetter.config.{CommandLineParser, Config}
+import trw.dbsubsetter.db.{BaseQueries, DbMetadataQueries, SchemaInfoRetrieval}
 import trw.dbsubsetter.util.Util
 
 /**

@@ -1,14 +1,8 @@
 package trw.dbsubsetter.workflow
 
-import trw.dbsubsetter.db.Keys
-import trw.dbsubsetter.db.PrimaryKeyValue
-import trw.dbsubsetter.db.SchemaInfo
-import trw.dbsubsetter.db.Table
+import trw.dbsubsetter.db.{Keys, PrimaryKeyValue, SchemaInfo, Table}
 import trw.dbsubsetter.keyextraction.KeyExtractionUtil
-import trw.dbsubsetter.primarykeystore.AlreadySeenWithoutChildren
-import trw.dbsubsetter.primarykeystore.FirstTimeSeen
-import trw.dbsubsetter.primarykeystore.PrimaryKeyStore
-import trw.dbsubsetter.primarykeystore.WriteOutcome
+import trw.dbsubsetter.primarykeystore.{AlreadySeenWithoutChildren, FirstTimeSeen, PrimaryKeyStore, WriteOutcome}
 
 final class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
 

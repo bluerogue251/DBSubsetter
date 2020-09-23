@@ -1,9 +1,7 @@
 package trw.dbsubsetter.workflow
 
 import trw.dbsubsetter.config.Config
-import trw.dbsubsetter.db.DbAccessFactory
-import trw.dbsubsetter.db.SchemaInfo
-import trw.dbsubsetter.db.Table
+import trw.dbsubsetter.db.{DbAccessFactory, SchemaInfo, Table}
 
 final class OriginDbWorkflow(config: Config, schemaInfo: SchemaInfo, dbAccessFactory: DbAccessFactory) {
 

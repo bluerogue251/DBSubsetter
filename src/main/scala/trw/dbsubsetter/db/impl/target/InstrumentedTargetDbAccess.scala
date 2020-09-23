@@ -1,9 +1,7 @@
 package trw.dbsubsetter.db.impl.target
 
 import io.prometheus.client.Histogram
-import trw.dbsubsetter.db.Row
-import trw.dbsubsetter.db.Table
-import trw.dbsubsetter.db.TargetDbAccess
+import trw.dbsubsetter.db.{Row, Table, TargetDbAccess}
 import trw.dbsubsetter.metrics.Metrics
 
 private[db] class InstrumentedTargetDbAccess(delegatee: TargetDbAccess) extends TargetDbAccess {
