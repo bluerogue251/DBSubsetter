@@ -15,12 +15,12 @@ private[db] class OriginDbAccessImpl(connStr: String, sch: SchemaInfo, mapper: J
   private[this] val conn = connectionFactory.getReadOnlyConnection(connStr)
 
   private[this] val foreignKeyTemplateStatements: Map[(ForeignKey, Table), PreparedStatement] =
-    Sql.queryByFkSqlTemplates(sch).map { case ((fk, table), sqlQuery) =>
+    Sql.queryByFkSqlTemplates(sch).data.map { case ((fk, table), sqlQuery) =>
       (fk, table) -> conn.prepareStatement(sqlQuery.value)
     }
 
   private[this] val primaryKeyTemplateStatements: Map[(Table, Short), PreparedStatement] =
-    Sql.queryByPkSqlTemplates(sch).map { case (tableWithBatchSize, sqlQuery) =>
+    Sql.queryByPkSqlTemplates(sch).data.map { case (tableWithBatchSize, sqlQuery) =>
       tableWithBatchSize -> conn.prepareStatement(sqlQuery.value)
     }
 

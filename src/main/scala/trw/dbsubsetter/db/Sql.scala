@@ -7,7 +7,8 @@ private[db] object Sql {
       table <- Set(fk.fromTable, fk.toTable)
     } yield (fk, table)
 
-    allCombos.map { case (fk, table) =>
+    val data =
+      allCombos.map { case (fk, table) =>
       val whereClauseColumns: Seq[Column] =
         if (table == fk.toTable) {
           fk.toCols
@@ -23,16 +24,21 @@ private[db] object Sql {
 
       (fk, table) -> makeQueryString(table, selectColumns, whereClause)
     }.toMap
+
+    ForeignKeySqlTemplates(data)
   }
 
   def queryByPkSqlTemplates(sch: SchemaInfo): PrimaryKeySqlTemplates = {
-    sch.pksByTable.flatMap { case (table, primaryKey) =>
-      Constants.dataCopyBatchSizes.map(batchSize => {
-        val whereClause: String = makeCompositeWhereClause(primaryKey.columns, batchSize)
-        val selectColumns: Seq[Column] = sch.dataColumnsByTableOrdered(table)
-        (table, batchSize) -> makeQueryString(table, selectColumns, whereClause)
-      })
-    }
+    val data =
+      sch.pksByTable.flatMap { case (table, primaryKey) =>
+        Constants.dataCopyBatchSizes.map(batchSize => {
+          val whereClause: String = makeCompositeWhereClause(primaryKey.columns, batchSize)
+          val selectColumns: Seq[Column] = sch.dataColumnsByTableOrdered(table)
+          (table, batchSize) -> makeQueryString(table, selectColumns, whereClause)
+        })
+      }
+
+    PrimaryKeySqlTemplates(data)
   }
 
   def insertSqlTemplates(sch: SchemaInfo): Map[Table, SqlQuery] = {
