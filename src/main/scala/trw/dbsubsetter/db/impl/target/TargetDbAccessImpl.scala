@@ -10,8 +10,8 @@ private[db] class TargetDbAccessImpl(connStr: String, sch: SchemaInfo, connectio
   private[this] val connection: Connection =
     connectionFactory.getReadWriteConnection(connStr)
 
-  private[this] val statements = Sql.insertSqlTemplates(sch).map { case (table, sqlStr) =>
-    table -> connection.prepareStatement(sqlStr)
+  private[this] val statements = Sql.insertSqlTemplates(sch).map { case (table, sqlQuery) =>
+    table -> connection.prepareStatement(sqlQuery.value)
   }
 
   override def insertRows(table: Table, rows: Vector[Row]): Unit = {

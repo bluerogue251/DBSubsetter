@@ -15,13 +15,13 @@ private[db] class OriginDbAccessImpl(connStr: String, sch: SchemaInfo, mapper: J
   private[this] val conn = connectionFactory.getReadOnlyConnection(connStr)
 
   private[this] val foreignKeyTemplateStatements: Map[(ForeignKey, Table), PreparedStatement] =
-    Sql.queryByFkSqlTemplates(sch).map { case ((fk, table), sqlString) =>
-      (fk, table) -> conn.prepareStatement(sqlString)
+    Sql.queryByFkSqlTemplates(sch).map { case ((fk, table), sqlQuery) =>
+      (fk, table) -> conn.prepareStatement(sqlQuery.value)
     }
 
   private[this] val primaryKeyTemplateStatements: Map[(Table, Short), PreparedStatement] =
-    Sql.queryByPkSqlTemplates(sch).map { case (tableWithBatchSize, sqlString) =>
-      tableWithBatchSize -> conn.prepareStatement(sqlString)
+    Sql.queryByPkSqlTemplates(sch).map { case (tableWithBatchSize, sqlQuery) =>
+      tableWithBatchSize -> conn.prepareStatement(sqlQuery.value)
     }
 
   override def getRowsFromForeignKeyValue(fk: ForeignKey, table: Table, fkValue: ForeignKeyValue): Vector[Keys] = {
@@ -53,7 +53,7 @@ private[db] class OriginDbAccessImpl(connStr: String, sch: SchemaInfo, mapper: J
   }
 
   override def getRows(query: SqlQuery, table: Table): Vector[Keys] = {
-    val jdbcResult = conn.createStatement().executeQuery(query)
+    val jdbcResult = conn.createStatement().executeQuery(query.value)
     mapper.convertToKeys(jdbcResult, table)
   }
 }
