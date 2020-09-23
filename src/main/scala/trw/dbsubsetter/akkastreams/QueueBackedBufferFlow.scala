@@ -8,7 +8,8 @@ import akka.stream.stage._
   * Refer to akka.stream.impl.fusing.Buffer for onUpstreamFinish logic
   * Relevant docs: https://doc.akka.io/docs/akka/current/stream/stream-customize.html
   */
-private[akkastreams] final class QueueBackedBufferFlow[T, U](backingQueue: TransformingQueue[T, U]) extends GraphStage[FlowShape[T, U]] {
+private[akkastreams] final class QueueBackedBufferFlow[T, U](backingQueue: TransformingQueue[T, U])
+  extends GraphStage[FlowShape[T, U]] {
 
   private[this] val in: Inlet[T] = Inlet.create[T]("QueueBackedBufferFlow.in")
 
@@ -18,6 +19,7 @@ private[akkastreams] final class QueueBackedBufferFlow[T, U](backingQueue: Trans
 
   override def createLogic(inheritedAttributes: Attributes): GraphStageLogic = new GraphStageLogic(shape) {
 
+    // format: off
     setHandler(in, new InHandler {
       override def onPush(): Unit = {
         val inputElement: T = grab(in)
@@ -42,6 +44,7 @@ private[akkastreams] final class QueueBackedBufferFlow[T, U](backingQueue: Trans
         }
       }
     })
+    // format: on
 
     override def preStart(): Unit = {
       pull(in)
