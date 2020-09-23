@@ -1,4 +1,7 @@
 ---
+# Whenever this file is modified, we must re-sign it for Drone:
+# $ drone sign bluerogue251/DBSubsetter --save
+---
 kind: pipeline
 type: docker
 name: default
@@ -35,7 +38,7 @@ steps:
   - name: code_style_check
     image: bluerogue251/db-subsetter-ci:6
     commands:
-      - sbt scalastyle test:scalastyle
+      - sbt scalafmtCheckAll
 
   - name: compile
     image: bluerogue251/db-subsetter-ci:6
@@ -75,6 +78,6 @@ steps:
 
 ---
 kind: signature
-hmac: ae6e7c84a2acb0563d1185f0e49d752553383adf9f41318506fada5dd7769dcb
+hmac: a9e93667b9af8ff5f83c846c4610fec0f0f58684c5965b26acf44efac593f5a0
 
 ...
