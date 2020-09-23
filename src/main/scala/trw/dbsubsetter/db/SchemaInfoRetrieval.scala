@@ -2,7 +2,7 @@ package trw.dbsubsetter.db
 
 import java.util.NoSuchElementException
 
-import trw.dbsubsetter.config.Config
+import trw.dbsubsetter.config.{CmdLineColumn, Config}
 import trw.dbsubsetter.db.ColumnTypes.ColumnType
 
 // scalastyle:off
@@ -37,13 +37,14 @@ object SchemaInfoRetrieval {
             TableWithAutoincrementMetadata(table, hasSqlServerAutoincrement)
           }
 
-    val colsByTableAndName: Map[Table, Map[ColumnName, Column]] = {
+    val colsByTableAndName: Map[Table, Map[String, Column]] = {
       dbMetadata
         .columns
         .filterNot { columnQueryRow =>
           val schema = Schema(columnQueryRow.schema)
           val table = Table(schema, columnQueryRow.table)
-          config.excludeColumns(table).contains(columnQueryRow.name)
+          val cmdLineColumn = CmdLineColumn(table, columnQueryRow.name)
+          config.excludeColumns.contains(cmdLineColumn)
         }
         .filter(c => tablesByName.contains((c.schema, c.table)))
         .groupBy(c => tablesByName(c.schema, c.table))
@@ -83,7 +84,7 @@ object SchemaInfoRetrieval {
             .extraPrimaryKeys
             .map { cmdLinePrimaryKey =>
               val table = cmdLinePrimaryKey.table
-              val columnNames = cmdLinePrimaryKey.columns.toSet
+              val columnNames = cmdLinePrimaryKey.columns.map(_.name).toSet
               val orderedColumns = allColumnsByTableOrdered(table).filter(c => columnNames.contains(c.name))
               table -> new PrimaryKey(orderedColumns)
             }
@@ -103,10 +104,10 @@ object SchemaInfoRetrieval {
                   ForeignKeyColumnQueryRow(
                     efk.fromTable.schema.name,
                     efk.fromTable.name,
-                    fromColumn,
+                    fromColumn.name,
                     efk.toTable.schema.name,
                     efk.toTable.name,
-                    toColumn
+                    toColumn.name
                   )
                 }
             }

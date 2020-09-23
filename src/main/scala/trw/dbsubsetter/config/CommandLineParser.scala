@@ -3,7 +3,7 @@ package trw.dbsubsetter.config
 import java.io.File
 
 import scopt.OptionParser
-import trw.dbsubsetter.db.{ColumnName, Schema, Table, WhereClause}
+import trw.dbsubsetter.db.{Schema, Table}
 
 
 object CommandLineParser {
@@ -94,9 +94,11 @@ object CommandLineParser {
         fk match {
           case regex(fromSchemaName, fromTableName, fromCols, toSchemaName, toTableName, toCols) =>
             val fromTable = normalizeTable(fromSchemaName, fromTableName)
+            val fromColumns = normalizeColumns(fromTable, fromCols)
             val toTable = normalizeTable(toSchemaName, toTableName)
-            val cmdLineForeignKey = CmdLineForeignKey(fromTable, trimCsvs(fromCols), toTable, trimCsvs(toCols))
-            c.copy(extraForeignKeys = c.extraForeignKeys :+ cmdLineForeignKey)
+            val toColumns = normalizeColumns(toTable, toCols)
+            val cmdLineForeignKey = CmdLineForeignKey(fromTable, fromColumns, toTable, toColumns)
+            c.copy(extraForeignKeys = c.extraForeignKeys + cmdLineForeignKey)
           case _ => throw new RuntimeException()
         }
       }
@@ -113,8 +115,9 @@ object CommandLineParser {
         fk match {
           case regex(schemaName, tableName, cols) =>
             val table = normalizeTable(schemaName, tableName)
-            val cmdLinePrimaryKey = CmdLinePrimaryKey(table, trimCsvs(cols))
-            c.copy(extraPrimaryKeys = c.extraPrimaryKeys :+ cmdLinePrimaryKey)
+            val columns = normalizeColumns(table, cols)
+            val cmdLinePrimaryKey = CmdLinePrimaryKey(table, columns)
+            c.copy(extraPrimaryKeys = c.extraPrimaryKeys + cmdLinePrimaryKey)
           case _ => throw new RuntimeException()
         }
       }
@@ -149,10 +152,8 @@ object CommandLineParser {
         ic match {
           case regex(schemaName, tableName, cols) =>
             val table = normalizeTable(schemaName, tableName)
-            val alreadyExcluded = c.excludeColumns(table)
-            val newlyExcluded = trimCsvs(cols).toSet
-            val totalExcluded = alreadyExcluded ++ newlyExcluded
-            c.copy(excludeColumns = c.excludeColumns.updated(table, totalExcluded))
+            val newlyExcluded = normalizeColumns(table, cols).toSet
+            c.copy(excludeColumns = c.excludeColumns ++ newlyExcluded)
           case _ => throw new RuntimeException
         }
       }
@@ -271,25 +272,33 @@ object CommandLineParser {
     Table(schema = schema, name = tableName.trim)
   }
 
-  private def trimCsvs(untrimmedCsvs: String): Seq[String] = {
-    untrimmedCsvs.split(",").map(_.trim)
+  private def normalizeColumns(table: Table, untrimmedColumnCsvs: String): Seq[CmdLineColumn] = {
+    untrimmedColumnCsvs
+      .split(",")
+      .map(_.trim)
+      .map(columnName => CmdLineColumn(table, columnName))
   }
 }
 
 case class CmdLineBaseQuery(
     table: Table,
-    whereClause: WhereClause,
+    whereClause: String,
     includeChildren: Boolean
 )
 
 case class CmdLineForeignKey(
     fromTable: Table,
-    fromColumns: Seq[ColumnName],
+    fromColumns: Seq[CmdLineColumn],
     toTable: Table,
-    toColumns: Seq[ColumnName]
+    toColumns: Seq[CmdLineColumn]
 )
 
 case class CmdLinePrimaryKey(
     table: Table,
-    columns: Seq[ColumnName]
+    columns: Seq[CmdLineColumn]
+)
+
+case class CmdLineColumn(
+  table: Table,
+  name: String
 )

@@ -56,7 +56,7 @@ private[db] object Sql {
     }.toMap
   }
 
-  def makeQueryString(table: Table, selectColumns: Seq[Column], whereClause: WhereClause): SqlQuery = {
+  def makeQueryString(table: Table, selectColumns: Seq[Column], whereClause: String): SqlQuery = {
     val selectClause: String =
       selectColumns.map(quoteFullyQualified).mkString(", ")
 

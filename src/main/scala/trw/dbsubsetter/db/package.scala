@@ -5,11 +5,11 @@ import java.sql.Connection
 import trw.dbsubsetter.db.ColumnTypes.ColumnType
 
 package object db {
+
   case class Schema(name: String)
-  type TableName = String
-  type ColumnName = String
-  type WhereClause = String
-  type TypeName = String
+
+  case class Table(schema: Schema, name: String)
+
   type SqlQuery = String
   type ForeignKeySqlTemplates = Map[(ForeignKey, Table), SqlQuery]
   type PrimaryKeySqlTemplates = Map[(Table, Short), SqlQuery]
@@ -26,11 +26,6 @@ package object db {
       val fksToTable: Map[Table, Vector[ForeignKey]]
   )
 
-  case class Table(
-      schema: Schema,
-      name: String
-  )
-
   case class TableWithAutoincrementMetadata(
       table: Table,
       hasSqlServerAutoIncrement: Boolean
@@ -38,7 +33,7 @@ package object db {
 
   class Column(
       val table: Table,
-      val name: ColumnName,
+      val name: String,
       /*
        * The 0-indexed location of this column in query results where only primary and foreign key columns are included
        * -1 if this column is not part of a primary or foreign key, as this column would not be included in that query.
