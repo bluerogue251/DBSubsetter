@@ -1,4 +1,8 @@
 ---
+
+# Whenever this file is modified, we must re-sign it for Drone:
+# $ drone sign bluerogue251/DBSubsetter --save
+
 kind: pipeline
 type: docker
 name: default
@@ -33,27 +37,28 @@ services:
 
 steps:
   - name: code_style_check
-    image: bluerogue251/db-subsetter-ci:6
+    image: bluerogue251/db-subsetter-ci:7
+    failure: ignore
     commands:
-      - sbt scalastyle test:scalastyle
+      - sbt scalafmtCheck
 
   - name: compile
-    image: bluerogue251/db-subsetter-ci:6
+    image: bluerogue251/db-subsetter-ci:7
     commands:
       - sbt compile test:compile
 
   - name: unit_tests
-    image: bluerogue251/db-subsetter-ci:6
+    image: bluerogue251/db-subsetter-ci:7
     commands:
       - sbt "testOnly unit.*"
 
   - name: integration_tests
-    image: bluerogue251/db-subsetter-ci:6
+    image: bluerogue251/db-subsetter-ci:7
     commands:
       - sbt "testOnly integration.*"
 
   - name: end_to_end_tests
-    image: bluerogue251/db-subsetter-ci:6
+    image: bluerogue251/db-subsetter-ci:7
     environment:
       DB_SUBSETTER_POSTGRES_HOST: postgres
       DB_SUBSETTER_SQL_SERVER_HOST: sql_server
@@ -67,7 +72,7 @@ steps:
       - sbt "testOnly e2e.*"
 
   - name: load_test
-    image: bluerogue251/db-subsetter-ci:6
+    image: bluerogue251/db-subsetter-ci:7
     environment:
       DB_SUBSETTER_POSTGRES_HOST: postgres
     commands:
@@ -75,6 +80,6 @@ steps:
 
 ---
 kind: signature
-hmac: ae6e7c84a2acb0563d1185f0e49d752553383adf9f41318506fada5dd7769dcb
+hmac: 35ae0ffad5df0d681826ca35f3b3caac199d3d6fdf430a8df02d523b541c76c7
 
 ...

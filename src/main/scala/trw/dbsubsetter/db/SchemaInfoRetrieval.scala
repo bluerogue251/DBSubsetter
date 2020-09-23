@@ -5,7 +5,6 @@ import java.util.NoSuchElementException
 import trw.dbsubsetter.config.{CmdLineColumn, Config}
 import trw.dbsubsetter.db.ColumnTypes.ColumnType
 
-// scalastyle:off
 object SchemaInfoRetrieval {
   def getSchemaInfo(dbMetadata: DbMetadataQueryResult, config: Config): SchemaInfo = {
     val includedTables =

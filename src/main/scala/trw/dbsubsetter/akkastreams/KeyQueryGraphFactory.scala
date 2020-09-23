@@ -18,7 +18,6 @@ import trw.dbsubsetter.workflow.{AlreadySeen, _}
 import scala.concurrent.{ExecutionContext, Future}
 
 
-// scalastyle:off
 object KeyQueryGraphFactory {
   def build(config: Config, schemaInfo: SchemaInfo, baseQueries: Seq[BaseQuery], pkStore: ActorRef, dbAccessFactory: DbAccessFactory, fkTaskCreationWorkflow: FkTaskCreationWorkflow, fkTaskQueue: ForeignKeyTaskQueue, dataCopyQueue: DataCopyQueue)(implicit ec: ExecutionContext): RunnableGraph[Future[Done]] = RunnableGraph.fromGraph(GraphDSL.create(BufferFactory.dataCopyBufferSink(dataCopyQueue)) { implicit b => dataCopyBufferSink =>
     // Infrastructure: Timeouts, Merges, Balances, Partitions, Broadcasts

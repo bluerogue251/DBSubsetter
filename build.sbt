@@ -6,9 +6,6 @@ scalaVersion := "2.12.3"
 
 scalacOptions ++= Seq("-deprecation", "-Xfatal-warnings")
 
-scalastyleFailOnError := false
-scalastyleFailOnWarning := false
-
 libraryDependencies ++= Seq(
   // Command line parser
   "com.github.scopt" %% "scopt" % "3.7.0",
