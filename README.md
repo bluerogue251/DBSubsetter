@@ -22,7 +22,8 @@ _Do one thing well_: a tiny codebase focused exclusively on core subsetting feat
 
 DBSubsetter has been tested against recent versions of PostgreSQL, MySQL, and Microsoft SQL Server.
 
-Please reach out by opening a GitHub ticket if you would like support for a different database vendor.
+Please [open an issue](https://github.com/bluerogue251/DBSubsetter/issues/new)
+if you would like support for a different database vendor.
 
 
 ## Download and Usage Instructions
@@ -64,11 +65,10 @@ $ java -jar /path/to/DBSubsetter.jar \
 ## Contributing
 
 Contributions of all kinds are welcome!
-
-To ask a question, report a bug, or request a feature, please open an
-[issue](https://github.com/bluerogue251/DBSubsetter/issues/new).
-To contribute code changes, please open a
-[pull request](https://github.com/bluerogue251/DBSubsetter/pulls).
+To ask a question, report a bug, or request a feature, please
+[open an issue](https://github.com/bluerogue251/DBSubsetter/issues/new).
+To contribute code changes, please
+[open a pull request](https://github.com/bluerogue251/DBSubsetter/pulls).
 
 Please follow our [code of conduct](CODE_OF_CONDUCT.md) when contributing.
 
