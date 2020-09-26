@@ -3,7 +3,7 @@ package e2e.pgdatatypes
 import java.io.File
 
 import e2e.PostgresEnabledTest
-import util.db.PostgreSQLDatabase
+import util.db.PostgresDatabase
 
 import scala.sys.process._
 
@@ -44,7 +44,7 @@ class PostgreSQLDataTypesTest extends PostgresEnabledTest {
   }
 
   private def originPsqlCommand: String = {
-    val originDb: PostgreSQLDatabase = dbs.origin
+    val originDb: PostgresDatabase = dbs.origin
     s"psql --host ${originDb.host} --port ${originDb.port} --user postgres ${originDb.name}"
   }
 }

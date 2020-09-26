@@ -6,7 +6,7 @@ import util.db._
 import scala.sys.process._
 import scala.util.Properties
 
-abstract class PostgresEnabledTest extends DbEnabledTest[PostgreSQLDatabase] {
+abstract class PostgresEnabledTest extends DbEnabledTest[PostgresDatabase] {
   override protected val profile = slick.jdbc.PostgresProfile
 
   protected def testName: String
@@ -20,7 +20,7 @@ abstract class PostgresEnabledTest extends DbEnabledTest[PostgreSQLDatabase] {
     PostgresqlEndToEndTestUtil.createDb(dbs.targetAkkaStreams)
   }
 
-  override protected def dbs: DatabaseSet[PostgreSQLDatabase] = {
+  override protected def dbs: DatabaseSet[PostgresDatabase] = {
     val host = Properties.envOrElse("DB_SUBSETTER_POSTGRES_HOST", "localhost")
     val port = Ports.sharedPostgresPort
 
@@ -51,16 +51,16 @@ abstract class PostgresEnabledTest extends DbEnabledTest[PostgreSQLDatabase] {
 }
 
 object PostgresqlEndToEndTestUtil {
-  def buildDatabase(dbHost: String, dbPort: Int, dbName: String): PostgreSQLDatabase = {
-    new PostgreSQLDatabase(dbHost, dbPort, dbName)
+  def buildDatabase(dbHost: String, dbPort: Int, dbName: String): PostgresDatabase = {
+    new PostgresDatabase(dbHost, dbPort, dbName)
   }
 
-  def createDb(db: PostgreSQLDatabase): Unit = {
+  def createDb(db: PostgresDatabase): Unit = {
     s"dropdb --host ${db.host} --port ${db.port} --user postgres --if-exists ${db.name}".!!
     s"createdb --host ${db.host} --port ${db.port} --user postgres ${db.name}".!!
   }
 
-  def preSubsetDdlSync(origin: PostgreSQLDatabase, target: PostgreSQLDatabase): Unit = {
+  def preSubsetDdlSync(origin: PostgresDatabase, target: PostgresDatabase): Unit = {
     val exportCommand =
       s"pg_dump --host ${origin.host} --port ${origin.port} --user postgres --section=pre-data ${origin.name}"
 
@@ -70,7 +70,7 @@ object PostgresqlEndToEndTestUtil {
     (exportCommand #| importCommand).!!
   }
 
-  def postSubsetDdlSync(origin: PostgreSQLDatabase, target: PostgreSQLDatabase): Unit = {
+  def postSubsetDdlSync(origin: PostgresDatabase, target: PostgresDatabase): Unit = {
     val exportCommand =
       s"pg_dump --host ${origin.host} --port ${origin.port} --user postgres --section=post-data ${origin.name}"
 

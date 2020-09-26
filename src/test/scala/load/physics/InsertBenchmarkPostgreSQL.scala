@@ -9,7 +9,7 @@ import org.postgresql.core.BaseConnection
 import slick.jdbc.PostgresProfile.api._
 import slick.sql.SqlAction
 import trw.dbsubsetter.db.Row
-import util.db.{DatabaseSet, PostgreSQLDatabase}
+import util.db.{DatabaseSet, PostgresDatabase}
 
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.duration.Duration
@@ -60,12 +60,12 @@ class InsertBenchmarkPostgreSQL extends PostgresEnabledTest {
 
   override protected def createOriginDatabase(): Unit = {}
 
-  override protected def dbs: DatabaseSet[PostgreSQLDatabase] = {
+  override protected def dbs: DatabaseSet[PostgresDatabase] = {
     val defaults = super.dbs
 
-    val originDb = new PostgreSQLDatabase("localhost", ???, "physics_db")
+    val originDb = new PostgresDatabase("localhost", ???, "physics_db")
 
-    new DatabaseSet[PostgreSQLDatabase](
+    new DatabaseSet[PostgresDatabase](
       originDb,
       defaults.targetSingleThreaded,
       defaults.targetAkkaStreams
