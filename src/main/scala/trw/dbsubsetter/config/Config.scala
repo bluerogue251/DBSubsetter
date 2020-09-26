@@ -4,7 +4,6 @@ import java.io.File
 
 import trw.dbsubsetter.db.{Schema, Table}
 
-
 case class Config(
     schemas: Seq[Schema] = Seq.empty,
     originDbConnectionString: String = "",

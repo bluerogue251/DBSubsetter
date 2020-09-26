@@ -6,7 +6,6 @@ import trw.dbsubsetter.db.DbVendor
 
 import scala.collection.mutable
 
-
 /**
   * WARNING: this class is not threadsafe
   */

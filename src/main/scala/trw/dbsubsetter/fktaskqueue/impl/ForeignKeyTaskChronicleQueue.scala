@@ -8,11 +8,11 @@ import trw.dbsubsetter.db.{ForeignKey, ForeignKeyValue, SchemaInfo}
 import trw.dbsubsetter.fktaskqueue.ForeignKeyTaskQueue
 import trw.dbsubsetter.workflow.{FetchChildrenTask, FetchParentTask, ForeignKeyTask}
 
-
 /**
   * WARNING: this class is not threadsafe
   */
-private[fktaskqueue] final class ForeignKeyTaskChronicleQueue(config: Config, schemaInfo: SchemaInfo) extends ForeignKeyTaskQueue {
+private[fktaskqueue] final class ForeignKeyTaskChronicleQueue(config: Config, schemaInfo: SchemaInfo)
+    extends ForeignKeyTaskQueue {
 
   private[this] var queuedTaskCount: Long = 0L
 
@@ -23,8 +23,7 @@ private[fktaskqueue] final class ForeignKeyTaskChronicleQueue(config: Config, sc
   private[this] val tailer = queue.createTailer()
 
   private[this] val childReaders =
-    schemaInfo
-      .fksOrdered
+    schemaInfo.fksOrdered
       .map { fk =>
         new ChronicleQueueFkTaskReader(fk.fromCols.map(_.dataType))
       }

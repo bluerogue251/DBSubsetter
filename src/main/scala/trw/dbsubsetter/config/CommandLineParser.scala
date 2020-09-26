@@ -5,7 +5,6 @@ import java.io.File
 import scopt.OptionParser
 import trw.dbsubsetter.db.{Schema, Table}
 
-
 object CommandLineParser {
   val parser: OptionParser[Config] = new OptionParser[Config]("DBSubsetter") {
     head("DBSubsetter", "v1.0.0-beta.4")
@@ -22,23 +21,21 @@ object CommandLineParser {
       .valueName("<jdbc connection string>")
       .required()
       .action((cs, c) => c.copy(originDbConnectionString = cs.trim))
-      .text(
-        """JDBC connection string to the full-size origin db, for example:
-          |                           MySQL:       jdbc:mysql://<originHost>:<originPort>/<originDb>?user=<originUser>&password=<originPassword>&rewriteBatchedStatements=true
-          |                           PostgreSQL:  jdbc:postgresql://<originHost>:<originPort>/<originDb>?user=<originUser>&password=<originPassword>
-          |                           SQL Server:  jdbc:sqlserver://<originHost>:<originPort>;databaseName=<originDb>;user=<originUser>;password=<originPassword>
-          |""".stripMargin)
+      .text("""JDBC connection string to the full-size origin db, for example:
+              |                           MySQL:       jdbc:mysql://<originHost>:<originPort>/<originDb>?user=<originUser>&password=<originPassword>&rewriteBatchedStatements=true
+              |                           PostgreSQL:  jdbc:postgresql://<originHost>:<originPort>/<originDb>?user=<originUser>&password=<originPassword>
+              |                           SQL Server:  jdbc:sqlserver://<originHost>:<originPort>;databaseName=<originDb>;user=<originUser>;password=<originPassword>
+              |""".stripMargin)
 
     opt[String]("targetDbConnStr")
       .valueName("<jdbc connection string>")
       .required()
       .action((cs, c) => c.copy(targetDbConnectionString = cs.trim))
-      .text(
-        """JDBC connection string to the smaller target db, for example:
-          |                           MySQL:       jdbc:mysql://<targetHost>:<targetPort>/<targetDb>?user=<targetUser>&password=<targetPassword>&rewriteBatchedStatements=true
-          |                           PostgreSQL:  jdbc:postgresql://<targetHost>:<targetPort>/<targetDb>?user=<targetUser>&password=<targetPassword>
-          |                           SQL Server:  jdbc:sqlserver://<targetHost>:<targetPort>;databaseName=<targetDb>;user=<targetUser>;password=<targetPassword>
-          |""".stripMargin)
+      .text("""JDBC connection string to the smaller target db, for example:
+              |                           MySQL:       jdbc:mysql://<targetHost>:<targetPort>/<targetDb>?user=<targetUser>&password=<targetPassword>&rewriteBatchedStatements=true
+              |                           PostgreSQL:  jdbc:postgresql://<targetHost>:<targetPort>/<targetDb>?user=<targetUser>&password=<targetPassword>
+              |                           SQL Server:  jdbc:sqlserver://<targetHost>:<targetPort>;databaseName=<targetDb>;user=<targetUser>;password=<targetPassword>
+              |""".stripMargin)
 
     opt[String]("baseQuery")
       .required()
@@ -54,35 +51,32 @@ object CommandLineParser {
           case _ => throw new RuntimeException()
         }
       }
-      .text(
-        """Starting table, where-clause, and includeChildren/excludeChildren to kick off subsetting
-          |                           includeChildren is recommended for most use cases
-          |                              It continues downwards recursively, meaning children of the children are also fetched, etc
-          |                              It does *not* continue upwards, meaning children of *parents* will *not* be fetched
-          |                              Not continuing upwards is important for keeping the resulting dataset small
-          |                           excludeChildren is mostly for edge cases such as ensuring an entire table is kept:
-          |                              --baseQuery "public.invoice_types ::: true ::: excludeChildren"
-          |                              would includes the entire invoice_types table but would not fetch any of its children.
-          |                              This is often useful for tables containing static "domain data".
-          |                           Can be specified multiple times
-          |""".stripMargin)
+      .text("""Starting table, where-clause, and includeChildren/excludeChildren to kick off subsetting
+              |                           includeChildren is recommended for most use cases
+              |                              It continues downwards recursively, meaning children of the children are also fetched, etc
+              |                              It does *not* continue upwards, meaning children of *parents* will *not* be fetched
+              |                              Not continuing upwards is important for keeping the resulting dataset small
+              |                           excludeChildren is mostly for edge cases such as ensuring an entire table is kept:
+              |                              --baseQuery "public.invoice_types ::: true ::: excludeChildren"
+              |                              would includes the entire invoice_types table but would not fetch any of its children.
+              |                              This is often useful for tables containing static "domain data".
+              |                           Can be specified multiple times
+              |""".stripMargin)
 
     opt[Int]("keyCalculationDbConnectionCount")
       .valueName("<int>")
       .action((dbp, c) => c.copy(keyCalculationDbConnectionCount = dbp))
-      .text(
-        """Concurrent connections to the Origin DB for calculating primary and foreign key dependencies
-          |                           A reasonable starting value is half the number of CPU cores on your origin database machine
-          |                           (Note the total Origin DB connection count is --keyCalculationDbConnectionCount + --dataCopyDbConnectionCount)
+      .text("""Concurrent connections to the Origin DB for calculating primary and foreign key dependencies
+              |                           A reasonable starting value is half the number of CPU cores on your origin database machine
+              |                           (Note the total Origin DB connection count is --keyCalculationDbConnectionCount + --dataCopyDbConnectionCount)
         """.stripMargin)
 
     opt[Int]("dataCopyDbConnectionCount")
       .valueName("<int>")
       .action((dbp, c) => c.copy(dataCopyDbConnectionCount = dbp))
-      .text(
-        """Concurrent connections to both the Origin DB and the Target DB for copying over full row data
-          |                           A reasonable starting value is half the number of CPU cores on your target database machine
-          |                           (Note the total Origin DB connection count is --keyCalculationDbConnectionCount + --dataCopyDbConnectionCount)
+      .text("""Concurrent connections to both the Origin DB and the Target DB for copying over full row data
+              |                           A reasonable starting value is half the number of CPU cores on your target database machine
+              |                           (Note the total Origin DB connection count is --keyCalculationDbConnectionCount + --dataCopyDbConnectionCount)
         """.stripMargin)
 
     opt[String]("foreignKey")
@@ -102,10 +96,9 @@ object CommandLineParser {
           case _ => throw new RuntimeException()
         }
       }
-      .text(
-        """Foreign key to respect during subsetting even though it is not defined in the database
-          |                           Can be specified multiple times
-          |""".stripMargin)
+      .text("""Foreign key to respect during subsetting even though it is not defined in the database
+              |                           Can be specified multiple times
+              |""".stripMargin)
 
     opt[String]("primaryKey")
       .maxOccurs(Int.MaxValue)
@@ -121,10 +114,9 @@ object CommandLineParser {
           case _ => throw new RuntimeException()
         }
       }
-      .text(
-        """Primary key to recognize during subsetting even though it is not defined in the database
-          |                           Can be specified multiple times
-          |""".stripMargin)
+      .text("""Primary key to recognize during subsetting even though it is not defined in the database
+              |                           Can be specified multiple times
+              |""".stripMargin)
 
     opt[String]("excludeTable")
       .valueName("<schema>.<table>")
@@ -138,11 +130,10 @@ object CommandLineParser {
           case _ => throw new RuntimeException
         }
       }
-      .text(
-        """Exclude a table from the resulting subset
-          |                           Also ignore all foreign keys to and from this table
-          |                           Can be specified multiple times
-          |""".stripMargin)
+      .text("""Exclude a table from the resulting subset
+              |                           Also ignore all foreign keys to and from this table
+              |                           Can be specified multiple times
+              |""".stripMargin)
 
     opt[String]("excludeColumns")
       .valueName("<schema>.<table>(<column1>, <column2>, ...)")
@@ -157,12 +148,11 @@ object CommandLineParser {
           case _ => throw new RuntimeException
         }
       }
-      .text(
-        """Exclude data from these columns when subsetting
-          |                           Intended for columns that are not part of any primary or foreign keys
-          |                           Useful among other things as a workaround if DBSubsetter does not support a vendor-specific data type
-          |                           Can be specified multiple times
-          |""".stripMargin)
+      .text("""Exclude data from these columns when subsetting
+              |                           Intended for columns that are not part of any primary or foreign keys
+              |                           Useful among other things as a workaround if DBSubsetter does not support a vendor-specific data type
+              |                           Can be specified multiple times
+              |""".stripMargin)
 
     opt[File]("tempfileStorageDirectory")
       .valueName("</path/to/tempfile/storage/directory>")
@@ -177,30 +167,27 @@ object CommandLineParser {
           success
         }
       }
-      .text(
-        """Directory in which DBSubsetter will store tempfiles containing intermediate results
-          |                           Defaults to the standard tempfile location of your OS
-          |""".stripMargin)
+      .text("""Directory in which DBSubsetter will store tempfiles containing intermediate results
+              |                           Defaults to the standard tempfile location of your OS
+              |""".stripMargin)
 
     opt[Unit]("singleThreadedDebugMode")
       .action((_, c) => c.copy(singleThreadDebugMode = true))
-      .text(
-        """Run DBSubsetter in debug mode (NOT recommended)
-          |                           Uses a simplified, single-threaded architecture
-          |                           Avoids using Akka Streams and Chronicle-Queue
-          |                           Ignores `--keyCalculationDbConnectionCount` and `--dataCopyDbConnectionCount` and uses one connection per database
-          |                           Subsetting may be significantly slower
-          |                           The resulting subset should be exactly the same as in regular mode
-          |""".stripMargin)
+      .text("""Run DBSubsetter in debug mode (NOT recommended)
+              |                           Uses a simplified, single-threaded architecture
+              |                           Avoids using Akka Streams and Chronicle-Queue
+              |                           Ignores `--keyCalculationDbConnectionCount` and `--dataCopyDbConnectionCount` and uses one connection per database
+              |                           Subsetting may be significantly slower
+              |                           The resulting subset should be exactly the same as in regular mode
+              |""".stripMargin)
 
     opt[Unit]("exposeMetrics")
       .action((_, c) => c.copy(exposeMetrics = true))
-      .text(
-        """Exposes performance metrics at localhost:9092/metrics
-          |                           (Mainly for debugging purposes)
-          |                           Designed for use with Prometheus (https://prometheus.io/) and Grafana (https://grafana.com/)
-          |                           See the `observability-tools.sh` shell script in the project root for an example of how to visualize these metrics
-          |""".stripMargin)
+      .text("""Exposes performance metrics at localhost:9092/metrics
+              |                           (Mainly for debugging purposes)
+              |                           Designed for use with Prometheus (https://prometheus.io/) and Grafana (https://grafana.com/)
+              |                           See the `observability-tools.sh` shell script in the project root for an example of how to visualize these metrics
+              |""".stripMargin)
 
     private val usageExamples =
       """
@@ -299,6 +286,6 @@ case class CmdLinePrimaryKey(
 )
 
 case class CmdLineColumn(
-  table: Table,
-  name: String
+    table: Table,
+    name: String
 )

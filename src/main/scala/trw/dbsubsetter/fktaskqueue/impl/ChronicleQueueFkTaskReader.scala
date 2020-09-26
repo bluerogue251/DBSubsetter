@@ -5,7 +5,6 @@ import trw.dbsubsetter.chronicle.ChronicleQueueFunctions
 import trw.dbsubsetter.db.ColumnTypes.ColumnType
 import trw.dbsubsetter.db.ForeignKeyValue
 
-
 private[impl] final class ChronicleQueueFkTaskReader(columnTypes: Seq[ColumnType]) {
   private[this] val valueReader: ValueIn => ForeignKeyValue = {
     val singleColumnReadFunctions: Seq[ValueIn => Any] =

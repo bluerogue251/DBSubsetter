@@ -13,7 +13,6 @@ object KeyExtractionUtil {
 
   def fkExtractionFunctions(schemaInfo: SchemaInfo): Map[(ForeignKey, Boolean), Keys => ForeignKeyValue] = {
     schemaInfo.fksOrdered.flatMap { foreignKey =>
-
       val parentExtractionFunction: Keys => ForeignKeyValue =
         keys => keys.getValue(foreignKey, confusingTechDebt = false)
 

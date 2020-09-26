@@ -11,7 +11,7 @@ import trw.dbsubsetter.util.Util
   * call this object rather than calling the real Application object. This is because
   * the real Application object appears to have some non-threadsafe behavior which
   * can cause tests to fail nondeterministically when executed in parallel.
- */
+  */
 object ApplicationRunner {
   def run(args: Array[String]): Unit = {
     val startingTime = System.nanoTime()

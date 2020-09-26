@@ -4,7 +4,6 @@ import trw.dbsubsetter.datacopyqueue.DataCopyQueue
 import trw.dbsubsetter.metrics.Metrics
 import trw.dbsubsetter.workflow.{DataCopyTask, PksAdded}
 
-
 private[datacopyqueue] final class DataCopyQueueInstrumented(delegatee: DataCopyQueue) extends DataCopyQueue {
 
   private[this] val pendingTaskCount = Metrics.PendingDataCopyRows

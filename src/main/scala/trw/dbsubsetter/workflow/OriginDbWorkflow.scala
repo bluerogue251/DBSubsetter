@@ -3,7 +3,6 @@ package trw.dbsubsetter.workflow
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.{DbAccessFactory, SchemaInfo, Table}
 
-
 final class OriginDbWorkflow(config: Config, schemaInfo: SchemaInfo, dbAccessFactory: DbAccessFactory) {
 
   private[this] val dbAccess = dbAccessFactory.buildOriginDbAccess()

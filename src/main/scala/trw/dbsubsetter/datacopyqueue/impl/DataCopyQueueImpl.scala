@@ -9,7 +9,6 @@ import trw.dbsubsetter.workflow.{DataCopyTask, PksAdded}
 
 import scala.collection.mutable
 
-
 /**
   * WARNING: this class is not threadsafe
   */
@@ -17,9 +16,11 @@ private[datacopyqueue] final class DataCopyQueueImpl(config: Config, schemaInfo:
 
   private[this] val tablesToQueuedValueCounts: mutable.Map[Table, Long] = {
     val elems: Seq[(Table, Long)] =
-      schemaInfo.
-        tables
-        .map { tableWithMetadata => tableWithMetadata.table -> 0L }
+      schemaInfo
+        .tables
+        .map { tableWithMetadata =>
+          tableWithMetadata.table -> 0L
+        }
 
     mutable.Map[Table, Long](elems: _*)
   }

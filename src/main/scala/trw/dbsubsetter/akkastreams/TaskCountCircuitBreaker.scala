@@ -4,7 +4,6 @@ import akka.NotUsed
 import akka.stream.scaladsl.Flow
 import trw.dbsubsetter.workflow.ForeignKeyTask
 
-
 /**
   * Keeps track of the count of currently outstanding tasks and completes when that count reaches zero.
   * This allows stream processing to eventually complete even though the graph contains cycles.

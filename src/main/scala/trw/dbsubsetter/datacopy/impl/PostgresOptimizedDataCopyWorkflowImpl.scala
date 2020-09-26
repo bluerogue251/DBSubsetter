@@ -11,8 +11,10 @@ import trw.dbsubsetter.workflow.DataCopyTask
 
 import scala.concurrent.{ExecutionContext, Future}
 
-
-private[datacopy] final class PostgresOptimizedDataCopyWorkflowImpl(dbAccessFactory: DbAccessFactory, schemaInfo: SchemaInfo) extends DataCopyWorkflow {
+private[datacopy] final class PostgresOptimizedDataCopyWorkflowImpl(
+    dbAccessFactory: DbAccessFactory,
+    schemaInfo: SchemaInfo
+) extends DataCopyWorkflow {
 
   private[this] val originCopyManager: CopyManager =
     dbAccessFactory.buildOriginPostgresCopyManager()
@@ -30,9 +32,9 @@ private[datacopy] final class PostgresOptimizedDataCopyWorkflowImpl(dbAccessFact
 
     val allColumnNamesSql: String =
       schemaInfo
-      .dataColumnsByTableOrdered(dataCopyTask.table)
-      .map(col => s""""${col.name}"""")
-      .mkString(", ")
+        .dataColumnsByTableOrdered(dataCopyTask.table)
+        .map(col => s""""${col.name}"""")
+        .mkString(", ")
 
     val pkColumnNamesSql: String =
       schemaInfo

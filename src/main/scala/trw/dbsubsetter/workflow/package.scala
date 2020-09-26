@@ -14,7 +14,12 @@ package object workflow {
 
   case class OriginDbResult(table: Table, rows: Vector[Keys], viaTableOpt: Option[Table], fetchChildren: Boolean)
 
-  case class PksAdded(table: Table, rowsNeedingParentTasks: Vector[Keys], rowsNeedingChildTasks: Vector[Keys], viaTableOpt: Option[Table])
+  case class PksAdded(
+      table: Table,
+      rowsNeedingParentTasks: Vector[Keys],
+      rowsNeedingChildTasks: Vector[Keys],
+      viaTableOpt: Option[Table]
+  )
 
   class DataCopyTask(val table: Table, val pkValues: Seq[PrimaryKeyValue])
 

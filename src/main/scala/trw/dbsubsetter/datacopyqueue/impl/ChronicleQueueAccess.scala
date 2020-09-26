@@ -9,7 +9,6 @@ import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.ColumnTypes.ColumnType
 import trw.dbsubsetter.db.PrimaryKeyValue
 
-
 private[impl] final class ChronicleQueueAccess(config: Config, columnTypes: Seq[ColumnType]) {
 
   private[this] val queue: SingleChronicleQueue =

@@ -5,7 +5,6 @@ import trw.dbsubsetter.chronicle.ChronicleQueueFunctions
 import trw.dbsubsetter.db.ColumnTypes.ColumnType
 import trw.dbsubsetter.db.ForeignKeyValue
 
-
 private[impl] final class ChronicleQueueFkTaskWriter(fkOrdinal: Short, columnTypes: Seq[ColumnType]) {
   private[this] val valueWriter: (ValueOut, ForeignKeyValue) => Unit = {
     val singleColumnWriteFunctions: Seq[(ValueOut, Any) => WireOut] =
@@ -18,12 +17,11 @@ private[impl] final class ChronicleQueueFkTaskWriter(fkOrdinal: Short, columnTyp
     }
   }
 
-  def writeHandler(fetchChildren: Boolean, fkValue: ForeignKeyValue): WriteMarshallable = {
+  def writeHandler(fetchChildren: Boolean, fkValue: ForeignKeyValue): WriteMarshallable =
     wireOut => {
       val out = wireOut.getValueOut
       out.bool(fetchChildren)
       out.int16(fkOrdinal)
       valueWriter(out, fkValue)
     }
-  }
 }

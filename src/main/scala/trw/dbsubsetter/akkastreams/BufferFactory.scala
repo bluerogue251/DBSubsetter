@@ -1,9 +1,9 @@
 package trw.dbsubsetter.akkastreams
 
+import akka.{Done, NotUsed}
 import akka.stream.FlowShape
 import akka.stream.scaladsl.{Sink, Source}
 import akka.stream.stage.GraphStage
-import akka.{Done, NotUsed}
 import trw.dbsubsetter.datacopyqueue.DataCopyQueue
 import trw.dbsubsetter.fktaskqueue.ForeignKeyTaskQueue
 import trw.dbsubsetter.workflow.{DataCopyTask, ForeignKeyTask, PksAdded}

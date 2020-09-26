@@ -10,8 +10,8 @@ import trw.dbsubsetter.db.{DbAccessFactory, SchemaInfo}
 import trw.dbsubsetter.fktaskqueue.{ForeignKeyTaskQueue, ForeignKeyTaskQueueFactory}
 import trw.dbsubsetter.workflow._
 
-import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.duration.Duration
 
 object ApplicationAkkaStreams {
   def run(config: Config, schemaInfo: SchemaInfo, baseQueries: Seq[BaseQuery]): Unit = {
@@ -30,7 +30,16 @@ object ApplicationAkkaStreams {
 
       val keyQueryPhase: Future[Done] =
         KeyQueryGraphFactory
-          .build(config, schemaInfo, baseQueries, pkStore, dbAccessFactory, fkTaskCreationWorkflow, fkTaskQueue, dataCopyQueue)
+          .build(
+            config,
+            schemaInfo,
+            baseQueries,
+            pkStore,
+            dbAccessFactory,
+            fkTaskCreationWorkflow,
+            fkTaskQueue,
+            dataCopyQueue
+          )
           .run()
 
       // Wait for the key query phase to complete. Use `result` rather than `ready` to ensure an exception is thrown on failure.

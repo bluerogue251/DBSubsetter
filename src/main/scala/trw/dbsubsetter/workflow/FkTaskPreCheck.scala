@@ -11,7 +11,7 @@ object FkTaskPreCheck {
    * will _not_ be it's PK, so in most cases the PKStore can't help us... but in the one-to-one case
    * where the child column happens to be its PrimaryKey, it might work. It might even be worth defining
    * another class for that case extending ForeignKeyTask called OneToOne[SomethingTask]
-  */
+   */
   def shouldPrecheck(task: FetchParentTask): Boolean = {
     task.fk.pointsToPk
   }

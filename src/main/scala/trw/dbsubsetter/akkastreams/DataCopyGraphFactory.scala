@@ -11,9 +11,10 @@ import trw.dbsubsetter.workflow._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-
 object DataCopyGraphFactory {
-  def build(config: Config, schemaInfo: SchemaInfo, dbAccessFactory: DbAccessFactory, dataCopyQueue: DataCopyQueue)(implicit ec: ExecutionContext): RunnableGraph[Future[Done]] = {
+  def build(config: Config, schemaInfo: SchemaInfo, dbAccessFactory: DbAccessFactory, dataCopyQueue: DataCopyQueue)(
+      implicit ec: ExecutionContext
+  ): RunnableGraph[Future[Done]] = {
     RunnableGraph.fromGraph(GraphDSL.create(Sink.ignore) { implicit b => sink =>
       val dataCopyBufferSource = b.add(BufferFactory.dataCopyBufferSource(dataCopyQueue))
       val balanceTargetDb = b.add(Balance[DataCopyTask](config.dataCopyDbConnectionCount, waitForAllDownstreams = true))

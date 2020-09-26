@@ -41,7 +41,7 @@ final class DbAccessFactory(config: Config, schemaInfo: SchemaInfo) {
       new TargetDbAccessImpl(config.targetDbConnectionString, schemaInfo, connectionFactory)
 
     if (config.exposeMetrics) {
-       targetDbAccess = new InstrumentedTargetDbAccess(targetDbAccess)
+      targetDbAccess = new InstrumentedTargetDbAccess(targetDbAccess)
     }
 
     targetDbAccess

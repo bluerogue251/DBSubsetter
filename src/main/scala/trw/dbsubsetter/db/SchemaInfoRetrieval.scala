@@ -22,19 +22,19 @@ object SchemaInfoRetrieval {
         .toMap
 
     val tablesWithAutoincrementMetadata =
-        includedTables
-          .map { table =>
-            val hasSqlServerAutoincrement =
-              dbMetadata
-                .columns
-                .exists(columnQueryRow => {
-                  columnQueryRow.schema == table.schema.name &&
-                    columnQueryRow.table == table.name &&
-                    columnQueryRow.isSqlServerAutoincrement
-                })
+      includedTables
+        .map { table =>
+          val hasSqlServerAutoincrement =
+            dbMetadata
+              .columns
+              .exists(columnQueryRow => {
+                columnQueryRow.schema == table.schema.name &&
+                  columnQueryRow.table == table.name &&
+                  columnQueryRow.isSqlServerAutoincrement
+              })
 
-            TableWithAutoincrementMetadata(table, hasSqlServerAutoincrement)
-          }
+          TableWithAutoincrementMetadata(table, hasSqlServerAutoincrement)
+        }
 
     val colsByTableAndName: Map[Table, Map[String, Column]] = {
       dbMetadata
@@ -69,47 +69,46 @@ object SchemaInfoRetrieval {
     val pksByTable: Map[Table, PrimaryKey] = {
       val autodetectedPrimaryKeys =
         dbMetadata
-            .primaryKeyColumns
-            .filter(c => tablesByName.contains((c.schema, c.table)))
-            .groupBy(pk => tablesByName(pk.schema, pk.table))
-            .map { case (table, singleTablePrimaryKeyMetadataRows) =>
-              val columnNames = singleTablePrimaryKeyMetadataRows.map(_.column).toSet
-              val orderedColumns = allColumnsByTableOrdered(table).filter(c => columnNames.contains(c.name))
-              table -> new PrimaryKey(orderedColumns)
-            }
+          .primaryKeyColumns
+          .filter(c => tablesByName.contains((c.schema, c.table)))
+          .groupBy(pk => tablesByName(pk.schema, pk.table))
+          .map { case (table, singleTablePrimaryKeyMetadataRows) =>
+            val columnNames = singleTablePrimaryKeyMetadataRows.map(_.column).toSet
+            val orderedColumns = allColumnsByTableOrdered(table).filter(c => columnNames.contains(c.name))
+            table -> new PrimaryKey(orderedColumns)
+          }
 
       val configuredPrimaryKeys =
-          config
-            .extraPrimaryKeys
-            .map { cmdLinePrimaryKey =>
-              val table = cmdLinePrimaryKey.table
-              val columnNames = cmdLinePrimaryKey.columns.map(_.name).toSet
-              val orderedColumns = allColumnsByTableOrdered(table).filter(c => columnNames.contains(c.name))
-              table -> new PrimaryKey(orderedColumns)
-            }
+        config
+          .extraPrimaryKeys
+          .map { cmdLinePrimaryKey =>
+            val table = cmdLinePrimaryKey.table
+            val columnNames = cmdLinePrimaryKey.columns.map(_.name).toSet
+            val orderedColumns = allColumnsByTableOrdered(table).filter(c => columnNames.contains(c.name))
+            table -> new PrimaryKey(orderedColumns)
+          }
 
       autodetectedPrimaryKeys ++ configuredPrimaryKeys
     }
 
     val foreignKeysOrdered: Array[ForeignKey] = {
       val configuredForeignKeys =
-          config
-            .extraForeignKeys
-            .flatMap { efk =>
-              efk
-                .fromColumns
-                .zip(efk.toColumns)
-                .map { case (fromColumn, toColumn) =>
-                  ForeignKeyColumnQueryRow(
-                    efk.fromTable.schema.name,
-                    efk.fromTable.name,
-                    fromColumn.name,
-                    efk.toTable.schema.name,
-                    efk.toTable.name,
-                    toColumn.name
-                  )
-                }
-            }
+        config
+          .extraForeignKeys
+          .flatMap { efk =>
+            efk.fromColumns
+              .zip(efk.toColumns)
+              .map { case (fromColumn, toColumn) =>
+                ForeignKeyColumnQueryRow(
+                  efk.fromTable.schema.name,
+                  efk.fromTable.name,
+                  fromColumn.name,
+                  efk.toTable.schema.name,
+                  efk.toTable.name,
+                  toColumn.name
+                )
+              }
+          }
 
       val combinedForeignKeys = dbMetadata.foreignKeyColumns ++ configuredForeignKeys
 
@@ -135,7 +134,14 @@ object SchemaInfoRetrieval {
             //
             // A less hacky workaround would be to match by column ordinal rather than by name, but unfortunately that info
             // is not included in the result of the query we make to get foreign keys.
-            lazy val mysqlWorkaround = colsByTableAndName.mapValues(nameToColMap => nameToColMap.map { case (k, v) => k.toLowerCase -> v })
+            lazy val mysqlWorkaround =
+              colsByTableAndName
+                .mapValues { nameToColMap =>
+                  nameToColMap
+                    .map { case (k, v) =>
+                      k.toLowerCase -> v
+                    }
+                }
             val toCols = partialForeignKeys.map { pfk =>
               try {
                 colsByTableAndName(toTable)(pfk.toColumn)
@@ -147,10 +153,10 @@ object SchemaInfoRetrieval {
               }
             }
 
-          val pointsToPk = pksByTable.get(toTable).fold(false)(pk => pk.columns == toCols)
+            val pointsToPk = pksByTable.get(toTable).fold(false)(pk => pk.columns == toCols)
 
-        new ForeignKey(fromCols, toCols, pointsToPk, 0)
-      }
+            new ForeignKey(fromCols, toCols, pointsToPk, 0)
+          }
 
       fksUnordered.toArray.zipWithIndex.map { case (fk, idx) =>
         fk.setIndex(idx.toShort)

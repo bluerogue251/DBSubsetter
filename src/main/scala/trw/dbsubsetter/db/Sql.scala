@@ -9,21 +9,21 @@ private[db] object Sql {
 
     val data =
       allCombos.map { case (fk, table) =>
-      val whereClauseColumns: Seq[Column] =
-        if (table == fk.toTable) {
-          fk.toCols
-        } else {
-          fk.fromCols
-        }
+        val whereClauseColumns: Seq[Column] =
+          if (table == fk.toTable) {
+            fk.toCols
+          } else {
+            fk.fromCols
+          }
 
-      val whereClause: String =
-        makeSimpleWhereClause(whereClauseColumns)
+        val whereClause: String =
+          makeSimpleWhereClause(whereClauseColumns)
 
-      val selectColumns: Seq[Column] =
-        sch.keyColumnsByTableOrdered(table)
+        val selectColumns: Seq[Column] =
+          sch.keyColumnsByTableOrdered(table)
 
-      (fk, table) -> makeQueryString(table, selectColumns, whereClause)
-    }.toMap
+        (fk, table) -> makeQueryString(table, selectColumns, whereClause)
+      }.toMap
 
     ForeignKeySqlTemplates(data)
   }
@@ -68,9 +68,9 @@ private[db] object Sql {
 
     val query =
       s"""select $selectClause
-       | from ${quote(table)}
-       | where $whereClause
-       | """.stripMargin
+         | from ${quote(table)}
+         | where $whereClause
+         | """.stripMargin
 
     SqlQuery(query)
   }

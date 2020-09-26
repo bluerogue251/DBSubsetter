@@ -3,7 +3,6 @@ package trw.dbsubsetter.workflow
 import trw.dbsubsetter.db._
 import trw.dbsubsetter.keyextraction.KeyExtractionUtil
 
-
 final class FkTaskCreationWorkflow(schemaInfo: SchemaInfo) {
 
   private[this] val fkExtractionFunctions: Map[(ForeignKey, Boolean), Keys => ForeignKeyValue] =
@@ -16,7 +15,11 @@ final class FkTaskCreationWorkflow(schemaInfo: SchemaInfo) {
     parentTasks ++ childTasks
   }
 
-  private[this] def calcParentTasks(table: Table, rows: Vector[Keys], viaTableOpt: Option[Table]): IndexedSeq[ForeignKeyTask] = {
+  private[this] def calcParentTasks(
+      table: Table,
+      rows: Vector[Keys],
+      viaTableOpt: Option[Table]
+  ): IndexedSeq[ForeignKeyTask] = {
     /*
      * Re: `viaTableOpt`, if we know that the reason we fetched a row to begin with is that it is the child of some row
      * we've already fetched, then we know that we don't need to go fetch that particular parent row again. This only
@@ -24,7 +27,8 @@ final class FkTaskCreationWorkflow(schemaInfo: SchemaInfo) {
      * parent tasks, not child tasks.
      */
     val allForeignKeys = schemaInfo.fksFromTable(table)
-    val useForeignKeys = viaTableOpt.fold(allForeignKeys)(viaTable => allForeignKeys.filterNot(fk => fk.toTable == viaTable))
+    val useForeignKeys =
+      viaTableOpt.fold(allForeignKeys)(viaTable => allForeignKeys.filterNot(fk => fk.toTable == viaTable))
     useForeignKeys.flatMap { foreignKey =>
       val extractionFunction: Keys => ForeignKeyValue = fkExtractionFunctions(foreignKey, false)
       val fkValues: Seq[ForeignKeyValue] = rows.map(extractionFunction).filterNot(_.isEmpty)
@@ -40,4 +44,5 @@ final class FkTaskCreationWorkflow(schemaInfo: SchemaInfo) {
       fkValues.map(fkValue => FetchChildrenTask(foreignKey, fkValue))
     }
   }
+
 }

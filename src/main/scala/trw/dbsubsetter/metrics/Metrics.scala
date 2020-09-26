@@ -3,6 +3,8 @@ package trw.dbsubsetter.metrics
 import io.prometheus.client.{Counter, Gauge, Histogram}
 
 object Metrics {
+
+  // format: off
   val dbDurationPerStatementBuckets: Array[Double] = Array(
     .001, .0025, .005, .0075,
     .01, .025, .05, .075,
@@ -27,6 +29,7 @@ object Metrics {
     .001, .005,
     .01, .05
   )
+  // format: on
 
   val OriginDbDurationPerStatement: Histogram =
     Histogram

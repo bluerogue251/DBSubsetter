@@ -4,7 +4,6 @@ import trw.dbsubsetter.datacopy.DataCopyWorkflow
 import trw.dbsubsetter.db.{Constants, DbAccessFactory, PrimaryKeyValue, Row}
 import trw.dbsubsetter.workflow.DataCopyTask
 
-
 private[datacopy] final class GenericDataCopyWorkflowImpl(dbAccessFactory: DbAccessFactory) extends DataCopyWorkflow {
 
   private[this] val originDbAccess = dbAccessFactory.buildOriginDbAccess()

@@ -8,7 +8,6 @@ import trw.dbsubsetter.fktaskqueue.{ForeignKeyTaskQueue, ForeignKeyTaskQueueFact
 import trw.dbsubsetter.primarykeystore.{PrimaryKeyStore, PrimaryKeyStoreFactory}
 import trw.dbsubsetter.workflow._
 
-
 class ApplicationSingleThreaded(config: Config, schemaInfo: SchemaInfo, baseQueries: Seq[BaseQuery]) {
 
   private[this] val dbAccessFactory =
@@ -60,7 +59,8 @@ class ApplicationSingleThreaded(config: Config, schemaInfo: SchemaInfo, baseQuer
       task match {
         case fetchParentTask: FetchParentTask if FkTaskPreCheck.shouldPrecheck(fetchParentTask) =>
           val tableToCheck: Table = fetchParentTask.fk.toTable
-          val primaryKeyValueToCheck: PrimaryKeyValue = new PrimaryKeyValue(fetchParentTask.fkValueFromChild.individualColumnValues)
+          val primaryKeyValueToCheck: PrimaryKeyValue =
+            new PrimaryKeyValue(fetchParentTask.fkValueFromChild.individualColumnValues)
           pkStore.alreadySeen(tableToCheck, primaryKeyValueToCheck)
         case _ => false
       }

@@ -7,7 +7,12 @@ import trw.dbsubsetter.db.{DbAccessFactory, SchemaInfo}
 import trw.dbsubsetter.workflow._
 
 private[akkastreams] object OriginDb {
-  def query(config: Config, schemaInfo: SchemaInfo, dbAccessFactory: DbAccessFactory): Flow[OriginDbRequest, OriginDbResult, NotUsed] = {
+
+  def query(
+      config: Config,
+      schemaInfo: SchemaInfo,
+      dbAccessFactory: DbAccessFactory
+  ): Flow[OriginDbRequest, OriginDbResult, NotUsed] = {
     Flow[OriginDbRequest].statefulMapConcat { () =>
       val dbWorkflow = new OriginDbWorkflow(config, schemaInfo, dbAccessFactory)
       req => {

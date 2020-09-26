@@ -6,8 +6,12 @@ import trw.dbsubsetter.db.impl.ConnectionFactory
 import trw.dbsubsetter.db.impl.mapper.JdbcResultConverter
 import trw.dbsubsetter.db.{ForeignKey, ForeignKeyValue, Keys, OriginDbAccess, PrimaryKeyValue, Row, SchemaInfo, Sql, SqlQuery, Table}
 
-
-private[db] class OriginDbAccessImpl(connStr: String, sch: SchemaInfo, mapper: JdbcResultConverter, connectionFactory: ConnectionFactory) extends OriginDbAccess {
+private[db] class OriginDbAccessImpl(
+    connStr: String,
+    sch: SchemaInfo,
+    mapper: JdbcResultConverter,
+    connectionFactory: ConnectionFactory
+) extends OriginDbAccess {
 
   private[this] val conn = connectionFactory.getReadOnlyConnection(connStr)
 

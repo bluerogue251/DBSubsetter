@@ -4,7 +4,6 @@ import trw.dbsubsetter.db.{Keys, PrimaryKeyValue, SchemaInfo, Table}
 import trw.dbsubsetter.keyextraction.KeyExtractionUtil
 import trw.dbsubsetter.primarykeystore.{AlreadySeenWithoutChildren, FirstTimeSeen, PrimaryKeyStore, WriteOutcome}
 
-
 final class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
 
   private[this] val pkValueExtractionFunctions: Map[Table, Keys => PrimaryKeyValue] =
@@ -35,7 +34,7 @@ final class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
         val pkValue: PrimaryKeyValue = pkValueExtractionFunction(row)
         pkStore.markSeen(table, pkValue) match {
           case FirstTimeSeen => true
-          case _ => false
+          case _             => false
         }
       })
       PksAdded(table, newRows, Vector.empty, viaTableOpt)
@@ -46,6 +45,7 @@ final class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
 private[this] object PkStoreWorkflow {
 
   private val EmptyMap: Map[WriteOutcome, Vector[Keys]] =
-    Map.empty[WriteOutcome, Vector[Keys]]
+    Map
+      .empty[WriteOutcome, Vector[Keys]]
       .withDefaultValue(Vector.empty[Keys])
 }

@@ -12,7 +12,7 @@ object ChronicleQueueFactory {
     val storageDir =
       config.tempfileStorageDirectoryOverride match {
         case Some(dir) => dir.toPath
-        case None => Files.createTempDirectory("DBSubsetter-")
+        case None      => Files.createTempDirectory("DBSubsetter-")
       }
 
     SingleChronicleQueueBuilder
