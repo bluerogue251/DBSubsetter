@@ -8,8 +8,7 @@ import trw.dbsubsetter.db.ColumnTypes.ColumnType
 object SchemaInfoRetrieval {
   def getSchemaInfo(dbMetadata: DbMetadataQueryResult, config: Config): SchemaInfo = {
     val includedTables =
-      dbMetadata
-        .tables
+      dbMetadata.tables
         .map { tableQueryRow =>
           val schema = Schema(tableQueryRow.schema)
           Table(schema, tableQueryRow.name)
@@ -25,20 +24,16 @@ object SchemaInfoRetrieval {
       includedTables
         .map { table =>
           val hasSqlServerAutoincrement =
-            dbMetadata
-              .columns
+            dbMetadata.columns
               .exists(columnQueryRow => {
-                columnQueryRow.schema == table.schema.name &&
-                  columnQueryRow.table == table.name &&
-                  columnQueryRow.isSqlServerAutoincrement
+                columnQueryRow.schema == table.schema.name && columnQueryRow.table == table.name && columnQueryRow.isSqlServerAutoincrement
               })
 
           TableWithAutoincrementMetadata(table, hasSqlServerAutoincrement)
         }
 
     val colsByTableAndName: Map[Table, Map[String, Column]] = {
-      dbMetadata
-        .columns
+      dbMetadata.columns
         .filterNot { columnQueryRow =>
           val schema = Schema(columnQueryRow.schema)
           val table = Table(schema, columnQueryRow.table)
@@ -68,8 +63,7 @@ object SchemaInfoRetrieval {
 
     val pksByTable: Map[Table, PrimaryKey] = {
       val autodetectedPrimaryKeys =
-        dbMetadata
-          .primaryKeyColumns
+        dbMetadata.primaryKeyColumns
           .filter(c => tablesByName.contains((c.schema, c.table)))
           .groupBy(pk => tablesByName(pk.schema, pk.table))
           .map { case (table, singleTablePrimaryKeyMetadataRows) =>
@@ -79,8 +73,7 @@ object SchemaInfoRetrieval {
           }
 
       val configuredPrimaryKeys =
-        config
-          .extraPrimaryKeys
+        config.extraPrimaryKeys
           .map { cmdLinePrimaryKey =>
             val table = cmdLinePrimaryKey.table
             val columnNames = cmdLinePrimaryKey.columns.map(_.name).toSet
@@ -93,8 +86,7 @@ object SchemaInfoRetrieval {
 
     val foreignKeysOrdered: Array[ForeignKey] = {
       val configuredForeignKeys =
-        config
-          .extraForeignKeys
+        config.extraForeignKeys
           .flatMap { efk =>
             efk.fromColumns
               .zip(efk.toColumns)

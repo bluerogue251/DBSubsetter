@@ -34,15 +34,13 @@ private[fktaskqueue] final class ForeignKeyTaskChronicleQueue(config: Config, sc
     }
 
   private[this] val parentFkWriters =
-    schemaInfo
-      .fksOrdered
+    schemaInfo.fksOrdered
       .map { fk =>
         new ChronicleQueueFkTaskWriter(fk.i, fk.toCols.map(_.dataType))
       }
 
   private[this] val childFkWriters =
-    schemaInfo
-      .fksOrdered
+    schemaInfo.fksOrdered
       .map { fk =>
         new ChronicleQueueFkTaskWriter(fk.i, fk.fromCols.map(_.dataType))
       }
