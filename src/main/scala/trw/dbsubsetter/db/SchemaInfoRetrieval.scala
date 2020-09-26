@@ -25,9 +25,11 @@ object SchemaInfoRetrieval {
         .map { table =>
           val hasSqlServerAutoincrement =
             dbMetadata.columns
-              .exists(columnQueryRow => {
-                columnQueryRow.schema == table.schema.name && columnQueryRow.table == table.name && columnQueryRow.isSqlServerAutoincrement
-              })
+              .exists { columnQueryRow =>
+                columnQueryRow.schema == table.schema.name &&
+                  columnQueryRow.table == table.name &&
+                  columnQueryRow.isSqlServerAutoincrement
+              }
 
           TableWithAutoincrementMetadata(table, hasSqlServerAutoincrement)
         }
