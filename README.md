@@ -11,11 +11,11 @@ It can also be used to export the data belonging to a particular set of users.
 
 ## Project Goals
 
-_Support large datasets_: Designed for stability when handling large datasets.
+_Support large datasets_: designed for stability when handling large datasets.
 
-_Deterministic_: Identical inputs yield identical outputs.
+_Deterministic_: identical inputs yield identical outputs.
 
-_Do one thing well_: A tiny codebase focused only on subsetting features.
+_Do one thing well_: a tiny codebase focused exclusively on core subsetting features.
 
 
 ## Supported Databases
@@ -27,10 +27,11 @@ Please reach out by opening a GitHub ticket if you would like support for a diff
 
 ## Download and Usage Instructions
 
-1. Load an empty schema from your "origin" database into your "target" database. See vendor-specific instructions for
-[Postgres](docs/pre_subset_postgres.md),
-[MySQL](docs/pre_subset_mysql.md), or
-[Microsoft SQL Server](docs/pre_subset_ms_sql_server.md).
+1. Load an empty schema from your "origin" database into your "target" database.
+   Follow vendor-specific instructions for:
+     * [Postgres](docs/pre_subset_postgres.md)
+     * [MySQL](docs/pre_subset_mysql.md)
+     * [Microsoft SQL Server](docs/pre_subset_ms_sql_server.md)
  
 2. Use Java 8 or above to run our
 [latest release](https://github.com/bluerogue251/DBSubsetter/releases/latest):
@@ -54,10 +55,10 @@ $ java -jar /path/to/DBSubsetter.jar \
     --dataCopyDbConnectionCount 8
 ```
 
-3. After DBSubsetter exits, follow vendor-specific instructions for
-[Postgres](docs/post_subset_postgres.md),
-[MySQL](docs/post_subset_mysql.md), or
-[Microsoft SQL Server](docs/post_subset_ms_sql_server.md).
+3. After DBSubsetter exits,follow vendor-specific instructions for
+    * [Postgres](docs/post_subset_postgres.md)
+    * [MySQL](docs/post_subset_mysql.md)
+    * [Microsoft SQL Server](docs/post_subset_ms_sql_server.md)
 
 
 ## Contributing
