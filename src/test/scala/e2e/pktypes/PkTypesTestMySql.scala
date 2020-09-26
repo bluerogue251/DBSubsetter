@@ -1,8 +1,8 @@
 package e2e.pktypes
 
-import e2e.MySqlEnabledTest
+import e2e.MySqlSubsettingTest
 
-class PkTypesTestMySql extends MySqlEnabledTest with PkTypesTest {
+class PkTypesTestMySql extends MySqlSubsettingTest with PkTypesTest {
 
   override def expectedChar10Ids = Seq[String](" four", "two")
 

@@ -1,8 +1,8 @@
 package e2e.fktononpk
 
-import e2e.MySqlEnabledTest
+import e2e.MySqlSubsettingTest
 
-class ForeignKeyToNonPrimaryKeyTestMySql extends MySqlEnabledTest with ForeignKeyToNonPrimaryKeyTest {
+class ForeignKeyToNonPrimaryKeyTestMySql extends MySqlSubsettingTest with ForeignKeyToNonPrimaryKeyTest {
 
   override val programArgs = Array(
     "--schemas", "fk_reference_non_pk",
