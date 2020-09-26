@@ -1,6 +1,6 @@
 package load
 
-import e2e.AbstractEndToEndTest
+import e2e.DbEnabledTest
 import util.db.Database
 import util.runner.TestSubsetRunner
 
@@ -13,7 +13,7 @@ import util.runner.TestSubsetRunner
  * way. Because of how messy the implementation of (2) is at the moment, only Postgres load tests work at the moment, and
  * their MySql and SqlServer counterparts are commented out. This is a definite area for future refactoring.
  */
-trait LoadTest[T <: Database] { this: AbstractEndToEndTest[T] =>
+trait LoadTest[T <: Database] { this: DbEnabledTest[T] =>
 
   protected def singleThreadedRuntimeLimitMillis: Long
 
