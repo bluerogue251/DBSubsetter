@@ -5,7 +5,7 @@ import util.assertion.AssertionUtil
 import util.slick.SlickUtil
 
 trait ValidationTest extends FunSuiteLike with AssertionUtil {
-  val testName = "self_referencing"
+  val testName = "validation"
 
   protected val profile: slick.jdbc.JdbcProfile
 
@@ -20,7 +20,7 @@ trait ValidationTest extends FunSuiteLike with AssertionUtil {
   }
 
   protected def prepareOriginDML(): Unit = {
-    SlickUtil.dml(originSlick, ValidationDML.dbioSeq(ddl))
+    // No-Op
   }
 
   test("Correct self_referencing_table records were included") {
