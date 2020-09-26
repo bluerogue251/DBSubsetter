@@ -1,8 +1,8 @@
 package e2e.circulardep
 
-import e2e.AbstractSqlServerEndToEndTest
+import e2e.SqlServerSubsettingTest
 
-class CircularDepTestSqlServer extends AbstractSqlServerEndToEndTest with CircularDepTest {
+class CircularDepTestSqlServer extends SqlServerSubsettingTest with CircularDepTest {
 
   override val programArgs = Array(
     "--schemas", "dbo",

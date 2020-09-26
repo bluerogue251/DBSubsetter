@@ -1,13 +1,13 @@
 package e2e.crossschema
 
-import e2e.AbstractPostgresqlEndToEndTest
+import e2e.PostgresSubsettingTest
 import slick.dbio.DBIO
 import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
-class CrossSchemaTestPostgreSQL extends AbstractPostgresqlEndToEndTest with CrossSchemaTest {
+class CrossSchemaTestPostgreSQL extends PostgresSubsettingTest with CrossSchemaTest {
 
   override val programArgs = Array(
     "--schemas", "schema_1, schema_2, schema_3",

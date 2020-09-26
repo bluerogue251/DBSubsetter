@@ -2,12 +2,12 @@ package e2e.pgdatatypes
 
 import java.io.File
 
-import e2e.AbstractPostgresqlEndToEndTest
-import util.db.PostgreSQLDatabase
+import e2e.PostgresSubsettingTest
+import util.db.PostgresDatabase
 
 import scala.sys.process._
 
-class PostgreSQLDataTypesTest extends AbstractPostgresqlEndToEndTest {
+class PostgreSQLDataTypesTest extends PostgresSubsettingTest {
   override protected val testName = "pg_data_types"
 
   override protected val programArgs = Array(
@@ -44,7 +44,7 @@ class PostgreSQLDataTypesTest extends AbstractPostgresqlEndToEndTest {
   }
 
   private def originPsqlCommand: String = {
-    val originDb: PostgreSQLDatabase = dbs.origin
+    val originDb: PostgresDatabase = dbs.origin
     s"psql --host ${originDb.host} --port ${originDb.port} --user postgres ${originDb.name}"
   }
 }

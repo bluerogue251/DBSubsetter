@@ -1,8 +1,8 @@
 package e2e.mixedcase
 
-import e2e.AbstractSqlServerEndToEndTest
+import e2e.SqlServerSubsettingTest
 
-class MixedCaseTestSqlServer extends AbstractSqlServerEndToEndTest with MixedCaseTest {
+class MixedCaseTestSqlServer extends SqlServerSubsettingTest with MixedCaseTest {
 
   override val programArgs = Array(
     "--schemas", "dbo",

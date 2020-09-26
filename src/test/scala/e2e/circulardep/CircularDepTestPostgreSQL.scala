@@ -1,8 +1,8 @@
 package e2e.circulardep
 
-import e2e.AbstractPostgresqlEndToEndTest
+import e2e.PostgresSubsettingTest
 
-class CircularDepTestPostgreSQL extends AbstractPostgresqlEndToEndTest with CircularDepTest {
+class CircularDepTestPostgreSQL extends PostgresSubsettingTest with CircularDepTest {
 
   override val programArgs = Array(
     "--schemas", "public",

@@ -1,8 +1,8 @@
 package e2e.missingfk
 
-import e2e.AbstractMysqlEndToEndTest
+import e2e.MySqlSubsettingTest
 
-class MissingFkTestMySql extends AbstractMysqlEndToEndTest with MissingFkTest {
+class MissingFkTestMySql extends MySqlSubsettingTest with MissingFkTest {
 
   override val programArgs = Array(
     "--schemas", "missing_fk",

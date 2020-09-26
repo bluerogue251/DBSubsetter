@@ -1,8 +1,8 @@
 package e2e.basequeries
 
-import e2e.AbstractSqlServerEndToEndTest
+import e2e.SqlServerSubsettingTest
 
-class BaseQueriesTestSqlServer extends AbstractSqlServerEndToEndTest with BaseQueriesTest {
+class BaseQueriesTestSqlServer extends SqlServerSubsettingTest with BaseQueriesTest {
 
   override protected val programArgs = Array(
     "--schemas", "dbo",

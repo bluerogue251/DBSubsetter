@@ -2,13 +2,13 @@ package e2e.mysqldatatypes
 
 import java.io.File
 
-import e2e.AbstractMysqlEndToEndTest
+import e2e.MySqlSubsettingTest
 import util.assertion.AssertionUtil
 import util.db.MySqlDatabase
 
 import scala.sys.process._
 
-class MySqlDataTypesTest extends AbstractMysqlEndToEndTest with AssertionUtil {
+class MySqlDataTypesTest extends MySqlSubsettingTest with AssertionUtil {
   override protected val testName = "mysql_data_types"
 
   override protected val programArgs = Array(

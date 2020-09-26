@@ -1,12 +1,12 @@
 //package load.schooldb
 //
-//import e2e.{AbstractMysqlEndToEndTest, MysqlEndToEndTestUtil}
+//import e2e.{MySqlEnabledTest, MysqlEndToEndTestUtil}
 //import load.LoadTest
 //import util.db.MySqlDatabase
 //
 //import scala.sys.process._
 //
-//class SchoolDbTestMySql extends AbstractMysqlEndToEndTest with LoadTest[MySqlDatabase] with SchoolDbTest {
+//class SchoolDbTestMySql extends MySqlEnabledTest with LoadTest[MySqlDatabase] with SchoolDbTest {
 //
 //  override val singleThreadedRuntimeLimitMillis: Long = 1150000
 //

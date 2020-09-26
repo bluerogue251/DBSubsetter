@@ -3,19 +3,17 @@ package load.physics
 import java.io._
 import java.sql.{Connection, DriverManager, PreparedStatement, ResultSet}
 
-import e2e.AbstractPostgresqlEndToEndTest
+import e2e.PostgresEnabledTest
 import org.postgresql.copy.CopyManager
 import org.postgresql.core.BaseConnection
 import slick.jdbc.PostgresProfile.api._
 import slick.sql.SqlAction
 import trw.dbsubsetter.db.Row
-import util.db.{DatabaseSet, PostgreSQLDatabase}
+import util.db.{DatabaseSet, PostgresDatabase}
 
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
-
-
 
 /*
  * This is a benchmark to find out what the fastest way to insert large volumes of data into Postgres is.
@@ -52,7 +50,7 @@ import scala.concurrent.{Await, Future}
  *   Bulk Copy:         49  Seconds
 
  */
-class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
+class InsertBenchmarkPostgreSQL extends PostgresEnabledTest {
 
   override protected def testName: String = "insert_benchmark"
 
@@ -60,12 +58,12 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
 
   override protected def createOriginDatabase(): Unit = {}
 
-  override protected def dbs: DatabaseSet[PostgreSQLDatabase] = {
+  override protected def dbs: DatabaseSet[PostgresDatabase] = {
     val defaults = super.dbs
 
-    val originDb = new PostgreSQLDatabase("localhost", ???, "physics_db")
+    val originDb = new PostgresDatabase("localhost", ???, "physics_db")
 
-    new DatabaseSet[PostgreSQLDatabase](
+    new DatabaseSet[PostgresDatabase](
       originDb,
       defaults.targetSingleThreaded,
       defaults.targetAkkaStreams
@@ -107,12 +105,6 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
 
     Await.ready(targetSingleThreadedSlick.run(createTableStatements), Duration.Inf)
   }
-
-  override protected def runSubsetInSingleThreadedMode(): Unit = {}
-
-  override protected def runSubsetInAkkaStreamsMode(): Unit = {}
-
-  override protected def postSubset(): Unit = {}
 
   test("JDBC Batch Insert 100 Rows At A Time") {
     jdbcBatchFullFlow("jdbc_batch_100", 100)
@@ -256,7 +248,6 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
     val originCopyManager: CopyManager = new CopyManager(originJdbcConnection.asInstanceOf[BaseConnection])
     val targetCopyManager: CopyManager = new CopyManager(targetJdbcConnection.asInstanceOf[BaseConnection])
 
-
     def makeBulkCopyIdString(fromIdInclusive: Int, endIdInclusive: Int): String = {
       val idValues = (fromIdInclusive to endIdInclusive).mkString(",")
       s"COPY (select * from quantum_data where id in ($idValues)) TO STDOUT (FORMAT BINARY)"
@@ -345,7 +336,8 @@ class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
   }
 
   private[this] lazy val targetJdbcConnection: Connection = {
-    val connectionString = s"jdbc:postgresql://localhost:${dbs.targetSingleThreaded.port}/${dbs.targetSingleThreaded.name}?user=postgres"
+    val connectionString =
+      s"jdbc:postgresql://localhost:${dbs.targetSingleThreaded.port}/${dbs.targetSingleThreaded.name}?user=postgres"
     val connection: Connection = DriverManager.getConnection(connectionString)
     connection.setAutoCommit(false)
     connection

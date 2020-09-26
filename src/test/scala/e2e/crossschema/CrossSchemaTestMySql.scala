@@ -1,8 +1,8 @@
 package e2e.crossschema
 
-import e2e.AbstractMysqlEndToEndTest
+import e2e.MySqlSubsettingTest
 
-class CrossSchemaTestMySql extends AbstractMysqlEndToEndTest with CrossSchemaTest {
+class CrossSchemaTestMySql extends MySqlSubsettingTest with CrossSchemaTest {
 
   override protected val additionalSchemas: List[String] =
     List[String]("schema_1", "schema_2", "schema_3")

@@ -1,8 +1,8 @@
 package e2e.autoincrementingpk
 
-import e2e.AbstractPostgresqlEndToEndTest
+import e2e.PostgresSubsettingTest
 
-class AutoIncrementingPkTestPostgreSQL extends AbstractPostgresqlEndToEndTest with AutoIncrementingPkTest {
+class AutoIncrementingPkTestPostgreSQL extends PostgresSubsettingTest with AutoIncrementingPkTest {
 
   override protected val programArgs = Array(
     "--schemas", "public",

@@ -6,7 +6,10 @@ import util.db._
 import scala.sys.process._
 import scala.util.Properties
 
-abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest[SqlServerDatabase] {
+/**
+  * A test which requires access to a running Microsoft Sql Server database.
+  */
+abstract class SqlServerEnabledTest extends DbEnabledTest[SqlServerDatabase] {
   override protected val profile = slick.jdbc.SQLServerProfile
 
   protected def testName: String
@@ -42,11 +45,6 @@ abstract class AbstractSqlServerEndToEndTest extends AbstractEndToEndTest[SqlSer
   override protected def prepareTargetDDL(): Unit = {
     s"./src/test/util/sync_sqlserver_origin_to_target.sh ${dbs.origin.host} ${dbs.origin.name} ${dbs.targetSingleThreaded.name}".!!
     s"./src/test/util/sync_sqlserver_origin_to_target.sh ${dbs.origin.host} ${dbs.origin.name} ${dbs.targetAkkaStreams.name}".!!
-  }
-
-  override protected def postSubset(): Unit = {
-    s"./src/test/util/sqlserver_post_subset.sh ${dbs.origin.host} ${dbs.targetSingleThreaded.name}".!!
-    s"./src/test/util/sqlserver_post_subset.sh ${dbs.origin.host} ${dbs.targetAkkaStreams.name}".!!
   }
 
   private def createEmptyDb(containerName: String, dbName: String): Unit = {

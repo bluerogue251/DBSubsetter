@@ -1,8 +1,8 @@
 package e2e.missingfk
 
-import e2e.AbstractPostgresqlEndToEndTest
+import e2e.PostgresSubsettingTest
 
-class MissingFkTestPostgreSQL extends AbstractPostgresqlEndToEndTest with MissingFkTest {
+class MissingFkTestPostgreSQL extends PostgresSubsettingTest with MissingFkTest {
 
   override val programArgs = Array(
     "--schemas", "public",

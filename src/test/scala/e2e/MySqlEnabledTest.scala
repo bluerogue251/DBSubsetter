@@ -6,7 +6,10 @@ import util.db._
 import scala.sys.process._
 import scala.util.Properties
 
-abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest[MySqlDatabase] {
+/**
+  * A test which requires access to a running MySql database.
+  */
+abstract class MySqlEnabledTest extends DbEnabledTest[MySqlDatabase] {
   override protected val profile = slick.jdbc.MySQLProfile
 
   protected def additionalSchemas: List[String] = List.empty
@@ -67,8 +70,6 @@ abstract class AbstractMysqlEndToEndTest extends AbstractEndToEndTest[MySqlDatab
     MysqlEndToEndTestUtil.preSubsetDdlSync(dbs.origin, dbs.targetSingleThreaded, allSchemas)
     MysqlEndToEndTestUtil.preSubsetDdlSync(dbs.origin, dbs.targetAkkaStreams, allSchemas)
   }
-
-  override protected def postSubset(): Unit = {} // No-op
 }
 
 object MysqlEndToEndTestUtil {

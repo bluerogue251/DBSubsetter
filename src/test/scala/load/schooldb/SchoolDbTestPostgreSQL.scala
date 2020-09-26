@@ -1,16 +1,16 @@
 package load.schooldb
 
-import e2e.AbstractPostgresqlEndToEndTest
+import e2e.PostgresSubsettingTest
 import load.LoadTest
 import slick.dbio.DBIO
 import slick.jdbc.PostgresProfile.api._
-import util.db.PostgreSQLDatabase
+import util.db.PostgresDatabase
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 import scala.sys.process._
 
-class SchoolDbTestPostgreSQL extends AbstractPostgresqlEndToEndTest with LoadTest[PostgreSQLDatabase] with SchoolDbTest {
+class SchoolDbTestPostgreSQL extends PostgresSubsettingTest with LoadTest[PostgresDatabase] with SchoolDbTest {
 
   /*
    * These values are configured for the Drone CI environment and are supposed to be pretty lenient,
@@ -22,11 +22,11 @@ class SchoolDbTestPostgreSQL extends AbstractPostgresqlEndToEndTest with LoadTes
   override val akkaStreamsRuntimeLimitMillis: Long = 20000 // 20 seconds
 
   /*
-    * Only to be used when manually changing the origin db definition. In this case, the origin DB needs
-    * to be completely rebuilt from scratch using Slick definitions, as opposed to being efficiently
-    * loaded from an existing dump file. Only set this to `true` if you really know what you are doing, and
-    * if you are prepared to make sure the dump file stored in S3 gets updated to your latest version.
-    */
+   * Only to be used when manually changing the origin db definition. In this case, the origin DB needs
+   * to be completely rebuilt from scratch using Slick definitions, as opposed to being efficiently
+   * loaded from an existing dump file. Only set this to `true` if you really know what you are doing, and
+   * if you are prepared to make sure the dump file stored in S3 gets updated to your latest version.
+   */
   private val updateOriginDb: Boolean = false
 
   override protected def prepareOriginDDL(): Unit = {
@@ -47,10 +47,11 @@ class SchoolDbTestPostgreSQL extends AbstractPostgresqlEndToEndTest with LoadTes
   override protected def prepareOriginDML(): Unit = {
     (updateOriginDb) match {
       case (false) => // No action necessary (already done in prepareOriginDDL)
-      case (true) => super.prepareOriginDML() // We have to populate it from scratch
+      case (true)  => super.prepareOriginDML() // We have to populate it from scratch
     }
   }
 
+  // format: off
   override protected val programArgs = Array(
     "--schemas", "school_db,Audit",
     "--baseQuery", "school_db.Students ::: student_id % 100 = 0 ::: includeChildren",
@@ -58,4 +59,5 @@ class SchoolDbTestPostgreSQL extends AbstractPostgresqlEndToEndTest with LoadTes
     "--excludeColumns", "school_db.schools(mascot)",
     "--excludeTable", "school_db.empty_table_2"
   )
+  // format: on
 }

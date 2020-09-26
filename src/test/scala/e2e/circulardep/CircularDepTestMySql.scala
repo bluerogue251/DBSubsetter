@@ -1,8 +1,8 @@
 package e2e.circulardep
 
-import e2e.AbstractMysqlEndToEndTest
+import e2e.MySqlSubsettingTest
 
-class CircularDepTestMySql extends AbstractMysqlEndToEndTest with CircularDepTest {
+class CircularDepTestMySql extends MySqlSubsettingTest with CircularDepTest {
 
   override val programArgs = Array(
     "--schemas", "circular_dep",

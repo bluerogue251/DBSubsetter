@@ -1,10 +1,10 @@
 package e2e.crossschema
 
-import e2e.AbstractSqlServerEndToEndTest
+import e2e.SqlServerSubsettingTest
 
 import scala.sys.process._
 
-class CrossSchemaTestSqlServer extends AbstractSqlServerEndToEndTest with CrossSchemaTest {
+class CrossSchemaTestSqlServer extends SqlServerSubsettingTest with CrossSchemaTest {
 
   override protected val programArgs = Array(
     "--schemas", "schema_1, schema_2, schema_3",

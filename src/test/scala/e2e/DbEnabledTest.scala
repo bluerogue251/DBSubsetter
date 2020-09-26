@@ -3,9 +3,11 @@ package e2e
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 import slick.jdbc.JdbcBackend
 import util.db.{Database, DatabaseSet}
-import util.runner.TestSubsetRunner
 
-abstract class AbstractEndToEndTest[T <: Database] extends FunSuite with BeforeAndAfterAll {
+/**
+  * A test which requires access to a running database.
+  */
+abstract class DbEnabledTest[T <: Database] extends FunSuite with BeforeAndAfterAll {
   /*
    * Concrete test classes must override the following
    */
@@ -22,18 +24,6 @@ abstract class AbstractEndToEndTest[T <: Database] extends FunSuite with BeforeA
   protected def prepareOriginDML(): Unit
 
   protected def prepareTargetDDL(): Unit
-
-  protected def programArgs: Array[String]
-
-  protected def runSubsetInSingleThreadedMode(): Unit = {
-    TestSubsetRunner.runSubsetInSingleThreadedMode(dbs, programArgs)
-  }
-
-  protected def runSubsetInAkkaStreamsMode(): Unit = {
-    TestSubsetRunner.runSubsetInAkkaStreamsMode(dbs, programArgs)
-  }
-
-  protected def postSubset(): Unit
 
   protected def teardownOriginContainer(): Unit = {} // No-op by default
 
@@ -76,25 +66,6 @@ abstract class AbstractEndToEndTest[T <: Database] extends FunSuite with BeforeA
      * Set up the DDL (but NOT the DML) in the target DB
      */
     prepareTargetDDL()
-
-
-    /*
-     * Run subsetting to copy a subset of the DML from the origin DB to the target DBs
-     */
-    runSubsetInSingleThreadedMode()
-    runSubsetInAkkaStreamsMode()
-
-    /*
-     * Do any steps necessary after subsetting, such as re-enabling foreign keys, re-adding indices
-     * to the target DBs, etc.
-     */
-    postSubset()
-
-    /*
-     * All of our setup is now done. We are now ready to make assertions on the contents of the
-     * target DBs to ensure that our program copied the correct data from the origin to the target
-     * DBs.
-     */
   }
 
   override protected def afterAll(): Unit = {
