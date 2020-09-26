@@ -172,7 +172,7 @@ object CommandLineParser {
               |""".stripMargin)
 
     opt[Unit]("singleThreadedDebugMode")
-      .action((_, c) => c.copy(singleThreadDebugMode = true))
+      .action((_, c) => c.copy(singleThreadMode = true))
       .text("""Run DBSubsetter in debug mode (NOT recommended)
               |                           Uses a simplified, single-threaded architecture
               |                           Avoids using Akka Streams and Chronicle-Queue
@@ -182,7 +182,7 @@ object CommandLineParser {
               |""".stripMargin)
 
     opt[Unit]("exposeMetrics")
-      .action((_, c) => c.copy(exposeMetrics = true))
+      .action((_, c) => c.copy(metricsPort = Some(9092)))
       .text("""Exposes performance metrics at localhost:9092/metrics
               |                           (Mainly for debugging purposes)
               |                           Designed for use with Prometheus (https://prometheus.io/) and Grafana (https://grafana.com/)

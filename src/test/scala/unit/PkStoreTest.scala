@@ -1,7 +1,6 @@
 package unit
 
 import org.scalatest.FunSuite
-import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.{Column, PrimaryKey, PrimaryKeyValue, Schema, SchemaInfo, Table}
 import trw.dbsubsetter.primarykeystore._
 
@@ -10,7 +9,7 @@ class PkStoreTest extends FunSuite {
     val table: Table =
       Table(
         schema = Schema("public"),
-        name ="users"
+        name = "users"
       )
 
     val pkCol: Column =
@@ -34,7 +33,7 @@ class PkStoreTest extends FunSuite {
       )
 
     val pkStore: PrimaryKeyStore =
-      PrimaryKeyStoreFactory.buildPrimaryKeyStore(Config(), schemaInfo)
+      PrimaryKeyStoreFactory.buildPrimaryKeyStore(schemaInfo)
 
     val pkValue: PrimaryKeyValue = new PrimaryKeyValue(Seq[String]("pkValue"))
 

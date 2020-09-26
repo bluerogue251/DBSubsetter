@@ -10,8 +10,8 @@ import trw.dbsubsetter.db.{DbAccessFactory, SchemaInfo}
 import trw.dbsubsetter.fktaskqueue.{ForeignKeyTaskQueue, ForeignKeyTaskQueueFactory}
 import trw.dbsubsetter.workflow._
 
-import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 object ApplicationAkkaStreams {
   def run(config: Config, schemaInfo: SchemaInfo, baseQueries: Seq[BaseQuery]): Unit = {
@@ -24,7 +24,7 @@ object ApplicationAkkaStreams {
 
     // Encapsulate in method so as to encourage JVM to garbage-collect the Primary Key Store as early as possible
     def runKeyQueryPhase(): Unit = {
-      val pkStore: ActorRef = system.actorOf(PkStoreActor.props(config, schemaInfo))
+      val pkStore: ActorRef = system.actorOf(PkStoreActor.props(schemaInfo))
       val fkTaskCreationWorkflow: FkTaskCreationWorkflow = new FkTaskCreationWorkflow(schemaInfo)
       val fkTaskQueue: ForeignKeyTaskQueue = ForeignKeyTaskQueueFactory.build(config, schemaInfo)
 

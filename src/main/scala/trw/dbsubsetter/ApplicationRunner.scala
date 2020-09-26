@@ -3,8 +3,6 @@ package trw.dbsubsetter
 import io.prometheus.client.exporter.HTTPServer
 import io.prometheus.client.hotspot.DefaultExports
 import trw.dbsubsetter.config.{CommandLineParser, Config}
-import trw.dbsubsetter.db.{BaseQueries, DbMetadataQueries, SchemaInfoRetrieval}
-import trw.dbsubsetter.util.Util
 
 /**
   * Provides a very thin layer underneath the real Application object. Tests will
@@ -14,35 +12,25 @@ import trw.dbsubsetter.util.Util
   */
 object ApplicationRunner {
   def run(args: Array[String]): Unit = {
-    val startingTime = System.nanoTime()
 
     CommandLineParser.parser.parse(args, Config()) match {
       case None =>
         System.exit(1)
       case Some(config) =>
-        val dbMetadata =
-          DbMetadataQueries.retrieveSchemaMetadata(
-            config.originDbConnectionString,
-            config.schemas
-          )
-        val schemaInfo = SchemaInfoRetrieval.getSchemaInfo(dbMetadata, config)
-        val baseQueries = BaseQueries.get(config, schemaInfo)
+        val metricsEndpoint: Option[HTTPServer] =
+          config.metricsPort
+            .map { port =>
+              DefaultExports.initialize()
+              new HTTPServer(port)
+            }
 
-        val optionalMetricsEndpoint: Option[HTTPServer] =
-          if (config.exposeMetrics) {
-            DefaultExports.initialize()
-            Some(new HTTPServer(9092, true))
-          } else {
-            None
-          }
-
-        if (config.singleThreadDebugMode) {
-          new ApplicationSingleThreaded(config, schemaInfo, baseQueries).run()
-        } else {
-          ApplicationAkkaStreams.run(config, schemaInfo, baseQueries)
+        DbSubsetter.run(config) match {
+          case Success => // No-op
+          case FailedValidation(message) =>
+            System.err.println("Pre-run validation failed: ", message)
         }
-        Util.printRuntime(startingTime)
-        optionalMetricsEndpoint.foreach(_.stop())
+
+        metricsEndpoint.foreach(_.stop())
     }
   }
 }

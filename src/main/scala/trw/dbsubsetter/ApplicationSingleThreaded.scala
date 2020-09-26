@@ -20,7 +20,7 @@ class ApplicationSingleThreaded(config: Config, schemaInfo: SchemaInfo, baseQuer
     DataCopyWorkflowFactory.build(dbAccessFactory, schemaInfo)
 
   private[this] val pkStore: PrimaryKeyStore =
-    PrimaryKeyStoreFactory.buildPrimaryKeyStore(config, schemaInfo)
+    PrimaryKeyStoreFactory.buildPrimaryKeyStore(schemaInfo)
 
   private[this] val pkWorkflow: PkStoreWorkflow =
     new PkStoreWorkflow(pkStore, schemaInfo)

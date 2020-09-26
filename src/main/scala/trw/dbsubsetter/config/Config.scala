@@ -16,6 +16,6 @@ case class Config(
     excludeTables: Set[Table] = Set.empty,
     excludeColumns: Set[CmdLineColumn] = Set.empty,
     tempfileStorageDirectoryOverride: Option[File] = None,
-    singleThreadDebugMode: Boolean = false,
-    exposeMetrics: Boolean = false
+    singleThreadMode: Boolean = false,
+    metricsPort: Option[Int] = None
 )
