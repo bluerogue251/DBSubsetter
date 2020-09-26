@@ -7,7 +7,7 @@ import scala.sys.process._
 import scala.util.Properties
 
 /**
-  * A test which requires access to a MySql database.
+  * A test which requires access to a running MySql database.
   */
 abstract class MySqlEnabledTest extends DbEnabledTest[MySqlDatabase] {
   override protected val profile = slick.jdbc.MySQLProfile

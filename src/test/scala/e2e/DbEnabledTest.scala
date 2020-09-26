@@ -4,6 +4,9 @@ import org.scalatest.{BeforeAndAfterAll, FunSuite}
 import slick.jdbc.JdbcBackend
 import util.db.{Database, DatabaseSet}
 
+/**
+  * A test which requires access to a running database.
+  */
 abstract class DbEnabledTest[T <: Database] extends FunSuite with BeforeAndAfterAll {
   /*
    * Concrete test classes must override the following

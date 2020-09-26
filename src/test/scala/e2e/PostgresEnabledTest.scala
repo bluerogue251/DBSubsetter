@@ -6,6 +6,9 @@ import util.db._
 import scala.sys.process._
 import scala.util.Properties
 
+/**
+  * A test which requires access to a running PostgreSQL database.
+  */
 abstract class PostgresEnabledTest extends DbEnabledTest[PostgresDatabase] {
   override protected val profile = slick.jdbc.PostgresProfile
 
@@ -43,11 +46,6 @@ abstract class PostgresEnabledTest extends DbEnabledTest[PostgresDatabase] {
     PostgresqlEndToEndTestUtil.preSubsetDdlSync(dbs.origin, dbs.targetSingleThreaded)
     PostgresqlEndToEndTestUtil.preSubsetDdlSync(dbs.origin, dbs.targetAkkaStreams)
   }
-
-  override protected def postSubset(): Unit = {
-    PostgresqlEndToEndTestUtil.postSubsetDdlSync(dbs.origin, dbs.targetSingleThreaded)
-    PostgresqlEndToEndTestUtil.postSubsetDdlSync(dbs.origin, dbs.targetAkkaStreams)
-  }
 }
 
 object PostgresqlEndToEndTestUtil {
@@ -70,13 +68,4 @@ object PostgresqlEndToEndTestUtil {
     (exportCommand #| importCommand).!!
   }
 
-  def postSubsetDdlSync(origin: PostgresDatabase, target: PostgresDatabase): Unit = {
-    val exportCommand =
-      s"pg_dump --host ${origin.host} --port ${origin.port} --user postgres --section=post-data ${origin.name}"
-
-    val importCommand =
-      s"psql --host ${target.host} --port ${target.port} --user postgres ${target.name} -v ON_ERROR_STOP=1"
-
-    (exportCommand #| importCommand).!!
-  }
 }
