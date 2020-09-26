@@ -1,8 +1,8 @@
 package e2e.basequeries
 
-import e2e.AbstractPostgresqlEndToEndTest
+import e2e.PostgresEnabledTest
 
-class BaseQueriesTestPostgreSQL extends AbstractPostgresqlEndToEndTest with BaseQueriesTest {
+class BaseQueriesTestPostgreSQL extends PostgresEnabledTest with BaseQueriesTest {
 
   override protected val programArgs = Array(
     "--schemas", "public",

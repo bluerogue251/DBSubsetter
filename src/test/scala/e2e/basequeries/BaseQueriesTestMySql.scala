@@ -1,8 +1,8 @@
 package e2e.basequeries
 
-import e2e.AbstractMysqlEndToEndTest
+import e2e.MySqlEnabledTest
 
-class BaseQueriesTestMySql extends AbstractMysqlEndToEndTest with BaseQueriesTest {
+class BaseQueriesTestMySql extends MySqlEnabledTest with BaseQueriesTest {
 
   override protected val programArgs = Array(
     "--schemas", "base_queries",

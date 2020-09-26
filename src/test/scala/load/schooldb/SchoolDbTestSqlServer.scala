@@ -1,12 +1,12 @@
 //package load.schooldb
 //
-//import e2e.AbstractSqlServerEndToEndTest
+//import e2e.SqlServerEnabledTest
 //import load.LoadTest
 //import util.db.SqlServerDatabase
 //
 //import scala.sys.process._
 //
-//class SchoolDbTestSqlServer extends AbstractSqlServerEndToEndTest with LoadTest[SqlServerDatabase] with SchoolDbTest {
+//class SchoolDbTestSqlServer extends SqlServerEnabledTest with LoadTest[SqlServerDatabase] with SchoolDbTest {
 //
 //  override val singleThreadedRuntimeLimitMillis: Long = 110000
 //

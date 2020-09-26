@@ -1,8 +1,8 @@
 package e2e.compositekeys
 
-import e2e.AbstractSqlServerEndToEndTest
+import e2e.SqlServerEnabledTest
 
-class CompositeKeysTestSqlServer extends AbstractSqlServerEndToEndTest with CompositeKeysTest {
+class CompositeKeysTestSqlServer extends SqlServerEnabledTest with CompositeKeysTest {
 
   override val programArgs = Array(
     "--schemas", "dbo",

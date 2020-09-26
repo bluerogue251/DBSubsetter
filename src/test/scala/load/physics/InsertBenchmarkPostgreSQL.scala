@@ -3,7 +3,7 @@ package load.physics
 import java.io._
 import java.sql.{Connection, DriverManager, PreparedStatement, ResultSet}
 
-import e2e.AbstractPostgresqlEndToEndTest
+import e2e.PostgresEnabledTest
 import org.postgresql.copy.CopyManager
 import org.postgresql.core.BaseConnection
 import slick.jdbc.PostgresProfile.api._
@@ -52,7 +52,7 @@ import scala.concurrent.{Await, Future}
  *   Bulk Copy:         49  Seconds
 
  */
-class InsertBenchmarkPostgreSQL extends AbstractPostgresqlEndToEndTest {
+class InsertBenchmarkPostgreSQL extends PostgresEnabledTest {
 
   override protected def testName: String = "insert_benchmark"
 

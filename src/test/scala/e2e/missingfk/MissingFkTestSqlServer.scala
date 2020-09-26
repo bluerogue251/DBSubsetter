@@ -1,8 +1,8 @@
 package e2e.missingfk
 
-import e2e.AbstractSqlServerEndToEndTest
+import e2e.SqlServerEnabledTest
 
-class MissingFkTestSqlServer extends AbstractSqlServerEndToEndTest with MissingFkTest {
+class MissingFkTestSqlServer extends SqlServerEnabledTest with MissingFkTest {
 
   override val programArgs = Array(
     "--schemas", "dbo",

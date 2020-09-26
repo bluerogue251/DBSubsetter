@@ -1,8 +1,8 @@
 package e2e.mixedcase
 
-import e2e.AbstractPostgresqlEndToEndTest
+import e2e.PostgresEnabledTest
 
-class MixedCaseTestPostgreSQL extends AbstractPostgresqlEndToEndTest with MixedCaseTest {
+class MixedCaseTestPostgreSQL extends PostgresEnabledTest with MixedCaseTest {
 
   override val programArgs = Array(
     "--schemas", "public",

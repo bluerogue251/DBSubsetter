@@ -1,8 +1,8 @@
 package e2e.mixedcase
 
-import e2e.AbstractMysqlEndToEndTest
+import e2e.MySqlEnabledTest
 
-class MixedCaseTestMySql extends AbstractMysqlEndToEndTest with MixedCaseTest {
+class MixedCaseTestMySql extends MySqlEnabledTest with MixedCaseTest {
 
   override val programArgs = Array(
     "--schemas", "mIXED_case_DB",

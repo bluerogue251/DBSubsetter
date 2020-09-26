@@ -1,8 +1,8 @@
 package e2e.selfreferencing
 
-import e2e.AbstractSqlServerEndToEndTest
+import e2e.SqlServerEnabledTest
 
-class SelfReferencingTestSqlServer extends AbstractSqlServerEndToEndTest with SelfReferencingTest {
+class SelfReferencingTestSqlServer extends SqlServerEnabledTest with SelfReferencingTest {
 
   override val programArgs = Array(
     "--schemas", "dbo",

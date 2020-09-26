@@ -1,8 +1,8 @@
 package e2e.compositekeys
 
-import e2e.AbstractMysqlEndToEndTest
+import e2e.MySqlEnabledTest
 
-class CompositeKeysTestMySql extends AbstractMysqlEndToEndTest with CompositeKeysTest {
+class CompositeKeysTestMySql extends MySqlEnabledTest with CompositeKeysTest {
 
   override val programArgs = Array(
     "--schemas", "composite_keys",

@@ -1,8 +1,8 @@
 package e2e.pktypes
 
-import e2e.AbstractPostgresqlEndToEndTest
+import e2e.PostgresEnabledTest
 
-class PkTypesTestPostgreSQL extends AbstractPostgresqlEndToEndTest with PkTypesTest {
+class PkTypesTestPostgreSQL extends PostgresEnabledTest with PkTypesTest {
 
   override protected val programArgs = Array(
     "--schemas", "public",

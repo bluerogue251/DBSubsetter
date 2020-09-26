@@ -5,7 +5,7 @@ import slick.jdbc.JdbcBackend
 import util.db.{Database, DatabaseSet}
 import util.runner.TestSubsetRunner
 
-abstract class AbstractEndToEndTest[T <: Database] extends FunSuite with BeforeAndAfterAll {
+abstract class DbEnabledTest[T <: Database] extends FunSuite with BeforeAndAfterAll {
   /*
    * Concrete test classes must override the following
    */

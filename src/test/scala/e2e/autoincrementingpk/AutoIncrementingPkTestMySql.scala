@@ -1,8 +1,8 @@
 package e2e.autoincrementingpk
 
-import e2e.AbstractMysqlEndToEndTest
+import e2e.MySqlEnabledTest
 
-class AutoIncrementingPkTestMySql extends AbstractMysqlEndToEndTest with AutoIncrementingPkTest {
+class AutoIncrementingPkTestMySql extends MySqlEnabledTest with AutoIncrementingPkTest {
 
   override protected val programArgs = Array(
     "--schemas", "autoincrementing_pk",

@@ -1,8 +1,8 @@
 package e2e.selfreferencing
 
-import e2e.AbstractMysqlEndToEndTest
+import e2e.MySqlEnabledTest
 
-class SelfReferencingTestMySql extends AbstractMysqlEndToEndTest with SelfReferencingTest {
+class SelfReferencingTestMySql extends MySqlEnabledTest with SelfReferencingTest {
 
   override val programArgs = Array(
     "--schemas", "self_referencing",

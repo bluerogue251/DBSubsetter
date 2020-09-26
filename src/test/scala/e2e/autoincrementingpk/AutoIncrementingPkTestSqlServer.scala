@@ -1,8 +1,8 @@
 package e2e.autoincrementingpk
 
-import e2e.AbstractSqlServerEndToEndTest
+import e2e.SqlServerEnabledTest
 
-class AutoIncrementingPkTestSqlServer extends AbstractSqlServerEndToEndTest with AutoIncrementingPkTest {
+class AutoIncrementingPkTestSqlServer extends SqlServerEnabledTest with AutoIncrementingPkTest {
 
   override protected val programArgs = Array(
     "--schemas", "dbo",

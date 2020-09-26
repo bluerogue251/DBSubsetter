@@ -1,6 +1,6 @@
 package load.schooldb
 
-import e2e.AbstractPostgresqlEndToEndTest
+import e2e.PostgresEnabledTest
 import load.LoadTest
 import slick.dbio.DBIO
 import slick.jdbc.PostgresProfile.api._
@@ -10,7 +10,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 import scala.sys.process._
 
-class SchoolDbTestPostgreSQL extends AbstractPostgresqlEndToEndTest with LoadTest[PostgreSQLDatabase] with SchoolDbTest {
+class SchoolDbTestPostgreSQL extends PostgresEnabledTest with LoadTest[PostgreSQLDatabase] with SchoolDbTest {
 
   /*
    * These values are configured for the Drone CI environment and are supposed to be pretty lenient,
