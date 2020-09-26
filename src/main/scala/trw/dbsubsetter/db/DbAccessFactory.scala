@@ -6,7 +6,7 @@ import org.postgresql.copy.CopyManager
 import org.postgresql.core.BaseConnection
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.impl.ConnectionFactory
-import trw.dbsubsetter.db.impl.mapper.{JdbcResultConverter, JdbcResultConverterImpl, JdbcResultConverterTimed}
+import trw.dbsubsetter.db.impl.mapper.{JdbcResultConverter, JdbcResultConverterImpl, JdbcResultConverterInstrumented}
 import trw.dbsubsetter.db.impl.origin.{InstrumentedOriginDbAccess, OriginDbAccessImpl}
 import trw.dbsubsetter.db.impl.target.{InstrumentedTargetDbAccess, TargetDbAccessImpl}
 
@@ -19,32 +19,31 @@ final class DbAccessFactory(config: Config, schemaInfo: SchemaInfo) {
   }
 
   def buildOriginDbAccess(): OriginDbAccess = {
-    var mapper: JdbcResultConverter =
+    val baseMapper: JdbcResultConverter =
       new JdbcResultConverterImpl(schemaInfo)
 
-    if (config.exposeMetrics) {
-      mapper = new JdbcResultConverterTimed(mapper)
-    }
+    val instrumentedMapper: JdbcResultConverter =
+      new JdbcResultConverterInstrumented(baseMapper)
 
-    var originDbAccess: OriginDbAccess =
-      new OriginDbAccessImpl(config.originDbConnectionString, schemaInfo, mapper, connectionFactory)
+    val baseOriginDbAccess: OriginDbAccess =
+      new OriginDbAccessImpl(
+        config.originDbConnectionString,
+        schemaInfo,
+        instrumentedMapper,
+        connectionFactory
+      )
 
-    if (config.exposeMetrics) {
-      originDbAccess = new InstrumentedOriginDbAccess(originDbAccess)
-    }
-
-    originDbAccess
+    new InstrumentedOriginDbAccess(baseOriginDbAccess)
   }
 
   def buildTargetDbAccess(): TargetDbAccess = {
-    var targetDbAccess: TargetDbAccess =
-      new TargetDbAccessImpl(config.targetDbConnectionString, schemaInfo, connectionFactory)
-
-    if (config.exposeMetrics) {
-      targetDbAccess = new InstrumentedTargetDbAccess(targetDbAccess)
-    }
-
-    targetDbAccess
+    val base: TargetDbAccess =
+      new TargetDbAccessImpl(
+        config.targetDbConnectionString,
+        schemaInfo,
+        connectionFactory
+      )
+    new InstrumentedTargetDbAccess(base)
   }
 
   def buildOriginPostgresCopyManager(): CopyManager = {

@@ -1,7 +1,6 @@
 package unit
 
 import org.scalatest.FunSuite
-import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.{Column, Keys, PrimaryKey, PrimaryKeyValue, Schema, SchemaInfo, Table}
 import trw.dbsubsetter.primarykeystore.{PrimaryKeyStore, PrimaryKeyStoreFactory}
 import trw.dbsubsetter.workflow._
@@ -35,7 +34,7 @@ class PkStoreWorkflowTest extends FunSuite {
       )
 
     val pkStore: PrimaryKeyStore =
-      PrimaryKeyStoreFactory.buildPrimaryKeyStore(Config(), schemaInfo)
+      PrimaryKeyStoreFactory.buildPrimaryKeyStore(schemaInfo)
 
     val pkStoreWorkflow =
       new PkStoreWorkflow(pkStore, schemaInfo)
@@ -100,7 +99,7 @@ class PkStoreWorkflowTest extends FunSuite {
       )
 
     val pkStore: PrimaryKeyStore =
-      PrimaryKeyStoreFactory.buildPrimaryKeyStore(Config(), schemaInfo)
+      PrimaryKeyStoreFactory.buildPrimaryKeyStore(schemaInfo)
 
     val pkStoreWorkflow: PkStoreWorkflow =
       new PkStoreWorkflow(pkStore, schemaInfo)

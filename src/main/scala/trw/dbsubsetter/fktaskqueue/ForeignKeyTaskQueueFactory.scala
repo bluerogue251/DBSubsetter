@@ -6,13 +6,7 @@ import trw.dbsubsetter.fktaskqueue.impl.{ForeignKeyTaskChronicleQueue, ForeignKe
 
 object ForeignKeyTaskQueueFactory {
   def build(config: Config, schemaInfo: SchemaInfo): ForeignKeyTaskQueue = {
-    var fkTaskQueue: ForeignKeyTaskQueue =
-      new ForeignKeyTaskChronicleQueue(config, schemaInfo)
-
-    if (config.exposeMetrics) {
-      fkTaskQueue = new ForeignKeyTaskQueueInstrumented(fkTaskQueue)
-    }
-
-    fkTaskQueue
+    val base: ForeignKeyTaskQueue = new ForeignKeyTaskChronicleQueue(config, schemaInfo)
+    new ForeignKeyTaskQueueInstrumented(base)
   }
 }
