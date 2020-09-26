@@ -15,12 +15,12 @@ abstract class PostgresEnabledTest extends DbEnabledTest[PostgresDatabase] {
   protected def testName: String
 
   override protected def createOriginDatabase(): Unit = {
-    PostgresqlEndToEndTestUtil.createDb(dbs.origin)
+    createDb(dbs.origin)
   }
 
   override protected def createTargetDatabases(): Unit = {
-    PostgresqlEndToEndTestUtil.createDb(dbs.targetSingleThreaded)
-    PostgresqlEndToEndTestUtil.createDb(dbs.targetAkkaStreams)
+    createDb(dbs.targetSingleThreaded)
+    createDb(dbs.targetAkkaStreams)
   }
 
   override protected def dbs: DatabaseSet[PostgresDatabase] = {
@@ -32,9 +32,9 @@ abstract class PostgresEnabledTest extends DbEnabledTest[PostgresDatabase] {
     val targetAkkaStreamsDb = s"${testName}_target_akka_streams"
 
     new DatabaseSet(
-      PostgresqlEndToEndTestUtil.buildDatabase(host, port, originDb),
-      PostgresqlEndToEndTestUtil.buildDatabase(host, port, targetSingleThreadedDb),
-      PostgresqlEndToEndTestUtil.buildDatabase(host, port, targetAkkaStreamsDb)
+      new PostgresDatabase(host, port, originDb),
+      new PostgresDatabase(host, port, targetSingleThreadedDb),
+      new PostgresDatabase(host, port, targetAkkaStreamsDb)
     )
   }
 
@@ -43,22 +43,16 @@ abstract class PostgresEnabledTest extends DbEnabledTest[PostgresDatabase] {
   override protected def prepareOriginDML(): Unit
 
   override protected def prepareTargetDDL(): Unit = {
-    PostgresqlEndToEndTestUtil.preSubsetDdlSync(dbs.origin, dbs.targetSingleThreaded)
-    PostgresqlEndToEndTestUtil.preSubsetDdlSync(dbs.origin, dbs.targetAkkaStreams)
-  }
-}
-
-object PostgresqlEndToEndTestUtil {
-  def buildDatabase(dbHost: String, dbPort: Int, dbName: String): PostgresDatabase = {
-    new PostgresDatabase(dbHost, dbPort, dbName)
+    syncSchemaToTarget(dbs.origin, dbs.targetSingleThreaded)
+    syncSchemaToTarget(dbs.origin, dbs.targetAkkaStreams)
   }
 
-  def createDb(db: PostgresDatabase): Unit = {
+  private[this] def createDb(db: PostgresDatabase): Unit = {
     s"dropdb --host ${db.host} --port ${db.port} --user postgres --if-exists ${db.name}".!!
     s"createdb --host ${db.host} --port ${db.port} --user postgres ${db.name}".!!
   }
 
-  def preSubsetDdlSync(origin: PostgresDatabase, target: PostgresDatabase): Unit = {
+  private[this] def syncSchemaToTarget(origin: PostgresDatabase, target: PostgresDatabase): Unit = {
     val exportCommand =
       s"pg_dump --host ${origin.host} --port ${origin.port} --user postgres --section=pre-data ${origin.name}"
 
@@ -67,5 +61,4 @@ object PostgresqlEndToEndTestUtil {
 
     (exportCommand #| importCommand).!!
   }
-
 }
