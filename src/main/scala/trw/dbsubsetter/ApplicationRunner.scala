@@ -4,6 +4,8 @@ import io.prometheus.client.exporter.HTTPServer
 import io.prometheus.client.hotspot.DefaultExports
 import trw.dbsubsetter.config.{CommandLineParser, Config}
 
+import scala.concurrent.duration.Duration
+
 /**
   * Provides a very thin layer underneath the real Application object. Tests will
   * call this object rather than calling the real Application object. This is because
@@ -24,9 +26,10 @@ object ApplicationRunner {
               new HTTPServer(port)
             }
 
-        DbSubsetter.run(config)
+        val took: Duration = DbSubsetter.run(config)
 
         metricsEndpoint.foreach(_.stop())
+        println(s"DBSubsetter has completed successfully! Approximate runtime: ${took.toSeconds} seconds")
     }
   }
 }
