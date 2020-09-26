@@ -44,11 +44,9 @@ private[datacopy] final class PostgresOptimizedDataCopyWorkflowImpl(
         .mkString("(", ",", ")")
 
     val individualPkValuesSql: Seq[String] =
-      dataCopyTask
-        .pkValues
+      dataCopyTask.pkValues
         .map(pkValue => {
-          pkValue
-            .individualColumnValues
+          pkValue.individualColumnValues
             .map(quote)
             .mkString("(", ",", ")")
         })

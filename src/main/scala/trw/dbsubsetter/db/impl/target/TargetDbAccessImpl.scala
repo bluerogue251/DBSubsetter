@@ -2,8 +2,8 @@ package trw.dbsubsetter.db.impl.target
 
 import java.sql.Connection
 
-import trw.dbsubsetter.db.{Row, SchemaInfo, Sql, Table, TargetDbAccess}
 import trw.dbsubsetter.db.impl.ConnectionFactory
+import trw.dbsubsetter.db.{Row, SchemaInfo, Sql, Table, TargetDbAccess}
 
 private[db] class TargetDbAccessImpl(connStr: String, sch: SchemaInfo, connectionFactory: ConnectionFactory)
     extends TargetDbAccess {
@@ -19,9 +19,7 @@ private[db] class TargetDbAccessImpl(connStr: String, sch: SchemaInfo, connectio
     val stmt = statements(table)
 
     rows.foreach { row =>
-      row
-        .data
-        .zipWithIndex
+      row.data.zipWithIndex
         .foreach { case (singleColumnValue, i) =>
           stmt.setObject(i + 1, singleColumnValue)
         }

@@ -16,8 +16,7 @@ private[datacopyqueue] final class DataCopyQueueImpl(config: Config, schemaInfo:
 
   private[this] val tablesToQueuedValueCounts: mutable.Map[Table, Long] = {
     val elems: Seq[(Table, Long)] =
-      schemaInfo
-        .tables
+      schemaInfo.tables
         .map { tableWithMetadata =>
           tableWithMetadata.table -> 0L
         }
@@ -28,8 +27,7 @@ private[datacopyqueue] final class DataCopyQueueImpl(config: Config, schemaInfo:
   private[this] val tablesWithQueuedValues: mutable.Set[Table] = new mutable.HashSet[Table]()
 
   private[this] val tablesToChronicleQueues: Map[Table, ChronicleQueueAccess] = {
-    schemaInfo
-      .pksByTable
+    schemaInfo.pksByTable
       .map { case (table, primaryKey) =>
         val columnTypes: Seq[ColumnType] = primaryKey.columns.map(_.dataType)
         table -> new ChronicleQueueAccess(config, columnTypes)

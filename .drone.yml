@@ -38,7 +38,6 @@ services:
 steps:
   - name: code_style_check
     image: bluerogue251/db-subsetter-ci:7
-    failure: ignore
     commands:
       - sbt scalafmtCheck
 
@@ -80,6 +79,6 @@ steps:
 
 ---
 kind: signature
-hmac: 35ae0ffad5df0d681826ca35f3b3caac199d3d6fdf430a8df02d523b541c76c7
+hmac: bbcf3321552ccbcde02e27932bd12c7d57a0c527920acacbbf65e7599129eea7
 
 ...
