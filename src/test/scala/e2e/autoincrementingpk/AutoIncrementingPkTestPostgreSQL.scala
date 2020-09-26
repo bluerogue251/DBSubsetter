@@ -1,8 +1,8 @@
 package e2e.autoincrementingpk
 
-import e2e.PostgresEnabledTest
+import e2e.PostgresSubsettingTest
 
-class AutoIncrementingPkTestPostgreSQL extends PostgresEnabledTest with AutoIncrementingPkTest {
+class AutoIncrementingPkTestPostgreSQL extends PostgresSubsettingTest with AutoIncrementingPkTest {
 
   override protected val programArgs = Array(
     "--schemas", "public",

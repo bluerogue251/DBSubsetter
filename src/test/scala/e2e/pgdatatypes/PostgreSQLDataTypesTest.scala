@@ -2,12 +2,12 @@ package e2e.pgdatatypes
 
 import java.io.File
 
-import e2e.PostgresEnabledTest
+import e2e.PostgresSubsettingTest
 import util.db.PostgresDatabase
 
 import scala.sys.process._
 
-class PostgreSQLDataTypesTest extends PostgresEnabledTest {
+class PostgreSQLDataTypesTest extends PostgresSubsettingTest {
   override protected val testName = "pg_data_types"
 
   override protected val programArgs = Array(
