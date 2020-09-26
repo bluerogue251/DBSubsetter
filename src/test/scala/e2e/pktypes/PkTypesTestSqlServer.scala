@@ -2,9 +2,9 @@ package e2e.pktypes
 
 import java.util.UUID
 
-import e2e.SqlServerEnabledTest
+import e2e.SqlServerSubsettingTest
 
-class PkTypesTestSqlServer extends SqlServerEnabledTest with PkTypesTest {
+class PkTypesTestSqlServer extends SqlServerSubsettingTest with PkTypesTest {
 
   override def expectedByteIds = super.expectedByteIds.filterNot(_ == -128)
 

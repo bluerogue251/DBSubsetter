@@ -1,8 +1,8 @@
 package e2e.selfreferencing
 
-import e2e.SqlServerEnabledTest
+import e2e.SqlServerSubsettingTest
 
-class SelfReferencingTestSqlServer extends SqlServerEnabledTest with SelfReferencingTest {
+class SelfReferencingTestSqlServer extends SqlServerSubsettingTest with SelfReferencingTest {
 
   override val programArgs = Array(
     "--schemas", "dbo",

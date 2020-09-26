@@ -1,8 +1,8 @@
 package e2e.fktononpk
 
-import e2e.SqlServerEnabledTest
+import e2e.SqlServerSubsettingTest
 
-class ForeignKeyToNonPrimaryKeyTestSqlServer extends SqlServerEnabledTest with ForeignKeyToNonPrimaryKeyTest {
+class ForeignKeyToNonPrimaryKeyTestSqlServer extends SqlServerSubsettingTest with ForeignKeyToNonPrimaryKeyTest {
 
   override protected val programArgs = Array(
     "--schemas", "dbo",
