@@ -3,13 +3,8 @@ package trw.dbsubsetter
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.{BaseQueries, DbMetadataQueries, SchemaInfoRetrieval}
 
-import scala.concurrent.duration._
-
 object DbSubsetter {
-  def run(config: Config): Duration = {
-    val startTime =
-      System.nanoTime()
-
+  def run(config: Config): Result = {
     val dbMetadata =
       DbMetadataQueries.retrieveSchemaMetadata(
         config.originDbConnectionString,
@@ -24,10 +19,16 @@ object DbSubsetter {
 
     if (config.singleThreadMode) {
       new ApplicationSingleThreaded(config, schemaInfo, baseQueries).run()
+      Success
     } else {
       ApplicationAkkaStreams.run(config, schemaInfo, baseQueries)
+      Success
     }
-
-    (System.nanoTime() - startTime).nanoseconds
   }
 }
+
+sealed trait Result
+
+case object Success extends Result
+
+case class FailedValidation(message: String) extends Result
