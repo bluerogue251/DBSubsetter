@@ -2,7 +2,8 @@
 
 DBSubsetter is a tool for taking a logically consistent subset of a relational database.
 
-Starting with a base condition specifying a set of rows from one or more tables, it respects foreign key constraints by recursively fetching the "parents" and (optionally) the "children" of those rows.
+Starting with a given set of rows from one or more tables, it respects foreign key constraints
+by recursively fetching the "parents" and (optionally) the "children" of those rows.
 
 This is useful for creating local development and testing datasets.
 It can also be used to export the data belonging to a particular set of users.
@@ -10,11 +11,11 @@ It can also be used to export the data belonging to a particular set of users.
 
 ## Project Goals
 
-_High performance_: Optimized for fast runtimes on large datasets.
+_Support large datasets_: Designed for stability when handling large datasets.
 
-_Deterministic_: Identical inputs yield identical outputs. Random subsets are possible, but only if purposely configured.
+_Deterministic_: Identical inputs yield identical outputs.
 
-_Do one thing well_: A tiny codebase with a highly focused and well-tested set of features.
+_Do one thing well_: A tiny codebase focused only on subsetting features.
 
 
 ## Supported Databases
@@ -26,9 +27,13 @@ Please reach out by opening a GitHub ticket if you would like support for a diff
 
 ## Download and Usage Instructions
 
-1. Load an empty schema from your "origin" database into your "target" database. See vendor-specific instructions for [Postgres](docs/pre_subset_postgres.md), [MySQL](docs/pre_subset_mysql.md), and [Microsoft SQL Server](docs/pre_subset_ms_sql_server.md).
+1. Load an empty schema from your "origin" database into your "target" database. See vendor-specific instructions for
+[Postgres](docs/pre_subset_postgres.md),
+[MySQL](docs/pre_subset_mysql.md), or
+[Microsoft SQL Server](docs/pre_subset_ms_sql_server.md).
  
-2. Download the DBSubsetter.jar file from our [latest release](https://github.com/bluerogue251/DBSubsetter/releases/latest) and run it with Java 8:
+2. Use Java 8 or above to run our
+[latest release](https://github.com/bluerogue251/DBSubsetter/releases/latest):
 
 ```bash
 # Download the DBSubsetter.jar file
@@ -49,13 +54,16 @@ $ java -jar /path/to/DBSubsetter.jar \
     --dataCopyDbConnectionCount 8
 ```
 
-3. After DBSubsetter exits, follow vendor-specific instructions for [Postgres](docs/post_subset_postgres.md), [MySQL](docs/post_subset_mysql.md), and [Microsoft SQL Server](docs/post_subset_ms_sql_server.md).
+3. After DBSubsetter exits, follow vendor-specific instructions for
+[Postgres](docs/post_subset_postgres.md),
+[MySQL](docs/post_subset_mysql.md), or
+[Microsoft SQL Server](docs/post_subset_ms_sql_server.md).
 
 
 ## Contributing
 
 Contributions of all kinds are welcome!
-Feel free to open an issue or a pull request on the project [GitHub page](https://github.com/bluerogue251/DBSubsetter).
+Just open an issue or pull request on the project [GitHub page](https://github.com/bluerogue251/DBSubsetter).
 
 Please follow our [code of conduct](CODE_OF_CONDUCT.md) when contributing.
 
@@ -74,7 +82,8 @@ Other related resources include
 [postgres-subset](https://github.com/BeautifulDestinations/postgres-subset), and
 [CA Data Subset](https://docops.ca.com/ca-test-data-manager/4-2/en/provisioning-test-data/subset-production-data).
 
-DBSubsetter is written in [Scala](https://www.scala-lang.org/) using
+DBSubsetter is written in
+[Scala](https://www.scala-lang.org/) using
 [Akka Streams](https://doc.akka.io/docs/akka/2.5.8/stream/index.html?language=scala),
 [Chronicle-Queue](https://github.com/OpenHFT/Chronicle-Queue), and
 [scopt](https://github.com/scopt/scopt).
