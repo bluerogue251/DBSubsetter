@@ -62,8 +62,9 @@ $ java -jar /path/to/DBSubsetter.jar \
 
 ## Contributing
 
-Contributions of all kinds are welcome!
-Just open an issue or pull request on the project [GitHub page](https://github.com/bluerogue251/DBSubsetter).
+Contributions of all kinds are welcome! Just open an
+[issue](https://github.com/bluerogue251/DBSubsetter/issues) or
+[pull request](https://github.com/bluerogue251/DBSubsetter/pulls).
 
 Please follow our [code of conduct](CODE_OF_CONDUCT.md) when contributing.
 
