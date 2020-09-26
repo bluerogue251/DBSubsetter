@@ -55,7 +55,7 @@ $ java -jar /path/to/DBSubsetter.jar \
     --dataCopyDbConnectionCount 8
 ```
 
-3. After DBSubsetter exits,follow vendor-specific instructions for
+3. After DBSubsetter exits, follow vendor-specific instructions for:
     * [Postgres](docs/post_subset_postgres.md)
     * [MySQL](docs/post_subset_mysql.md)
     * [Microsoft SQL Server](docs/post_subset_ms_sql_server.md)
@@ -63,8 +63,11 @@ $ java -jar /path/to/DBSubsetter.jar \
 
 ## Contributing
 
-Contributions of all kinds are welcome! Just open an
-[issue](https://github.com/bluerogue251/DBSubsetter/issues) or
+Contributions of all kinds are welcome!
+
+To ask a question, report a bug, or request a feature, please open an
+[issue](https://github.com/bluerogue251/DBSubsetter/issues/new).
+To contribute code changes, please open a
 [pull request](https://github.com/bluerogue251/DBSubsetter/pulls).
 
 Please follow our [code of conduct](CODE_OF_CONDUCT.md) when contributing.
