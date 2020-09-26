@@ -1,11 +1,24 @@
-package util.runner
+package e2e
 
 import trw.dbsubsetter.ApplicationRunner
-import util.db.{Database, DatabaseSet}
+import util.db.Database
 
-object TestSubsetRunner {
 
-  def runSubsetInSingleThreadedMode[T <: Database](dbs: DatabaseSet[T], programArgs: Array[String]): Long = {
+trait SubsettingTest[T <: Database] extends DbEnabledTest[T] {
+
+  protected def programArgs: Array[String]
+
+  protected var singleThreadedRuntimeMillis: Long = _
+
+  protected var akkaStreamsRuntimeMillis: Long = _
+
+  override protected def beforeAll(): Unit = {
+    super.beforeAll()
+    singleThreadedRuntimeMillis = runSubsetInSingleThreadedMode()
+    akkaStreamsRuntimeMillis = runSubsetInAkkaStreamsMode()
+  }
+
+  protected def runSubsetInSingleThreadedMode(): Long = {
     val defaultArgs: Array[String] = Array(
       "--originDbConnStr", dbs.origin.connectionString,
       "--targetDbConnStr", dbs.targetSingleThreaded.connectionString,
@@ -17,12 +30,12 @@ object TestSubsetRunner {
     timedSubsetMilliseconds(finalArgs)
   }
 
-  def runSubsetInAkkaStreamsMode[T <: Database](containers: DatabaseSet[T], programArgs: Array[String]): Long = {
+  protected def runSubsetInAkkaStreamsMode(): Long = {
     val defaultArgs: Array[String] = Array(
-      "--originDbConnStr", containers.origin.connectionString,
+      "--originDbConnStr", dbs.origin.connectionString,
       "--keyCalculationDbConnectionCount", "10",
       "--dataCopyDbConnectionCount", "10",
-      "--targetDbConnStr", containers.targetAkkaStreams.connectionString,
+      "--targetDbConnStr", dbs.targetAkkaStreams.connectionString,
       "--exposeMetrics"
     )
     val finalArgs: Array[String] = defaultArgs ++ programArgs
@@ -30,7 +43,6 @@ object TestSubsetRunner {
     timedSubsetMilliseconds(finalArgs)
   }
 
-  // TODO: refactor to re-use the timing logic already present in production code
   private def timedSubsetMilliseconds(args: Array[String]): Long = {
     val start = System.nanoTime()
     ApplicationRunner.run(args)
