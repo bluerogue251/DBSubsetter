@@ -88,9 +88,9 @@ object MysqlEndToEndTestUtil {
   def preSubsetDdlSync(origin: MySqlDatabase, target: MySqlDatabase, schemas: List[String]): Unit = {
     schemas.foreach(schema => {
       val exportCommand: String =
-        s"mysqldump --ssl-mode=DISABLED --host ${origin.host} --port ${origin.port} --user root --no-data $schema"
+        s"mysqldump --host ${origin.host} --port ${origin.port} --user root --no-data $schema"
       val importCommand: String =
-        s"mysql --ssl-mode=DISABLED --host ${target.host} --port ${target.port} --user root $schema"
+        s"mysql --host ${target.host} --port ${target.port} --user root $schema"
       (exportCommand #| importCommand).!!
     })
   }
