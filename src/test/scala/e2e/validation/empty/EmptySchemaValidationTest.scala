@@ -1,14 +1,13 @@
-package e2e.validation
+package e2e.validation.empty
 
 import org.scalatest.FunSuiteLike
 import trw.dbsubsetter.config.{CmdLineBaseQuery, Config}
 import trw.dbsubsetter.db.{Schema, Table}
-import trw.dbsubsetter.{DbSubsetter, FailedValidation, Result, Success}
+import trw.dbsubsetter.{DbSubsetter, FailedValidation, Success}
 import util.assertion.AssertionUtil
 import util.db.{Database, DatabaseSet}
-import util.slick.SlickUtil
 
-trait ValidationTest extends FunSuiteLike with AssertionUtil {
+trait EmptySchemaValidationTest extends FunSuiteLike with AssertionUtil {
   val testName = "validation"
 
   protected val profile: slick.jdbc.JdbcProfile
@@ -17,11 +16,8 @@ trait ValidationTest extends FunSuiteLike with AssertionUtil {
 
   protected def dbs: DatabaseSet[_ <: Database]
 
-  private val ddl: ValidationDDL = new ValidationDDL(profile)
-
   protected def prepareOriginDDL(): Unit = {
-    import ddl.profile.api._
-    SlickUtil.ddl(originSlick, ddl.schema.create)
+    // No-Op
   }
 
   protected def prepareOriginDML(): Unit = {
@@ -47,15 +43,16 @@ trait ValidationTest extends FunSuiteLike with AssertionUtil {
       baseQueries = Seq(validationBaseQuery)
     )
 
-  test("Schema not found") {
-    val invalidSchema = Schema("invalid_schema")
-    val invalidConfig = validConfig.copy(schemas = Seq(invalidSchema))
-    val result: Result = DbSubsetter.run(invalidConfig)
-    assertErrorMessage(result, "Schema not found: invalid_schema")
+  test("Nonexistent schema") {
+    val nonexistentSchema = Schema("nonexistent_schema")
+    val invalidConfig = validConfig.copy(schemas = Seq(nonexistentSchema))
+    assertErrorMessage(invalidConfig, "Schema not found: nonexistent_schema")
   }
 
-  private[this] def assertErrorMessage(result: Result, expectedMessage: String): Unit = {
-    result match {
+  // TODO add a nicer error messages for totally uncaught exceptions (bugs)
+
+  private[this] def assertErrorMessage(config: Config, expectedMessage: String): Unit = {
+    DbSubsetter.run(config) match {
       case Success                         => fail("Expected validation failure. Got success.")
       case FailedValidation(actualMessage) => assert(actualMessage === expectedMessage)
     }
