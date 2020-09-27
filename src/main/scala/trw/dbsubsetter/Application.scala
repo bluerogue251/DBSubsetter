@@ -5,7 +5,7 @@ object Application extends App {
     case Success =>
       System.exit(0)
     case Error(message) =>
-      System.err.println("Run failed with message: " + message)
+      System.err.println("Run failed. " + message)
       System.exit(1)
   }
 }

@@ -33,7 +33,7 @@ object ApplicationRunner {
           case SubsetCompletedSuccessfully =>
             Success
           case FailedValidation(message) =>
-            Error(s"Pre-run validation failed: $message.")
+            Error(s"Validation error: $message.")
         }
     }
   }
