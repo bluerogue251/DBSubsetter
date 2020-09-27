@@ -8,7 +8,7 @@ import util.assertion.AssertionUtil
 import util.db.{Database, DatabaseSet}
 
 trait EmptySchemaValidationTest extends FunSuiteLike with AssertionUtil {
-  val testName = "validation"
+  val testName = "empty_schema_validation"
 
   protected val profile: slick.jdbc.JdbcProfile
 

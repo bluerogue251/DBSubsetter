@@ -2,19 +2,29 @@ package trw.dbsubsetter.db
 
 import java.sql.{DriverManager, JDBCType}
 
+import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 object DbMetadataQueries {
-  def retrieveSchemaMetadata(connectionString: String, schemas: Seq[Schema]): DbMetadataQueryResult = {
+  def retrieveSchemaMetadata(connectionString: String, includeSchemas: Set[String]): DbMetadataQueryResult = {
     val conn = DriverManager.getConnection(connectionString)
     conn.setReadOnly(true)
     val catalog = conn.getCatalog
     val ddl = conn.getMetaData
 
+    val schemas = mutable.Set.empty[SchemaQueryRow]
     val tables = ArrayBuffer.empty[TableQueryRow]
     val columns = ArrayBuffer.empty[ColumnQueryRow]
     val primaryKeyColumns = ArrayBuffer.empty[PrimaryKeyColumnQueryRow]
     val foreignKeyColumns = ArrayBuffer.empty[ForeignKeyColumnQueryRow]
+
+    val schemasJdbcResultSet = ddl.getSchemas()
+    while (schemasJdbcResultSet.next()) {
+      val schemaName = schemasJdbcResultSet.getString("TABLE_SCHEM")
+      if (includeSchemas.contains(schemaName)) {
+        schemas + SchemaQueryRow(schemaName)
+      }
+    }
 
     /*
      * Retrieve table metadata
@@ -119,6 +129,7 @@ object DbMetadataQueries {
     conn.close()
 
     DbMetadataQueryResult(
+      schemas.toVector,
       tables.toVector,
       columns.toVector,
       primaryKeyColumns,
@@ -129,11 +140,16 @@ object DbMetadataQueries {
 }
 
 private[db] case class DbMetadataQueryResult(
+    schemas: Seq[SchemaQueryRow],
     tables: Seq[TableQueryRow],
     columns: Seq[ColumnQueryRow],
     primaryKeyColumns: Seq[PrimaryKeyColumnQueryRow],
     foreignKeyColumns: Seq[ForeignKeyColumnQueryRow],
     vendor: DbVendor
+)
+
+private[this] case class SchemaQueryRow(
+    name: String
 )
 
 private[this] case class TableQueryRow(

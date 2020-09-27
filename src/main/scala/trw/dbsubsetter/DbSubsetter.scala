@@ -8,7 +8,7 @@ object DbSubsetter {
     val dbMetadata =
       DbMetadataQueries.retrieveSchemaMetadata(
         config.originDbConnectionString,
-        config.schemas
+        config.schemas.map(_.name).toSet
       )
 
     val schemaInfo =
