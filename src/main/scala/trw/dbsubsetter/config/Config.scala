@@ -16,6 +16,12 @@ case class Config(
     excludeTables: Set[Table] = Set.empty,
     excludeColumns: Set[CmdLineColumn] = Set.empty,
     tempfileStorageDirectoryOverride: Option[File] = None,
-    singleThreadMode: Boolean = false,
+    runMode: RunMode = AkkaStreamsMode,
     metricsPort: Option[Int] = None
 )
+
+sealed trait RunMode
+
+case object SingleThreadMode extends RunMode
+
+case object AkkaStreamsMode extends RunMode

@@ -1,7 +1,7 @@
 package trw.dbsubsetter
 
-import trw.dbsubsetter.config.Config
-import trw.dbsubsetter.db.{BaseQueries, DbMetadataQueries, SchemaInfoRetrieval}
+import trw.dbsubsetter.config.{AkkaStreamsMode, Config, SingleThreadMode}
+import trw.dbsubsetter.db.{BaseQueries, DbMetadataQueries, OK, SchemaInfoRetrieval, SchemaValidation, ValidationError}
 
 object DbSubsetter {
   def run(config: Config): Result = {
@@ -11,18 +11,19 @@ object DbSubsetter {
         config.schemas.map(_.name).toSet
       )
 
-    val schemaInfo =
-      SchemaInfoRetrieval.getSchemaInfo(dbMetadata, config)
-
-    val baseQueries =
-      BaseQueries.get(config, schemaInfo)
-
-    if (config.singleThreadMode) {
-      new ApplicationSingleThreaded(config, schemaInfo, baseQueries).run()
-      Success
-    } else {
-      ApplicationAkkaStreams.run(config, schemaInfo, baseQueries)
-      Success
+    SchemaValidation.validate(config, dbMetadata) match {
+      case ValidationError(message) =>
+        FailedValidation(message)
+      case OK =>
+        val schemaInfo = SchemaInfoRetrieval.getSchemaInfo(dbMetadata, config)
+        val baseQueries = BaseQueries.get(config, schemaInfo)
+        config.runMode match {
+          case AkkaStreamsMode =>
+            ApplicationAkkaStreams.run(config, schemaInfo, baseQueries)
+          case SingleThreadMode =>
+            new ApplicationSingleThreaded(config, schemaInfo, baseQueries).run()
+        }
+        Success
     }
   }
 }
