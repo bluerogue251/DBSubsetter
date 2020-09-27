@@ -6,7 +6,7 @@ object SchemaValidation {
 
   def validate(config: Config, dbMeta: DbMetadataQueryResult): SchemaValidationResult = {
     firstNotFoundSchemaName(config, dbMeta)
-      .map(schemaName => ValidationError(s"Schema not found: $schemaName"))
+      .map(schemaName => ValidationError(s"Schema not found in origin database: $schemaName"))
       .getOrElse(OK)
   }
 
