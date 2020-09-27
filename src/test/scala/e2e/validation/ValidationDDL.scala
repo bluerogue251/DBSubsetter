@@ -10,7 +10,9 @@ class ValidationDDL(val profile: JdbcProfile) {
 
   case class ValidationRow(id: Int, contents: String)
 
-  class ValidationTable(_tableTag: Tag) extends profile.api.Table[ValidationRow](_tableTag, "validation") {
+  class ValidationTable(tag: Tag)
+      extends profile.api.Table[ValidationRow](tag, Some("validation_schema"), "validation_table") {
+
     def * = (id, contents) <> (ValidationRow.tupled, ValidationRow.unapply)
 
     val id: Rep[Int] = column[Int]("id", O.PrimaryKey)
