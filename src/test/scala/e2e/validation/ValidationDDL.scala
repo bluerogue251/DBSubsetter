@@ -6,22 +6,16 @@ class ValidationDDL(val profile: JdbcProfile) {
 
   import profile.api._
 
-  lazy val schema: profile.SchemaDescription = SelfReferencingTable.schema
+  lazy val schema: profile.SchemaDescription = ValidationTableQuery.schema
 
-  /**
-    * self_referencing_table
-    */
-  case class SelfReferencingTableRow(id: Int, parentId: Option[Int])
+  case class ValidationRow(id: Int, contents: String)
 
-  class SelfReferencingTable(_tableTag: Tag)
-      extends profile.api.Table[SelfReferencingTableRow](_tableTag, "self_referencing_table") {
-    def * = (id, parentId) <> (SelfReferencingTableRow.tupled, SelfReferencingTableRow.unapply)
+  class ValidationTable(_tableTag: Tag) extends profile.api.Table[ValidationRow](_tableTag, "validation") {
+    def * = (id, contents) <> (ValidationRow.tupled, ValidationRow.unapply)
 
     val id: Rep[Int] = column[Int]("id", O.PrimaryKey)
-    val parentId: Rep[Option[Int]] = column[Option[Int]]("parent_id")
-    lazy val selfReferencingTableFk =
-      foreignKey("self_referencing_table_parent_id_fkey", parentId, SelfReferencingTable)(r => Rep.Some(r.id))
+    val contents: Rep[String] = column[String]("contents")
   }
 
-  lazy val SelfReferencingTable = new TableQuery(tag => new SelfReferencingTable(tag))
+  lazy val ValidationTableQuery = new TableQuery(tag => new ValidationTable(tag))
 }

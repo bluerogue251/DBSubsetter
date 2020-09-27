@@ -20,11 +20,11 @@ trait ValidationTest extends FunSuiteLike with AssertionUtil {
   }
 
   protected def prepareOriginDML(): Unit = {
-    SlickUtil.dml(originSlick, ValidationDML.dbioSeq(ddl))
+    // No-Op
   }
 
   test("Correct self_referencing_table records were included") {
-    assertCount(ddl.SelfReferencingTable, 10)
-    assertThat(ddl.SelfReferencingTable.map(_.id).sum.result, 70)
+    assertCount(ddl.ValidationTableQuery, 10)
+    assertThat(ddl.ValidationTableQuery.map(_.id).sum.result, 70)
   }
 }
