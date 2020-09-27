@@ -4,7 +4,7 @@ import trw.dbsubsetter.config.{AkkaStreamsMode, Config, SingleThreadMode}
 import trw.dbsubsetter.db.{BaseQueries, DbMetadataQueries, OK, SchemaInfoRetrieval, SchemaValidation, ValidationError}
 
 object DbSubsetter {
-  def run(config: Config): Result = {
+  def run(config: Config): DbSubsetterResult = {
     val dbMetadata =
       DbMetadataQueries.retrieveSchemaMetadata(
         config.originDbConnectionString,
@@ -23,13 +23,14 @@ object DbSubsetter {
           case SingleThreadMode =>
             new ApplicationSingleThreaded(config, schemaInfo, baseQueries).run()
         }
-        Success
+        SubsetCompletedSuccessfully
     }
   }
+
+  sealed trait DbSubsetterResult
+
+  case object SubsetCompletedSuccessfully extends DbSubsetterResult
+
+  case class FailedValidation(message: String) extends DbSubsetterResult
+
 }
-
-sealed trait Result
-
-case object Success extends Result
-
-case class FailedValidation(message: String) extends Result

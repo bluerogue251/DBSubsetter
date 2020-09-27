@@ -2,6 +2,7 @@ package trw.dbsubsetter
 
 import io.prometheus.client.exporter.HTTPServer
 import io.prometheus.client.hotspot.DefaultExports
+import trw.dbsubsetter.DbSubsetter.{DbSubsetterResult, FailedValidation, SubsetCompletedSuccessfully}
 import trw.dbsubsetter.config.{CommandLineParser, Config}
 
 /**
@@ -11,11 +12,11 @@ import trw.dbsubsetter.config.{CommandLineParser, Config}
   * can cause tests to fail nondeterministically when executed in parallel.
   */
 object ApplicationRunner {
-  def run(args: Array[String]): Unit = {
+  def run(args: Array[String]): ApplicationRunResult = {
 
     CommandLineParser.parser.parse(args, Config()) match {
       case None =>
-        System.exit(1)
+        Error(s"Failed to parse command line config.")
       case Some(config) =>
         val metricsEndpoint: Option[HTTPServer] =
           config.metricsPort
@@ -24,13 +25,24 @@ object ApplicationRunner {
               new HTTPServer(port)
             }
 
-        DbSubsetter.run(config) match {
-          case Success => // No-op
-          case FailedValidation(message) =>
-            System.err.println("Pre-run validation failed: ", message)
-        }
+        val result: DbSubsetterResult = DbSubsetter.run(config)
 
         metricsEndpoint.foreach(_.stop())
+
+        result match {
+          case SubsetCompletedSuccessfully =>
+            Success
+          case FailedValidation(message) =>
+            metricsEndpoint.foreach(_.stop())
+            Error(s"Pre-run validation failed: $message.")
+        }
+
     }
   }
 }
+
+sealed trait ApplicationRunResult
+
+case object Success extends ApplicationRunResult
+
+case class Error(message: String) extends ApplicationRunResult

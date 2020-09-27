@@ -18,7 +18,5 @@ object SchemaValidation {
 }
 
 sealed trait SchemaValidationResult
-
 case object OK extends SchemaValidationResult
-
 case class ValidationError(message: String) extends SchemaValidationResult
