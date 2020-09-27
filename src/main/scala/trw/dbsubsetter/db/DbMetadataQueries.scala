@@ -22,7 +22,7 @@ object DbMetadataQueries {
     while (schemasJdbcResultSet.next()) {
       val schemaName = schemasJdbcResultSet.getString("TABLE_SCHEM")
       if (includeSchemas.contains(schemaName)) {
-        schemas + SchemaQueryRow(schemaName)
+        schemas += SchemaQueryRow(schemaName)
       }
     }
 
