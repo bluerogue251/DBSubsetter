@@ -21,7 +21,5 @@ case class Config(
 )
 
 sealed trait RunMode
-
-case object SingleThreadMode extends RunMode
-
+case object DebugMode extends RunMode
 case object AkkaStreamsMode extends RunMode

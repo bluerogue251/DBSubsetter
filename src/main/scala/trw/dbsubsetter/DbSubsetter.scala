@@ -1,6 +1,6 @@
 package trw.dbsubsetter
 
-import trw.dbsubsetter.config.{AkkaStreamsMode, Config, SingleThreadMode}
+import trw.dbsubsetter.config.{AkkaStreamsMode, Config, DebugMode}
 import trw.dbsubsetter.db.{BaseQueries, DbMetadataQueries, OK, SchemaInfoRetrieval, SchemaValidation, ValidationError}
 
 object DbSubsetter {
@@ -20,7 +20,7 @@ object DbSubsetter {
         config.runMode match {
           case AkkaStreamsMode =>
             ApplicationAkkaStreams.run(config, schemaInfo, baseQueries)
-          case SingleThreadMode =>
+          case DebugMode =>
             new ApplicationSingleThreaded(config, schemaInfo, baseQueries).run()
         }
         SubsetCompletedSuccessfully

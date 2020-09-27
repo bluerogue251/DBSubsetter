@@ -1,9 +1,10 @@
 package e2e.validation.empty
 
 import org.scalatest.FunSuiteLike
+import trw.dbsubsetter.DbSubsetter
+import trw.dbsubsetter.DbSubsetter.{FailedValidation, SubsetCompletedSuccessfully}
 import trw.dbsubsetter.config.{CmdLineBaseQuery, Config}
 import trw.dbsubsetter.db.{Schema, Table}
-import trw.dbsubsetter.{DbSubsetter, FailedValidation, Success}
 import util.assertion.AssertionUtil
 import util.db.{Database, DatabaseSet}
 
@@ -49,11 +50,9 @@ trait EmptySchemaValidationTest extends FunSuiteLike with AssertionUtil {
     assertErrorMessage(invalidConfig, "Schema not found: nonexistent_schema")
   }
 
-  // TODO add a nicer error messages for totally uncaught exceptions (bugs)
-
   private[this] def assertErrorMessage(config: Config, expectedMessage: String): Unit = {
     DbSubsetter.run(config) match {
-      case Success                         => fail("Expected validation failure. Got success.")
+      case SubsetCompletedSuccessfully     => fail("Expected validation failure. Got success.")
       case FailedValidation(actualMessage) => assert(actualMessage === expectedMessage)
     }
   }
