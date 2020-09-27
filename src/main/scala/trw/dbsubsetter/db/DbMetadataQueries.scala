@@ -18,11 +18,24 @@ object DbMetadataQueries {
     val primaryKeyColumns = ArrayBuffer.empty[PrimaryKeyColumnQueryRow]
     val foreignKeyColumns = ArrayBuffer.empty[ForeignKeyColumnQueryRow]
 
-    val schemasJdbcResultSet = ddl.getSchemas()
-    while (schemasJdbcResultSet.next()) {
-      val schemaName = schemasJdbcResultSet.getString("TABLE_SCHEM")
-      if (includeSchemas.contains(schemaName)) {
-        schemas += SchemaQueryRow(schemaName)
+    /*
+     * Retrieve schema metadata
+     */
+    if (conn.isMysql) {
+      val catalogsJdbcResultSet = ddl.getCatalogs
+      while (catalogsJdbcResultSet.next()) {
+        val schemaName = catalogsJdbcResultSet.getString("TABLE_CAT")
+        if (includeSchemas.contains(schemaName)) {
+          schemas += SchemaQueryRow(schemaName)
+        }
+      }
+    } else {
+      val schemasJdbcResultSet = ddl.getSchemas()
+      while (schemasJdbcResultSet.next()) {
+        val schemaName = schemasJdbcResultSet.getString("TABLE_SCHEM")
+        if (includeSchemas.contains(schemaName)) {
+          schemas += SchemaQueryRow(schemaName)
+        }
       }
     }
 

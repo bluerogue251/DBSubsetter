@@ -39,16 +39,22 @@ abstract class MySqlEnabledTest extends DbEnabledTest[MySqlDatabase] {
       Properties.envOrElse("DB_SUBSETTER_MYSQL_ORIGIN_PORT", Ports.sharedMySqlOriginPort.toString).toInt
 
     val mySqlTargetSingleThreadedPort: Int =
-      Properties.envOrElse("DB_SUBSETTER_MYSQL_TARGET_SINGLE_THREADED_PORT", Ports.sharedMySqlTargetSingleThreadedPort.toString).toInt
+      Properties
+        .envOrElse("DB_SUBSETTER_MYSQL_TARGET_SINGLE_THREADED_PORT", Ports.sharedMySqlTargetSingleThreadedPort.toString)
+        .toInt
 
     val mySqlTargetAkkaStreamsPort: Int =
-      Properties.envOrElse("DB_SUBSETTER_MYSQL_TARGET_AKKA_STREAMS_PORT", Ports.sharedMySqlTargetAkkaStreamsPort.toString).toInt
+      Properties
+        .envOrElse("DB_SUBSETTER_MYSQL_TARGET_AKKA_STREAMS_PORT", Ports.sharedMySqlTargetAkkaStreamsPort.toString)
+        .toInt
 
     lazy val mysqlOrigin: MySqlDatabase = buildDatabase(mySqlOriginHost, mySqlOriginPort)
 
-    lazy val mysqlTargetSingleThreaded: MySqlDatabase = buildDatabase(mySqlTargetSingleThreadedHost, mySqlTargetSingleThreadedPort)
+    lazy val mysqlTargetSingleThreaded: MySqlDatabase =
+      buildDatabase(mySqlTargetSingleThreadedHost, mySqlTargetSingleThreadedPort)
 
-    lazy val mysqlTargetAkkaStreams: MySqlDatabase = buildDatabase(mySqlTargetAkkaStreamsHost, mySqlTargetAkkaStreamsPort)
+    lazy val mysqlTargetAkkaStreams: MySqlDatabase =
+      buildDatabase(mySqlTargetAkkaStreamsHost, mySqlTargetAkkaStreamsPort)
 
     def buildDatabase(host: String, port: Int): MySqlDatabase = {
       new MySqlDatabase(host, port, testName)
@@ -81,8 +87,10 @@ object MysqlEndToEndTestUtil {
 
   def preSubsetDdlSync(origin: MySqlDatabase, target: MySqlDatabase, schemas: List[String]): Unit = {
     schemas.foreach(schema => {
-      val exportCommand: String = s"mysqldump --host ${origin.host} --port ${origin.port} --user root --no-data $schema"
-      val importCommand: String = s"mysql --host ${target.host} --port ${target.port} --user root $schema"
+      val exportCommand: String =
+        s"mysqldump --ssl-mode=DISABLED --host ${origin.host} --port ${origin.port} --user root --no-data $schema"
+      val importCommand: String =
+        s"mysql --ssl-mode=DISABLED --host ${target.host} --port ${target.port} --user root $schema"
       (exportCommand #| importCommand).!!
     })
   }
