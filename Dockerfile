@@ -12,6 +12,10 @@ RUN apt-get upgrade -y
 
 RUN apt-get install -y postgresql-client
 
+RUN wget https://dev.mysql.com/get/mysql-apt-config_0.8.15-1_all.deb
+RUN dpkg -i mysql-apt-config_0.8.15-1_all.deb
+RUN rm mysql-apt-config_0.8.15-1_all.deb
+RUN apt-get update
 RUN apt-get install -y mysql-client
 
 # Install some pre-requisites to HTTPS usage in certain apt functions
@@ -41,4 +45,4 @@ ADD . /tmp-project-install
 WORKDIR /tmp-project-install
 RUN sbt compile
 WORKDIR root
-run rm -rf /tmp-project-install
+RUN rm -rf /tmp-project-install
