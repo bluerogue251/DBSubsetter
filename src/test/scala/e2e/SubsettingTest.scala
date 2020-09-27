@@ -33,7 +33,9 @@ trait SubsettingTest[T <: Database] extends DbEnabledTest[T] {
     )
     val finalArgs: Array[String] = defaultArgs ++ programArgs
 
-    timedSubsetMilliseconds(finalArgs)
+    val result = timedSubsetMilliseconds(finalArgs)
+    println(s"Debug Mode Result: $result")
+    result
   }
   // format: on
 
@@ -48,15 +50,17 @@ trait SubsettingTest[T <: Database] extends DbEnabledTest[T] {
     )
     val finalArgs: Array[String] = defaultArgs ++ programArgs
 
-    timedSubsetMilliseconds(finalArgs)
+    val result = timedSubsetMilliseconds(finalArgs)
+    println(s"Akka Streams Mode Result: $result")
+    result
   }
   // format: on
 
   private def timedSubsetMilliseconds(args: Array[String]): TestRunResult = {
     val start = System.nanoTime()
-    val result = ApplicationRunner.run(args)
+    val applicationRunResult = ApplicationRunner.run(args)
     val duration = (System.nanoTime() - start).nanos
-    TestRunResult(result, duration)
+    TestRunResult(applicationRunResult, duration)
   }
 
   case class TestRunResult(runResult: ApplicationRunResult, runDuration: Duration)
