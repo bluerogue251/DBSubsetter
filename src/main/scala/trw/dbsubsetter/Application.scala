@@ -4,8 +4,8 @@ object Application extends App {
   ApplicationRunner.run(args) match {
     case Success =>
       System.exit(0)
-    case Error(message) =>
-      System.err.println("Run failed. " + message)
+    case FailedToStart(message) =>
+      System.err.println("DBSubsetter failed to start. " + message)
       System.exit(1)
   }
 }

@@ -11,12 +11,12 @@ object SchemaValidation {
     val missingSchemaNames: Set[String] = findMissingSchemas(config, dbMeta)
 
     if (missingSchemaNames.size == 1) {
-      return ValidationError(s"specified schema not found: ${missingSchemaNames.head}")
+      return ValidationError(s"Specified schema not found: ${missingSchemaNames.head}")
     }
 
     if (missingSchemaNames.size > 1) {
       val csv = missingSchemaNames.mkString(", ")
-      return ValidationError(s"specified schemas not found: $csv")
+      return ValidationError(s"Specified schemas not found: $csv")
     }
 
     OK

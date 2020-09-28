@@ -16,7 +16,7 @@ object ApplicationRunner {
 
     CommandLineParser.parser.parse(args, Config()) match {
       case None =>
-        Error(s"Could not parse command line arguments.")
+        FailedToStart(s"Could not parse command line arguments.")
       case Some(config) =>
         val metricsEndpoint: Option[HTTPServer] =
           config.metricsPort
@@ -33,7 +33,7 @@ object ApplicationRunner {
           case SubsetCompletedSuccessfully =>
             Success
           case FailedValidation(message) =>
-            Error(s"Validation error: $message.")
+            FailedToStart(message)
         }
     }
   }
@@ -41,4 +41,4 @@ object ApplicationRunner {
 
 sealed trait ApplicationRunResult
 case object Success extends ApplicationRunResult
-case class Error(message: String) extends ApplicationRunResult
+case class FailedToStart(message: String) extends ApplicationRunResult
