@@ -5,15 +5,27 @@ import trw.dbsubsetter.config.Config
 object SchemaValidation {
 
   def validate(config: Config, dbMeta: DbMetadataQueryResult): SchemaValidationResult = {
-    firstNotFoundSchemaName(config, dbMeta)
-      .map(schemaName => ValidationError(s"specified schema not found: $schemaName"))
-      .getOrElse(OK)
+    /*
+     * Detect Missing Schemas
+     */
+    val missingSchemaNames: Set[String] = findMissingSchemas(config, dbMeta)
+
+    if (missingSchemaNames.size == 1) {
+      return ValidationError(s"specified schema not found: ${missingSchemaNames.head}")
+    }
+
+    if (missingSchemaNames.size > 1) {
+      val csv = missingSchemaNames.mkString(", ")
+      return ValidationError(s"specified schemas not found: $csv")
+    }
+
+    OK
   }
 
-  private[this] def firstNotFoundSchemaName(config: Config, dbMeta: DbMetadataQueryResult): Option[String] = {
+  private[this] def findMissingSchemas(config: Config, dbMeta: DbMetadataQueryResult): Set[String] = {
     val actualSchemas: Set[String] = dbMeta.schemas.map(_.name).toSet
     val configSchemas: Set[String] = config.schemas.map(_.name).toSet
-    configSchemas.filterNot(actualSchemas).headOption
+    configSchemas.filterNot(actualSchemas)
   }
 }
 
