@@ -1,7 +1,9 @@
 package e2e
 
-import trw.dbsubsetter.ApplicationRunner
+import trw.dbsubsetter.{ApplicationRunResult, ApplicationRunner}
 import util.db.Database
+
+import scala.concurrent.duration.{Duration, DurationLong}
 
 /**
   * A test mixin which runs subsetting in both single threaded mode and akka streams
@@ -12,18 +14,18 @@ trait SubsettingTest[T <: Database] extends DbEnabledTest[T] {
 
   protected def programArgs: Array[String]
 
-  protected var singleThreadedRuntimeMillis: Long = _
+  protected var debugModeResult: TestRunResult = _
 
-  protected var akkaStreamsRuntimeMillis: Long = _
+  protected var akkaStreamsModeResult: TestRunResult = _
 
   override protected def beforeAll(): Unit = {
     super.beforeAll()
-    singleThreadedRuntimeMillis = runSubsetInSingleThreadedMode()
-    akkaStreamsRuntimeMillis = runSubsetInAkkaStreamsMode()
+    debugModeResult = runSubsetInSingleThreadedMode()
+    akkaStreamsModeResult = runSubsetInAkkaStreamsMode()
   }
 
   // format: off
-  protected def runSubsetInSingleThreadedMode(): Long = {
+  protected def runSubsetInSingleThreadedMode(): TestRunResult = {
     val defaultArgs: Array[String] = Array(
       "--originDbConnStr", dbs.origin.connectionString,
       "--targetDbConnStr", dbs.targetSingleThreaded.connectionString,
@@ -31,10 +33,14 @@ trait SubsettingTest[T <: Database] extends DbEnabledTest[T] {
     )
     val finalArgs: Array[String] = defaultArgs ++ programArgs
 
-    timedSubsetMilliseconds(finalArgs)
+    val result = timedSubsetMilliseconds(finalArgs)
+    println(s"Debug Mode Result: $result")
+    result
   }
+  // format: on
 
-  protected def runSubsetInAkkaStreamsMode(): Long = {
+  // format: off
+  protected def runSubsetInAkkaStreamsMode(): TestRunResult = {
     val defaultArgs: Array[String] = Array(
       "--originDbConnStr", dbs.origin.connectionString,
       "--keyCalculationDbConnectionCount", "10",
@@ -44,14 +50,18 @@ trait SubsettingTest[T <: Database] extends DbEnabledTest[T] {
     )
     val finalArgs: Array[String] = defaultArgs ++ programArgs
 
-    timedSubsetMilliseconds(finalArgs)
+    val result = timedSubsetMilliseconds(finalArgs)
+    println(s"Akka Streams Mode Result: $result")
+    result
   }
   // format: on
 
-  private def timedSubsetMilliseconds(args: Array[String]): Long = {
+  private def timedSubsetMilliseconds(args: Array[String]): TestRunResult = {
     val start = System.nanoTime()
-    ApplicationRunner.run(args)
-    val end = System.nanoTime()
-    (end - start) / 1000000
+    val applicationRunResult = ApplicationRunner.run(args)
+    val duration = (System.nanoTime() - start).nanos
+    TestRunResult(applicationRunResult, duration)
   }
+
+  case class TestRunResult(runResult: ApplicationRunResult, runDuration: Duration)
 }

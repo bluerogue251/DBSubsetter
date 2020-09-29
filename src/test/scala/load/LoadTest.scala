@@ -3,6 +3,8 @@ package load
 import e2e.SubsettingTest
 import util.db.Database
 
+import scala.concurrent.duration.Duration
+
 /**
   * A load test is a `SubsettingTest` with two extra capabilities:
   *   1. Assert that subsetting runtimes were within some pre-defined, expected limits
@@ -14,15 +16,21 @@ import util.db.Database
   */
 trait LoadTest[T <: Database] extends SubsettingTest[T] {
 
-  protected def singleThreadedRuntimeLimitMillis: Long
+  /**
+    * The maximum amount of time the subsetting run is allowed to take in `--singleThreadedDebugMode`
+    */
+  protected def debugModeLimit: Duration
 
-  protected def akkaStreamsRuntimeLimitMillis: Long
+  /**
+    * The maximum amount of time the subsetting run is allowed to take in its normal running mode
+    */
+  protected def akkaStreamsModeLimit: Duration
 
   test("Check that single threaded runtime did not significantly increase") {
-    assert(singleThreadedRuntimeMillis < singleThreadedRuntimeLimitMillis)
+    assert(debugModeResult.runDuration < debugModeLimit)
   }
 
   test("Check that Akka Streams runtime did not significantly increase") {
-    assert(akkaStreamsRuntimeMillis < akkaStreamsRuntimeLimitMillis)
+    assert(akkaStreamsModeResult.runDuration < akkaStreamsModeLimit)
   }
 }

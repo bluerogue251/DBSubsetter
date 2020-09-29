@@ -172,7 +172,7 @@ object CommandLineParser {
               |""".stripMargin)
 
     opt[Unit]("singleThreadedDebugMode")
-      .action((_, c) => c.copy(singleThreadMode = true))
+      .action((_, c) => c.copy(runMode = DebugMode))
       .text("""Run DBSubsetter in debug mode (NOT recommended)
               |                           Uses a simplified, single-threaded architecture
               |                           Avoids using Akka Streams and Chronicle-Queue
