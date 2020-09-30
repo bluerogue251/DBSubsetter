@@ -1,10 +1,10 @@
 package trw.dbsubsetter.config
 
 case class CommandLineConfig(
-    schemas: Seq[String] = Seq.empty,
+    schemas: Set[String] = Set.empty,
     originDbConnectionString: String = "",
     targetDbConnectionString: String = "",
-    baseQueries: Seq[String] = Seq.empty,
+    baseQueries: Set[String] = Set.empty,
     keyCalculationDbConnectionCount: Int = 1,
     dataCopyDbConnectionCount: Int = 1,
     extraForeignKeys: Set[String] = Set.empty,

@@ -78,7 +78,7 @@ class ConfigExtractor {
         extraForeignKeys = extraForeignKeys,
         extraPrimaryKeys = extraPrimaryKeys,
         excludeTables = excludeTables,
-        excludeColumns = ???
+        excludeColumns = excludeColumns
       )
     )
   }
