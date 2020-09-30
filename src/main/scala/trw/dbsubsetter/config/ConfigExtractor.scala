@@ -66,11 +66,9 @@ class ConfigExtractor {
         .flatMap {
           case columnRegex(schemaName, tableName, cols) =>
             val table = normalizeTable(schemaName, tableName)
-            val newlyExcluded = normalizeColumns(table, cols).toSet
-            c.copy(excludeColumns = c.excludeColumns ++ newlyExcluded)
-          case _ =>
-            return InvalidInput(InvalidExcludeTable(excludeTableString))
-            throw new RuntimeException
+            normalizeColumns(table, cols).toSet
+          case excludeColumnsString =>
+            return InvalidInput(InvalidExcludeTable(excludeColumnsString))
         }
 
     Valid(
@@ -107,5 +105,4 @@ case class InvalidBaseQuery(input: String) extends ErrorType
 case class InvalidExtraPrimaryKey(input: String) extends ErrorType
 case class InvalidExtraForeignKey(input: String) extends ErrorType
 case class InvalidExcludeTable(input: String) extends ErrorType
-
 case class InvalidExcludeColumn(input: String) extends ErrorType
