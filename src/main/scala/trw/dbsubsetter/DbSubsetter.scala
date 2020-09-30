@@ -4,16 +4,16 @@ import trw.dbsubsetter.config._
 import trw.dbsubsetter.db.{BaseQueries, DbMetadataQueries, OK, SchemaInfoRetrieval, SchemaValidation, ValidationError}
 
 object DbSubsetter {
-  def run(cmdLineConfig: CommandLineConfig): DbSubsetterResult = {
-    ConfigExtractor.extractSchemaConfig(cmdLineConfig) match {
+  def run(input: CommandLineConfig): DbSubsetterResult = {
+    ConfigExtractor.extractSchemaConfig(input) match {
       case InvalidInput(errorType) =>
         FailedSchemaConfigExtraction(errorType)
 
       case Valid(schemaConfig) =>
         val dbMetadata =
           DbMetadataQueries.retrieveSchemaMetadata(
-            cmdLineConfig.originDbConnectionString,
-            cmdLineConfig.schemas
+            input.originDbConnectionString,
+            input.schemas
           )
 
         SchemaValidation.validate(schemaConfig, dbMetadata) match {
@@ -23,11 +23,18 @@ object DbSubsetter {
           case OK =>
             val schemaInfo = SchemaInfoRetrieval.getSchemaInfo(dbMetadata, schemaConfig)
             val baseQueries = BaseQueries.get(schemaConfig, schemaInfo)
-            cmdLineConfig.runMode match {
+            val config = Config(
+              originDbConnectionString = input.originDbConnectionString,
+              targetDbConnectionString = input.targetDbConnectionString,
+              keyCalculationDbConnectionCount = input.keyCalculationDbConnectionCount,
+              dataCopyDbConnectionCount = input.dataCopyDbConnectionCount,
+              tempfileStorageDirectoryOverride = input.tempfileStorageDirectoryOverride
+            )
+            input.runMode match {
               case AkkaStreamsMode =>
-                ApplicationAkkaStreams.run(cmdLineConfig, schemaInfo, baseQueries)
+                ApplicationAkkaStreams.run(config, schemaInfo, baseQueries)
               case DebugMode =>
-                new ApplicationSingleThreaded(cmdLineConfig, schemaInfo, baseQueries).run()
+                new ApplicationSingleThreaded(config, schemaInfo, baseQueries).run()
             }
             SubsetCompletedSuccessfully
         }
