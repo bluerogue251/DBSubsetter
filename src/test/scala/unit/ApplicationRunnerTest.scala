@@ -1,10 +1,10 @@
 package unit
 
 import org.scalatest.FunSuite
-import trw.dbsubsetter.{ApplicationRunResult, ApplicationRunner}
+import trw.dbsubsetter.{ApplicationRunResult, ApplicationRunner, FailedToStart, Success}
 
 class ApplicationRunnerTest extends FunSuite {
-  test("Woot") {
+  test("Base Query Regex Validation Failure") {
     // format: off
     val args: Array[String] = Array(
       "--schemas", "public",
@@ -15,6 +15,12 @@ class ApplicationRunnerTest extends FunSuite {
     // format: on
 
     val result: ApplicationRunResult = ApplicationRunner.run(args)
-    assert("one" === "two")
+
+    result match {
+      case Success =>
+        fail("Expected invalid but actually was success.")
+      case FailedToStart(message) =>
+        assert(message === "Invalid --baseQuery specified: I ::: Am ::: Invalid.")
+    }
   }
 }
