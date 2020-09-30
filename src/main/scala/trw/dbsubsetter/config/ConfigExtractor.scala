@@ -50,13 +50,36 @@ class ConfigExtractor {
             return InvalidInput(InvalidExtraPrimaryKey(primaryKeyString))
         }
 
+    val tableRegex = """^\s*(.+)\.(.+)\s*$""".r
+    val excludeTables =
+      input.excludeTables
+        .map {
+          case tableRegex(schemaName, tableName) =>
+            normalizeTable(schemaName, tableName)
+          case excludeTableString =>
+            return InvalidInput(InvalidExcludeTable(excludeTableString))
+        }
+
+    val columnRegex = """^\s*(.+)\.(.+)\((.+)\)\s*$""".r
+    val excludeColumns =
+      input.excludeColumns
+        .flatMap {
+          case columnRegex(schemaName, tableName, cols) =>
+            val table = normalizeTable(schemaName, tableName)
+            val newlyExcluded = normalizeColumns(table, cols).toSet
+            c.copy(excludeColumns = c.excludeColumns ++ newlyExcluded)
+          case _ =>
+            return InvalidInput(InvalidExcludeTable(excludeTableString))
+            throw new RuntimeException
+        }
+
     Valid(
       SchemaConfig(
         schemas = schemas,
         baseQueries = baseQueries,
         extraForeignKeys = extraForeignKeys,
         extraPrimaryKeys = extraPrimaryKeys,
-        excludeTables = ???,
+        excludeTables = excludeTables,
         excludeColumns = ???
       )
     )
@@ -83,3 +106,6 @@ sealed trait ErrorType
 case class InvalidBaseQuery(input: String) extends ErrorType
 case class InvalidExtraPrimaryKey(input: String) extends ErrorType
 case class InvalidExtraForeignKey(input: String) extends ErrorType
+case class InvalidExcludeTable(input: String) extends ErrorType
+
+case class InvalidExcludeColumn(input: String) extends ErrorType

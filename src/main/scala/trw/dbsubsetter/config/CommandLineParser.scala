@@ -88,15 +88,7 @@ object CommandLineParser {
     opt[String]("excludeTable")
       .valueName("<schema>.<table>")
       .maxOccurs(Int.MaxValue)
-      .action { (str, c) =>
-        val regex = """^\s*(.+)\.(.+)\s*$""".r
-        str match {
-          case regex(schemaName, tableName) =>
-            val table = normalizeTable(schemaName, tableName)
-            c.copy(excludeTables = c.excludeTables + table)
-          case _ => throw new RuntimeException
-        }
-      }
+      .action((t, c) => c.copy(excludeTables = c.excludeTables + t))
       .text("""Exclude a table from the resulting subset
               |                           Also ignore all foreign keys to and from this table
               |                           Can be specified multiple times
@@ -105,16 +97,7 @@ object CommandLineParser {
     opt[String]("excludeColumns")
       .valueName("<schema>.<table>(<column1>, <column2>, ...)")
       .maxOccurs(Int.MaxValue)
-      .action { (ic, c) =>
-        val regex = """^\s*(.+)\.(.+)\((.+)\)\s*$""".r
-        ic match {
-          case regex(schemaName, tableName, cols) =>
-            val table = normalizeTable(schemaName, tableName)
-            val newlyExcluded = normalizeColumns(table, cols).toSet
-            c.copy(excludeColumns = c.excludeColumns ++ newlyExcluded)
-          case _ => throw new RuntimeException
-        }
-      }
+      .action((ec, c) => c.copy(excludeColumns = c.excludeColumns + ec))
       .text("""Exclude data from these columns when subsetting
               |                           Intended for columns that are not part of any primary or foreign keys
               |                           Useful among other things as a workaround if DBSubsetter does not support a vendor-specific data type
