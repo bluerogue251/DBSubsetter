@@ -16,14 +16,14 @@ object ApplicationRunner {
         FailedToStart(s"Could not parse command line arguments.")
       case Some(commandLineArgs) =>
         ConfigExtractor.extractConfig(commandLineArgs) match {
-          case InvalidInput(invalidInputType) =>
+          case Invalid(invalidInputType) =>
             FailedToStart(InvalidInputMessaging.toErrorMessage(invalidInputType))
           case Valid(schemaConfig, config) =>
             DbSubsetter.run(schemaConfig, config) match {
-              case SubsetCompletedSuccessfully =>
-                Success
               case FailedValidation(message) =>
                 FailedToStart(message)
+              case SubsetCompletedSuccessfully =>
+                Success
             }
         }
     }

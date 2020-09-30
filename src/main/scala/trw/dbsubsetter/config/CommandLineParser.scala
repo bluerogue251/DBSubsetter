@@ -73,7 +73,7 @@ object CommandLineParser {
       .maxOccurs(Int.MaxValue)
       .valueName("<schema>.<table>(<column1>, <column2>, ...)")
       .action((fk, c) => c.copy(extraPrimaryKeys = c.extraPrimaryKeys + fk))
-      .text("""Primary key to recognize during subsetting even though it is not defined in the database
+      .text("""Primary key to respect during subsetting even though it is not defined in the database
               |                           Can be specified multiple times
               |""".stripMargin)
 

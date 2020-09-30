@@ -18,7 +18,7 @@ object ConfigExtractor {
             val table = normalizeTable(schemaName, tableName)
             ConfigBaseQuery(table, whereClause.trim, includeChildren == "includeChildren")
           case baseQueryString =>
-            return InvalidInput(InvalidBaseQuery(baseQueryString))
+            return Invalid(InvalidBaseQuery(baseQueryString))
         }
 
     val foreignKeyRegex = """^(.+)\.(.+)\((.+)\)\s+:::\s+(.+)\.(.+)\((.+)\)\s*$""".r
@@ -35,7 +35,7 @@ object ConfigExtractor {
               toColumns = normalizeColumns(toTable, toCols)
             )
           case foreignKeyString =>
-            return InvalidInput(InvalidExtraForeignKey(foreignKeyString))
+            return Invalid(InvalidExtraForeignKey(foreignKeyString))
         }
 
     val primaryKeyRegex = """^\s*(.+)\.(.+)\((.+)\)\s*$""".r
@@ -47,7 +47,7 @@ object ConfigExtractor {
             val columns = normalizeColumns(table, cols)
             ConfigPrimaryKey(table, columns)
           case primaryKeyString =>
-            return InvalidInput(InvalidExtraPrimaryKey(primaryKeyString))
+            return Invalid(InvalidExtraPrimaryKey(primaryKeyString))
         }
 
     val tableRegex = """^\s*(.+)\.(.+)\s*$""".r
@@ -57,7 +57,7 @@ object ConfigExtractor {
           case tableRegex(schemaName, tableName) =>
             normalizeTable(schemaName, tableName)
           case excludeTableString =>
-            return InvalidInput(InvalidExcludeTable(excludeTableString))
+            return Invalid(InvalidExcludeTable(excludeTableString))
         }
 
     val columnRegex = """^\s*(.+)\.(.+)\((.+)\)\s*$""".r
@@ -68,7 +68,7 @@ object ConfigExtractor {
             val table = normalizeTable(schemaName, tableName)
             normalizeColumns(table, cols).toSet
           case excludeColumnsString =>
-            return InvalidInput(InvalidExcludeTable(excludeColumnsString))
+            return Invalid(InvalidExcludeTable(excludeColumnsString))
         }
 
     Valid(
@@ -105,7 +105,7 @@ object ConfigExtractor {
 
 sealed trait ExtractionResult
 case class Valid(schemaConfig: SchemaConfig, config: Config) extends ExtractionResult
-case class InvalidInput(invalidInputType: InvalidInputType) extends ExtractionResult
+case class Invalid(invalidInputType: InvalidInputType) extends ExtractionResult
 
 sealed trait InvalidInputType
 case class InvalidBaseQuery(input: String) extends InvalidInputType
