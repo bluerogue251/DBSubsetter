@@ -7,12 +7,12 @@ import trw.dbsubsetter.db.{Schema, Table}
   * richer types. If invalid input prevents this, surface this as a validation error.
   */
 object ConfigExtractor {
-  def extractSchemaConfig(input: CommandLineArgs): SchemaConfigExtractionResult = {
-    val schemas = input.schemas.map(Schema)
+  def extractSchemaConfig(args: CommandLineArgs): ExtractionResult = {
+    val schemas = args.schemas.map(Schema)
 
     val baseQueryRegex = """^\s*(.+)\.(.+)\s+:::\s+(.+)\s+:::\s+(includeChildren|excludeChildren)\s*$""".r
     val baseQueries =
-      input.baseQueries
+      args.baseQueries
         .map {
           case baseQueryRegex(schemaName, tableName, whereClause, includeChildren) =>
             val table = normalizeTable(schemaName, tableName)
@@ -23,7 +23,7 @@ object ConfigExtractor {
 
     val foreignKeyRegex = """^(.+)\.(.+)\((.+)\)\s+:::\s+(.+)\.(.+)\((.+)\)\s*$""".r
     val extraForeignKeys =
-      input.extraForeignKeys
+      args.extraForeignKeys
         .map {
           case foreignKeyRegex(fromSchemaName, fromTableName, fromCols, toSchemaName, toTableName, toCols) =>
             val fromTable = normalizeTable(fromSchemaName, fromTableName)
@@ -40,7 +40,7 @@ object ConfigExtractor {
 
     val primaryKeyRegex = """^\s*(.+)\.(.+)\((.+)\)\s*$""".r
     val extraPrimaryKeys =
-      input.extraPrimaryKeys
+      args.extraPrimaryKeys
         .map {
           case primaryKeyRegex(schemaName, tableName, cols) =>
             val table = normalizeTable(schemaName, tableName)
@@ -52,7 +52,7 @@ object ConfigExtractor {
 
     val tableRegex = """^\s*(.+)\.(.+)\s*$""".r
     val excludeTables =
-      input.excludeTables
+      args.excludeTables
         .map {
           case tableRegex(schemaName, tableName) =>
             normalizeTable(schemaName, tableName)
@@ -62,7 +62,7 @@ object ConfigExtractor {
 
     val columnRegex = """^\s*(.+)\.(.+)\((.+)\)\s*$""".r
     val excludeColumns =
-      input.excludeColumns
+      args.excludeColumns
         .flatMap {
           case columnRegex(schemaName, tableName, cols) =>
             val table = normalizeTable(schemaName, tableName)
@@ -79,6 +79,13 @@ object ConfigExtractor {
         extraPrimaryKeys = extraPrimaryKeys,
         excludeTables = excludeTables,
         excludeColumns = excludeColumns
+      ),
+      Config(
+        originDbConnectionString = args.originDbConnectionString,
+        targetDbConnectionString = args.targetDbConnectionString,
+        keyCalculationDbConnectionCount = args.keyCalculationDbConnectionCount,
+        dataCopyDbConnectionCount = args.dataCopyDbConnectionCount,
+        tempfileStorageDirectoryOverride = args.tempfileStorageDirectoryOverride
       )
     )
   }
@@ -96,13 +103,13 @@ object ConfigExtractor {
   }
 }
 
-sealed trait SchemaConfigExtractionResult
-case class Valid(schemaConfig: SchemaConfig) extends SchemaConfigExtractionResult
-case class InvalidInput(errorType: SchemaConfigError) extends SchemaConfigExtractionResult
+sealed trait ExtractionResult
+case class Valid(schemaConfig: SchemaConfig, config: Config) extends ExtractionResult
+case class InvalidInput(invalidInputType: InvalidInputType) extends ExtractionResult
 
-sealed trait SchemaConfigError
-case class InvalidBaseQuery(input: String) extends SchemaConfigError
-case class InvalidExtraPrimaryKey(input: String) extends SchemaConfigError
-case class InvalidExtraForeignKey(input: String) extends SchemaConfigError
-case class InvalidExcludeTable(input: String) extends SchemaConfigError
-case class InvalidExcludeColumn(input: String) extends SchemaConfigError
+sealed trait InvalidInputType
+case class InvalidBaseQuery(input: String) extends InvalidInputType
+case class InvalidExtraPrimaryKey(input: String) extends InvalidInputType
+case class InvalidExtraForeignKey(input: String) extends InvalidInputType
+case class InvalidExcludeTable(input: String) extends InvalidInputType
+case class InvalidExcludeColumn(input: String) extends InvalidInputType

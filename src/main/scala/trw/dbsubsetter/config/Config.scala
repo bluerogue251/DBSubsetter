@@ -7,5 +7,7 @@ case class Config(
     targetDbConnectionString: String = "",
     keyCalculationDbConnectionCount: Int = 1,
     dataCopyDbConnectionCount: Int = 1,
-    tempfileStorageDirectoryOverride: Option[File] = None
+    tempfileStorageDirectoryOverride: Option[File] = None,
+    runMode: RunMode = AkkaStreamsMode,
+    metricsPort: Option[Int] = None
 )

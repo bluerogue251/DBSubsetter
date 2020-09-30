@@ -9,7 +9,7 @@ object DbSubsetter {
       case InvalidInput(errorType) =>
         FailedSchemaConfigExtraction(errorType)
 
-      case Valid(schemaConfig) =>
+      case Valid(schemaConfig, config) =>
         val dbMetadata =
           DbMetadataQueries.retrieveSchemaMetadata(
             args.originDbConnectionString,
@@ -23,13 +23,6 @@ object DbSubsetter {
           case OK =>
             val schemaInfo = SchemaInfoRetrieval.getSchemaInfo(dbMetadata, schemaConfig)
             val baseQueries = BaseQueries.get(schemaConfig, schemaInfo)
-            val config = Config(
-              originDbConnectionString = args.originDbConnectionString,
-              targetDbConnectionString = args.targetDbConnectionString,
-              keyCalculationDbConnectionCount = args.keyCalculationDbConnectionCount,
-              dataCopyDbConnectionCount = args.dataCopyDbConnectionCount,
-              tempfileStorageDirectoryOverride = args.tempfileStorageDirectoryOverride
-            )
             args.runMode match {
               case AkkaStreamsMode =>
                 ApplicationAkkaStreams.run(config, schemaInfo, baseQueries)
@@ -43,6 +36,6 @@ object DbSubsetter {
 
   sealed trait DbSubsetterResult
   case object SubsetCompletedSuccessfully extends DbSubsetterResult
-  case class FailedSchemaConfigExtraction(error: SchemaConfigError) extends DbSubsetterResult
+  case class FailedSchemaConfigExtraction(error: InvalidInputType) extends DbSubsetterResult
   case class FailedValidation(message: String) extends DbSubsetterResult
 }
