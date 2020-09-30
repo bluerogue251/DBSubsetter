@@ -43,6 +43,5 @@ object DbSubsetter {
 
   sealed trait DbSubsetterResult
   case object SubsetCompletedSuccessfully extends DbSubsetterResult
-  case class FailedSchemaConfigExtraction(error: InvalidInputType) extends DbSubsetterResult
   case class FailedValidation(message: String) extends DbSubsetterResult
 }

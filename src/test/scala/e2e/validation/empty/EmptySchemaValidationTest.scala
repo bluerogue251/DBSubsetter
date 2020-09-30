@@ -3,7 +3,7 @@ package e2e.validation.empty
 import org.scalatest.FunSuiteLike
 import trw.dbsubsetter.DbSubsetter
 import trw.dbsubsetter.DbSubsetter.{FailedValidation, SubsetCompletedSuccessfully}
-import trw.dbsubsetter.config.{Config, ConfigBaseQuery}
+import trw.dbsubsetter.config.{Config, ConfigBaseQuery, SchemaConfig}
 import trw.dbsubsetter.db.{Schema, Table}
 import util.assertion.AssertionUtil
 import util.db.{Database, DatabaseSet}
@@ -36,26 +36,30 @@ trait EmptySchemaValidationTest extends FunSuiteLike with AssertionUtil {
       includeChildren = true
     )
 
+  private val validSchemaConfig: SchemaConfig =
+    SchemaConfig(
+      schemas = Set(validationSchema),
+      baseQueries = Set(validationBaseQuery)
+    )
+
   private val validConfig: Config =
     Config(
-      schemas = Seq(validationSchema),
       originDbConnectionString = dbs.origin.connectionString,
-      targetDbConnectionString = dbs.targetAkkaStreams.connectionString,
-      baseQueries = Seq(validationBaseQuery)
+      targetDbConnectionString = dbs.targetAkkaStreams.connectionString
     )
 
   test("Single nonexistent schema") {
-    val invalidConfig = validConfig.copy(schemas = Seq(Schema("nonexistent")))
-    assertErrorMessage(invalidConfig, "Specified schema not found: nonexistent")
+    val invalidSchemaConfig = validSchemaConfig.copy(schemas = Set(Schema("nonexistent")))
+    assertErrorMessage(invalidSchemaConfig, "Specified schema not found: nonexistent")
   }
 
   test("Multiple nonexistent schemas") {
-    val invalidConfig = validConfig.copy(schemas = Seq(Schema("s1"), Schema("s2"), Schema("s3")))
-    assertErrorMessage(invalidConfig, "Specified schemas not found: s1, s2, s3")
+    val invalidSchemaConfig = validSchemaConfig.copy(schemas = Set(Schema("s1"), Schema("s2"), Schema("s3")))
+    assertErrorMessage(invalidSchemaConfig, "Specified schemas not found: s1, s2, s3")
   }
 
-  private[this] def assertErrorMessage(config: Config, expectedMessage: String): Unit = {
-    DbSubsetter.run(config) match {
+  private[this] def assertErrorMessage(schemaConfig: SchemaConfig, expectedMessage: String): Unit = {
+    DbSubsetter.run(schemaConfig, validConfig) match {
       case SubsetCompletedSuccessfully     => fail("Expected validation failure. Got success.")
       case FailedValidation(actualMessage) => assert(actualMessage === expectedMessage)
     }
