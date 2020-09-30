@@ -22,7 +22,7 @@ object DbSubsetter {
 
           case OK =>
             val schemaInfo = SchemaInfoRetrieval.getSchemaInfo(dbMetadata, schemaConfig)
-            val baseQueries = BaseQueries.get(cmdLineConfig, schemaInfo)
+            val baseQueries = BaseQueries.get(schemaConfig, schemaInfo)
             cmdLineConfig.runMode match {
               case AkkaStreamsMode =>
                 ApplicationAkkaStreams.run(cmdLineConfig, schemaInfo, baseQueries)
