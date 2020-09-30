@@ -2,7 +2,7 @@ package trw.dbsubsetter.db
 
 import java.util.NoSuchElementException
 
-import trw.dbsubsetter.config.{CmdLineColumn, Config}
+import trw.dbsubsetter.config.{Config, ConfigColumn}
 import trw.dbsubsetter.db.ColumnTypes.ColumnType
 
 object SchemaInfoRetrieval {
@@ -39,7 +39,7 @@ object SchemaInfoRetrieval {
         .filterNot { columnQueryRow =>
           val schema = Schema(columnQueryRow.schema)
           val table = Table(schema, columnQueryRow.table)
-          val cmdLineColumn = CmdLineColumn(table, columnQueryRow.name)
+          val cmdLineColumn = ConfigColumn(table, columnQueryRow.name)
           config.excludeColumns.contains(cmdLineColumn)
         }
         .filter(c => tablesByName.contains((c.schema, c.table)))

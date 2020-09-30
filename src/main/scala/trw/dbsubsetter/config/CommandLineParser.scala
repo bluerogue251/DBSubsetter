@@ -3,7 +3,6 @@ package trw.dbsubsetter.config
 import java.io.File
 
 import scopt.OptionParser
-import trw.dbsubsetter.db.{Schema, Table}
 
 object CommandLineParser {
   val parser: OptionParser[CommandLineConfig] = new OptionParser[CommandLineConfig]("DBSubsetter") {
@@ -70,42 +69,19 @@ object CommandLineParser {
               |                           (Note the total Origin DB connection count is --keyCalculationDbConnectionCount + --dataCopyDbConnectionCount)
         """.stripMargin)
 
-    opt[String]("foreignKey")
-      .maxOccurs(Int.MaxValue)
-      .valueName("<schema1>.<table1>(<column1>, <column2>, ...) ::: <schema2>.<table2>(<column3>, <column4>, ...)")
-      .action { case (fk, c) =>
-        val regex = """^(.+)\.(.+)\((.+)\)\s+:::\s+(.+)\.(.+)\((.+)\)\s*$""".r
-
-        fk match {
-          case regex(fromSchemaName, fromTableName, fromCols, toSchemaName, toTableName, toCols) =>
-            val fromTable = normalizeTable(fromSchemaName, fromTableName)
-            val fromColumns = normalizeColumns(fromTable, fromCols)
-            val toTable = normalizeTable(toSchemaName, toTableName)
-            val toColumns = normalizeColumns(toTable, toCols)
-            val cmdLineForeignKey = CmdLineForeignKey(fromTable, fromColumns, toTable, toColumns)
-            c.copy(extraForeignKeys = c.extraForeignKeys + cmdLineForeignKey)
-          case _ => throw new RuntimeException()
-        }
-      }
-      .text("""Foreign key to respect during subsetting even though it is not defined in the database
-              |                           Can be specified multiple times
-              |""".stripMargin)
-
     opt[String]("primaryKey")
       .maxOccurs(Int.MaxValue)
       .valueName("<schema>.<table>(<column1>, <column2>, ...)")
-      .action { case (fk, c) =>
-        val regex = """^\s*(.+)\.(.+)\((.+)\)\s*$""".r
-        fk match {
-          case regex(schemaName, tableName, cols) =>
-            val table = normalizeTable(schemaName, tableName)
-            val columns = normalizeColumns(table, cols)
-            val cmdLinePrimaryKey = CmdLinePrimaryKey(table, columns)
-            c.copy(extraPrimaryKeys = c.extraPrimaryKeys + cmdLinePrimaryKey)
-          case _ => throw new RuntimeException()
-        }
-      }
+      .action((fk, c) => c.copy(extraPrimaryKeys = c.extraPrimaryKeys + fk))
       .text("""Primary key to recognize during subsetting even though it is not defined in the database
+              |                           Can be specified multiple times
+              |""".stripMargin)
+
+    opt[String]("foreignKey")
+      .maxOccurs(Int.MaxValue)
+      .valueName("<schema1>.<table1>(<column1>, <column2>, ...) ::: <schema2>.<table2>(<column3>, <column4>, ...)")
+      .action((fk, c) => c.copy(extraForeignKeys = c.extraForeignKeys + fk))
+      .text("""Foreign key to respect during subsetting even though it is not defined in the database
               |                           Can be specified multiple times
               |""".stripMargin)
 
@@ -244,39 +220,4 @@ object CommandLineParser {
         |""".stripMargin
     note(usageExamples)
   }
-
-  private def normalizeTable(schemaName: String, tableName: String): Table = {
-    val schema = Schema(schemaName.trim)
-    Table(schema = schema, name = tableName.trim)
-  }
-
-  private def normalizeColumns(table: Table, untrimmedColumnCsvs: String): Seq[CmdLineColumn] = {
-    untrimmedColumnCsvs
-      .split(",")
-      .map(_.trim)
-      .map(columnName => CmdLineColumn(table, columnName))
-  }
 }
-
-case class CmdLineBaseQuery(
-    table: Table,
-    whereClause: String,
-    includeChildren: Boolean
-)
-
-case class CmdLineForeignKey(
-    fromTable: Table,
-    fromColumns: Seq[CmdLineColumn],
-    toTable: Table,
-    toColumns: Seq[CmdLineColumn]
-)
-
-case class CmdLinePrimaryKey(
-    table: Table,
-    columns: Seq[CmdLineColumn]
-)
-
-case class CmdLineColumn(
-    table: Table,
-    name: String
-)

@@ -2,19 +2,34 @@ package trw.dbsubsetter.config
 
 import trw.dbsubsetter.db.{Schema, Table}
 
-/**
-  * @param schemas
-  * @param baseQueries
-  * @param extraForeignKeys
-  * @param extraPrimaryKeys
-  * @param excludeTables
-  * @param excludeColumns
-  */
 case class SchemaConfig(
     schemas: Seq[Schema] = Seq.empty,
-    baseQueries: Seq[CmdLineBaseQuery] = Seq.empty,
-    extraForeignKeys: Set[CmdLineForeignKey] = Set.empty,
-    extraPrimaryKeys: Set[CmdLinePrimaryKey] = Set.empty,
+    baseQueries: Seq[ConfigBaseQuery] = Seq.empty,
+    extraPrimaryKeys: Set[ConfigPrimaryKey] = Set.empty,
+    extraForeignKeys: Set[ConfigForeignKey] = Set.empty,
     excludeTables: Set[Table] = Set.empty,
-    excludeColumns: Set[CmdLineColumn] = Set.empty
+    excludeColumns: Set[ConfigColumn] = Set.empty
+)
+
+case class ConfigBaseQuery(
+    table: Table,
+    whereClause: String,
+    includeChildren: Boolean
+)
+
+case class ConfigForeignKey(
+    fromTable: Table,
+    fromColumns: Seq[ConfigColumn],
+    toTable: Table,
+    toColumns: Seq[ConfigColumn]
+)
+
+case class ConfigPrimaryKey(
+    table: Table,
+    columns: Seq[ConfigColumn]
+)
+
+case class ConfigColumn(
+    table: Table,
+    name: String
 )

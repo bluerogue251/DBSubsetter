@@ -2,7 +2,7 @@ package e2e.validation.nonempty
 
 import org.scalatest.FunSuiteLike
 import trw.dbsubsetter.DbSubsetter.{FailedValidation, SubsetCompletedSuccessfully}
-import trw.dbsubsetter.config.{CmdLineBaseQuery, Config}
+import trw.dbsubsetter.config.{Config, ConfigBaseQuery}
 import trw.dbsubsetter.db.{Schema, Table}
 import trw.dbsubsetter.{DbSubsetter, db}
 import util.assertion.AssertionUtil
@@ -34,8 +34,8 @@ trait NonEmptySchemaValidationTest extends FunSuiteLike with AssertionUtil {
 
   private val validationTable: db.Table = Table(validationSchema, "validation_table")
 
-  private val validationBaseQuery: CmdLineBaseQuery =
-    CmdLineBaseQuery(
+  private val validationBaseQuery: ConfigBaseQuery =
+    ConfigBaseQuery(
       table = validationTable,
       whereClause = "true",
       includeChildren = true
