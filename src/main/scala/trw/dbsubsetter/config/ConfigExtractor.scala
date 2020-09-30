@@ -7,7 +7,7 @@ import trw.dbsubsetter.db.{Schema, Table}
   * richer types. If invalid input prevents this, surface this as a validation error.
   */
 object ConfigExtractor {
-  def extractSchemaConfig(args: CommandLineArgs): ExtractionResult = {
+  def extractConfig(args: CommandLineArgs): ExtractionResult = {
     val schemas = args.schemas.map(Schema)
 
     val baseQueryRegex = """^\s*(.+)\.(.+)\s+:::\s+(.+)\s+:::\s+(includeChildren|excludeChildren)\s*$""".r
@@ -112,4 +112,4 @@ case class InvalidBaseQuery(input: String) extends InvalidInputType
 case class InvalidExtraPrimaryKey(input: String) extends InvalidInputType
 case class InvalidExtraForeignKey(input: String) extends InvalidInputType
 case class InvalidExcludeTable(input: String) extends InvalidInputType
-case class InvalidExcludeColumn(input: String) extends InvalidInputType
+case class InvalidExcludeColumns(input: String) extends InvalidInputType

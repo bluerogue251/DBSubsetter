@@ -1,9 +1,7 @@
 package trw.dbsubsetter
 
-import io.prometheus.client.exporter.HTTPServer
-import io.prometheus.client.hotspot.DefaultExports
-import trw.dbsubsetter.DbSubsetter.{DbSubsetterResult, FailedValidation, SubsetCompletedSuccessfully}
-import trw.dbsubsetter.config.{CommandLineArgs, CommandLineParser}
+import trw.dbsubsetter.DbSubsetter.{FailedValidation, SubsetCompletedSuccessfully}
+import trw.dbsubsetter.config._
 
 /**
   * Provides a very thin layer underneath the real Application object. Tests will
@@ -13,27 +11,20 @@ import trw.dbsubsetter.config.{CommandLineArgs, CommandLineParser}
   */
 object ApplicationRunner {
   def run(args: Array[String]): ApplicationRunResult = {
-
     CommandLineParser.parser.parse(args, CommandLineArgs()) match {
       case None =>
         FailedToStart(s"Could not parse command line arguments.")
-      case Some(commandLineConfig) =>
-        val metricsEndpoint: Option[HTTPServer] =
-          commandLineConfig.metricsPort
-            .map { port =>
-              DefaultExports.initialize()
-              new HTTPServer(port)
+      case Some(commandLineArgs) =>
+        ConfigExtractor.extractConfig(commandLineArgs) match {
+          case InvalidInput(invalidInputType) =>
+            FailedToStart(InvalidInputMessaging.toErrorMessage(invalidInputType))
+          case Valid(schemaConfig, config) =>
+            DbSubsetter.run(schemaConfig, config) match {
+              case SubsetCompletedSuccessfully =>
+                Success
+              case FailedValidation(message) =>
+                FailedToStart(message)
             }
-
-        val result: DbSubsetterResult = DbSubsetter.run(commandLineConfig)
-
-        metricsEndpoint.foreach(_.stop())
-
-        result match {
-          case SubsetCompletedSuccessfully =>
-            Success
-          case FailedValidation(message) =>
-            FailedToStart(message)
         }
     }
   }
