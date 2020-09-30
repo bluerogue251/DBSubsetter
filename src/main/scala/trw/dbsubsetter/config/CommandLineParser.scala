@@ -40,7 +40,7 @@ object CommandLineParser {
       .required()
       .maxOccurs(Int.MaxValue)
       .valueName("<schema>.<table> ::: <whereClause> ::: <includeChildren|excludeChildren>")
-      .action((baseQuery, config) => config.copy(config.baseQueries + baseQuery))
+      .action((baseQuery, config) => config.copy(baseQueries = config.baseQueries + baseQuery))
       .text("""Starting table, where-clause, and includeChildren/excludeChildren to kick off subsetting
               |                           includeChildren is recommended for most use cases
               |                              It continues downwards recursively, meaning children of the children are also fetched, etc

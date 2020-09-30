@@ -5,7 +5,15 @@ import trw.dbsubsetter.{ApplicationRunResult, ApplicationRunner}
 
 class ApplicationRunnerTest extends FunSuite {
   test("Woot") {
-    val args: Array[String] = Array("--baseQuery", "invalid-syntax")
+    // format: off
+    val args: Array[String] = Array(
+      "--schemas", "public",
+      "--originDbConnStr", "whatevs",
+      "--targetDbConnStr", "whatevs",
+      "--baseQuery", "I ::: Am ::: Invalid"
+    )
+    // format: on
+
     val result: ApplicationRunResult = ApplicationRunner.run(args)
     assert("one" === "two")
   }
