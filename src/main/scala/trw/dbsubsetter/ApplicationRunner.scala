@@ -3,7 +3,7 @@ package trw.dbsubsetter
 import io.prometheus.client.exporter.HTTPServer
 import io.prometheus.client.hotspot.DefaultExports
 import trw.dbsubsetter.DbSubsetter.{DbSubsetterResult, FailedValidation, SubsetCompletedSuccessfully}
-import trw.dbsubsetter.config.{CommandLineParser, Config}
+import trw.dbsubsetter.config.{CommandLineConfig, CommandLineParser}
 
 /**
   * Provides a very thin layer underneath the real Application object. Tests will
@@ -14,18 +14,18 @@ import trw.dbsubsetter.config.{CommandLineParser, Config}
 object ApplicationRunner {
   def run(args: Array[String]): ApplicationRunResult = {
 
-    CommandLineParser.parser.parse(args, Config()) match {
+    CommandLineParser.parser.parse(args, CommandLineConfig()) match {
       case None =>
         FailedToStart(s"Could not parse command line arguments.")
-      case Some(config) =>
+      case Some(commandLineConfig) =>
         val metricsEndpoint: Option[HTTPServer] =
-          config.metricsPort
+          commandLineConfig.metricsPort
             .map { port =>
               DefaultExports.initialize()
               new HTTPServer(port)
             }
 
-        val result: DbSubsetterResult = DbSubsetter.run(config)
+        val result: DbSubsetterResult = DbSubsetter.run(commandLineConfig)
 
         metricsEndpoint.foreach(_.stop())
 

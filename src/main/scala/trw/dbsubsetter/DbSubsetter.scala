@@ -1,27 +1,36 @@
 package trw.dbsubsetter
 
-import trw.dbsubsetter.config.{AkkaStreamsMode, Config, DebugMode}
+import trw.dbsubsetter.config._
 import trw.dbsubsetter.db.{BaseQueries, DbMetadataQueries, OK, SchemaInfoRetrieval, SchemaValidation, ValidationError}
 
 object DbSubsetter {
-  def run(config: Config): DbSubsetterResult = {
+  def run(input: CommandLineConfig): DbSubsetterResult = {
+
+    val schemaConfig =
+      ConfigExtractor.extractSchemaConfig(input) match {
+        case Valid(schemaConfig) =>
+          schemaConfig
+        case InvalidInput(errorType) =>
+          return FailedSchemaConfigExtraction
+      }
+
     val dbMetadata =
       DbMetadataQueries.retrieveSchemaMetadata(
-        config.originDbConnectionString,
-        config.schemas.map(_.name).toSet
+        input.originDbConnectionString,
+        input.schemas
       )
 
-    SchemaValidation.validate(config, dbMetadata) match {
+    SchemaValidation.validate(input, dbMetadata) match {
       case ValidationError(message) =>
         FailedValidation(message)
       case OK =>
-        val schemaInfo = SchemaInfoRetrieval.getSchemaInfo(dbMetadata, config)
-        val baseQueries = BaseQueries.get(config, schemaInfo)
-        config.runMode match {
+        val schemaInfo = SchemaInfoRetrieval.getSchemaInfo(dbMetadata, input)
+        val baseQueries = BaseQueries.get(input, schemaInfo)
+        input.runMode match {
           case AkkaStreamsMode =>
-            ApplicationAkkaStreams.run(config, schemaInfo, baseQueries)
+            ApplicationAkkaStreams.run(input, schemaInfo, baseQueries)
           case DebugMode =>
-            new ApplicationSingleThreaded(config, schemaInfo, baseQueries).run()
+            new ApplicationSingleThreaded(input, schemaInfo, baseQueries).run()
         }
         SubsetCompletedSuccessfully
     }
@@ -29,5 +38,6 @@ object DbSubsetter {
 
   sealed trait DbSubsetterResult
   case object SubsetCompletedSuccessfully extends DbSubsetterResult
+  case class FailedSchemaConfigExtraction(error: SchemaConfigError)
   case class FailedValidation(message: String) extends DbSubsetterResult
 }

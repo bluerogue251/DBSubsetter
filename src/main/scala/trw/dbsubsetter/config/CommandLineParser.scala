@@ -12,7 +12,7 @@ object CommandLineParser {
 
     opt[Seq[String]]("schemas")
       .valueName("<schema1>,<schema2>,<schema3>, ...")
-      .action((schemaNames, c) => c.copy(schemas = schemaNames.map(_.trim)))
+      .action((schemaNames, c) => c.copy(schemas = schemaNames.map(_.trim).toSet))
       .required()
       .text("Names of the schemas to include when subsetting\n")
 
@@ -40,7 +40,7 @@ object CommandLineParser {
       .required()
       .maxOccurs(Int.MaxValue)
       .valueName("<schema>.<table> ::: <whereClause> ::: <includeChildren|excludeChildren>")
-      .action((baseQuery, config) => config.copy(config.baseQueries :+ baseQuery))
+      .action((baseQuery, config) => config.copy(config.baseQueries + baseQuery))
       .text("""Starting table, where-clause, and includeChildren/excludeChildren to kick off subsetting
               |                           includeChildren is recommended for most use cases
               |                              It continues downwards recursively, meaning children of the children are also fetched, etc

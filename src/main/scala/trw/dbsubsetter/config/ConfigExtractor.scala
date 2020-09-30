@@ -6,7 +6,7 @@ import trw.dbsubsetter.db.{Schema, Table}
   * Extract command line supplied config values which are simple strings into
   * richer types. If invalid input prevents this, surface this as a validation error.
   */
-class ConfigExtractor {
+object ConfigExtractor {
   def extractSchemaConfig(input: CommandLineConfig): SchemaConfigExtractionResult = {
     val schemas = input.schemas.map(Schema)
 
@@ -98,11 +98,11 @@ class ConfigExtractor {
 
 sealed trait SchemaConfigExtractionResult
 case class Valid(schemaConfig: SchemaConfig) extends SchemaConfigExtractionResult
-case class InvalidInput(errorType: ErrorType) extends SchemaConfigExtractionResult
+case class InvalidInput(errorType: SchemaConfigError) extends SchemaConfigExtractionResult
 
-sealed trait ErrorType
-case class InvalidBaseQuery(input: String) extends ErrorType
-case class InvalidExtraPrimaryKey(input: String) extends ErrorType
-case class InvalidExtraForeignKey(input: String) extends ErrorType
-case class InvalidExcludeTable(input: String) extends ErrorType
-case class InvalidExcludeColumn(input: String) extends ErrorType
+sealed trait SchemaConfigError
+case class InvalidBaseQuery(input: String) extends SchemaConfigError
+case class InvalidExtraPrimaryKey(input: String) extends SchemaConfigError
+case class InvalidExtraForeignKey(input: String) extends SchemaConfigError
+case class InvalidExcludeTable(input: String) extends SchemaConfigError
+case class InvalidExcludeColumn(input: String) extends SchemaConfigError

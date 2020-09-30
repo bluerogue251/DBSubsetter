@@ -11,7 +11,3 @@ case class Config(
     runMode: RunMode = AkkaStreamsMode,
     metricsPort: Option[Int] = None
 )
-
-sealed trait RunMode
-case object DebugMode extends RunMode
-case object AkkaStreamsMode extends RunMode
