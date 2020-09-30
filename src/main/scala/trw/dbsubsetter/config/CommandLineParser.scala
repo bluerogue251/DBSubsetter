@@ -6,14 +6,14 @@ import scopt.OptionParser
 import trw.dbsubsetter.db.{Schema, Table}
 
 object CommandLineParser {
-  val parser: OptionParser[Config] = new OptionParser[Config]("DBSubsetter") {
+  val parser: OptionParser[CommandLineConfig] = new OptionParser[CommandLineConfig]("DBSubsetter") {
     head("DBSubsetter", "v1.0.0-beta.4")
     help("help").text("Prints this usage text\n")
     version("version").text("Prints the application version\n")
 
     opt[Seq[String]]("schemas")
       .valueName("<schema1>,<schema2>,<schema3>, ...")
-      .action((schemaNames, c) => c.copy(schemas = schemaNames.map(schemaName => Schema(schemaName.trim))))
+      .action((schemaNames, c) => c.copy(schemas = schemaNames.map(_.trim)))
       .required()
       .text("Names of the schemas to include when subsetting\n")
 
@@ -41,16 +41,7 @@ object CommandLineParser {
       .required()
       .maxOccurs(Int.MaxValue)
       .valueName("<schema>.<table> ::: <whereClause> ::: <includeChildren|excludeChildren>")
-      .action { case (bq, c) =>
-        val r = """^\s*(.+)\.(.+)\s+:::\s+(.+)\s+:::\s+(includeChildren|excludeChildren)\s*$""".r
-        bq match {
-          case r(schemaName, tableName, whereClause, includeChildren) =>
-            val table = normalizeTable(schemaName, tableName)
-            val baseQuery = CmdLineBaseQuery(table, whereClause.trim, includeChildren == "includeChildren")
-            c.copy(baseQueries = c.baseQueries :+ baseQuery)
-          case _ => throw new RuntimeException()
-        }
-      }
+      .action((baseQuery, config) => config.copy(config.baseQueries :+ baseQuery))
       .text("""Starting table, where-clause, and includeChildren/excludeChildren to kick off subsetting
               |                           includeChildren is recommended for most use cases
               |                              It continues downwards recursively, meaning children of the children are also fetched, etc

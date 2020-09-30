@@ -1,13 +1,17 @@
 package trw.dbsubsetter.config
 
-import java.io.File
-
-case class Config(
+case class CommandLineConfig(
+    schemas: Seq[String] = Seq.empty,
     originDbConnectionString: String = "",
     targetDbConnectionString: String = "",
+    baseQueries: Seq[String] = Seq.empty,
     keyCalculationDbConnectionCount: Int = 1,
     dataCopyDbConnectionCount: Int = 1,
-    tempfileStorageDirectoryOverride: Option[File] = None,
+    extraForeignKeys: Set[String] = Set.empty,
+    extraPrimaryKeys: Set[String] = Set.empty,
+    excludeTables: Set[String] = Set.empty,
+    excludeColumns: Set[String] = Set.empty,
+    tempfileStorageDirectoryOverride: Option[String] = None,
     runMode: RunMode = AkkaStreamsMode,
     metricsPort: Option[Int] = None
 )
