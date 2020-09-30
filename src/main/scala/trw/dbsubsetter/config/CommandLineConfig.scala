@@ -1,5 +1,7 @@
 package trw.dbsubsetter.config
 
+import java.io.File
+
 case class CommandLineConfig(
     schemas: Set[String] = Set.empty,
     originDbConnectionString: String = "",
@@ -11,7 +13,7 @@ case class CommandLineConfig(
     extraPrimaryKeys: Set[String] = Set.empty,
     excludeTables: Set[String] = Set.empty,
     excludeColumns: Set[String] = Set.empty,
-    tempfileStorageDirectoryOverride: Option[String] = None,
+    tempfileStorageDirectoryOverride: Option[File] = None,
     runMode: RunMode = AkkaStreamsMode,
     metricsPort: Option[Int] = None
 )
