@@ -4,40 +4,38 @@ import trw.dbsubsetter.config._
 import trw.dbsubsetter.db.{BaseQueries, DbMetadataQueries, OK, SchemaInfoRetrieval, SchemaValidation, ValidationError}
 
 object DbSubsetter {
-  def run(input: CommandLineConfig): DbSubsetterResult = {
+  def run(cmdLineConfig: CommandLineConfig): DbSubsetterResult = {
+    ConfigExtractor.extractSchemaConfig(cmdLineConfig) match {
+      case InvalidInput(errorType) =>
+        FailedSchemaConfigExtraction(errorType)
 
-    val schemaConfig =
-      ConfigExtractor.extractSchemaConfig(input) match {
-        case Valid(schemaConfig) =>
-          schemaConfig
-        case InvalidInput(errorType) =>
-          return FailedSchemaConfigExtraction
-      }
+      case Valid(schemaConfig) =>
+        val dbMetadata =
+          DbMetadataQueries.retrieveSchemaMetadata(
+            cmdLineConfig.originDbConnectionString,
+            cmdLineConfig.schemas
+          )
 
-    val dbMetadata =
-      DbMetadataQueries.retrieveSchemaMetadata(
-        input.originDbConnectionString,
-        input.schemas
-      )
+        SchemaValidation.validate(schemaConfig, dbMetadata) match {
+          case ValidationError(message) =>
+            FailedValidation(message)
 
-    SchemaValidation.validate(input, dbMetadata) match {
-      case ValidationError(message) =>
-        FailedValidation(message)
-      case OK =>
-        val schemaInfo = SchemaInfoRetrieval.getSchemaInfo(dbMetadata, input)
-        val baseQueries = BaseQueries.get(input, schemaInfo)
-        input.runMode match {
-          case AkkaStreamsMode =>
-            ApplicationAkkaStreams.run(input, schemaInfo, baseQueries)
-          case DebugMode =>
-            new ApplicationSingleThreaded(input, schemaInfo, baseQueries).run()
+          case OK =>
+            val schemaInfo = SchemaInfoRetrieval.getSchemaInfo(dbMetadata, schemaConfig)
+            val baseQueries = BaseQueries.get(cmdLineConfig, schemaInfo)
+            cmdLineConfig.runMode match {
+              case AkkaStreamsMode =>
+                ApplicationAkkaStreams.run(cmdLineConfig, schemaInfo, baseQueries)
+              case DebugMode =>
+                new ApplicationSingleThreaded(cmdLineConfig, schemaInfo, baseQueries).run()
+            }
+            SubsetCompletedSuccessfully
         }
-        SubsetCompletedSuccessfully
     }
   }
 
   sealed trait DbSubsetterResult
   case object SubsetCompletedSuccessfully extends DbSubsetterResult
-  case class FailedSchemaConfigExtraction(error: SchemaConfigError)
+  case class FailedSchemaConfigExtraction(error: SchemaConfigError) extends DbSubsetterResult
   case class FailedValidation(message: String) extends DbSubsetterResult
 }

@@ -1,14 +1,14 @@
 package trw.dbsubsetter.db
 
-import trw.dbsubsetter.config.Config
+import trw.dbsubsetter.config.SchemaConfig
 
 object SchemaValidation {
 
-  def validate(config: Config, dbMeta: DbMetadataQueryResult): SchemaValidationResult = {
+  def validate(schemaConfig: SchemaConfig, dbMeta: DbMetadataQueryResult): SchemaValidationResult = {
     /*
      * Detect Missing Schemas
      */
-    val missingSchemaNames: Set[String] = findMissingSchemas(config, dbMeta)
+    val missingSchemaNames: Set[String] = findMissingSchemas(schemaConfig, dbMeta)
 
     if (missingSchemaNames.size == 1) {
       return ValidationError(s"Specified schema not found: ${missingSchemaNames.head}")
@@ -22,9 +22,9 @@ object SchemaValidation {
     OK
   }
 
-  private[this] def findMissingSchemas(config: Config, dbMeta: DbMetadataQueryResult): Set[String] = {
+  private[this] def findMissingSchemas(schemaConfig: SchemaConfig, dbMeta: DbMetadataQueryResult): Set[String] = {
     val actualSchemas: Set[String] = dbMeta.schemas.map(_.name).toSet
-    val configSchemas: Set[String] = config.schemas.map(_.name).toSet
+    val configSchemas: Set[String] = schemaConfig.schemas.map(_.name)
     configSchemas.filterNot(actualSchemas)
   }
 }
