@@ -2,7 +2,7 @@ package trw.dbsubsetter.config
 
 import java.io.File
 
-case class CommandLineConfig(
+case class CommandLineArgs(
     schemas: Set[String] = Set.empty,
     originDbConnectionString: String = "",
     targetDbConnectionString: String = "",
