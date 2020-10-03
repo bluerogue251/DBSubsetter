@@ -1,5 +1,7 @@
 package trw.dbsubsetter.config
 
+import trw.dbsubsetter.db.Schema
+
 object InvalidInputMessaging {
   def toErrorMessage(invalidInputType: InvalidInputType): String = {
     invalidInputType match {
@@ -13,12 +15,20 @@ object InvalidInputMessaging {
         invalidInputMessage("--excludeTable", input)
       case InvalidExcludeColumns(input) =>
         invalidInputMessage("--excludeColumns", input)
-      case InvalidBaseQuerySchema(table) =>
-        s"""Schema '${table.schema.name}' was used in --baseQuery but was missing from --schemas."""
+      case InvalidBaseQuerySchema(schema) =>
+        invalidSchema("--baseQuery", schema)
+      case InvalidExtraPrimaryKeySchema(schema) =>
+        invalidSchema("--primaryKey", schema)
+      case InvalidExtraForeignKeySchema(schema) =>
+        invalidSchema("--foreignKey", schema)
     }
   }
 
   private[this] def invalidInputMessage(option: String, value: String): String = {
     s"Invalid $option specified: $value."
+  }
+
+  private def invalidSchema(option: String, schema: Schema): String = {
+    s"""Schema '${schema.name}' was used in $option but was missing from --schemas."""
   }
 }

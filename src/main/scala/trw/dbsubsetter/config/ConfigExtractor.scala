@@ -27,6 +27,18 @@ object ConfigExtractor {
             return Invalid(InvalidBaseQuery(baseQueryString))
         }
 
+    val primaryKeyRegex = regex(columnSet)
+    val extraPrimaryKeys =
+      args.extraPrimaryKeys
+        .map {
+          case primaryKeyRegex(schemaName, tableName, cols) =>
+            val table = normalizeTable(schemaName, tableName)
+            val columns = normalizeColumns(table, cols)
+            ConfigPrimaryKey(table, columns)
+          case primaryKeyString =>
+            return Invalid(InvalidExtraPrimaryKey(primaryKeyString))
+        }
+
     val foreignKeyRegex = regex(columnSet + separator + columnSet)
     val extraForeignKeys =
       args.extraForeignKeys
@@ -42,18 +54,6 @@ object ConfigExtractor {
             )
           case foreignKeyString =>
             return Invalid(InvalidExtraForeignKey(foreignKeyString))
-        }
-
-    val primaryKeyRegex = regex(columnSet)
-    val extraPrimaryKeys =
-      args.extraPrimaryKeys
-        .map {
-          case primaryKeyRegex(schemaName, tableName, cols) =>
-            val table = normalizeTable(schemaName, tableName)
-            val columns = normalizeColumns(table, cols)
-            ConfigPrimaryKey(table, columns)
-          case primaryKeyString =>
-            return Invalid(InvalidExtraPrimaryKey(primaryKeyString))
         }
 
     val tableRegex = regex(table)
@@ -79,7 +79,22 @@ object ConfigExtractor {
 
     baseQueries.foreach { baseQuery =>
       if (!schemas.contains(baseQuery.table.schema)) {
-        return Invalid(InvalidBaseQuerySchema(baseQuery.table))
+        return Invalid(InvalidBaseQuerySchema(baseQuery.table.schema))
+      }
+    }
+
+    extraPrimaryKeys.foreach { extraPrimaryKey =>
+      if (!schemas.contains(extraPrimaryKey.table.schema)) {
+        return Invalid(InvalidExtraPrimaryKeySchema(extraPrimaryKey.table.schema))
+      }
+    }
+
+    extraForeignKeys.foreach { extraForeignKey =>
+      if (!schemas.contains(extraForeignKey.fromTable.schema)) {
+        return Invalid(InvalidExtraForeignKeySchema(extraForeignKey.fromTable.schema))
+      }
+      if (!schemas.contains(extraForeignKey.toTable.schema)) {
+        return Invalid(InvalidExtraForeignKeySchema(extraForeignKey.toTable.schema))
       }
     }
 
@@ -87,8 +102,8 @@ object ConfigExtractor {
       SchemaConfig(
         schemas = schemas,
         baseQueries = baseQueries,
-        extraForeignKeys = extraForeignKeys,
         extraPrimaryKeys = extraPrimaryKeys,
+        extraForeignKeys = extraForeignKeys,
         excludeTables = excludeTables,
         excludeColumns = excludeColumns
       ),
@@ -129,4 +144,6 @@ case class InvalidExtraPrimaryKey(input: String) extends InvalidInputType
 case class InvalidExtraForeignKey(input: String) extends InvalidInputType
 case class InvalidExcludeTable(input: String) extends InvalidInputType
 case class InvalidExcludeColumns(input: String) extends InvalidInputType
-case class InvalidBaseQuerySchema(table: Table) extends InvalidInputType
+case class InvalidBaseQuerySchema(schema: Schema) extends InvalidInputType
+case class InvalidExtraPrimaryKeySchema(schema: Schema) extends InvalidInputType
+case class InvalidExtraForeignKeySchema(schema: Schema) extends InvalidInputType

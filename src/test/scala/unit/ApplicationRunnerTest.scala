@@ -83,6 +83,14 @@ class ApplicationRunnerTest extends FunSuite {
     )
     assertErrorMessage(args, "Schema 'other' was used in --excludeTable but was missing from --schemas.")
   }
+
+  test("Invalid --excludeColumns") {
+    fail()
+  }
+
+  test("Invalid --excludeColumns schema") {
+    fail()
+  }
   
   private[this] def buildArgs(additionalArgs: String*): Array[String] = {
     Array[String](
