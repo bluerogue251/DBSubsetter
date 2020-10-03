@@ -4,7 +4,7 @@ DBSubsetter is a tool for taking a logically consistent subset of a relational d
 
 Starting with a given set of rows, it respects foreign key constraints by recursively fetching
 the parents and (optionally) the children of those rows.
-This is useful for creating local development and testing datasets or for exporting the
+This is useful for creating local development and testing datasets, or for exporting the
 data belonging only to a particular group of users.
 
 
@@ -14,9 +14,9 @@ _Easy to learn_: a simple and well documented command line interface.
 
 _Support large datasets_: designed for stability when handling large datasets.
 
-_Non-intrusive_: connections to the origin database are read-only. Connections to the
-                 target database require only [DML](https://stackoverflow.com/a/2578207)
-                 write permission.
+_Non-intrusive_: connections to the origin DB are read-only. Writes to the
+                 target DB require only [DML](https://stackoverflow.com/a/2578207)
+                 permission.
 
 _Deterministic_: identical inputs yield identical outputs.
 
