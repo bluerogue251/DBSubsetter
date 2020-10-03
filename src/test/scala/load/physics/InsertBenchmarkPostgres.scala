@@ -50,7 +50,7 @@ import scala.concurrent.{Await, Future}
  *   Bulk Copy:         49  Seconds
 
  */
-class InsertBenchmarkPostgreSQL extends PostgresEnabledTest {
+class InsertBenchmarkPostgres extends PostgresEnabledTest {
 
   override protected def testName: String = "insert_benchmark"
 

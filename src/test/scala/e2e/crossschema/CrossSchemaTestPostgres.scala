@@ -7,7 +7,8 @@ import slick.jdbc.PostgresProfile.api._
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
-class CrossSchemaTestPostgreSQL extends PostgresSubsettingTest with CrossSchemaTest {
+class CrossSchemaTestPostgres extends PostgresSubsettingTest with CrossSchemaTest {
+  // format: off
 
   override val programArgs = Array(
     "--schemas", "schema_1, schema_2, schema_3",

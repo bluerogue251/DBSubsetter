@@ -7,7 +7,9 @@ import util.db.PostgresDatabase
 
 import scala.sys.process._
 
-class PostgreSQLDataTypesTest extends PostgresSubsettingTest {
+class PostgresDataTypesTest extends PostgresSubsettingTest {
+  // format: off
+  
   override protected val testName = "pg_data_types"
 
   override protected val programArgs = Array(

@@ -2,7 +2,8 @@ package e2e.fktononpk
 
 import e2e.PostgresSubsettingTest
 
-class ForeignKeyToNonPrimaryKeyTestPostgreSQL extends PostgresSubsettingTest with ForeignKeyToNonPrimaryKeyTest {
+class ForeignKeyToNonPrimaryKeyTestPostgres extends PostgresSubsettingTest with ForeignKeyToNonPrimaryKeyTest {
+  // format: off
 
   override val programArgs = Array(
     "--schemas", "public",

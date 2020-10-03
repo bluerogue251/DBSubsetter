@@ -2,7 +2,8 @@ package e2e.compositekeys
 
 import e2e.PostgresSubsettingTest
 
-class CompositeKeysTestPostgreSQL extends PostgresSubsettingTest with CompositeKeysTest {
+class CompositeKeysTestPostgres extends PostgresSubsettingTest with CompositeKeysTest {
+  // format: off
 
   override val programArgs = Array(
     "--schemas", "public",

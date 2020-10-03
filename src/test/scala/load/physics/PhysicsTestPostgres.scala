@@ -8,7 +8,7 @@
 //
 //import scala.sys.process._
 //
-//class PhysicsTestPostgreSQL extends PostgresEnabledTest with LoadTest[PostgreSQLDatabase] with PhysicsTest {
+//class PhysicsTestPostgres extends PostgresEnabledTest with LoadTest[PostgreSQLDatabase] with PhysicsTest {
 //  override val singleThreadedRuntimeLimitMillis: Long = 13000000 // 3.6 hours
 //
 //  override val akkaStreamsRuntimeLimitMillis: Long = 2700000 // 45 minutes

@@ -2,7 +2,8 @@ package e2e.selfreferencing
 
 import e2e.PostgresSubsettingTest
 
-class SelfReferencingTestPostgreSQL extends PostgresSubsettingTest with SelfReferencingTest {
+class SelfReferencingTestPostgres extends PostgresSubsettingTest with SelfReferencingTest {
+  // format: off
 
   override val programArgs = Array(
     "--schemas", "public",
