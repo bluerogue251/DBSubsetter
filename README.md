@@ -74,7 +74,6 @@ To ask a question, report a bug, or request a feature, please
 [open an issue](https://github.com/bluerogue251/DBSubsetter/issues/new).
 To contribute code changes, please
 [open a pull request](https://github.com/bluerogue251/DBSubsetter/pulls).
-
 Please follow our [code of conduct](CODE_OF_CONDUCT.md) when contributing.
 
 
