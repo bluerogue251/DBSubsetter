@@ -10,17 +10,17 @@ data from a particular group of users.
 
 ## Project Goals
 
-_Easy to learn_: a simple and well documented command line interface.
+_Easy to learn_: A simple and well documented command line interface.
 
-_Support large datasets_: designed for stability when handling large datasets.
+_Support large datasets_: Designed for stability when handling large datasets.
 
-_Non-intrusive_: connections to the origin DB are read-only. Writes to the
-                 target DB require only [DML](https://stackoverflow.com/a/2578207)
+_Non-intrusive_: Origin DB connections are read-only. Target DB writes
+                 require only [DML](https://stackoverflow.com/a/2578207)
                  permission.
 
-_Deterministic_: identical inputs yield identical outputs.
+_Deterministic_: Identical inputs yield identical outputs.
 
-_Do one thing well_: a tiny codebase focused exclusively on core subsetting features.
+_Do one thing well_: A tiny codebase focused exclusively on core subsetting features.
 
 
 ## Usage Instructions
