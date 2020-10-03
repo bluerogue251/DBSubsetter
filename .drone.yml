@@ -70,15 +70,8 @@ steps:
     commands:
       - sbt "testOnly e2e.*"
 
-  - name: load_test
-    image: bluerogue251/db-subsetter-ci:7
-    environment:
-      DB_SUBSETTER_POSTGRES_HOST: postgres
-    commands:
-      - sbt "testOnly load.schooldb.SchoolDbTestPostgreSQL"
-
 ---
 kind: signature
-hmac: bbcf3321552ccbcde02e27932bd12c7d57a0c527920acacbbf65e7599129eea7
+hmac: 38a2c7f94f43d2fc7e0a792583f543a7fd1ce1e01d5f187104167e657dc62569
 
 ...
