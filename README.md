@@ -14,10 +14,6 @@ _Easy to learn_: A simple and well documented command line interface.
 
 _Support large datasets_: Designed for stability when handling large datasets.
 
-_Non-intrusive_: Origin DB connections are read-only. Target DB writes
-                 require only [DML](https://stackoverflow.com/a/2578207)
-                 permission.
-
 _Deterministic_: Identical inputs yield identical outputs.
 
 _Do one thing well_: A tiny codebase focused exclusively on core subsetting features.
