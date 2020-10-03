@@ -74,7 +74,7 @@ object ConfigExtractor {
             val table = normalizeTable(schemaName, tableName)
             normalizeColumns(table, cols).toSet
           case excludeColumnsString =>
-            return Invalid(InvalidExcludeTable(excludeColumnsString))
+            return Invalid(InvalidExcludeColumns(excludeColumnsString))
         }
 
     baseQueries.foreach { baseQuery =>
@@ -95,6 +95,18 @@ object ConfigExtractor {
       }
       if (!schemas.contains(extraForeignKey.toTable.schema)) {
         return Invalid(InvalidExtraForeignKeySchema(extraForeignKey.toTable.schema))
+      }
+    }
+
+    excludeTables.foreach { excludeTable =>
+      if (!schemas.contains(excludeTable.schema)) {
+        return Invalid(InvalidExcludeTableSchema(excludeTable.schema))
+      }
+    }
+
+    excludeColumns.foreach { excludeColumn =>
+      if (!schemas.contains(excludeColumn.table.schema)) {
+        return Invalid(InvalidExcludeColumnsSchema(excludeColumn.table.schema))
       }
     }
 
@@ -147,3 +159,5 @@ case class InvalidExcludeColumns(input: String) extends InvalidInputType
 case class InvalidBaseQuerySchema(schema: Schema) extends InvalidInputType
 case class InvalidExtraPrimaryKeySchema(schema: Schema) extends InvalidInputType
 case class InvalidExtraForeignKeySchema(schema: Schema) extends InvalidInputType
+case class InvalidExcludeTableSchema(schema: Schema) extends InvalidInputType
+case class InvalidExcludeColumnsSchema(schema: Schema) extends InvalidInputType

@@ -21,6 +21,10 @@ object InvalidInputMessaging {
         invalidSchema("--primaryKey", schema)
       case InvalidExtraForeignKeySchema(schema) =>
         invalidSchema("--foreignKey", schema)
+      case InvalidExcludeTableSchema(schema) =>
+        invalidSchema("--excludeTable", schema)
+      case InvalidExcludeColumnsSchema(schema) =>
+        invalidSchema("--excludeColumns", schema)
     }
   }
 

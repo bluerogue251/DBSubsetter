@@ -85,11 +85,21 @@ class ApplicationRunnerTest extends FunSuite {
   }
 
   test("Invalid --excludeColumns") {
-    fail()
+    val args: Array[String] = buildArgs(
+      "--schemas", "public",
+      "--baseQuery", "public.my_table ::: true ::: includeChildren",
+      "--excludeColumns", "unqualified_table(col_1, col_2)"
+    )
+    assertErrorMessage(args, "Invalid --excludeColumns specified: unqualified_table(col_1, col_2).")
   }
 
   test("Invalid --excludeColumns schema") {
-    fail()
+    val args: Array[String] = buildArgs(
+      "--schemas", "my_schema",
+      "--baseQuery", "my_schema.my_table ::: true ::: includeChildren",
+      "--excludeColumns", "OTHER_SCHEMA.some_table(col1, col2, col3)"
+    )
+    assertErrorMessage(args, "Schema 'OTHER_SCHEMA' was used in --excludeColumns but was missing from --schemas.")
   }
   
   private[this] def buildArgs(additionalArgs: String*): Array[String] = {
