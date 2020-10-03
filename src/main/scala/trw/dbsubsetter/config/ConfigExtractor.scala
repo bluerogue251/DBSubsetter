@@ -2,15 +2,21 @@ package trw.dbsubsetter.config
 
 import trw.dbsubsetter.db.{Schema, Table}
 
+import scala.util.matching.Regex
+
 /**
   * Extract command line supplied config values which are simple strings into
   * richer types. If invalid input prevents this, surface this as a validation error.
   */
 object ConfigExtractor {
+  private val table: String = """([^.\s]*)\.([^.\s]+)"""
+  private val columnSet: String = """([^.\s]+)\.([^.\s]+)\((.+)\)"""
+  private val separator: String = """\s+:::\s+"""
+
   def extractConfig(args: CommandLineArgs): ExtractionResult = {
     val schemas = args.schemas.map(Schema)
 
-    val baseQueryRegex = """^\s*(.+)\.(.+)\s+:::\s+(.+)\s+:::\s+(includeChildren|excludeChildren)\s*$""".r
+    val baseQueryRegex = regex(table + separator + """(.+)""" + separator + """(includeChildren|excludeChildren)""")
     val baseQueries =
       args.baseQueries
         .map {
@@ -21,7 +27,7 @@ object ConfigExtractor {
             return Invalid(InvalidBaseQuery(baseQueryString))
         }
 
-    val foreignKeyRegex = """^(.+)\.(.+)\((.+)\)\s+:::\s+(.+)\.(.+)\((.+)\)\s*$""".r
+    val foreignKeyRegex = regex(columnSet + separator + columnSet)
     val extraForeignKeys =
       args.extraForeignKeys
         .map {
@@ -38,7 +44,7 @@ object ConfigExtractor {
             return Invalid(InvalidExtraForeignKey(foreignKeyString))
         }
 
-    val primaryKeyRegex = """^\s*(.+)\.(.+)\((.+)\)\s*$""".r
+    val primaryKeyRegex = regex(columnSet)
     val extraPrimaryKeys =
       args.extraPrimaryKeys
         .map {
@@ -50,7 +56,7 @@ object ConfigExtractor {
             return Invalid(InvalidExtraPrimaryKey(primaryKeyString))
         }
 
-    val tableRegex = """^\s*(.+)\.(.+)\s*$""".r
+    val tableRegex = regex(table)
     val excludeTables =
       args.excludeTables
         .map {
@@ -60,7 +66,7 @@ object ConfigExtractor {
             return Invalid(InvalidExcludeTable(excludeTableString))
         }
 
-    val columnRegex = """^\s*(.+)\.(.+)\((.+)\)\s*$""".r
+    val columnRegex = regex(columnSet)
     val excludeColumns =
       args.excludeColumns
         .flatMap {
@@ -100,6 +106,10 @@ object ConfigExtractor {
       .split(",")
       .map(_.trim)
       .map(columnName => ConfigColumn(table, columnName))
+  }
+
+  private[this] def regex(regexString: String): Regex = {
+    ("""^\s*""" + regexString + """\s*$""").r
   }
 }
 
