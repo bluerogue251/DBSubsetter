@@ -36,13 +36,15 @@ _Do one thing well_: A tiny codebase focused exclusively on core subsetting feat
 
 ```bash
 # Download the DBSubsetter.jar file
-$ wget https://github.com/bluerogue251/DBSubsetter/releases/download/v1.0.0-beta.4/DBSubsetter.jar --output-document /path/to/DBSubsetter.jar
+$ wget \
+    --output-document DBSubsetter.jar \
+    https://github.com/bluerogue251/DBSubsetter/releases/download/v1.0.0-beta.4/DBSubsetter.jar
  
-# Learn how to use DBSubsetter and see examples
-$ java -jar /path/to/DBSubsetter.jar --help
+# Learn how to use DBSubsetter
+$ java -jar DBSubsetter.jar --help | less
 
 # Run DBSubsetter
-$ java -jar /path/to/DBSubsetter.jar \
+$ java -jar DBSubsetter.jar \
     --schemas schema_1,schema_2 \
     --originDbConnStr "jdbc:<driverName>://<originConnectionString>" \
     --targetDbConnStr "jdbc:<driverName>://<targetConnectionString>" \
