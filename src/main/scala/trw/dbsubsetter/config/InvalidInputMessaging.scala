@@ -13,6 +13,8 @@ object InvalidInputMessaging {
         invalidInputMessage("--excludeTable", input)
       case InvalidExcludeColumns(input) =>
         invalidInputMessage("--excludeColumns", input)
+      case InvalidBaseQuerySchema(table) =>
+        s"""Schema '${table.schema.name}' was used in --baseQuery but was missing from --schemas."""
     }
   }
 

@@ -77,6 +77,12 @@ object ConfigExtractor {
             return Invalid(InvalidExcludeTable(excludeColumnsString))
         }
 
+    baseQueries.foreach { baseQuery =>
+      if (!schemas.contains(baseQuery.table.schema)) {
+        return Invalid(InvalidBaseQuerySchema(baseQuery.table))
+      }
+    }
+
     Valid(
       SchemaConfig(
         schemas = schemas,
@@ -123,3 +129,4 @@ case class InvalidExtraPrimaryKey(input: String) extends InvalidInputType
 case class InvalidExtraForeignKey(input: String) extends InvalidInputType
 case class InvalidExcludeTable(input: String) extends InvalidInputType
 case class InvalidExcludeColumns(input: String) extends InvalidInputType
+case class InvalidBaseQuerySchema(table: Table) extends InvalidInputType
