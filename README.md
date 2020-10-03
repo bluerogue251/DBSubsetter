@@ -23,14 +23,6 @@ _Deterministic_: identical inputs yield identical outputs.
 _Do one thing well_: a tiny codebase focused exclusively on core subsetting features.
 
 
-## Supported Databases
-
-DBSubsetter has been tested against recent versions of PostgreSQL, MySQL, and Microsoft SQL Server.
-
-Please [open an issue](https://github.com/bluerogue251/DBSubsetter/issues/new)
-if you would like support for a different database vendor.
-
-
 ## Usage Instructions
 
 1. Load an empty schema from your "origin" database into your "target" database.
@@ -46,12 +38,10 @@ if you would like support for a different database vendor.
 # Download the DBSubsetter.jar file
 $ wget https://github.com/bluerogue251/DBSubsetter/releases/download/v1.0.0-beta.4/DBSubsetter.jar --output-document /path/to/DBSubsetter.jar
  
-# Show explanation and examples of how to configure multiple schemas, 
-# multiple base queries, missing foreign or primary keys, columns to exclude,
-# vendor-specific JDBC connection strings, etc.
+# Learn how to use DBSubsetter and see examples
 $ java -jar /path/to/DBSubsetter.jar --help
 
-# Once you are comfortable with the syntax and options, run DBSubsetter for real
+# Run DBSubsetter
 $ java -jar /path/to/DBSubsetter.jar \
     --schemas schema_1,schema_2 \
     --originDbConnStr "jdbc:<driverName>://<originConnectionString>" \
