@@ -2,8 +2,9 @@ package e2e.autoincrementingpk
 
 import e2e.PostgresSubsettingTest
 
-class AutoIncrementingPkTestPostgreSQL extends PostgresSubsettingTest with AutoIncrementingPkTest {
-
+class AutoIncrementingPkTestPostgres extends PostgresSubsettingTest with AutoIncrementingPkTest {
+  // format: off
+  
   override protected val programArgs = Array(
     "--schemas", "public",
 

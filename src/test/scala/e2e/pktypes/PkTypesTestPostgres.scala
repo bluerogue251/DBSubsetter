@@ -2,7 +2,8 @@ package e2e.pktypes
 
 import e2e.PostgresSubsettingTest
 
-class PkTypesTestPostgreSQL extends PostgresSubsettingTest with PkTypesTest {
+class PkTypesTestPostgres extends PostgresSubsettingTest with PkTypesTest {
+  // format: off
 
   override protected val programArgs = Array(
     "--schemas", "public",

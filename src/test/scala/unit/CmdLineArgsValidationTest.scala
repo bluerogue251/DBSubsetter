@@ -3,8 +3,22 @@ package unit
 import org.scalatest.FunSuite
 import trw.dbsubsetter.{ApplicationRunResult, ApplicationRunner, FailedToStart, Success}
 
-// format: off
-class ApplicationRunnerTest extends FunSuite {
+/**
+  * Test that the args passed in on the command line are correctly parsed and
+  * validated, with the correct error messages being returned in each case.
+  */
+class CmdLineArgsValidationTest extends FunSuite {
+  // format: off
+  
+  test("Arguments that can't be parsed") {
+    val args: Array[String] = Array(
+      "--these", "are",
+      "--args", "that",
+      "--can't", "be parsed"
+    )
+    assertErrorMessage(args, "Could not parse command line arguments.")
+  }
+  
   test("Invalid --baseQuery") {
     val args: Array[String] = buildArgs(
         "--schemas", "public",

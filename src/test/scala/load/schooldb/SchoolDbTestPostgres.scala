@@ -10,7 +10,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration.{Duration, DurationInt}
 import scala.sys.process._
 
-class SchoolDbTestPostgreSQL extends PostgresSubsettingTest with LoadTest[PostgresDatabase] with SchoolDbTest {
+class SchoolDbTestPostgres extends PostgresSubsettingTest with LoadTest[PostgresDatabase] with SchoolDbTest {
 
   /*
    * These values are configured for the Drone CI environment and are supposed to be pretty lenient,
