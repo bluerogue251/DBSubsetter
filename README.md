@@ -37,6 +37,8 @@ _Do one thing well_: A tiny codebase focused exclusively on core subsetting feat
 ```bash
 # Download the DBSubsetter.jar file
 $ wget \
+    --quiet \
+    --show-progress \
     --output-document DBSubsetter.jar \
     https://github.com/bluerogue251/DBSubsetter/releases/download/v1.0.0-beta.4/DBSubsetter.jar
  
