@@ -2,31 +2,24 @@
 
 DBSubsetter is a tool for taking a logically consistent subset of a relational database.
 
-Starting with a given set of rows from one or more tables, it respects foreign key constraints
-by recursively fetching the "parents" and (optionally) the "children" of those rows.
-
-This is useful for creating local development and testing datasets.
-It can also be used to export the data belonging to a particular set of users.
+Starting with a given set of rows, it respects foreign key constraints by recursively fetching
+the parents and (optionally) children of those rows.
+This is useful for local development and testing, or for exporting
+data from a particular group of users.
 
 
 ## Project Goals
 
-_Support large datasets_: designed for stability when handling large datasets.
+_Easy to learn_: A simple and well documented command line interface.
 
-_Deterministic_: identical inputs yield identical outputs.
+_Support large datasets_: Designed for stability when handling large datasets.
 
-_Do one thing well_: a tiny codebase focused exclusively on core subsetting features.
+_Deterministic_: Identical inputs yield identical outputs.
 
-
-## Supported Databases
-
-DBSubsetter has been tested against recent versions of PostgreSQL, MySQL, and Microsoft SQL Server.
-
-Please [open an issue](https://github.com/bluerogue251/DBSubsetter/issues/new)
-if you would like support for a different database vendor.
+_Do one thing well_: A tiny codebase focused exclusively on core subsetting features.
 
 
-## Download and Usage Instructions
+## Usage Instructions
 
 1. Load an empty schema from your "origin" database into your "target" database.
    Follow vendor-specific instructions for:
@@ -39,15 +32,17 @@ if you would like support for a different database vendor.
 
 ```bash
 # Download the DBSubsetter.jar file
-$ wget https://github.com/bluerogue251/DBSubsetter/releases/download/v1.0.0-beta.4/DBSubsetter.jar --output-document /path/to/DBSubsetter.jar
+$ wget \
+    --quiet \
+    --show-progress \
+    --output-document DBSubsetter.jar \
+    https://github.com/bluerogue251/DBSubsetter/releases/download/v1.0.0-beta.4/DBSubsetter.jar
  
-# Show explanation and examples of how to configure multiple schemas, 
-# multiple base queries, missing foreign or primary keys, columns to exclude,
-# vendor-specific JDBC connection strings, etc.
-$ java -jar /path/to/DBSubsetter.jar --help
+# Learn how to use DBSubsetter
+$ java -jar DBSubsetter.jar --help | less
 
-# Once you are comfortable with the syntax and options, run DBSubsetter for real
-$ java -jar /path/to/DBSubsetter.jar \
+# Run DBSubsetter
+$ java -jar DBSubsetter.jar \
     --schemas schema_1,schema_2 \
     --originDbConnStr "jdbc:<driverName>://<originConnectionString>" \
     --targetDbConnStr "jdbc:<driverName>://<targetConnectionString>" \
@@ -69,7 +64,6 @@ To ask a question, report a bug, or request a feature, please
 [open an issue](https://github.com/bluerogue251/DBSubsetter/issues/new).
 To contribute code changes, please
 [open a pull request](https://github.com/bluerogue251/DBSubsetter/pulls).
-
 Please follow our [code of conduct](CODE_OF_CONDUCT.md) when contributing.
 
 
