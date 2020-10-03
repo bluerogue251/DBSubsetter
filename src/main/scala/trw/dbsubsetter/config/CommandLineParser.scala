@@ -3,17 +3,16 @@ package trw.dbsubsetter.config
 import java.io.File
 
 import scopt.OptionParser
-import trw.dbsubsetter.db.{Schema, Table}
 
 object CommandLineParser {
-  val parser: OptionParser[Config] = new OptionParser[Config]("DBSubsetter") {
+  val parser: OptionParser[CommandLineArgs] = new OptionParser[CommandLineArgs]("DBSubsetter") {
     head("DBSubsetter", "v1.0.0-beta.4")
     help("help").text("Prints this usage text\n")
     version("version").text("Prints the application version\n")
 
     opt[Seq[String]]("schemas")
       .valueName("<schema1>,<schema2>,<schema3>, ...")
-      .action((schemaNames, c) => c.copy(schemas = schemaNames.map(schemaName => Schema(schemaName.trim))))
+      .action((schemaNames, c) => c.copy(schemas = schemaNames.map(_.trim).toSet))
       .required()
       .text("Names of the schemas to include when subsetting\n")
 
@@ -41,16 +40,7 @@ object CommandLineParser {
       .required()
       .maxOccurs(Int.MaxValue)
       .valueName("<schema>.<table> ::: <whereClause> ::: <includeChildren|excludeChildren>")
-      .action { case (bq, c) =>
-        val r = """^\s*(.+)\.(.+)\s+:::\s+(.+)\s+:::\s+(includeChildren|excludeChildren)\s*$""".r
-        bq match {
-          case r(schemaName, tableName, whereClause, includeChildren) =>
-            val table = normalizeTable(schemaName, tableName)
-            val baseQuery = CmdLineBaseQuery(table, whereClause.trim, includeChildren == "includeChildren")
-            c.copy(baseQueries = c.baseQueries :+ baseQuery)
-          case _ => throw new RuntimeException()
-        }
-      }
+      .action((baseQuery, config) => config.copy(baseQueries = config.baseQueries + baseQuery))
       .text("""Starting table, where-clause, and includeChildren/excludeChildren to kick off subsetting
               |                           includeChildren is recommended for most use cases
               |                              It continues downwards recursively, meaning children of the children are also fetched, etc
@@ -79,57 +69,26 @@ object CommandLineParser {
               |                           (Note the total Origin DB connection count is --keyCalculationDbConnectionCount + --dataCopyDbConnectionCount)
         """.stripMargin)
 
-    opt[String]("foreignKey")
-      .maxOccurs(Int.MaxValue)
-      .valueName("<schema1>.<table1>(<column1>, <column2>, ...) ::: <schema2>.<table2>(<column3>, <column4>, ...)")
-      .action { case (fk, c) =>
-        val regex = """^(.+)\.(.+)\((.+)\)\s+:::\s+(.+)\.(.+)\((.+)\)\s*$""".r
-
-        fk match {
-          case regex(fromSchemaName, fromTableName, fromCols, toSchemaName, toTableName, toCols) =>
-            val fromTable = normalizeTable(fromSchemaName, fromTableName)
-            val fromColumns = normalizeColumns(fromTable, fromCols)
-            val toTable = normalizeTable(toSchemaName, toTableName)
-            val toColumns = normalizeColumns(toTable, toCols)
-            val cmdLineForeignKey = CmdLineForeignKey(fromTable, fromColumns, toTable, toColumns)
-            c.copy(extraForeignKeys = c.extraForeignKeys + cmdLineForeignKey)
-          case _ => throw new RuntimeException()
-        }
-      }
-      .text("""Foreign key to respect during subsetting even though it is not defined in the database
-              |                           Can be specified multiple times
-              |""".stripMargin)
-
     opt[String]("primaryKey")
       .maxOccurs(Int.MaxValue)
       .valueName("<schema>.<table>(<column1>, <column2>, ...)")
-      .action { case (fk, c) =>
-        val regex = """^\s*(.+)\.(.+)\((.+)\)\s*$""".r
-        fk match {
-          case regex(schemaName, tableName, cols) =>
-            val table = normalizeTable(schemaName, tableName)
-            val columns = normalizeColumns(table, cols)
-            val cmdLinePrimaryKey = CmdLinePrimaryKey(table, columns)
-            c.copy(extraPrimaryKeys = c.extraPrimaryKeys + cmdLinePrimaryKey)
-          case _ => throw new RuntimeException()
-        }
-      }
-      .text("""Primary key to recognize during subsetting even though it is not defined in the database
+      .action((fk, c) => c.copy(extraPrimaryKeys = c.extraPrimaryKeys + fk))
+      .text("""Primary key to respect during subsetting even though it is not defined in the database
+              |                           Can be specified multiple times
+              |""".stripMargin)
+
+    opt[String]("foreignKey")
+      .maxOccurs(Int.MaxValue)
+      .valueName("<schema1>.<table1>(<column1>, <column2>, ...) ::: <schema2>.<table2>(<column3>, <column4>, ...)")
+      .action((fk, c) => c.copy(extraForeignKeys = c.extraForeignKeys + fk))
+      .text("""Foreign key to respect during subsetting even though it is not defined in the database
               |                           Can be specified multiple times
               |""".stripMargin)
 
     opt[String]("excludeTable")
       .valueName("<schema>.<table>")
       .maxOccurs(Int.MaxValue)
-      .action { (str, c) =>
-        val regex = """^\s*(.+)\.(.+)\s*$""".r
-        str match {
-          case regex(schemaName, tableName) =>
-            val table = normalizeTable(schemaName, tableName)
-            c.copy(excludeTables = c.excludeTables + table)
-          case _ => throw new RuntimeException
-        }
-      }
+      .action((t, c) => c.copy(excludeTables = c.excludeTables + t))
       .text("""Exclude a table from the resulting subset
               |                           Also ignore all foreign keys to and from this table
               |                           Can be specified multiple times
@@ -138,16 +97,7 @@ object CommandLineParser {
     opt[String]("excludeColumns")
       .valueName("<schema>.<table>(<column1>, <column2>, ...)")
       .maxOccurs(Int.MaxValue)
-      .action { (ic, c) =>
-        val regex = """^\s*(.+)\.(.+)\((.+)\)\s*$""".r
-        ic match {
-          case regex(schemaName, tableName, cols) =>
-            val table = normalizeTable(schemaName, tableName)
-            val newlyExcluded = normalizeColumns(table, cols).toSet
-            c.copy(excludeColumns = c.excludeColumns ++ newlyExcluded)
-          case _ => throw new RuntimeException
-        }
-      }
+      .action((ec, c) => c.copy(excludeColumns = c.excludeColumns + ec))
       .text("""Exclude data from these columns when subsetting
               |                           Intended for columns that are not part of any primary or foreign keys
               |                           Useful among other things as a workaround if DBSubsetter does not support a vendor-specific data type
@@ -253,39 +203,4 @@ object CommandLineParser {
         |""".stripMargin
     note(usageExamples)
   }
-
-  private def normalizeTable(schemaName: String, tableName: String): Table = {
-    val schema = Schema(schemaName.trim)
-    Table(schema = schema, name = tableName.trim)
-  }
-
-  private def normalizeColumns(table: Table, untrimmedColumnCsvs: String): Seq[CmdLineColumn] = {
-    untrimmedColumnCsvs
-      .split(",")
-      .map(_.trim)
-      .map(columnName => CmdLineColumn(table, columnName))
-  }
 }
-
-case class CmdLineBaseQuery(
-    table: Table,
-    whereClause: String,
-    includeChildren: Boolean
-)
-
-case class CmdLineForeignKey(
-    fromTable: Table,
-    fromColumns: Seq[CmdLineColumn],
-    toTable: Table,
-    toColumns: Seq[CmdLineColumn]
-)
-
-case class CmdLinePrimaryKey(
-    table: Table,
-    columns: Seq[CmdLineColumn]
-)
-
-case class CmdLineColumn(
-    table: Table,
-    name: String
-)

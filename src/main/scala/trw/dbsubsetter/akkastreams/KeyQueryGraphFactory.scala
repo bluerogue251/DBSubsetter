@@ -22,7 +22,7 @@ object KeyQueryGraphFactory {
   def build(
       config: Config,
       schemaInfo: SchemaInfo,
-      baseQueries: Seq[BaseQuery],
+      baseQueries: Set[BaseQuery],
       pkStore: ActorRef,
       dbAccessFactory: DbAccessFactory,
       fkTaskCreationWorkflow: FkTaskCreationWorkflow,

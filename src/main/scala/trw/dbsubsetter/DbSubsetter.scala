@@ -1,28 +1,42 @@
 package trw.dbsubsetter
 
-import trw.dbsubsetter.config.{AkkaStreamsMode, Config, DebugMode}
+import io.prometheus.client.exporter.HTTPServer
+import io.prometheus.client.hotspot.DefaultExports
+import trw.dbsubsetter.config._
 import trw.dbsubsetter.db.{BaseQueries, DbMetadataQueries, OK, SchemaInfoRetrieval, SchemaValidation, ValidationError}
 
 object DbSubsetter {
-  def run(config: Config): DbSubsetterResult = {
+  def run(schemaConfig: SchemaConfig, config: Config): DbSubsetterResult = {
     val dbMetadata =
       DbMetadataQueries.retrieveSchemaMetadata(
         config.originDbConnectionString,
-        config.schemas.map(_.name).toSet
+        schemaConfig.schemas.map(_.name)
       )
 
-    SchemaValidation.validate(config, dbMetadata) match {
+    SchemaValidation.validate(schemaConfig, dbMetadata) match {
       case ValidationError(message) =>
         FailedValidation(message)
+
       case OK =>
-        val schemaInfo = SchemaInfoRetrieval.getSchemaInfo(dbMetadata, config)
-        val baseQueries = BaseQueries.get(config, schemaInfo)
+        val schemaInfo = SchemaInfoRetrieval.getSchemaInfo(dbMetadata, schemaConfig)
+        val baseQueries = BaseQueries.get(schemaConfig, schemaInfo)
+
+        val metricsEndpoint: Option[HTTPServer] =
+          config.metricsPort
+            .map { port =>
+              DefaultExports.initialize()
+              new HTTPServer(port)
+            }
+
         config.runMode match {
           case AkkaStreamsMode =>
             ApplicationAkkaStreams.run(config, schemaInfo, baseQueries)
           case DebugMode =>
             new ApplicationSingleThreaded(config, schemaInfo, baseQueries).run()
         }
+
+        metricsEndpoint.foreach(_.stop())
+
         SubsetCompletedSuccessfully
     }
   }

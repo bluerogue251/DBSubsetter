@@ -2,18 +2,18 @@ package trw.dbsubsetter.db
 
 import java.util.NoSuchElementException
 
-import trw.dbsubsetter.config.{CmdLineColumn, Config}
+import trw.dbsubsetter.config.{ConfigColumn, SchemaConfig}
 import trw.dbsubsetter.db.ColumnTypes.ColumnType
 
 object SchemaInfoRetrieval {
-  def getSchemaInfo(dbMetadata: DbMetadataQueryResult, config: Config): SchemaInfo = {
+  def getSchemaInfo(dbMetadata: DbMetadataQueryResult, schemaConfig: SchemaConfig): SchemaInfo = {
     val includedTables =
       dbMetadata.tables
         .map { tableQueryRow =>
           val schema = Schema(tableQueryRow.schema)
           Table(schema, tableQueryRow.name)
         }
-        .filterNot(config.excludeTables)
+        .filterNot(schemaConfig.excludeTables)
 
     val tablesByName =
       includedTables
@@ -39,8 +39,8 @@ object SchemaInfoRetrieval {
         .filterNot { columnQueryRow =>
           val schema = Schema(columnQueryRow.schema)
           val table = Table(schema, columnQueryRow.table)
-          val cmdLineColumn = CmdLineColumn(table, columnQueryRow.name)
-          config.excludeColumns.contains(cmdLineColumn)
+          val configColumn = ConfigColumn(table, columnQueryRow.name)
+          schemaConfig.excludeColumns.contains(configColumn)
         }
         .filter(c => tablesByName.contains((c.schema, c.table)))
         .groupBy(c => tablesByName(c.schema, c.table))
@@ -75,7 +75,7 @@ object SchemaInfoRetrieval {
           }
 
       val configuredPrimaryKeys =
-        config.extraPrimaryKeys
+        schemaConfig.extraPrimaryKeys
           .map { cmdLinePrimaryKey =>
             val table = cmdLinePrimaryKey.table
             val columnNames = cmdLinePrimaryKey.columns.map(_.name).toSet
@@ -88,7 +88,7 @@ object SchemaInfoRetrieval {
 
     val foreignKeysOrdered: Array[ForeignKey] = {
       val configuredForeignKeys =
-        config.extraForeignKeys
+        schemaConfig.extraForeignKeys
           .flatMap { efk =>
             efk.fromColumns
               .zip(efk.toColumns)

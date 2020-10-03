@@ -8,7 +8,7 @@ import trw.dbsubsetter.fktaskqueue.{ForeignKeyTaskQueue, ForeignKeyTaskQueueFact
 import trw.dbsubsetter.primarykeystore.{PrimaryKeyStore, PrimaryKeyStoreFactory}
 import trw.dbsubsetter.workflow._
 
-class ApplicationSingleThreaded(config: Config, schemaInfo: SchemaInfo, baseQueries: Seq[BaseQuery]) {
+class ApplicationSingleThreaded(config: Config, schemaInfo: SchemaInfo, baseQueries: Set[BaseQuery]) {
 
   private[this] val dbAccessFactory =
     new DbAccessFactory(config, schemaInfo)
