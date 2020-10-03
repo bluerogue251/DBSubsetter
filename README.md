@@ -16,7 +16,8 @@ _Easy to learn_: a simple and well documented command line interface.
 _Support large datasets_: designed for stability when handling large datasets.
 
 _Non-intrusive_: connections to the origin database are read-only. Connections to the
-                 target database require only DML write permissions.
+                 target database only require [DML](https://stackoverflow.com/a/2578207)
+                 write permission.
 
 _Deterministic_: identical inputs yield identical outputs.
 
