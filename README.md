@@ -31,7 +31,7 @@ Please [open an issue](https://github.com/bluerogue251/DBSubsetter/issues/new)
 if you would like support for a different database vendor.
 
 
-## Download and Usage Instructions
+## Usage Instructions
 
 1. Load an empty schema from your "origin" database into your "target" database.
    Follow vendor-specific instructions for:
