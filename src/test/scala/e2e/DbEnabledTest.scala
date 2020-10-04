@@ -25,10 +25,6 @@ abstract class DbEnabledTest[T <: Database] extends FunSuite with BeforeAndAfter
 
   protected def prepareTargetDDL(): Unit
 
-  protected def teardownOriginContainer(): Unit = {} // No-op by default
-
-  protected def teardownTargetContainers(): Unit = {} // No-op by default
-
   /*
    * Slick testing utility connections (do not override)
    */
@@ -77,11 +73,5 @@ abstract class DbEnabledTest[T <: Database] extends FunSuite with BeforeAndAfter
     originSlick.close()
     targetSingleThreadedSlick.close()
     targetAkkaStreamsSlick.close()
-
-    /*
-     * Remove any containers as necessary
-     */
-    teardownOriginContainer()
-    teardownTargetContainers()
   }
 }
