@@ -158,6 +158,15 @@ trait NonEmptySchemaValidationTest extends FunSuiteLike with AssertionUtil {
     )
   }
 
+  test("Exclude Column Not Found") {
+    val invalidColumn = ConfigColumn(validTable, "col_b")
+    val invalidSchemaConfig = validSchemaConfig.copy(excludeColumns = Set(invalidColumn))
+    assertErrorMessage(
+      invalidSchemaConfig,
+      "Column 'valid_schema.foo.col_b' specified in --excludeColumns not found in database"
+    )
+  }
+
   private[this] def assertErrorMessage(schemaConfig: SchemaConfig, expectedMessage: String): Unit = {
     DbSubsetter.run(schemaConfig, validConfig) match {
       case SubsetCompletedSuccessfully     => fail("Expected validation failure. Got success.")
