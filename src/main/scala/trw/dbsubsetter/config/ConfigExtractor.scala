@@ -39,6 +39,17 @@ object ConfigExtractor {
             return Invalid(InvalidExtraPrimaryKey(primaryKeyString))
         }
 
+    val duplicatePkTables: Set[Table] =
+      extraPrimaryKeys.toSeq
+        .map(_.table)
+        .groupBy(identity)
+        .filter { case (_, elems) => elems.size > 1 }
+        .map { case (table, _) => table }
+        .toSet
+    if (duplicatePkTables.nonEmpty) {
+      return Invalid(DuplicateExtraPrimaryKey(duplicatePkTables))
+    }
+
     val foreignKeyRegex = regex(columnSet + separator + columnSet)
     val extraForeignKeys =
       args.extraForeignKeys
@@ -153,6 +164,7 @@ case class Invalid(invalidInputType: InvalidInputType) extends ExtractionResult
 sealed trait InvalidInputType
 case class InvalidBaseQuery(input: String) extends InvalidInputType
 case class InvalidExtraPrimaryKey(input: String) extends InvalidInputType
+case class DuplicateExtraPrimaryKey(tables: Set[Table]) extends InvalidInputType
 case class InvalidExtraForeignKey(input: String) extends InvalidInputType
 case class InvalidExcludeTable(input: String) extends InvalidInputType
 case class InvalidExcludeColumns(input: String) extends InvalidInputType

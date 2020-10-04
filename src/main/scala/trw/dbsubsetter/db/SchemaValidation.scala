@@ -72,6 +72,51 @@ object SchemaValidation {
       }
     }
 
+    val tablesWithPrimaryKeysInDb: Set[Table] =
+      dbMeta.primaryKeyColumns
+        .map({ pkColumnQueryRow =>
+          val schema = Schema(pkColumnQueryRow.schema)
+          Table(schema, pkColumnQueryRow.table)
+        })
+        .toSet
+
+    /*
+     * Detect duplicate primary key specifications
+     */
+    schemaConfig.extraPrimaryKeys.foreach { extraPk =>
+      if (tablesWithPrimaryKeysInDb.contains(extraPk.table)) {
+        return ValidationError(
+          s"--primaryKey specified for table ${display(extraPk.table)} which already has a primary key"
+        )
+      }
+    }
+
+    /*
+     * Detect missing primary keys
+     */
+    val tablesWithConfiguredPrimaryKeys: Set[Table] = schemaConfig.extraPrimaryKeys.map(_.table)
+    val allTablesWithPrimaryKeys = tablesWithPrimaryKeysInDb ++ tablesWithConfiguredPrimaryKeys
+    val tablesMissingPrimaryKeys = actualTables -- allTablesWithPrimaryKeys
+    if (tablesMissingPrimaryKeys.size == 1) {
+      val table = tablesMissingPrimaryKeys.head
+      return ValidationError(
+        s"""Table ${display(table)} is missing a primary key. Consider either:
+           |  (a) Specifying the missing primary key with the --primaryKey command line option
+           |  (b) Excluding the table with the --excludeTable command line option
+           |  (c) Adding a primary key onto the table in your origin database
+           |""".stripMargin
+      )
+    } else if (tablesMissingPrimaryKeys.size > 1) {
+      val tablesCsv = tablesMissingPrimaryKeys.map(display).mkString(", ")
+      return ValidationError(
+        s"""Tables $tablesCsv are missing primary keys. Consider either:
+           |  (a) Specifying the missing primary keys with the --primaryKey command line option
+           |  (b) Excluding the tables with the --excludeTable command line option
+           |  (c) Adding primary keys onto the tables in your origin database
+           |""".stripMargin
+      )
+    }
+
     val actualColumns: Set[ConfigColumn] =
       dbMeta.columns
         .map(columnQueryRow => {
