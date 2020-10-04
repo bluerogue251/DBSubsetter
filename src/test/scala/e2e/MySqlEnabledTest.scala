@@ -65,6 +65,8 @@ abstract class MySqlEnabledTest extends DbEnabledTest[MySqlDatabase] {
     )
   }
 
+  override protected def prepareOriginSchemas(): Unit = {}
+
   override protected def prepareOriginDDL(): Unit
 
   override protected def prepareOriginDML(): Unit

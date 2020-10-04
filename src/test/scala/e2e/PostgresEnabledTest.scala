@@ -40,7 +40,7 @@ abstract class PostgresEnabledTest extends DbEnabledTest[PostgresDatabase] {
     )
   }
 
-  override protected def prepareOriginDDL(): Unit = {
+  override protected def prepareOriginSchemas(): Unit = {
     import slick.jdbc.PostgresProfile.api._
 
     additionalSchemas.foreach { schema =>
