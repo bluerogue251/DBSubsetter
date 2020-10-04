@@ -12,7 +12,7 @@ class NonEmptyDDL(val profile: JdbcProfile) {
     */
   case class FooRow(id: Int)
 
-  class FooTable(tag: Tag) extends profile.api.Table[FooRow](tag, "foo") {
+  class FooTable(tag: Tag) extends profile.api.Table[FooRow](tag, Some("valid_schema"), "foo") {
     def * = id <> (FooRow, FooRow.unapply)
 
     val id: Rep[Int] = column[Int]("ID", O.PrimaryKey)
@@ -25,7 +25,7 @@ class NonEmptyDDL(val profile: JdbcProfile) {
     */
   case class BarRow(id: Int, mixedCaseTable1Id: Int)
 
-  class BarTable(tag: Tag) extends profile.api.Table[BarRow](tag, "bar") {
+  class BarTable(tag: Tag) extends profile.api.Table[BarRow](tag, Some("valid_schema"), "bar") {
     def * = (id, fooId) <> (BarRow.tupled, BarRow.unapply)
 
     val id: Rep[Int] = column[Int]("id", O.PrimaryKey)
@@ -40,7 +40,7 @@ class NonEmptyDDL(val profile: JdbcProfile) {
     */
   case class BazRow(id: Int, mixedCaseTable1Id: Int)
 
-  class BazTable(tag: Tag) extends profile.api.Table[BazRow](tag, "baz") {
+  class BazTable(tag: Tag) extends profile.api.Table[BazRow](tag, Some("valid_schema"), "baz") {
     def * = (id, barId) <> (BazRow.tupled, BazRow.unapply)
 
     val id: Rep[Int] = column[Int]("id", O.PrimaryKey)
