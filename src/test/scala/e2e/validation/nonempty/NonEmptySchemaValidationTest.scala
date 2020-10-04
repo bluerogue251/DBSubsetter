@@ -137,8 +137,8 @@ trait NonEmptySchemaValidationTest extends FunSuiteLike with AssertionUtil {
 
   test("Primary Key Column Not Found") {
     val invalidColumn = ConfigColumn(fooTable, "col_z")
-    val configPk = ConfigPrimaryKey(fooTable, Seq(invalidColumn))
-    val invalidSchemaConfig = validSchemaConfig.copy(extraPrimaryKeys = Set(configPk))
+    val invalidFooPk = ConfigPrimaryKey(fooTable, Seq(invalidColumn))
+    val invalidSchemaConfig = validSchemaConfig.copy(extraPrimaryKeys = Set(invalidFooPk, bazPk))
     assertErrorMessage(
       invalidSchemaConfig,
       "Column 'valid_schema.foo.col_z' specified in --primaryKey not found in database"
@@ -199,9 +199,9 @@ trait NonEmptySchemaValidationTest extends FunSuiteLike with AssertionUtil {
     assertErrorMessage(
       validSchemaConfig.copy(extraPrimaryKeys = Set.empty),
       """Tables 'valid_schema.baz', 'valid_schema.foo' are missing primary keys. Consider either:
-        |  (a) Specifying the missing primary key with the --primaryKey command line option
-        |  (b) Excluding the table with the --excludeTable command line option
-        |  (c) Adding a primary key onto the table in your origin database
+        |  (a) Specifying the missing primary keys with the --primaryKey command line option
+        |  (b) Excluding the tables with the --excludeTable command line option
+        |  (c) Adding primary keys onto the tables in your origin database
         |""".stripMargin
     )
   }

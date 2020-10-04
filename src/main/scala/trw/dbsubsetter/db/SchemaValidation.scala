@@ -112,7 +112,7 @@ object SchemaValidation {
         s"""Tables $tablesCsv are missing primary keys. Consider either:
            |  (a) Specifying the missing primary keys with the --primaryKey command line option
            |  (b) Excluding the tables with the --excludeTable command line option
-           |  (c) Adding a primary key onto the tables in your origin database
+           |  (c) Adding primary keys onto the tables in your origin database
            |""".stripMargin
       )
     }
