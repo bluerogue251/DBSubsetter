@@ -101,6 +101,21 @@ trait NonEmptySchemaValidationTest extends FunSuiteLike with AssertionUtil {
     assertErrorMessage(invalidSchemaConfig, "Table 'valid_schema.no' specified in --foreignKey not found in database")
   }
 
+  test("Exclude Table Not Found") {
+    val nonexistentTable = Table(validSchema, "x")
+    val invalidSchemaConfig = validSchemaConfig.copy(excludeTables = Set(nonexistentTable))
+    assertErrorMessage(invalidSchemaConfig, "Table 'valid_schema.x' specified in --excludeTable not found in database")
+  }
+
+  test("Exclude Columns Table Not Found") {
+    val nonexistentTable = Table(validSchema, "x")
+    val invalidSchemaConfig = validSchemaConfig.copy(excludeColumns = Set(ConfigColumn(nonexistentTable, "id")))
+    assertErrorMessage(
+      invalidSchemaConfig,
+      "Table 'valid_schema.x' specified in --excludeColumns not found in database"
+    )
+  }
+
   private[this] def assertErrorMessage(schemaConfig: SchemaConfig, expectedMessage: String): Unit = {
     DbSubsetter.run(schemaConfig, validConfig) match {
       case SubsetCompletedSuccessfully     => fail("Expected validation failure. Got success.")
