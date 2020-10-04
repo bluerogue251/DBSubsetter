@@ -36,14 +36,14 @@ class NonEmptyDDL(val profile: JdbcProfile) {
   lazy val Bar = new TableQuery(tag => new BarTable(tag))
 
   /**
-    * baz
+    * baz (purposely missing a primary key for testing purposes)
     */
   case class BazRow(id: Int, mixedCaseTable1Id: Int)
 
   class BazTable(tag: Tag) extends profile.api.Table[BazRow](tag, Some("valid_schema"), "baz") {
     def * = (id, barId) <> (BazRow.tupled, BazRow.unapply)
 
-    val id: Rep[Int] = column[Int]("id", O.PrimaryKey)
+    val id: Rep[Int] = column[Int]("id")
     val barId: Rep[Int] = column[Int]("bar_id")
     lazy val barFk = foreignKey("fkey", barId, Bar)(_.id)
   }

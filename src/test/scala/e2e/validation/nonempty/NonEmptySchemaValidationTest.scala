@@ -167,6 +167,17 @@ trait NonEmptySchemaValidationTest extends FunSuiteLike with AssertionUtil {
     )
   }
 
+  test("Missing Primary Key") {
+    assertErrorMessage(
+      validSchemaConfig,
+      """Table 'valid_schema.baz' is missing a primary key. Consider either:
+        |  (a) Specifying the missing primary key with the --primaryKey command line option
+        |  (b) Excluding the table in question with the --excludeTable command line option
+        |  (c) Adding a primary key onto the table in your origin database
+        |""".stripMargin
+    )
+  }
+
   private[this] def assertErrorMessage(schemaConfig: SchemaConfig, expectedMessage: String): Unit = {
     DbSubsetter.run(schemaConfig, validConfig) match {
       case SubsetCompletedSuccessfully     => fail("Expected validation failure. Got success.")
