@@ -2,7 +2,7 @@ package e2e.validation.nonempty
 
 import org.scalatest.FunSuiteLike
 import trw.dbsubsetter.DbSubsetter.{FailedValidation, SubsetCompletedSuccessfully}
-import trw.dbsubsetter.config.{Config, ConfigBaseQuery, SchemaConfig}
+import trw.dbsubsetter.config._
 import trw.dbsubsetter.db.{Schema, Table}
 import trw.dbsubsetter.{DbSubsetter, db}
 import util.assertion.AssertionUtil
@@ -30,20 +30,20 @@ trait NonEmptySchemaValidationTest extends FunSuiteLike with AssertionUtil {
     // No-Op
   }
 
-  private val validationSchema: Schema = Schema("valid_schema")
+  private val validSchema: Schema = Schema("valid_schema")
 
-  private val validationTable: db.Table = Table(validationSchema, "foo")
+  private val validTable: db.Table = Table(validSchema, "foo")
 
   private val validationBaseQuery: ConfigBaseQuery =
     ConfigBaseQuery(
-      table = validationTable,
+      table = validTable,
       whereClause = "true",
       includeChildren = true
     )
 
   private val validSchemaConfig: SchemaConfig =
     SchemaConfig(
-      schemas = Set(validationSchema),
+      schemas = Set(validSchema),
       baseQueries = Set(validationBaseQuery)
     )
 
@@ -64,10 +64,41 @@ trait NonEmptySchemaValidationTest extends FunSuiteLike with AssertionUtil {
   }
 
   test("Base Query Table Not Found") {
-    val nonexistentTable = Table(validationSchema, "t")
+    val nonexistentTable = Table(validSchema, "t")
     val baseQuery = ConfigBaseQuery(nonexistentTable, "true", includeChildren = true)
     val invalidSchemaConfig = validSchemaConfig.copy(baseQueries = Set(baseQuery))
     assertErrorMessage(invalidSchemaConfig, "Table 'valid_schema.t' specified in --baseQuery not found in database")
+  }
+
+  test("Extra Primary Key Table Not Found") {
+    val nonexistentTable = Table(validSchema, "nope")
+    val configPk = ConfigPrimaryKey(nonexistentTable, Seq(ConfigColumn(nonexistentTable, "col_name")))
+    val invalidSchemaConfig = validSchemaConfig.copy(extraPrimaryKeys = Set(configPk))
+    assertErrorMessage(invalidSchemaConfig, "Table 'valid_schema.nope' specified in --primaryKey not found in database")
+  }
+
+  test("Extra Foreign Key From Table Not Found") {
+    val nonexistentTable = Table(validSchema, "nope")
+    val configFk = ConfigForeignKey(
+      fromTable = nonexistentTable,
+      fromColumns = Seq(ConfigColumn(nonexistentTable, "id")),
+      toTable = validTable,
+      toColumns = Seq(ConfigColumn(validTable, "id"))
+    )
+    val invalidSchemaConfig = validSchemaConfig.copy(extraForeignKeys = Set(configFk))
+    assertErrorMessage(invalidSchemaConfig, "Table 'valid_schema.nope' specified in --foreignKey not found in database")
+  }
+
+  test("Extra Foreign Key To Table Not Found") {
+    val nonexistentTable = Table(validSchema, "no")
+    val configFk = ConfigForeignKey(
+      fromTable = validTable,
+      fromColumns = Seq(ConfigColumn(validTable, "id")),
+      toTable = nonexistentTable,
+      toColumns = Seq(ConfigColumn(nonexistentTable, "id"))
+    )
+    val invalidSchemaConfig = validSchemaConfig.copy(extraForeignKeys = Set(configFk))
+    assertErrorMessage(invalidSchemaConfig, "Table 'valid_schema.no' specified in --foreignKey not found in database")
   }
 
   private[this] def assertErrorMessage(schemaConfig: SchemaConfig, expectedMessage: String): Unit = {

@@ -30,11 +30,42 @@ object SchemaValidation {
      */
     schemaConfig.baseQueries.foreach { baseQuery =>
       if (!actualTables.contains(baseQuery.table)) {
-        return ValidationError(s"Table ${display(baseQuery.table)} specified in --baseQuery not found in database")
+        return missingTable("--baseQuery", baseQuery.table)
+      }
+    }
+
+    schemaConfig.extraPrimaryKeys.foreach { extraPrimaryKey =>
+      if (!actualTables.contains(extraPrimaryKey.table)) {
+        return missingTable("--primaryKey", extraPrimaryKey.table)
+      }
+    }
+
+    schemaConfig.extraForeignKeys.foreach { extraForeignKey =>
+      if (!actualTables.contains(extraForeignKey.fromTable)) {
+        return missingTable("--foreignKey", extraForeignKey.fromTable)
+      }
+      if (!actualTables.contains(extraForeignKey.toTable)) {
+        return missingTable("--foreignKey", extraForeignKey.toTable)
+      }
+    }
+
+    schemaConfig.excludeTables.foreach { excludeTable =>
+      if (!actualTables.contains(excludeTable)) {
+        return missingTable("--excludeTable", excludeTable)
+      }
+    }
+
+    schemaConfig.excludeColumns.foreach { excludeColumn =>
+      if (!actualTables.contains(excludeColumn.table)) {
+        return missingTable("--excludeColumns", excludeColumn.table)
       }
     }
 
     OK
+  }
+
+  private def missingTable(option: String, table: Table): ValidationError = {
+    ValidationError(s"Table ${display(table)} specified in $option not found in database")
   }
 
   private def display(table: Table): String = {
