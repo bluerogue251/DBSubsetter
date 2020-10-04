@@ -10,7 +10,9 @@ sudo docker exec pg_origin pg_dump --user postgres --dbname physics_db --section
 sudo docker exec pg_target pg_restore --user postgres --dbname physics_db --jobs 8 /tmp-data/physics-db-post-data.pgdump
 
 # Export prometheus metrics
-curl -X POST http://localhost:9090/api/v1/admin/tsdb/snapshot
+# curl -X POST http://localhost:9090/api/v1/admin/tsdb/snapshot
+
+# Response:
 # {
 #  "status": "success",
 #  "data": {
