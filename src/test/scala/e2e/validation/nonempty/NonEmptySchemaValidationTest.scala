@@ -30,9 +30,11 @@ trait NonEmptySchemaValidationTest extends FunSuiteLike with AssertionUtil {
     // No-Op
   }
 
-  private val validSchema: Schema = Schema("valid_schema")
+  private val validSchema: db.Schema = Schema("valid_schema")
 
   private val validTable: db.Table = Table(validSchema, "foo")
+
+  private val validColumn: ConfigColumn = ConfigColumn(validTable, "id")
 
   private val validationBaseQuery: ConfigBaseQuery =
     ConfigBaseQuery(
@@ -113,6 +115,46 @@ trait NonEmptySchemaValidationTest extends FunSuiteLike with AssertionUtil {
     assertErrorMessage(
       invalidSchemaConfig,
       "Table 'valid_schema.x' specified in --excludeColumns not found in database"
+    )
+  }
+
+  test("Primary Key Column Not Found") {
+    val invalidColumn = ConfigColumn(validTable, "col_z")
+    val configPk = ConfigPrimaryKey(validTable, Seq(invalidColumn))
+    val invalidSchemaConfig = validSchemaConfig.copy(extraPrimaryKeys = Set(configPk))
+    assertErrorMessage(
+      invalidSchemaConfig,
+      "Column 'valid_schema.foo.col_z' specified in --primaryKey not found in database"
+    )
+  }
+
+  test("Foreign Key From Column Not Found") {
+    val invalidColumn = ConfigColumn(validTable, "col_a")
+    val configFk = ConfigForeignKey(
+      fromTable = validTable,
+      fromColumns = Seq(invalidColumn),
+      toTable = validTable,
+      toColumns = Seq(validColumn)
+    )
+    val invalidSchemaConfig = validSchemaConfig.copy(extraForeignKeys = Set(configFk))
+    assertErrorMessage(
+      invalidSchemaConfig,
+      "Column 'valid_schema.foo.col_a' specified in --foreignKey not found in database"
+    )
+  }
+
+  test("Foreign Key To Column Not Found") {
+    val invalidColumn = ConfigColumn(validTable, "col_a")
+    val configFk = ConfigForeignKey(
+      fromTable = validTable,
+      fromColumns = Seq(validColumn),
+      toTable = validTable,
+      toColumns = Seq(invalidColumn)
+    )
+    val invalidSchemaConfig = validSchemaConfig.copy(extraForeignKeys = Set(configFk))
+    assertErrorMessage(
+      invalidSchemaConfig,
+      "Column 'valid_schema.foo.col_a' specified in --foreignKey not found in database"
     )
   }
 

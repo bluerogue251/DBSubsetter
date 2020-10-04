@@ -15,7 +15,7 @@ class NonEmptyDDL(val profile: JdbcProfile) {
   class FooTable(tag: Tag) extends profile.api.Table[FooRow](tag, Some("valid_schema"), "foo") {
     def * = id <> (FooRow, FooRow.unapply)
 
-    val id: Rep[Int] = column[Int]("ID", O.PrimaryKey)
+    val id: Rep[Int] = column[Int]("id", O.PrimaryKey)
   }
 
   lazy val Foo = new TableQuery(tag => new FooTable(tag))
