@@ -1,6 +1,6 @@
 package trw.dbsubsetter.config
 
-import trw.dbsubsetter.db.Schema
+import trw.dbsubsetter.db.{Schema, Table}
 
 object InvalidInputMessaging {
   def toErrorMessage(invalidInputType: InvalidInputType): String = {
@@ -9,6 +9,8 @@ object InvalidInputMessaging {
         invalidInputMessage("--baseQuery", input)
       case InvalidExtraPrimaryKey(input) =>
         invalidInputMessage("--primaryKey", input)
+      case DuplicateExtraPrimaryKey(tables) =>
+        duplicatePrimaryKeyMessage(tables)
       case InvalidExtraForeignKey(input) =>
         invalidInputMessage("--foreignKey", input)
       case InvalidExcludeTable(input) =>
@@ -30,6 +32,11 @@ object InvalidInputMessaging {
 
   private[this] def invalidInputMessage(option: String, value: String): String = {
     s"Invalid $option specified: $value."
+  }
+
+  private[this] def duplicatePrimaryKeyMessage(tables: Set[Table]): String = {
+    val tablesCsv = tables.map(table => s"'${table.schema.name}.${table.name}'").mkString(", ")
+    s"--primaryKey was specified more than once for table(s): $tablesCsv."
   }
 
   private def invalidSchema(option: String, schema: Schema): String = {

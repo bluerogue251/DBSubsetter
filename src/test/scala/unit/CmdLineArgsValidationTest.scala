@@ -117,14 +117,13 @@ class CmdLineArgsValidationTest extends FunSuite {
   }
   
   test("Multiple --primaryKey specifications for same table") {
-    fail()
     val args: Array[String] = buildArgs(
       "--schemas", "my_schema",
       "--baseQuery", "my_schema.my_table ::: true ::: includeChildren",
       "--primaryKey", "my_schema.my_table(column_one)",
-      "--primaryKey", "my_schema.my_table(column_one)"
+      "--primaryKey", "my_schema.my_table(column_two)"
     )
-    assertErrorMessage(args, "--primaryKey was specified more than once for 'my_schema.my_table'.")
+    assertErrorMessage(args, "--primaryKey was specified more than once for table(s): 'my_schema.my_table'.")
   }
   
   private[this] def buildArgs(additionalArgs: String*): Array[String] = {
