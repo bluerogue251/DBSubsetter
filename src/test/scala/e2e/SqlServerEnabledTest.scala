@@ -15,12 +15,12 @@ abstract class SqlServerEnabledTest extends DbEnabledTest[SqlServerDatabase] {
   protected def testName: String
 
   override protected def createOriginDatabase(): Unit = {
-    createEmptyDb(dbs.origin.name, dbs.origin.name)
+    createEmptyDb(dbs.origin.name)
   }
 
   override protected def createTargetDatabases(): Unit = {
-    createEmptyDb(dbs.origin.name, dbs.targetSingleThreaded.name)
-    createEmptyDb(dbs.origin.name, dbs.targetAkkaStreams.name)
+    createEmptyDb(dbs.targetSingleThreaded.name)
+    createEmptyDb(dbs.targetAkkaStreams.name)
     Thread.sleep(2000) // Try to get around flaky SqlServer tests
   }
 
@@ -38,6 +38,12 @@ abstract class SqlServerEnabledTest extends DbEnabledTest[SqlServerDatabase] {
     )
   }
 
+  override protected def prepareOriginSchemas(): Unit = {
+    additionalSchemas.foreach { schema =>
+      s"./src/test/util/create_schema_sqlserver.sh ${dbs.origin.host} ${dbs.origin.name} $schema".!!
+    }
+  }
+
   override protected def prepareOriginDDL(): Unit
 
   override protected def prepareOriginDML(): Unit
@@ -47,7 +53,7 @@ abstract class SqlServerEnabledTest extends DbEnabledTest[SqlServerDatabase] {
     s"./src/test/util/sync_sqlserver_origin_to_target.sh ${dbs.origin.host} ${dbs.origin.name} ${dbs.targetAkkaStreams.name}".!!
   }
 
-  private def createEmptyDb(containerName: String, dbName: String): Unit = {
+  private def createEmptyDb(dbName: String): Unit = {
     s"./src/test/util/create_sqlserver_db.sh ${dbs.origin.host} $dbName".!!
   }
 

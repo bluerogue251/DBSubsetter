@@ -67,7 +67,7 @@ trait NonEmptySchemaValidationTest extends FunSuiteLike with AssertionUtil {
     val nonexistentTable = Table(validationSchema, "t")
     val baseQuery = ConfigBaseQuery(nonexistentTable, "true", includeChildren = true)
     val invalidSchemaConfig = validSchemaConfig.copy(baseQueries = Set(baseQuery))
-    assertErrorMessage(invalidSchemaConfig, "Table 't' specified in --baseQuery not found in database")
+    assertErrorMessage(invalidSchemaConfig, "Table 'valid_schema.t' specified in --baseQuery not found in database")
   }
 
   private[this] def assertErrorMessage(schemaConfig: SchemaConfig, expectedMessage: String): Unit = {

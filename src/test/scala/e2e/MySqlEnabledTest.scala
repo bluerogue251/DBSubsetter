@@ -12,17 +12,15 @@ import scala.util.Properties
 abstract class MySqlEnabledTest extends DbEnabledTest[MySqlDatabase] {
   override protected val profile = slick.jdbc.MySQLProfile
 
-  protected def additionalSchemas: List[String] = List.empty
-
   protected def testName: String
 
   override protected def createOriginDatabase(): Unit = {
-    MysqlEndToEndTestUtil.createSchemas(dbs.origin, dbs.origin.name :: additionalSchemas)
+    MysqlEndToEndTestUtil.createSchemas(dbs.origin, additionalSchemas + dbs.origin.name)
   }
 
   override protected def createTargetDatabases(): Unit = {
-    MysqlEndToEndTestUtil.createSchemas(dbs.targetSingleThreaded, dbs.targetSingleThreaded.name :: additionalSchemas)
-    MysqlEndToEndTestUtil.createSchemas(dbs.targetAkkaStreams, dbs.targetAkkaStreams.name :: additionalSchemas)
+    MysqlEndToEndTestUtil.createSchemas(dbs.targetSingleThreaded, additionalSchemas + dbs.targetSingleThreaded.name)
+    MysqlEndToEndTestUtil.createSchemas(dbs.targetAkkaStreams, additionalSchemas + dbs.targetAkkaStreams.name)
   }
 
   override protected def dbs: DatabaseSet[MySqlDatabase] = {
@@ -72,20 +70,20 @@ abstract class MySqlEnabledTest extends DbEnabledTest[MySqlDatabase] {
   override protected def prepareOriginDML(): Unit
 
   override protected def prepareTargetDDL(): Unit = {
-    val allSchemas: List[String] = dbs.origin.name :: additionalSchemas
+    val allSchemas: Set[String] = additionalSchemas + dbs.origin.name
     MysqlEndToEndTestUtil.preSubsetDdlSync(dbs.origin, dbs.targetSingleThreaded, allSchemas)
     MysqlEndToEndTestUtil.preSubsetDdlSync(dbs.origin, dbs.targetAkkaStreams, allSchemas)
   }
 }
 
 object MysqlEndToEndTestUtil {
-  def createSchemas(db: MySqlDatabase, schemas: List[String]): Unit = {
+  def createSchemas(db: MySqlDatabase, schemas: Set[String]): Unit = {
     schemas.foreach(schema => {
       s"./src/test/util/create_mysql_db.sh ${db.host} ${db.port} $schema".!!
     })
   }
 
-  def preSubsetDdlSync(origin: MySqlDatabase, target: MySqlDatabase, schemas: List[String]): Unit = {
+  def preSubsetDdlSync(origin: MySqlDatabase, target: MySqlDatabase, schemas: Set[String]): Unit = {
     schemas.foreach(schema => {
       val exportCommand: String =
         s"mysqldump --host ${origin.host} --port ${origin.port} --user root --no-data $schema"

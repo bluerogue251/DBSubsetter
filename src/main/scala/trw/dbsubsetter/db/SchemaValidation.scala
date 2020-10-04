@@ -30,11 +30,15 @@ object SchemaValidation {
      */
     schemaConfig.baseQueries.foreach { baseQuery =>
       if (!actualTables.contains(baseQuery.table)) {
-        return ValidationError(s"Table '${}' specified in --baseQuery not found in database")
+        return ValidationError(s"Table ${display(baseQuery.table)} specified in --baseQuery not found in database")
       }
     }
 
     OK
+  }
+
+  private def display(table: Table): String = {
+    s"'${table.schema.name}.${table.name}'"
   }
 }
 
