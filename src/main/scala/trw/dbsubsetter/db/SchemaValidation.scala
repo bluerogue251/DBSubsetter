@@ -5,27 +5,40 @@ import trw.dbsubsetter.config.SchemaConfig
 object SchemaValidation {
 
   def validate(schemaConfig: SchemaConfig, dbMeta: DbMetadataQueryResult): SchemaValidationResult = {
+    val actualSchemas: Set[Schema] =
+      dbMeta.schemas
+        .map(schemaQueryRow => Schema(schemaQueryRow.name))
+        .toSet
+
     /*
      * Detect Missing Schemas
      */
-    val missingSchemaNames: Set[String] = findMissingSchemas(schemaConfig, dbMeta)
+    val missingSchemas: Set[Schema] = schemaConfig.schemas.filterNot(actualSchemas)
 
-    if (missingSchemaNames.size == 1) {
-      return ValidationError(s"Specified schema not found: ${missingSchemaNames.head}")
+    if (missingSchemas.nonEmpty) {
+      val csv = missingSchemas.map(_.name).mkString(", ")
+      return ValidationError(s"Specified --schemas not found in database: $csv")
     }
 
-    if (missingSchemaNames.size > 1) {
-      val csv = missingSchemaNames.mkString(", ")
-      return ValidationError(s"Specified schemas not found: $csv")
+    val actualTables: Set[Table] =
+      dbMeta.tables
+        .map(tableQueryRow => Table(Schema(tableQueryRow.schema), tableQueryRow.name))
+        .toSet
+
+    /*
+     * Detect missing tables from base queries
+     */
+    schemaConfig.baseQueries.foreach { baseQuery =>
+      if (!actualTables.contains(baseQuery.table)) {
+        return ValidationError(s"Table ${display(baseQuery.table)} specified in --baseQuery not found in database")
+      }
     }
 
     OK
   }
 
-  private[this] def findMissingSchemas(schemaConfig: SchemaConfig, dbMeta: DbMetadataQueryResult): Set[String] = {
-    val actualSchemas: Set[String] = dbMeta.schemas.map(_.name).toSet
-    val configSchemas: Set[String] = schemaConfig.schemas.map(_.name)
-    configSchemas.filterNot(actualSchemas)
+  private def display(table: Table): String = {
+    s"'${table.schema.name}.${table.name}'"
   }
 }
 

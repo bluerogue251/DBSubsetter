@@ -30,9 +30,9 @@ trait NonEmptySchemaValidationTest extends FunSuiteLike with AssertionUtil {
     // No-Op
   }
 
-  private val validationSchema: Schema = Schema("validation_schema")
+  private val validationSchema: Schema = Schema("valid_schema")
 
-  private val validationTable: db.Table = Table(validationSchema, "validation_table")
+  private val validationTable: db.Table = Table(validationSchema, "foo")
 
   private val validationBaseQuery: ConfigBaseQuery =
     ConfigBaseQuery(
@@ -55,12 +55,19 @@ trait NonEmptySchemaValidationTest extends FunSuiteLike with AssertionUtil {
 
   test("Single nonexistent schema") {
     val invalidSchemaConfig = validSchemaConfig.copy(schemas = Set(Schema("nonexistent")))
-    assertErrorMessage(invalidSchemaConfig, "Specified schema not found: nonexistent")
+    assertErrorMessage(invalidSchemaConfig, "Specified --schemas not found in database: nonexistent")
   }
 
   test("Multiple nonexistent schemas") {
     val invalidSchemaConfig = validSchemaConfig.copy(schemas = Set(Schema("s1"), Schema("s2"), Schema("s3")))
-    assertErrorMessage(invalidSchemaConfig, "Specified schemas not found: s1, s2, s3")
+    assertErrorMessage(invalidSchemaConfig, "Specified --schemas not found in database: s1, s2, s3")
+  }
+
+  test("Base Query Table Not Found") {
+    val nonexistentTable = Table(validationSchema, "t")
+    val baseQuery = ConfigBaseQuery(nonexistentTable, "true", includeChildren = true)
+    val invalidSchemaConfig = validSchemaConfig.copy(baseQueries = Set(baseQuery))
+    assertErrorMessage(invalidSchemaConfig, "Table 'valid_schema.t' specified in --baseQuery not found in database")
   }
 
   private[this] def assertErrorMessage(schemaConfig: SchemaConfig, expectedMessage: String): Unit = {

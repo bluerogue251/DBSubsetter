@@ -3,6 +3,8 @@ package e2e
 import util.Ports
 import util.db._
 
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 import scala.sys.process._
 import scala.util.Properties
 
@@ -38,7 +40,16 @@ abstract class PostgresEnabledTest extends DbEnabledTest[PostgresDatabase] {
     )
   }
 
-  override protected def prepareOriginDDL(): Unit
+  override protected def prepareOriginSchemas(): Unit = {
+    import slick.jdbc.PostgresProfile.api._
+
+    additionalSchemas.foreach { additionalSchema =>
+      val createSchemaStatement: DBIO[Unit] = DBIO.seq(
+        sqlu"create schema #$additionalSchema"
+      )
+      Await.ready(originSlick.run(createSchemaStatement), Duration.Inf)
+    }
+  }
 
   override protected def prepareOriginDML(): Unit
 

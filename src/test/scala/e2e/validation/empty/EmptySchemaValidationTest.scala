@@ -50,12 +50,12 @@ trait EmptySchemaValidationTest extends FunSuiteLike with AssertionUtil {
 
   test("Single nonexistent schema") {
     val invalidSchemaConfig = validSchemaConfig.copy(schemas = Set(Schema("nonexistent")))
-    assertErrorMessage(invalidSchemaConfig, "Specified schema not found: nonexistent")
+    assertErrorMessage(invalidSchemaConfig, "Specified --schemas not found in database: nonexistent")
   }
 
   test("Multiple nonexistent schemas") {
     val invalidSchemaConfig = validSchemaConfig.copy(schemas = Set(Schema("s1"), Schema("s2"), Schema("s3")))
-    assertErrorMessage(invalidSchemaConfig, "Specified schemas not found: s1, s2, s3")
+    assertErrorMessage(invalidSchemaConfig, "Specified --schemas not found in database: s1, s2, s3")
   }
 
   private[this] def assertErrorMessage(schemaConfig: SchemaConfig, expectedMessage: String): Unit = {

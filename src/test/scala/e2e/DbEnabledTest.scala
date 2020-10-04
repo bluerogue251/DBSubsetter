@@ -19,6 +19,10 @@ abstract class DbEnabledTest[T <: Database] extends FunSuite with BeforeAndAfter
 
   protected def dbs: DatabaseSet[T]
 
+  protected def additionalSchemas: Set[String] = Set.empty
+
+  protected def prepareOriginSchemas(): Unit
+
   protected def prepareOriginDDL(): Unit
 
   protected def prepareOriginDML(): Unit
@@ -55,6 +59,7 @@ abstract class DbEnabledTest[T <: Database] extends FunSuite with BeforeAndAfter
     /*
      * Set up the DDL and DML in the origin DB
      */
+    prepareOriginSchemas()
     prepareOriginDDL()
     prepareOriginDML()
 
