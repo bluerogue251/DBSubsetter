@@ -36,12 +36,12 @@
       target/scala-2.12/latest.jar \
       load-test/4-run.sh \
       load-test/5-post-run.sh \
-      ubuntu@ec2-3-230-142-113.compute-1.amazonaws.com:~
+      ubuntu@<ec2-host>:~
   ```
 
 * Manually run the contents of 3-prepare-suite.sh
   ```
-  $ ssh -i ~/code/db-subsetter-load-test.pem ubuntu@ec2-3-230-142-113.compute-1.amazonaws.com
+  $ ssh -i ~/code/db-subsetter-load-test.pem ubuntu@<ec2-host>
   $ # ... then copy-paste individual commands from 3-prepare-suite.sh
   ```
   
@@ -62,7 +62,10 @@
   so that the prometheus instance running there is accessible to the outside world.
   
 * Edit observability-tools.sh in the project root directory to point Grafana to the 
-  prometheus instance running on the EC2 instance itself.
+  prometheus instance running on the EC2 instance itself (HTTP & Port 9090)
+  ```
+    http://<ec2-host>:9090
+  ```
   
 * Run ./observability-tools.sh and follow the printed instructions to open Grafana locally and view metrics from the load
   test running on the EC2 instance.
