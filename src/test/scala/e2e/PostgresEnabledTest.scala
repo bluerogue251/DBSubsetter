@@ -43,11 +43,11 @@ abstract class PostgresEnabledTest extends DbEnabledTest[PostgresDatabase] {
   override protected def prepareOriginSchemas(): Unit = {
     import slick.jdbc.PostgresProfile.api._
 
-    additionalSchemas.foreach { schema =>
-      val createSchemaStatements: DBIO[Unit] = DBIO.seq(
-        sqlu"create schema $schema"
+    additionalSchemas.foreach { additionalSchema =>
+      val createSchemaStatement: DBIO[Unit] = DBIO.seq(
+        sqlu"create schema #$additionalSchema"
       )
-      Await.ready(originSlick.run(createSchemaStatements), Duration.Inf)
+      Await.ready(originSlick.run(createSchemaStatement), Duration.Inf)
     }
   }
 
