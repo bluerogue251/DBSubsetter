@@ -167,14 +167,28 @@ trait NonEmptySchemaValidationTest extends FunSuiteLike with AssertionUtil {
     )
   }
 
-  test("Missing Primary Key") {
+  test("Missing Single Primary Key") {
     assertErrorMessage(
       validSchemaConfig,
       """Table 'valid_schema.baz' is missing a primary key. Consider either:
         |  (a) Specifying the missing primary key with the --primaryKey command line option
-        |  (b) Excluding the table in question with the --excludeTable command line option
+        |  (b) Excluding the table with the --excludeTable command line option
         |  (c) Adding a primary key onto the table in your origin database
         |""".stripMargin
+    )
+  }
+
+  test("Missing Multiple Primary Keys") {
+    fail()
+  }
+
+  test("--primaryKey specified for a table which already had a primary key") {
+    val pkColumn = ConfigColumn(validTable, "id")
+    val duplicatePk = ConfigPrimaryKey(validTable, Seq(pkColumn))
+    val invalidSchemaConfig = validSchemaConfig.copy(extraPrimaryKeys = Set(duplicatePk))
+    assertErrorMessage(
+      invalidSchemaConfig,
+      "--primaryKey specified for table 'valid_schema.foo' which already has a primary key"
     )
   }
 
