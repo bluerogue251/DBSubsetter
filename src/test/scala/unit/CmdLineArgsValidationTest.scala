@@ -122,7 +122,7 @@ class CmdLineArgsValidationTest extends FunSuite {
       "--schemas", "my_schema",
       "--baseQuery", "my_schema.my_table ::: true ::: includeChildren",
       "--primaryKey", "my_schema.my_table(column_one)",
-      "--primaryKey", "my_schema.my_table(column_two)"
+      "--primaryKey", "my_schema.my_table(column_one)"
     )
     assertErrorMessage(args, "--primaryKey was specified more than once for 'my_schema.my_table'.")
   }
