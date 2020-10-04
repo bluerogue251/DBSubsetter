@@ -21,11 +21,11 @@ _Do one thing well_: A tiny codebase focused exclusively on core subsetting feat
 
 ## Usage Instructions
 
-1. Load an empty schema from your "origin" database into your "target" database.
-   Follow vendor-specific instructions for:
-     * [Postgres](docs/pre_subset_postgres.md)
-     * [MySQL](docs/pre_subset_mysql.md)
-     * [Microsoft SQL Server](docs/pre_subset_ms_sql_server.md)
+1. Load an empty schema from your origin database into your target database,
+   following vendor-specific instructions for
+   [Postgres](docs/pre_subset_postgres.md),
+   [MySQL](docs/pre_subset_mysql.md), or
+   [SQL Server](docs/pre_subset_ms_sql_server.md).
  
 2. Use Java 8 or above to run our
 [latest release](https://github.com/bluerogue251/DBSubsetter/releases/latest):
@@ -52,9 +52,9 @@ $ java -jar DBSubsetter.jar \
 ```
 
 3. After DBSubsetter exits, follow vendor-specific instructions for:
-    * [Postgres](docs/post_subset_postgres.md)
-    * [MySQL](docs/post_subset_mysql.md)
-    * [Microsoft SQL Server](docs/post_subset_ms_sql_server.md)
+   [Postgres](docs/post_subset_postgres.md),
+   [MySQL](docs/post_subset_mysql.md), or
+   [SQL Server](docs/post_subset_ms_sql_server.md).
 
 
 ## Contributing
