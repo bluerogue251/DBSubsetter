@@ -32,21 +32,38 @@ trait NonEmptySchemaValidationTest extends FunSuiteLike with AssertionUtil {
 
   private val validSchema: db.Schema = Schema("valid_schema")
 
-  private val validTable: db.Table = Table(validSchema, "foo")
+  private val fooTable: db.Table = Table(validSchema, "foo")
 
-  private val validColumn: ConfigColumn = ConfigColumn(validTable, "id")
+  private val barTable: db.Table = Table(validSchema, "bar")
+
+  private val bazTable: db.Table = Table(validSchema, "baz")
+
+  private val fooIdColumn: ConfigColumn = ConfigColumn(fooTable, "id")
 
   private val validationBaseQuery: ConfigBaseQuery =
     ConfigBaseQuery(
-      table = validTable,
+      table = fooTable,
       whereClause = "true",
       includeChildren = true
+    )
+
+  private val fooPk: ConfigPrimaryKey =
+    ConfigPrimaryKey(
+      table = fooTable,
+      columns = Seq(ConfigColumn(fooTable, "id"))
+    )
+
+  private val bazPk: ConfigPrimaryKey =
+    ConfigPrimaryKey(
+      table = bazTable,
+      columns = Seq(ConfigColumn(bazTable, "id"))
     )
 
   private val validSchemaConfig: SchemaConfig =
     SchemaConfig(
       schemas = Set(validSchema),
-      baseQueries = Set(validationBaseQuery)
+      baseQueries = Set(validationBaseQuery),
+      extraPrimaryKeys = Set(fooPk, bazPk)
     )
 
   private val validConfig: Config =
@@ -84,8 +101,8 @@ trait NonEmptySchemaValidationTest extends FunSuiteLike with AssertionUtil {
     val configFk = ConfigForeignKey(
       fromTable = nonexistentTable,
       fromColumns = Seq(ConfigColumn(nonexistentTable, "id")),
-      toTable = validTable,
-      toColumns = Seq(ConfigColumn(validTable, "id"))
+      toTable = fooTable,
+      toColumns = Seq(ConfigColumn(fooTable, "id"))
     )
     val invalidSchemaConfig = validSchemaConfig.copy(extraForeignKeys = Set(configFk))
     assertErrorMessage(invalidSchemaConfig, "Table 'valid_schema.nope' specified in --foreignKey not found in database")
@@ -94,8 +111,8 @@ trait NonEmptySchemaValidationTest extends FunSuiteLike with AssertionUtil {
   test("Extra Foreign Key To Table Not Found") {
     val nonexistentTable = Table(validSchema, "no")
     val configFk = ConfigForeignKey(
-      fromTable = validTable,
-      fromColumns = Seq(ConfigColumn(validTable, "id")),
+      fromTable = fooTable,
+      fromColumns = Seq(ConfigColumn(fooTable, "id")),
       toTable = nonexistentTable,
       toColumns = Seq(ConfigColumn(nonexistentTable, "id"))
     )
@@ -119,8 +136,8 @@ trait NonEmptySchemaValidationTest extends FunSuiteLike with AssertionUtil {
   }
 
   test("Primary Key Column Not Found") {
-    val invalidColumn = ConfigColumn(validTable, "col_z")
-    val configPk = ConfigPrimaryKey(validTable, Seq(invalidColumn))
+    val invalidColumn = ConfigColumn(fooTable, "col_z")
+    val configPk = ConfigPrimaryKey(fooTable, Seq(invalidColumn))
     val invalidSchemaConfig = validSchemaConfig.copy(extraPrimaryKeys = Set(configPk))
     assertErrorMessage(
       invalidSchemaConfig,
@@ -129,12 +146,12 @@ trait NonEmptySchemaValidationTest extends FunSuiteLike with AssertionUtil {
   }
 
   test("Foreign Key From Column Not Found") {
-    val invalidColumn = ConfigColumn(validTable, "col_a")
+    val invalidColumn = ConfigColumn(fooTable, "col_a")
     val configFk = ConfigForeignKey(
-      fromTable = validTable,
+      fromTable = fooTable,
       fromColumns = Seq(invalidColumn),
-      toTable = validTable,
-      toColumns = Seq(validColumn)
+      toTable = fooTable,
+      toColumns = Seq(fooIdColumn)
     )
     val invalidSchemaConfig = validSchemaConfig.copy(extraForeignKeys = Set(configFk))
     assertErrorMessage(
@@ -144,11 +161,11 @@ trait NonEmptySchemaValidationTest extends FunSuiteLike with AssertionUtil {
   }
 
   test("Foreign Key To Column Not Found") {
-    val invalidColumn = ConfigColumn(validTable, "col_a")
+    val invalidColumn = ConfigColumn(fooTable, "col_a")
     val configFk = ConfigForeignKey(
-      fromTable = validTable,
-      fromColumns = Seq(validColumn),
-      toTable = validTable,
+      fromTable = fooTable,
+      fromColumns = Seq(fooIdColumn),
+      toTable = fooTable,
       toColumns = Seq(invalidColumn)
     )
     val invalidSchemaConfig = validSchemaConfig.copy(extraForeignKeys = Set(configFk))
@@ -159,7 +176,7 @@ trait NonEmptySchemaValidationTest extends FunSuiteLike with AssertionUtil {
   }
 
   test("Exclude Column Not Found") {
-    val invalidColumn = ConfigColumn(validTable, "col_b")
+    val invalidColumn = ConfigColumn(fooTable, "col_b")
     val invalidSchemaConfig = validSchemaConfig.copy(excludeColumns = Set(invalidColumn))
     assertErrorMessage(
       invalidSchemaConfig,
@@ -169,7 +186,7 @@ trait NonEmptySchemaValidationTest extends FunSuiteLike with AssertionUtil {
 
   test("Missing Single Primary Key") {
     assertErrorMessage(
-      validSchemaConfig,
+      validSchemaConfig.copy(extraPrimaryKeys = validSchemaConfig.extraPrimaryKeys - bazPk),
       """Table 'valid_schema.baz' is missing a primary key. Consider either:
         |  (a) Specifying the missing primary key with the --primaryKey command line option
         |  (b) Excluding the table with the --excludeTable command line option
@@ -179,16 +196,23 @@ trait NonEmptySchemaValidationTest extends FunSuiteLike with AssertionUtil {
   }
 
   test("Missing Multiple Primary Keys") {
-    fail()
+    assertErrorMessage(
+      validSchemaConfig.copy(extraPrimaryKeys = Set.empty),
+      """Tables 'valid_schema.baz', 'valid_schema.foo' are missing primary keys. Consider either:
+        |  (a) Specifying the missing primary key with the --primaryKey command line option
+        |  (b) Excluding the table with the --excludeTable command line option
+        |  (c) Adding a primary key onto the table in your origin database
+        |""".stripMargin
+    )
   }
 
   test("--primaryKey specified for a table which already had a primary key") {
-    val pkColumn = ConfigColumn(validTable, "id")
-    val duplicatePk = ConfigPrimaryKey(validTable, Seq(pkColumn))
+    val pkColumn = ConfigColumn(barTable, "id")
+    val duplicatePk = ConfigPrimaryKey(barTable, Seq(pkColumn))
     val invalidSchemaConfig = validSchemaConfig.copy(extraPrimaryKeys = Set(duplicatePk))
     assertErrorMessage(
       invalidSchemaConfig,
-      "--primaryKey specified for table 'valid_schema.foo' which already has a primary key"
+      "--primaryKey specified for table 'valid_schema.bar' which already has a primary key"
     )
   }
 

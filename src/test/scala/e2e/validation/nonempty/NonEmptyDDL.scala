@@ -8,14 +8,14 @@ class NonEmptyDDL(val profile: JdbcProfile) {
   lazy val schema: profile.SchemaDescription = Foo.schema ++ Bar.schema ++ Baz.schema
 
   /**
-    * foo
+    * foo (purposely missing a primary key for testing purposes)
     */
   case class FooRow(id: Int)
 
   class FooTable(tag: Tag) extends profile.api.Table[FooRow](tag, Some("valid_schema"), "foo") {
     def * = id <> (FooRow, FooRow.unapply)
 
-    val id: Rep[Int] = column[Int]("id", O.PrimaryKey)
+    val id: Rep[Int] = column[Int]("id", O.Unique)
   }
 
   lazy val Foo = new TableQuery(tag => new FooTable(tag))
