@@ -13,7 +13,7 @@
 * Configure disks:
    - Increase root volume size to 100 GB. (Where target data will end up).
    - Verify an existing external volume of 200 GB. (Where origin data is)
-* Select an existing security group:
+* Select existing security group:
    - Name: db-subsetter-load-test
    - Security Group ID: sg-0febc138089257766
    - Description: SSH and Prometheus Access
