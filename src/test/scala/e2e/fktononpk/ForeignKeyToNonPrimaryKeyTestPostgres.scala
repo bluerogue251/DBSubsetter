@@ -8,7 +8,6 @@ class ForeignKeyToNonPrimaryKeyTestPostgres extends PostgresSubsettingTest with 
   override val programArgs = Array(
     "--schemas", "public",
     "--baseQuery", "public.referenced_table ::: id in (1, 4) ::: includeChildren",
-    "--baseQuery", "public.referencing_table ::: id = 5 ::: includeChildren",
-    "--exposeMetrics"
+    "--baseQuery", "public.referencing_table ::: id = 5 ::: includeChildren"
   )
 }
