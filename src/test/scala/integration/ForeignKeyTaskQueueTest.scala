@@ -5,6 +5,7 @@ import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.{Column, ColumnTypes, ForeignKey, ForeignKeyValue, Schema, SchemaInfo, Table}
 import trw.dbsubsetter.fktaskqueue.ForeignKeyTaskQueueFactory
 import trw.dbsubsetter.workflow.{FetchParentTask, ForeignKeyTask}
+import util.fixtures.ConfigFixtures
 
 /*
  * TODO add more test cases covering various combinations of:
@@ -18,7 +19,7 @@ import trw.dbsubsetter.workflow.{FetchParentTask, ForeignKeyTask}
 class ForeignKeyTaskQueueTest extends FunSuite {
 
   test("OffHeapTaskQueue returns an Option#None with no exception thrown when there is no data to read") {
-    val config: Config = Config()
+    val config: Config = ConfigFixtures.emptyConfig
     val schemaInfo: SchemaInfo = ForeignKeyTaskQueueTest.schemaInfo
     val queue = ForeignKeyTaskQueueFactory.build(config, schemaInfo)
     // Dequeue several times -- it should always return `None` and should never throw an exception
@@ -28,7 +29,7 @@ class ForeignKeyTaskQueueTest extends FunSuite {
   }
 
   test("OffHeapTaskQueue can succesfully write values and read them back (single column foreign key)") {
-    val config: Config = Config()
+    val config: Config = ConfigFixtures.emptyConfig
     val schemaInfo: SchemaInfo = ForeignKeyTaskQueueTest.schemaInfo
     val queue = ForeignKeyTaskQueueFactory.build(config, schemaInfo)
 
@@ -52,7 +53,7 @@ class ForeignKeyTaskQueueTest extends FunSuite {
     // All the data has been drained from the queue -- now we get `None`
     assert(queue.dequeue() === None)
 
-    Seq(firstTask, secondTask, thirdTask).foreach{ dequeuedTask =>
+    Seq(firstTask, secondTask, thirdTask).foreach { dequeuedTask =>
       assert(dequeuedTask.fk === ForeignKeyTaskQueueTest.foreignKey)
       assert(dequeuedTask.fk.toTable === ForeignKeyTaskQueueTest.parentTable)
     }

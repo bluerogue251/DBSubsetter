@@ -7,6 +7,7 @@ import trw.dbsubsetter.db.{Schema, Table}
 import trw.dbsubsetter.{DbSubsetter, db}
 import util.assertion.AssertionUtil
 import util.db.{Database, DatabaseSet}
+import util.fixtures.ConfigFixtures
 import util.slick.SlickUtil
 
 trait NonEmptySchemaValidationTest extends FunSuiteLike with AssertionUtil {
@@ -67,7 +68,7 @@ trait NonEmptySchemaValidationTest extends FunSuiteLike with AssertionUtil {
     )
 
   private val validConfig: Config =
-    Config(
+    ConfigFixtures.emptyConfig.copy(
       originDbConnectionString = dbs.origin.connectionString,
       targetDbConnectionString = dbs.targetAkkaStreams.connectionString
     )

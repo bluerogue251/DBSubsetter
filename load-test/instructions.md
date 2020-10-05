@@ -1,17 +1,60 @@
 # Load Test Instructions
 
-## Running up a load test
+## Launch Amazon EC2 Instance
 
-* There is a pre-existing AMI with dependencies and some test data pre-installed.
-  Spin up an EC2 instance from this AMI (Amazon Machine Image) ID ami-026d4599c1d66c647.
-  For consistency, use a "General Purpose" `t2.large` instance type (2 vCPUs, 8GB RAM).
-  Increase the root volume size to 100GB. This is where target data will end up.
-  This should come with an external volume of 200GB. This is where origin data comes from. Leave that one as-is.
-* Build an uber jar of the DBSubsetter application locally with: 
-  `$ sbt 'set test in assembly := {}' assembly`
-* `$ scp` the uber jar from your machine into the running EC2 instance
-* Run script number 3 as a one-time setup step
-* Run scripts numbers 4 and 5 as many times as desired (the second run onward tends to be most deterministic performance wise)
+* Select AMI (Amazon Machine Image):
+   - Name: db-subsetter-load-test
+   - AMI ID: ami-026d4599c1d66c647
+* Select instance type:
+   - Family: General Purpose
+   - Type: t2.large
+   - vCPUs: 2
+   - Memory: 8 GB
+* Configure disks:
+   - Increase root volume size to 100 GB. (Where target data will end up).
+   - Verify an existing external volume of 200 GB. (Where origin data is)
+* Select existing security group:
+   - Name: db-subsetter-load-test
+   - Security Group ID: sg-0febc138089257766
+   - Description: SSH and Prometheus Access
+* Choose an existing key pair:
+   - Name: db-subsetter-load-test
+   - Private key file: db-subsetter.load-test.pem   
+   
+   
+## Set up DBSubsetter on the new EC2 instance
+   
+* Build an uber jar of the DBSubsetter application locally: 
+  ```
+    $ sbt 'set test in assembly := {}; assemblyJarName in assembly := "latest.jar"' clean assembly
+  ```
+  
+* Copy local resources onto the running EC2 instance:
+  ```
+  $ scp \
+      -i ~/code/db-subsetter-load-test.pem \
+      target/scala-2.12/latest.jar \
+      load-test/4-run.sh \
+      load-test/5-post-run.sh \
+      ubuntu@<ec2-host>:~
+  ```
+
+* Manually run the contents of 3-prepare-suite.sh
+  ```
+  $ ssh -i ~/code/db-subsetter-load-test.pem ubuntu@<ec2-host>
+  $ # ... then copy-paste individual commands from 3-prepare-suite.sh
+  ```
+  
+* Run the load test multiple times (the second run onward has more deterministic performance)
+  ```
+  $ # Still on the remote EC2 instance
+  $ chmod +x 4-run.sh 
+  $ chmod +x 5-post-run.sh
+  $ ./4-run.sh
+  $ # ... and wait
+  $ ./5-post-run.sh
+  ```
+
 
 ## Viewing metrics from the load test
 
@@ -19,7 +62,10 @@
   so that the prometheus instance running there is accessible to the outside world.
   
 * Edit observability-tools.sh in the project root directory to point Grafana to the 
-  prometheus instance running on the EC2 instance itself.
+  prometheus instance running on the EC2 instance itself (HTTP & Port 9090)
+  ```
+    http://<ec2-host>:9090
+  ```
   
 * Run ./observability-tools.sh and follow the printed instructions to open Grafana locally and view metrics from the load
   test running on the EC2 instance.

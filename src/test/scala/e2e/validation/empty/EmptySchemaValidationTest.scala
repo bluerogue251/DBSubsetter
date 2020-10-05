@@ -7,6 +7,7 @@ import trw.dbsubsetter.config.{Config, ConfigBaseQuery, SchemaConfig}
 import trw.dbsubsetter.db.{Schema, Table}
 import util.assertion.AssertionUtil
 import util.db.{Database, DatabaseSet}
+import util.fixtures.ConfigFixtures
 
 trait EmptySchemaValidationTest extends FunSuiteLike with AssertionUtil {
   val testName = "empty_schema_validation"
@@ -43,7 +44,7 @@ trait EmptySchemaValidationTest extends FunSuiteLike with AssertionUtil {
     )
 
   private val validConfig: Config =
-    Config(
+    ConfigFixtures.emptyConfig.copy(
       originDbConnectionString = dbs.origin.connectionString,
       targetDbConnectionString = dbs.targetAkkaStreams.connectionString
     )
