@@ -207,6 +207,17 @@ trait NonEmptySchemaValidationTest extends FunSuiteLike with AssertionUtil {
     )
   }
 
+  test("--excludeTable fixes missing primary key") {
+    assertErrorMessage(
+      validSchemaConfig.copy(
+        extraPrimaryKeys = Set.empty,
+        excludeTables = Set(bazTable, fooTable)
+      ),
+      """Woot
+        |""".stripMargin
+    )
+  }
+
   test("--primaryKey specified for a table which already had a primary key") {
     val pkColumn = ConfigColumn(barTable, "id")
     val duplicatePk = ConfigPrimaryKey(barTable, Seq(pkColumn))

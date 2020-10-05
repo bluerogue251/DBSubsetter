@@ -96,7 +96,7 @@ object SchemaValidation {
      */
     val tablesWithConfiguredPrimaryKeys: Set[Table] = schemaConfig.extraPrimaryKeys.map(_.table)
     val allTablesWithPrimaryKeys = tablesWithPrimaryKeysInDb ++ tablesWithConfiguredPrimaryKeys
-    val tablesMissingPrimaryKeys = actualTables -- allTablesWithPrimaryKeys
+    val tablesMissingPrimaryKeys = actualTables -- allTablesWithPrimaryKeys -- schemaConfig.excludeTables
     if (tablesMissingPrimaryKeys.size == 1) {
       val table = tablesMissingPrimaryKeys.head
       return ValidationError(
