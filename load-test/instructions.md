@@ -26,7 +26,7 @@
    
 * Build an uber jar of the DBSubsetter application locally: 
   ```
-    $ sbt 'set test in assembly := {}; assemblyJarName in assembly := "latest.jar"' clean assembly
+    $ sbt 'set test in assembly := {}; set assemblyJarName in assembly := "latest.jar"' clean assembly
   ```
   
 * Copy local resources onto the running EC2 instance:
