@@ -36,7 +36,7 @@ $ wget \
     --quiet \
     --show-progress \
     --output-document DBSubsetter.jar \
-    https://github.com/bluerogue251/DBSubsetter/releases/download/v1.0.0-beta.4/DBSubsetter.jar
+    https://github.com/bluerogue251/DBSubsetter/releases/download/v1.0.0-beta.5/DBSubsetter.jar
  
 # Learn how to use DBSubsetter
 $ java -jar DBSubsetter.jar --help | less
