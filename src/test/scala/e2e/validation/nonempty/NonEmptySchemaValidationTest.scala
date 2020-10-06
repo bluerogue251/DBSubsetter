@@ -41,7 +41,7 @@ trait NonEmptySchemaValidationTest extends FunSuiteLike with AssertionUtil {
 
   private val fooIdColumn: ConfigColumn = ConfigColumn(fooTable, "id")
 
-  private val validationBaseQuery: ConfigBaseQuery =
+  private val validBaseQuery: ConfigBaseQuery =
     ConfigBaseQuery(
       table = fooTable,
       whereClause = "true",
@@ -63,7 +63,7 @@ trait NonEmptySchemaValidationTest extends FunSuiteLike with AssertionUtil {
   private val validSchemaConfig: SchemaConfig =
     SchemaConfig(
       schemas = Set(validSchema),
-      baseQueries = Set(validationBaseQuery),
+      baseQueries = Set(validBaseQuery),
       extraPrimaryKeys = Set(fooPk, bazPk)
     )
 
@@ -207,14 +207,16 @@ trait NonEmptySchemaValidationTest extends FunSuiteLike with AssertionUtil {
     )
   }
 
-  test("--excludeTable fixes missing primary key") {
-    assertErrorMessage(
+  test("--excludeTable fixes missing primary keys") {
+    val baseQuery: ConfigBaseQuery =
+      ConfigBaseQuery(barTable, "true", includeChildren = true)
+
+    assertValid(
       validSchemaConfig.copy(
         extraPrimaryKeys = Set.empty,
+        baseQueries = Set(baseQuery),
         excludeTables = Set(bazTable, fooTable)
-      ),
-      """Woot
-        |""".stripMargin
+      )
     )
   }
 
@@ -232,6 +234,13 @@ trait NonEmptySchemaValidationTest extends FunSuiteLike with AssertionUtil {
     DbSubsetter.run(schemaConfig, validConfig) match {
       case SubsetCompletedSuccessfully     => fail("Expected validation failure. Got success.")
       case FailedValidation(actualMessage) => assert(actualMessage === expectedMessage)
+    }
+  }
+
+  private[this] def assertValid(schemaConfig: SchemaConfig): Unit = {
+    DbSubsetter.run(schemaConfig, validConfig) match {
+      case SubsetCompletedSuccessfully => // Success
+      case FailedValidation(message)   => fail(message)
     }
   }
 }

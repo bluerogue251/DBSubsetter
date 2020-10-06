@@ -2,7 +2,7 @@ package e2e.missingfk
 
 import e2e.PostgresSubsettingTest
 
-class MissingFkTestPostgres extends PostgresSubsettingTest with MissingFkTest {
+class MissingKeysTestPostgres extends PostgresSubsettingTest with MissingKeysTest {
   // format: off
 
   override val programArgs = Array(

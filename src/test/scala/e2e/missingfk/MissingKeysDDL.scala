@@ -2,10 +2,20 @@ package e2e.missingfk
 
 import slick.jdbc.JdbcProfile
 
-class MissingFkDDL(val profile: JdbcProfile) {
+class MissingKeysDDL(val profile: JdbcProfile) {
   import profile.api._
 
-  lazy val schema: profile.SchemaDescription = Array(Table1.schema, Table2.schema, Table3.schema, Table4.schema, Table5.schema, TableA.schema, TableB.schema, TableC.schema, TableD.schema).reduceLeft(_ ++ _)
+  lazy val schema: profile.SchemaDescription = Array(
+    Table1.schema,
+    Table2.schema,
+    Table3.schema,
+    Table4.schema,
+    Table5.schema,
+    TableA.schema,
+    TableB.schema,
+    TableC.schema,
+    TableD.schema
+  ).reduceLeft(_ ++ _)
 
   /**
     * table_1
@@ -69,7 +79,9 @@ class MissingFkDDL(val profile: JdbcProfile) {
     val id: Rep[Int] = column[Int]("id", O.PrimaryKey)
     val table4Table1Id: Rep[Int] = column[Int]("table_4_table_1_id")
     val table4Table3Id: Rep[Int] = column[Int]("table_4_table_3_id")
-    lazy val table4Fk = foreignKey("table_5_table_4_table_1_id_fkey", (table4Table1Id, table4Table3Id), Table4)(r => (r.table1Id, r.table3Id))
+    lazy val table4Fk = foreignKey("table_5_table_4_table_1_id_fkey", (table4Table1Id, table4Table3Id), Table4)(r =>
+      (r.table1Id, r.table3Id)
+    )
   }
   lazy val Table5 = new TableQuery(tag => new Table5(tag))
 

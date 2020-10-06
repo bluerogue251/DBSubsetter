@@ -4,14 +4,14 @@ import org.scalatest.FunSuiteLike
 import util.assertion.AssertionUtil
 import util.slick.SlickUtil
 
-trait MissingFkTest extends FunSuiteLike with AssertionUtil {
-  val testName = "missing_fk"
+trait MissingKeysTest extends FunSuiteLike with AssertionUtil {
+  val testName = "missing_keys"
 
   protected val profile: slick.jdbc.JdbcProfile
 
   protected def originSlick: slick.jdbc.JdbcBackend#DatabaseDef
 
-  private val ddl: MissingFkDDL = new MissingFkDDL(profile)
+  private val ddl: MissingKeysDDL = new MissingKeysDDL(profile)
 
   import ddl.profile.api._
 
@@ -20,7 +20,7 @@ trait MissingFkTest extends FunSuiteLike with AssertionUtil {
   }
 
   protected def prepareOriginDML(): Unit = {
-    SlickUtil.dml(originSlick, MissingFkDML.dbioSeq(ddl))
+    SlickUtil.dml(originSlick, MissingKeysDML.dbioSeq(ddl))
   }
 
   test("Correct table_1 records were included") {
