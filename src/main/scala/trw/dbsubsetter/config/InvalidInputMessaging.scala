@@ -29,7 +29,6 @@ object InvalidInputMessaging {
         invalidSchema("--excludeColumns", schema)
       case ExcludedTableInBaseQuery(table) =>
         excludedTable("--baseQuery", table)
-
     }
   }
 
