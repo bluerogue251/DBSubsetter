@@ -2,8 +2,8 @@ package e2e.missingfk
 
 import slick.dbio.{DBIOAction, Effect, NoStream}
 
-object MissingFkDML {
-  def dbioSeq(ddl: MissingFkDDL): DBIOAction[Unit, NoStream, Effect.Write] = {
+object MissingKeysDML {
+  def dbioSeq(ddl: MissingKeysDDL): DBIOAction[Unit, NoStream, Effect.Write] = {
     import ddl._
     import ddl.profile.api._
 

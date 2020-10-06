@@ -2,10 +2,21 @@ package e2e.missingfk
 
 import slick.jdbc.JdbcProfile
 
-class MissingFkDDL(val profile: JdbcProfile) {
+class MissingKeysDDL(val profile: JdbcProfile) {
   import profile.api._
 
-  lazy val schema: profile.SchemaDescription = Array(Table1.schema, Table2.schema, Table3.schema, Table4.schema, Table5.schema, TableA.schema, TableB.schema, TableC.schema, TableD.schema).reduceLeft(_ ++ _)
+  lazy val schema: profile.SchemaDescription = Array(
+    Table1.schema,
+    Table2.schema,
+    Table3.schema,
+    Table4.schema,
+    Table5.schema,
+    Table6.schema,
+    TableA.schema,
+    TableB.schema,
+    TableC.schema,
+    TableD.schema
+  ).reduceLeft(_ ++ _)
 
   /**
     * table_1
@@ -19,7 +30,7 @@ class MissingFkDDL(val profile: JdbcProfile) {
   lazy val Table1 = new TableQuery(tag => new Table1(tag))
 
   /**
-    * table_2
+    * table_2 (Missing a foreign key definition)
     */
   case class Table2Row(id: Int, table1Id: Int)
   class Table2(_tableTag: Tag) extends profile.api.Table[Table2Row](_tableTag, "table_2") {
@@ -44,7 +55,7 @@ class MissingFkDDL(val profile: JdbcProfile) {
   lazy val Table3 = new TableQuery(tag => new Table3(tag))
 
   /**
-    * table_4
+    * table_4 (Missing a primary key definition)
     */
   case class Table4Row(table1Id: Int, table3Id: Int)
   class Table4(_tableTag: Tag) extends profile.api.Table[Table4Row](_tableTag, "table_4") {
@@ -69,9 +80,21 @@ class MissingFkDDL(val profile: JdbcProfile) {
     val id: Rep[Int] = column[Int]("id", O.PrimaryKey)
     val table4Table1Id: Rep[Int] = column[Int]("table_4_table_1_id")
     val table4Table3Id: Rep[Int] = column[Int]("table_4_table_3_id")
-    lazy val table4Fk = foreignKey("table_5_table_4_table_1_id_fkey", (table4Table1Id, table4Table3Id), Table4)(r => (r.table1Id, r.table3Id))
+    lazy val table4Fk = foreignKey("table_5_table_4_table_1_id_fkey", (table4Table1Id, table4Table3Id), Table4)(r =>
+      (r.table1Id, r.table3Id)
+    )
   }
   lazy val Table5 = new TableQuery(tag => new Table5(tag))
+
+  /**
+    * table_6 (also missing a primary key)
+    */
+  case class Table6Row(id: Int)
+  class Table6(_tableTag: Tag) extends profile.api.Table[Table6Row](_tableTag, "table_6") {
+    def * = id <> (Table6Row.apply, Table6Row.unapply)
+    val id: Rep[Int] = column[Int]("id")
+  }
+  lazy val Table6 = new TableQuery(tag => new Table6(tag))
 
   /**
     * table_a

@@ -144,6 +144,18 @@ class CmdLineArgsValidationTest extends FunSuite {
     )
   }
   
+  test("--baseQuery must not be for an --excludeTable") {
+    val args: Array[String] = buildArgs(
+      "--schemas", "my_schema",
+      "--baseQuery", "my_schema.my_table ::: true ::: includeChildren",
+      "--excludeTable", "my_schema.my_table"
+    )
+    assertErrorMessage(
+      args,
+      "Table 'my_schema.my_table' specified in --baseQuery was excluded via --excludeTable."
+    )
+  }
+  
   private[this] def buildArgs(additionalArgs: String*): Array[String] = {
     Array[String](
       "--originDbConnStr", "whatevs",

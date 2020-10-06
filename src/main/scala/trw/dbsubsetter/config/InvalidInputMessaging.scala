@@ -27,6 +27,8 @@ object InvalidInputMessaging {
         invalidSchema("--excludeTable", schema)
       case InvalidExcludeColumnsSchema(schema) =>
         invalidSchema("--excludeColumns", schema)
+      case ExcludedTableInBaseQuery(table) =>
+        excludedTable("--baseQuery", table)
     }
   }
 
@@ -41,5 +43,9 @@ object InvalidInputMessaging {
 
   private def invalidSchema(option: String, schema: Schema): String = {
     s"""Schema '${schema.name}' was used in $option but was missing from --schemas."""
+  }
+
+  private def excludedTable(option: String, table: Table): String = {
+    s"""Table '${table.schema.name}.${table.name}' specified in $option was excluded via --excludeTable."""
   }
 }
