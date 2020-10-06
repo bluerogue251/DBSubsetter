@@ -207,19 +207,6 @@ trait NonEmptySchemaValidationTest extends FunSuiteLike with AssertionUtil {
     )
   }
 
-  test("--excludeTable fixes missing primary keys") {
-    val baseQuery: ConfigBaseQuery =
-      ConfigBaseQuery(barTable, "true", includeChildren = true)
-
-    assertValid(
-      validSchemaConfig.copy(
-        extraPrimaryKeys = Set.empty,
-        baseQueries = Set(baseQuery),
-        excludeTables = Set(bazTable, fooTable)
-      )
-    )
-  }
-
   test("--primaryKey specified for a table which already had a primary key") {
     val pkColumn = ConfigColumn(barTable, "id")
     val duplicatePk = ConfigPrimaryKey(barTable, Seq(pkColumn))
@@ -227,6 +214,19 @@ trait NonEmptySchemaValidationTest extends FunSuiteLike with AssertionUtil {
     assertErrorMessage(
       invalidSchemaConfig,
       "--primaryKey specified for table 'valid_schema.bar' which already has a primary key"
+    )
+  }
+
+  test("--excludeTable fixes missing primary keys") {
+    val baseQuery: ConfigBaseQuery =
+      ConfigBaseQuery(barTable, "1 = 1", includeChildren = true)
+
+    assertValid(
+      validSchemaConfig.copy(
+        extraPrimaryKeys = Set.empty,
+        baseQueries = Set(baseQuery),
+        excludeTables = Set(bazTable, fooTable)
+      )
     )
   }
 
