@@ -9,6 +9,7 @@ class MissingKeysTestMySql extends MySqlSubsettingTest with MissingKeysTest {
     "--schemas", "missing_fk",
     "--baseQuery", "missing_fk.table_1 ::: id = 2 ::: includeChildren",
     "--foreignKey", "missing_fk.table_2(table_1_id) ::: missing_fk.table_1(id)",
-    "--primaryKey", "missing_fk.table_4(table_1_id, table_3_id)"
+    "--primaryKey", "missing_fk.table_4(table_1_id, table_3_id)",
+    "--excludeTable", "missing_fk.table_6"
   )
 }

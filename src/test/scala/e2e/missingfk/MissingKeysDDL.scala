@@ -11,6 +11,7 @@ class MissingKeysDDL(val profile: JdbcProfile) {
     Table3.schema,
     Table4.schema,
     Table5.schema,
+    Table6.schema,
     TableA.schema,
     TableB.schema,
     TableC.schema,
@@ -84,6 +85,16 @@ class MissingKeysDDL(val profile: JdbcProfile) {
     )
   }
   lazy val Table5 = new TableQuery(tag => new Table5(tag))
+
+  /**
+    * table_6 (also missing a primary key)
+    */
+  case class Table6Row(id: Int)
+  class Table6(_tableTag: Tag) extends profile.api.Table[Table6Row](_tableTag, "table_6") {
+    def * = id <> (Table6Row.apply, Table6Row.unapply)
+    val id: Rep[Int] = column[Int]("id")
+  }
+  lazy val Table6 = new TableQuery(tag => new Table6(tag))
 
   /**
     * table_a

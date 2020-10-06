@@ -9,6 +9,7 @@ class MissingKeysTestSqlServer extends SqlServerSubsettingTest with MissingKeysT
     "--schemas", "dbo",
     "--baseQuery", "dbo.table_1 ::: id = 2 ::: includeChildren",
     "--foreignKey", "dbo.table_2(table_1_id) ::: dbo.table_1(id)",
-    "--primaryKey", "dbo.table_4(table_1_id, table_3_id)"
+    "--primaryKey", "dbo.table_4(table_1_id, table_3_id)",
+    "--excludeTable", "dbo.table_6"
   )
 }
