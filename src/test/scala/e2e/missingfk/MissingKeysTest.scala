@@ -4,6 +4,9 @@ import org.scalatest.FunSuiteLike
 import util.assertion.AssertionUtil
 import util.slick.SlickUtil
 
+/**
+  * Tests missing primary and foreign keys
+  */
 trait MissingKeysTest extends FunSuiteLike with AssertionUtil {
   val testName = "missing_keys"
 

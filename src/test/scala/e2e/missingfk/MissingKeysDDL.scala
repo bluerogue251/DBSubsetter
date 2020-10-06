@@ -29,7 +29,7 @@ class MissingKeysDDL(val profile: JdbcProfile) {
   lazy val Table1 = new TableQuery(tag => new Table1(tag))
 
   /**
-    * table_2
+    * table_2 (Missing a foreign key definition)
     */
   case class Table2Row(id: Int, table1Id: Int)
   class Table2(_tableTag: Tag) extends profile.api.Table[Table2Row](_tableTag, "table_2") {
@@ -54,7 +54,7 @@ class MissingKeysDDL(val profile: JdbcProfile) {
   lazy val Table3 = new TableQuery(tag => new Table3(tag))
 
   /**
-    * table_4
+    * table_4 (Missing a primary key definition)
     */
   case class Table4Row(table1Id: Int, table3Id: Int)
   class Table4(_tableTag: Tag) extends profile.api.Table[Table4Row](_tableTag, "table_4") {
