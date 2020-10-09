@@ -14,3 +14,7 @@ out
 
 # Mac
 .DS_Store
+
+# Terraform
+load-test/infra/.terraform/*
+*.tfstate*
