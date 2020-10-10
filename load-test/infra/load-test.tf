@@ -63,6 +63,7 @@ resource "aws_instance" "pg-target" {
   key_name = "load-test"
   ebs_optimized = true
   monitoring = true
+  user_data = data.template_file.provision-postgres.rendered
 
   ebs_block_device {
     device_name = "/dev/sdb"
