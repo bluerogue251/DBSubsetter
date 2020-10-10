@@ -7,42 +7,46 @@ terraform {
   }
 }
 
+data "template_file" "provision-postgres" {
+  template = file("./provision-postgres.sh")
+}
+
 provider "aws" {
   profile = "default"
-  region  = "us-west-2"
+  region  = "us-east-1"
 }
 
 // $ ssh-keygen -f load-test -C "theodore.widom@gmail.com"
 resource "aws_key_pair" "load-test" {
-  key_name   = "woot"
-  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDcZvp1JKifuuByKT1PGnjD01f2NcJoq4q8VyamLmHB+ynwegzygER53FiHy7GTMPradrFlTUVZnbgYlU04bxKaTsZ8Tyc8oj3m5/rdiDfwkoQXhh4iDiZl/bKotT0DjylDsuo0eAqdUJD2EkZweexm0EmaBckwSjzprNJ2p88Cum8B8c5t02Xh3xYYjioEH2k7eYQoU4vqOq2gAPN2Gr8NANwkef/RvWYNX7LUWOXN5Gmu203y17DKgIlGRULFv4NO/IcoMcbx5HwwQwAiw9PRx1DMYQPc20Ogoa15D8rrJgAIxeRqQlkAxyXY8cZm/i6zpPthLbbg/z02s20xxmH+ni+hF5eqhu7TT3gOOKvlWTYx5Io4AkJeIA8ny7IATD3N8iq0IowfWF/OpOmPiRG78q+ABd+IQo6W4U7mbgYwXB/NJTCmU81v3GJbp4YC5U9SxfwTKMDmsnRFM7RHf6Tvyjt4cMhLkwLVx2xMJEcN5zp6+a5FLU7DJnfD/aNdem2NgGAnrj/eCtfviQzF1wcfBuaakTzD4c8gJZZLsbln7+RDqO7uvuhyp+cBafZFVpWlp6hbHxN3BUdPWJVEOXDgHs6yC1VkG4Wd9QkO9BXowgnuOSxnI8mvlcaiw7FGZStTfnvXhhLVhHz9k/dpL82uWLqh6AnEQOEcsVz4wp1Ufw== theodore.widom@gmail.com"
+  key_name   = "load-test"
+  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCfb5w6ksmww9O0Yfr6n7bKG1oTmaQLrlehVC9BD8WEA/BBbteTSBn57d/fqGBrfJtnTxOCZe/1ZBKg+ZrPlSXus8lndJXMkp6D08caGytHpd/VapvA1JP8LJiq5upIfpFdBjxx5Fw8Fg0TpJSmkvSChoKsjEjbrCCPprJTVcbRsKci9EHqARRM/Iae1DWsvDTmSaMOfGgKdTJRNE4yE+IFD/5HxqJnJfKKjXSCFZJyCPNVVzh/OsMju+tar9GGQNQRhIeELm0ef4esy6WOxFlGs7D9ylyb+OVgoXKauDGms/U442B6eKvFFkJaXyAl2nIf1BOOipw3PDHddmvO1P6ppBEAAHWmQZFJwluByvMuJCF7TT/5Ocpm2fEEJdxN3Fd3HseoYaDzz2vtYvJwSLJeUvwB6T56AWEkxdA8Jl/oX4j6u8uOsuNKizqP04DleWzyWXMk03je44GVK8Vyt1ykO3xy0GNS3aiYotNjn5tW8Y9vGJQZLuZiazVa6yC9nFs= theodore.widom@gmail.com"
 }
 
 // t3.medium   2 vCPU   4 GB RAM
 // t3.xlarge   4 vCPU   16 GB RAM
 resource "aws_instance" "control-panel" {
-  availability_zone = "us-west-2c"
-  ami           = "ami-06e54d05255faf8f6"
+  ami           = "ami-0dba2cb6798deb6d8"
   instance_type = "t3.medium"
   key_name = "load-test"
   ebs_optimized = false
-  monitoring = false
+  monitoring = true
 
   ebs_block_device {
     device_name = "/dev/sdb"
     volume_type = "gp2"
-    volume_size = 100
+    volume_size = 50
     delete_on_termination = true
     encrypted = false
   }
 }
 
 resource "aws_instance" "pg-origin" {
-  availability_zone = "us-west-2c"
-  ami = "ami-06e54d05255faf8f6"
+  ami = "ami-0dba2cb6798deb6d8"
   instance_type = "t3.xlarge"
+  key_name = "load-test"
   ebs_optimized = true
-  monitoring = false
+  monitoring = true
+  user_data = data.template_file.provision-postgres.rendered
 
   ebs_block_device {
     device_name = "/dev/sdb"
@@ -54,11 +58,11 @@ resource "aws_instance" "pg-origin" {
 }
 
 resource "aws_instance" "pg-target" {
-  availability_zone = "us-west-2c"
-  ami = "ami-06e54d05255faf8f6"
+  ami = "ami-0dba2cb6798deb6d8"
   instance_type = "t3.medium"
+  key_name = "load-test"
   ebs_optimized = true
-  monitoring = false
+  monitoring = true
 
   ebs_block_device {
     device_name = "/dev/sdb"
