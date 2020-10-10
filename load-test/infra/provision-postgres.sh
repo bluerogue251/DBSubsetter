@@ -11,5 +11,5 @@ local    all    all                      peer
 host     all    all         0.0.0.0/0    md5
 host     all    all         ::/0         md5
 EOF
-pg_ctlcluster 10 main start -o "-c listen_addresses=* -c hba_file=/home/ubuntu/pg_hba.conf"
+pg_ctlcluster 10 main restart -o "-c listen_addresses=* -c hba_file=/home/ubuntu/pg_hba.conf"
 sudo -u postgres createuser load-test --superuser --password load-test-pw
