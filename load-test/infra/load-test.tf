@@ -38,6 +38,10 @@ resource "aws_instance" "control-panel" {
     delete_on_termination = true
     encrypted = false
   }
+
+  tags = {
+    Name = "control-panel"
+  }
 }
 
 resource "aws_instance" "pg-origin" {
@@ -55,6 +59,10 @@ resource "aws_instance" "pg-origin" {
     delete_on_termination = true
     encrypted = false
   }
+
+  tags = {
+    Name = "pg-origin"
+  }
 }
 
 resource "aws_instance" "pg-target" {
@@ -71,5 +79,9 @@ resource "aws_instance" "pg-target" {
     volume_size = 100
     delete_on_termination = true
     encrypted = false
+  }
+
+  tags = {
+    Name = "pg-target"
   }
 }

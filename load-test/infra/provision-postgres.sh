@@ -7,3 +7,4 @@ wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-
 apt update
 apt install -y postgresql-10
 pg_ctlcluster 10 main start
+sudo -u postgres createuser ubuntu --superuser
