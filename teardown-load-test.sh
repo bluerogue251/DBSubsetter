@@ -2,5 +2,5 @@
 
 set -eou pipefail
 
-echo "Spinning down AWS infrastructure"
+echo "Spinning down load test infrastructure"
 ./load-test/infra/destroy.sh

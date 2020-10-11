@@ -10,6 +10,6 @@ echo "Initializing Terraform"
 ./load-test/infra/init.sh
 printf "\n\n"
 
-echo "Spinning up AWS infrastructure"
+echo "Spinning up load test infrastructure"
 ./load-test/infra/apply.sh
 printf "\n\n"
