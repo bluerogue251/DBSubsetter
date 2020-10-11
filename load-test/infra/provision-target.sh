@@ -4,7 +4,7 @@ set -eou pipefail
 
 #
 # Script will be run from: /var/lib/cloud/instances/<instance-id>/
-# Output for debugging goes to: less /var/log/cloud-init-output.log
+# Output for debugging goes to: /var/log/cloud-init-output.log
 #
 
 #
