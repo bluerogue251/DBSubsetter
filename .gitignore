@@ -18,5 +18,5 @@ out
 # Load tests
 load-test.pem
 load-test.pem.pub
-load-test/infra/.terraform/*
+.terraform
 *.tfstate*

@@ -37,17 +37,20 @@ sudo -u postgres psql -c "create role loadtest login superuser encrypted passwor
 wget --quiet -O /load-test/jdk8.tar.gz https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u265-b01/OpenJDK8U-jdk_x64_linux_hotspot_8u265b01.tar.gz
 tar xzf /load-test/jdk8.tar.gz --directory=/load-test
 mv /load-test/jdk8u265-b01 /load-test/jdk8
+rm /load-test/jdk8.tar.gz
 
 #
 # Install SBT
 #
 wget --quiet -O /load-test/sbt.tgz https://github.com/sbt/sbt/releases/download/v1.3.4/sbt-1.3.4.tgz
 tar xzf /load-test/sbt.tgz --directory=/load-test
+rm /load-test/sbt.tgz
 
 #
 # Build DBSubsetter
 #
-wget --quiet -O /load-test/DBSubsetter.tar.gz https://github.com/bluerogue251/DBSubsetter/archive/aba1435.tar.gz
+wget --quiet -O /load-test/DBSubsetter.tar.gz https://github.com/bluerogue251/DBSubsetter/archive/b5d7570.tar.gz
 tar xzf /load-test/DBSubsetter.tar.gz --directory=/load-test
+rm /load-test/DBSubsetter.tar.gz
 cd /load-test/DBSubsetter-*
 ./../sbt/bin/sbt --java-home /load-test/jdk8 'set assemblyOutputPath in assembly := new File("/load-test/DBSubsetter.jar")' assembly
