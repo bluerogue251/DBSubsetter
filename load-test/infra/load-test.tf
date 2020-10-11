@@ -4,7 +4,15 @@ terraform {
       source  = "hashicorp/aws"
       version = "3.9.0"
     }
+    template = {
+      source = "hashicorp/template"
+      version = "2.2.0"
+    }
   }
+}
+
+data "template_file" "ssh-public-key" {
+  template = file("./load-test.pem.pub")
 }
 
 data "template_file" "provision-origin" {
@@ -23,7 +31,7 @@ provider "aws" {
 // $ ssh-keygen -f load-test -C "theodore.widom@gmail.com"
 resource "aws_key_pair" "load-test" {
   key_name   = "load-test"
-  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCfb5w6ksmww9O0Yfr6n7bKG1oTmaQLrlehVC9BD8WEA/BBbteTSBn57d/fqGBrfJtnTxOCZe/1ZBKg+ZrPlSXus8lndJXMkp6D08caGytHpd/VapvA1JP8LJiq5upIfpFdBjxx5Fw8Fg0TpJSmkvSChoKsjEjbrCCPprJTVcbRsKci9EHqARRM/Iae1DWsvDTmSaMOfGgKdTJRNE4yE+IFD/5HxqJnJfKKjXSCFZJyCPNVVzh/OsMju+tar9GGQNQRhIeELm0ef4esy6WOxFlGs7D9ylyb+OVgoXKauDGms/U442B6eKvFFkJaXyAl2nIf1BOOipw3PDHddmvO1P6ppBEAAHWmQZFJwluByvMuJCF7TT/5Ocpm2fEEJdxN3Fd3HseoYaDzz2vtYvJwSLJeUvwB6T56AWEkxdA8Jl/oX4j6u8uOsuNKizqP04DleWzyWXMk03je44GVK8Vyt1ykO3xy0GNS3aiYotNjn5tW8Y9vGJQZLuZiazVa6yC9nFs= theodore.widom@gmail.com"
+  public_key = data.template_file.ssh-public-key.rendered
 }
 
 // t3.medium   2 vCPU   4 GB RAM

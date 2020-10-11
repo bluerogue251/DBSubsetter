@@ -3,6 +3,11 @@
 set -eou pipefail
 
 #
+# To debug this shell script:
+# less /var/log/cloud-init-output.log
+#
+
+#
 # Install Postgres
 #
 sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
@@ -20,6 +25,6 @@ sudo -u postgres psql -c "create role loadtest login superuser encrypted passwor
 #
 # Install Java
 #
-wget --quiet -O /home/ubuntu/jre8.tar.gz https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u265-b01/OpenJDK8U-jre_x64_linux_hotspot_8u265b01.tar.gz
-tar xzf /home/ubuntu/jre8.tar.gz
-mv /home/ubuntu/jdk8u265-b01-jre /home/ubuntu/jre8
+wget --quiet -O /home/ubuntu/jdk8.tar.gz https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u265-b01/OpenJDK8U-jdk_x64_linux_hotspot_8u265b01.tar.gz
+tar xzf /home/ubuntu/jdk8.tar.gz /home/ubuntu/jdk8.tar.gz --directory=/home/ubuntu
+mv /home/ubuntu/jdk8u265-b01-jdk /home/ubuntu/jdk8

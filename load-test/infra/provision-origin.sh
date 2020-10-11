@@ -3,6 +3,11 @@
 set -eou pipefail
 
 #
+# To debug this shell script:
+# less /var/log/cloud-init-output.log
+#
+
+#
 # Install Postgres
 #
 sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
