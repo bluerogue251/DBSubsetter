@@ -7,8 +7,12 @@ terraform {
   }
 }
 
-data "template_file" "provision-postgres" {
-  template = file("./provision-postgres.sh")
+data "template_file" "provision-origin" {
+  template = file("./provision-origin.sh")
+}
+
+data "template_file" "provision-target" {
+  template = file("./provision-target.sh")
 }
 
 provider "aws" {
@@ -50,7 +54,7 @@ resource "aws_instance" "pg-origin" {
   key_name = "load-test"
   ebs_optimized = true
   monitoring = true
-  user_data = data.template_file.provision-postgres.rendered
+  user_data = data.template_file.provision-origin.rendered
 
   ebs_block_device {
     device_name = "/dev/sdb"
@@ -71,7 +75,7 @@ resource "aws_instance" "pg-target" {
   key_name = "load-test"
   ebs_optimized = true
   monitoring = true
-  user_data = data.template_file.provision-postgres.rendered
+  user_data = data.template_file.provision-target.rendered
 
   ebs_block_device {
     device_name = "/dev/sdb"
