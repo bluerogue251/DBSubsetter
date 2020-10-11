@@ -26,14 +26,14 @@
    
 * Build an uber jar of the DBSubsetter application locally: 
   ```
-    $ sbt 'set test in assembly := {}; set assemblyJarName in assembly := "latest.jar"' clean assembly
+    $ sbt clean assembly
   ```
   
 * Copy local resources onto the running EC2 instance:
   ```
   $ scp \
       -i ~/code/db-subsetter-load-test.pem \
-      target/scala-2.12/latest.jar \
+      target/scala-2.12/DBSubsetter.jar \
       load-test/4-run.sh \
       load-test/5-post-run.sh \
       ubuntu@<ec2-host>:~

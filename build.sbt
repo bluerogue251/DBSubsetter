@@ -32,3 +32,6 @@ libraryDependencies ++= Seq(
 // Unfortunately SqlServer tests are flaky when run in parallel
 // TODO remove this and re-enable parallel tests
 parallelExecution in Test := false
+
+assemblyJarName in assembly := "DBSubsetter.jar"
+test in assembly := {}

@@ -3,9 +3,17 @@
 set -eou pipefail
 
 #
-# To debug this shell script:
-# less /var/log/cloud-init-output.log
+# Script will be run from: /var/lib/cloud/instances/<instance-id>/
+# Output for debugging goes to: less /var/log/cloud-init-output.log
 #
+
+#
+# Attach EBS Volume
+# See: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-using-volumes.html
+#
+mkfs -t xfs /dev/nvme1n1
+mkdir /load-test
+mount /dev/nvme1n1 /load-test
 
 #
 # Install Postgres
@@ -26,5 +34,18 @@ sudo -u postgres psql -c "create role loadtest login superuser encrypted passwor
 # Install Java
 #
 wget --quiet -O /home/ubuntu/jdk8.tar.gz https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u265-b01/OpenJDK8U-jdk_x64_linux_hotspot_8u265b01.tar.gz
-tar xzf /home/ubuntu/jdk8.tar.gz /home/ubuntu/jdk8.tar.gz --directory=/home/ubuntu
-mv /home/ubuntu/jdk8u265-b01-jdk /home/ubuntu/jdk8
+tar xzf /home/ubuntu/jdk8.tar.gz --directory=/home/ubuntu
+mv /home/ubuntu/jdk8u265-b01 /home/ubuntu/jdk8
+
+#
+# Install SBT
+#
+wget --quiet -O /home/ubuntu/sbt.tgz https://github.com/sbt/sbt/releases/download/v1.3.4/sbt-1.3.4.tgz
+tar xzf /home/ubuntu/sbt.tgz --directory=/home/ubuntu
+
+#
+# Build DBSubsetter
+#
+wget --quiet -O /home/ubuntu/DBSubsetter.tar.gz https://github.com/bluerogue251/DBSubsetter/archive/aba1435.tar.gz
+tar xzf /home/ubuntu/DBSubsetter.tar.gz --directory=/home/ubuntu
+cd /home/ubuntu/DBSubsetter-*; ./sbt/bin/sbt --java-home /home/ubuntu/jdk8 assembly; cd -
