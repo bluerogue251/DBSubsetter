@@ -46,9 +46,9 @@ rm /load-test/school-db.sql
 
 wget -O /load-test/physics-db-dump.tar "https://s3.amazonaws.com/db-subsetter/load-test/physics-db/physics-db-dump.tar"
 tar -xf /load-test/physics-db-dump.tar --directory /load-test
-sudo -u postgres createdb physics_db
-sudo -u postgres pg_restore --verbose --jobs 4 --dbname physics_db /load-test/physics-db-dump
 rm /load-test/physics-db-dump.tar
+sudo -u postgres createdb physics_db
+time sudo -u postgres pg_restore --exit-on-error --verbose --jobs 4 --dbname physics_db /load-test/physics-db-dump
 rm -rf /load-test/physics-db-dump
 
-sudo -u postgres psql -c 'vacuum analyze'
+time sudo -u postgres psql -c 'vacuum analyze'
