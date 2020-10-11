@@ -49,4 +49,5 @@ tar xzf /load-test/sbt.tgz --directory=/load-test
 #
 wget --quiet -O /load-test/DBSubsetter.tar.gz https://github.com/bluerogue251/DBSubsetter/archive/aba1435.tar.gz
 tar xzf /load-test/DBSubsetter.tar.gz --directory=/load-test
-cd /load-test/DBSubsetter-*; ./sbt/bin/sbt --java-home /load-test/jdk8 assembly; cd -
+cd /load-test/DBSubsetter-*
+./../sbt/bin/sbt --java-home /load-test/jdk8 'set assemblyOutputPath in assembly := new File("/load-test/DBSubsetter.jar")' assembly
