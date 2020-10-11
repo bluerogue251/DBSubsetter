@@ -23,6 +23,10 @@ data "template_file" "provision-target" {
   template = file("./provision-target.sh")
 }
 
+data "template_file" "provision-monitor" {
+  template = file("./provision-monitor.sh")
+}
+
 provider "aws" {
   profile = "default"
   region  = "us-east-1"
@@ -36,25 +40,6 @@ resource "aws_key_pair" "load-test" {
 
 // t3.medium   2 vCPU   4 GB RAM
 // t3.xlarge   4 vCPU   16 GB RAM
-resource "aws_instance" "control-panel" {
-  ami           = "ami-0dba2cb6798deb6d8"
-  instance_type = "t3.medium"
-  key_name = "load-test"
-  ebs_optimized = false
-  monitoring = true
-
-  ebs_block_device {
-    device_name = "/dev/sdb"
-    volume_type = "gp2"
-    volume_size = 50
-    delete_on_termination = true
-    encrypted = false
-  }
-
-  tags = {
-    Name = "control-panel"
-  }
-}
 
 resource "aws_instance" "pg-origin" {
   ami = "ami-0dba2cb6798deb6d8"
@@ -95,5 +80,26 @@ resource "aws_instance" "pg-target" {
 
   tags = {
     Name = "pg-target"
+  }
+}
+
+resource "aws_instance" "monitor" {
+  ami           = "ami-0dba2cb6798deb6d8"
+  instance_type = "t3.medium"
+  key_name = "load-test"
+  ebs_optimized = false
+  monitoring = true
+  user_data = data.template_file.provision-monitor.rendered
+
+  ebs_block_device {
+    device_name = "/dev/sdb"
+    volume_type = "gp2"
+    volume_size = 50
+    delete_on_termination = true
+    encrypted = false
+  }
+
+  tags = {
+    Name = "monitor"
   }
 }
