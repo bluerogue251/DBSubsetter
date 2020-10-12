@@ -50,7 +50,7 @@ wget --quiet -O /load-test/physics-db-dump.tar "https://s3.amazonaws.com/db-subs
 tar -xf /load-test/physics-db-dump.tar --directory /load-test
 rm /load-test/physics-db-dump.tar
 sudo -u postgres createdb physics_db
-time sudo -u postgres pg_restore --exit-on-error --verbose --jobs 4 --dbname physics_db /load-test/physics-db-dump
+time sudo -u postgres pg_restore --exit-on-error --verbose --single-transaction --dbname physics_db /load-test/physics-db-dump
 rm -rf /load-test/physics-db-dump
 time sudo -u postgres psql --dbname physics_db -c 'analyze'
 

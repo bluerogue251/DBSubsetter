@@ -52,7 +52,7 @@ resource "aws_instance" "pg-origin" {
   ebs_block_device {
     device_name = "/dev/sdb"
     volume_type = "gp2"
-    volume_size = 200
+    volume_size = 400
     delete_on_termination = true
     encrypted = false
   }
