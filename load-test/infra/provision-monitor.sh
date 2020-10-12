@@ -25,3 +25,8 @@ rm /load-test/prometheus.tar.gz
 
 # Still have to do some stuff here
 # https://prometheus.io/docs/introduction/first_steps/
+
+#
+# Install Grafana
+#
+# Do some stuff here...
