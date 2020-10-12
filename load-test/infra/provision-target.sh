@@ -35,7 +35,7 @@ host     all    all         0.0.0.0/0    md5
 host     all    all         ::/0         md5
 EOF
 pg_createcluster 10 loadtest --datadir=/load-test/pg-data
-pg_ctlcluster 10 loadtest start -o "-c listen_addresses=* -c hba_file=/load-test/pg_hba.conf"
+pg_ctlcluster 10 loadtest start -o "-c listen_addresses=* -c hba_file=/load-test/pg_hba.conf -c shared_buffers=1GB -c maintenance_work_mem=1GB -c autovacuum=off"
 sudo -u postgres psql -c "create role loadtest login superuser encrypted password 'load-test-pw'"
 
 #
