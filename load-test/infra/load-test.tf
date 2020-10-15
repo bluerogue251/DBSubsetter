@@ -25,6 +25,9 @@ data "template_file" "provision-target" {
 
 data "template_file" "provision-monitor" {
   template = file("./provision-monitor.sh")
+  vars = {
+    pg-target-ip = aws_instance.pg-origin.private_ip
+  }
 }
 
 provider "aws" {

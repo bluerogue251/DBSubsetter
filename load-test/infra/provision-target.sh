@@ -61,3 +61,11 @@ tar xzf /load-test/DBSubsetter.tar.gz --directory=/load-test
 rm /load-test/DBSubsetter.tar.gz
 cd /load-test/DBSubsetter-*
 ./../sbt/bin/sbt --java-home /load-test/jdk8 'set assemblyOutputPath in assembly := new File("/load-test/DBSubsetter.jar")' assembly
+
+#
+# Wait for pg-origin school_db to be ready
+#
+
+#
+# Run school_db load test
+#

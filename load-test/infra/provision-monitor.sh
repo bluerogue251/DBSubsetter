@@ -23,10 +23,66 @@ wget --quiet -O /load-test/prometheus.tar.gz https://github.com/prometheus/prome
 tar xzf /load-test/prometheus.tar.gz --directory=/load-test
 rm /load-test/prometheus.tar.gz
 
-# Still have to do some stuff here
+#
+# Configure Prometheus
+#
+cat <<EOF >/load-test/prometheus.yml
+global:
+  scrape_interval: 500ms
+
+scrape_configs:
+  - job_name: db_subsetter
+    static_configs:
+      - targets: ['${pg-target-ip}:9092']
+EOF
+
+#
+# Start prometheus
 # https://prometheus.io/docs/introduction/first_steps/
+#
+/load-test/prometheus-2.21.0.linux-amd64/prometheus --config.file=/load-test/prometheus.yml &
+
 
 #
 # Install Grafana
 #
-# Do some stuff here...
+wget --quiet -O /load-test/grafana.tar.gz https://dl.grafana.com/oss/release/grafana-7.2.1.linux-amd64.tar.gz
+tar xzf /load-test/grafana.tar.gz --directory=/load-test
+rm /load-test/grafana.tar.gz
+wget --quiet -O /load-test/grafana-dashboard.json https://raw.githubusercontent.com/bluerogue251/DBSubsetter/master/grafana-dashboard.json
+
+#
+# Configure Grafana
+#
+cat <<EOF >/load-test/grafana.ini
+[auth.anonymous]
+enabled = true
+org_role = Admin
+EOF
+
+#
+# Start Grafana
+#
+/load-test/grafana-7.2.1/bin/grafana-server --homepath /load-test/grafana-7.2.1/ --config=/load-test/grafana.ini &
+sleep 5
+
+#
+# Set up Grafana Dashboard
+#
+curl \
+  -X POST \
+  -H 'Content-Type: application/json' \
+  --data '{"name": "prometheus", "type": "prometheus", "url": "http://localhost:9090", "access": "browser", "jsonData": { "timeInterval": "500ms" } }' \
+  admin:admin@localhost:3000/api/datasources
+
+curl \
+  -X POST \
+  -H 'Content-Type: application/json' \
+  --data @/load-test/grafana-dashboard.json \
+  admin:admin@localhost:3000/api/dashboards/db
+
+curl \
+  -X PUT \
+  -H 'Content-Type: application/json' \
+  --data '{ "homeDashboardId": 1 }' \
+  admin:admin@localhost:3000/api/user/preferences
