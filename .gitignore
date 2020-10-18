@@ -14,3 +14,9 @@ out
 
 # Mac
 .DS_Store
+
+# Load tests
+load-test.pem
+load-test.pem.pub
+.terraform
+*.tfstate*
