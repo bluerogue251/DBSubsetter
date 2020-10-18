@@ -21,12 +21,15 @@ data "template_file" "provision-origin" {
 
 data "template_file" "provision-target" {
   template = file("./provision-target.sh")
+  vars = {
+    pg-origin-ip = aws_instance.pg-origin.private_ip
+  }
 }
 
 data "template_file" "provision-monitor" {
   template = file("./provision-monitor.sh")
   vars = {
-    pg-target-ip = aws_instance.pg-origin.private_ip
+    pg-target-ip = aws_instance.pg-target.private_ip
   }
 }
 

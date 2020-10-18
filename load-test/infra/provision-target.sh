@@ -65,7 +65,51 @@ cd /load-test/DBSubsetter-*
 #
 # Wait for pg-origin school_db to be ready
 #
+while ! PGPASSWORD=load-test-pw psql --host "${pg-origin-ip}" --user loadtest --dbname school_db_ready -c "select 1" &> /dev/null
+do
+    echo "$(date) - waiting for school_db origin to be ready"
+    sleep 10
+done
 
 #
-# Run school_db load test
+# Run school_db load test three times
 #
+PGPASSWORD=load-test-pw pg_dump \
+  --host "${pg-origin-ip}" \
+  --user loadtest \
+  --dbname school_db \
+  --section pre-data \
+  > /load-test/school-db-pre.sql
+
+PGPASSWORD=load-test-pw pg_dump \
+  --host "${pg-origin-ip}" \
+  --user loadtest \
+  --dbname school_db \
+  --section post-data \
+  --format custom \
+  > /load-test/school-db-post.pgdump
+
+for i in {1..3}; do
+  sudo -u postgres dropdb --if-exists school_db
+  sudo -u postgres createdb school_db
+  sudo -u postgres psql --quiet --dbname school_db < /load-test/school-db-pre.sql
+  /load-test/jdk8/bin/java -Xmx2G -jar /load-test/DBSubsetter.jar \
+    --originDbConnStr "jdbc:postgresql://${pg-origin-ip}:5432/school_db?user=loadtest&password=load-test-pw" \
+    --targetDbConnStr "jdbc:postgresql://localhost:5432/school_db?user=loadtest&password=load-test-pw" \
+    --keyCalculationDbConnectionCount 6 \
+    --dataCopyDbConnectionCount 6 \
+    --schemas "school_db,Audit" \
+    --baseQuery "school_db.Students ::: student_id % 25 = 0 ::: includeChildren" \
+    --baseQuery "school_db.standalone_table ::: id < 4 ::: includeChildren" \
+    --excludeColumns "school_db.schools(mascot)" \
+    --excludeTable "school_db.empty_table_2" \
+    --exposeMetrics
+  sudo -u postgres pg_restore --dbname school_db /load-test/school-db-post.pgdump
+  sleep 90
+done
+
+PGPASSWORD=load-test-pw psql \
+  --host "${pg-origin-ip}" \
+  --user loadtest \
+  --dbname school_db \
+  -c "create database school_db_complete"
