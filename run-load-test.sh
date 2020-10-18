@@ -9,6 +9,10 @@
 # 2) AWS account credentials stored at ~/.aws/credentials
 #    https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html
 #
+# Input Arguments:
+# $1 The git commit hash of the old code to use as the baseline for comparisons
+# $2 The git commit hash of the new code to test and compare to the baseline
+#
 
 echo "Creating SSH Key (if not exists)"
 echo "n" | ssh-keygen -q -N "" -f load-test/load-test.pem -C "load-test@example.com"
@@ -21,7 +25,8 @@ echo "Initializing Terraform"
 printf "\n\n"
 
 echo "Spinning up load test infrastructure"
-./load-test/apply.sh
+./load-test/apply.sh "$1" "$2"
+
 printf "\n\n"
 
-echo "View results on the monitor instance's Grafana at http://monitor-ip:3000"
+echo "View results on the monitor instance's Grafana at http://<monitor-ip>:3000"
