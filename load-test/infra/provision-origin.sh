@@ -58,7 +58,7 @@ sudo -u postgres createdb school_db_ready
 #
 # Await school_db load test completion
 #
-while ! sudo -u postgres --dbname school_db_complete -c "select 1" &> /dev/null
+while ! sudo -u postgres psql --dbname school_db_complete -c "select 1" &> /dev/null
 do
     echo "$(date) - waiting for school_db load test to complete"
     sleep 10
