@@ -1,30 +1,34 @@
 package trw.dbsubsetter.akkastreams
 
-import java.util.concurrent.{Executor, Executors}
+import java.util.concurrent.{CountDownLatch, ExecutorService, Executors}
 
-import trw.dbsubsetter.datacopy.DataCopierFactory
+import trw.dbsubsetter.datacopy.{DataCopier, DataCopierFactory}
 import trw.dbsubsetter.datacopyqueue.DataCopyQueue
 import trw.dbsubsetter.workflow.DataCopyTask
 
 final class DataCopyTaskRunnerImpl(queue: DataCopyQueue, copierFactory: DataCopierFactory, parallelism: Int)
     extends DataCopyTaskRunner {
 
-  private[this] val executor: Executor = Executors.newFixedThreadPool(parallelism)
-
   override def run(): Unit = {
-    (0 until parallelism).foreach()
-  }
+    val executorService: ExecutorService = Executors.newFixedThreadPool(parallelism)
+    val latch: CountDownLatch = new CountDownLatch(parallelism)
 
-  private def process(): Unit = {
-    val workflow =
-    var task = next()
-    while (task.nonEmpty) {
-     workflow.
+    (1 to parallelism).foreach { _ =>
+      val copier: DataCopier = copierFactory.build()
+      var nextTask = dequeueTask()
+      while (nextTask.nonEmpty) {
+        copier.copy(nextTask.get)
+        nextTask = dequeueTask()
+      }
+      latch.countDown()
     }
+
+    latch.await()
+    executorService.shutdownNow()
   }
 
-  private def next(): Option[DataCopyTask] = {
-    this.synchronized {
+  private def dequeueTask(): Option[DataCopyTask] = {
+    synchronized {
       queue.dequeue()
     }
   }
