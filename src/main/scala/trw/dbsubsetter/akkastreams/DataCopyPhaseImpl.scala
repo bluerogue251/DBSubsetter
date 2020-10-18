@@ -19,9 +19,15 @@ final class DataCopyPhaseImpl(queue: DataCopyQueue, copiers: Seq[DataCopier]) ex
 
     copiers.foreach { copier =>
       executorService.submit { () =>
-        copyTillExhausted(copier)
-        latch.countDown()
-        Unit
+        try {
+          copyTillExhausted(copier)
+          latch.countDown()
+          Unit
+        } catch {
+          case e: Throwable =>
+            e.printStackTrace()
+            System.exit(1)
+        }
       }
     }
 
