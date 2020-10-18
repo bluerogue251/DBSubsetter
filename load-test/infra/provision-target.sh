@@ -63,7 +63,7 @@ cd /load-test/DBSubsetter-*
 ./../sbt/bin/sbt --java-home /load-test/jdk8 'set assemblyOutputPath in assembly := new File("/load-test/DBSubsetter.jar")' assembly
 
 #
-# Wait for pg-origin school_db to be ready
+# Wait for origin school_db to be ready
 #
 while ! PGPASSWORD=load-test-pw psql --host "${pg-origin-ip}" --user loadtest --dbname school_db_ready -c "select 1" &> /dev/null
 do
@@ -72,7 +72,7 @@ do
 done
 
 #
-# Run school_db load test three times
+# Prepare school_db load test
 #
 PGPASSWORD=load-test-pw pg_dump \
   --host "${pg-origin-ip}" \
@@ -89,10 +89,11 @@ PGPASSWORD=load-test-pw pg_dump \
   --format custom \
   > /load-test/school-db-post.pgdump
 
-for i in {1..3}; do
+run_school_db_load_test() {
   sudo -u postgres dropdb --if-exists school_db
   sudo -u postgres createdb school_db
   sudo -u postgres psql --quiet --dbname school_db < /load-test/school-db-pre.sql
+  echo "Running school_db load test"
   /load-test/jdk8/bin/java -Xmx2G -jar /load-test/DBSubsetter.jar \
     --originDbConnStr "jdbc:postgresql://${pg-origin-ip}:5432/school_db?user=loadtest&password=load-test-pw" \
     --targetDbConnStr "jdbc:postgresql://localhost:5432/school_db?user=loadtest&password=load-test-pw" \
@@ -106,10 +107,75 @@ for i in {1..3}; do
     --exposeMetrics
   sudo -u postgres pg_restore --dbname school_db /load-test/school-db-post.pgdump
   sleep 15
-done
+}
 
+#
+# Run school_db load test three times
+#
+run_school_db_load_test
+run_school_db_load_test
+run_school_db_load_test
+
+#
+# Signal school_db load test is complete
+#
 PGPASSWORD=load-test-pw psql \
   --host "${pg-origin-ip}" \
   --user loadtest \
   --dbname school_db \
   -c "create database school_db_complete"
+
+#
+# Wait for origin physics_db to be ready
+#
+while ! PGPASSWORD=load-test-pw psql --host "${pg-origin-ip}" --user loadtest --dbname physics_db_ready -c "select 1" &> /dev/null
+do
+    echo "$(date) - waiting for physics_db origin to be ready"
+    sleep 300
+done
+
+#
+# Prepare physics_db load test
+#
+PGPASSWORD=load-test-pw pg_dump \
+  --host "${pg-origin-ip}" \
+  --user loadtest \
+  --dbname physics_db \
+  --section pre-data \
+  > /load-test/physics-db-pre.sql
+
+PGPASSWORD=load-test-pw pg_dump \
+  --host "${pg-origin-ip}" \
+  --user loadtest \
+  --dbname physics_db \
+  --section post-data \
+  --format custom \
+  > /load-test/physics-db-post.pgdump
+
+run_physics_db_load_test() {
+  sudo -u postgres dropdb --if-exists physics_db
+  sudo -u postgres createdb physics_db
+  sudo -u postgres psql --quiet --dbname physics_db < /load-test/physics-db-pre.sql
+  echo "Running physics_db load test"
+  /load-test/jdk8/bin/java -Xmx2G -jar /load-test/DBSubsetter.jar \
+    --originDbConnStr "jdbc:postgresql://${pg-origin-ip}:5432/physics_db?user=loadtest&password=load-test-pw" \
+    --targetDbConnStr "jdbc:postgresql://localhost:5432/physics_db?user=loadtest&password=load-test-pw" \
+    --keyCalculationDbConnectionCount 6 \
+    --dataCopyDbConnectionCount 6 \
+    --schemas "public" \
+    --baseQuery "public.scientists ::: id in (2) ::: includeChildren" \
+    --exposeMetrics
+  sudo -u postgres pg_restore --dbname physics_db /load-test/physics-db-post.pgdump
+  sleep 15
+}
+
+#
+# Run both school_db and physics_db load tests three times
+# (repeating school_db to make its graphs closer in Grafana)
+#
+run_school_db_load_test
+run_school_db_load_test
+run_school_db_load_test
+run_physics_db_load_test
+run_physics_db_load_test
+run_physics_db_load_test

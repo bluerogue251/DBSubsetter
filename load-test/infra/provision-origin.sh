@@ -51,7 +51,7 @@ rm /load-test/school-db.sql
 time sudo -u postgres psql --dbname school_db -c 'analyze'
 
 #
-# Start school_db load test (run starts upon detecting this DB)
+# Allow school_db load test (run starts upon detecting this DB)
 #
 sudo -u postgres createdb school_db_ready
 
@@ -74,6 +74,6 @@ rm -rf /load-test/physics-db-z1.dump
 time sudo -u postgres psql --dbname physics_db -c 'analyze'
 
 #
-# Start physics_db load test (run starts upon detecting this DB)
+# Allow physics_db load test (run starts upon detecting this DB)
 #
 sudo -u postgres createdb physics_db_ready
