@@ -110,9 +110,8 @@ run_school_db_load_test() {
 }
 
 #
-# Run school_db load test three times
+# Run school_db load test twice
 #
-run_school_db_load_test
 run_school_db_load_test
 run_school_db_load_test
 
@@ -169,13 +168,11 @@ run_physics_db_load_test() {
 }
 
 #
-# Run both school_db and physics_db load tests three times
+# Run both school_db and physics_db load tests twice
 # (repeating school_db to make its graphs closer in Grafana)
 #
 run_school_db_load_test
 run_school_db_load_test
-run_school_db_load_test
 sleep 600 # Sleep 10 minutes to visually separate the graphs
-run_physics_db_load_test
 run_physics_db_load_test
 run_physics_db_load_test
