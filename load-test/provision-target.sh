@@ -57,12 +57,13 @@ rm /load-test/sbt.tgz
 # Build DBSubsetter
 #
 build_jar() {
+  echo "Building DBSubsetter-$1.jar"
   wget --quiet -O /load-test/DBSubsetter-"$1".tar.gz https://github.com/bluerogue251/DBSubsetter/archive/"$1".tar.gz
   wget --quiet -O /load-test/DBSubsetter-"$1".tar.gz https://github.com/bluerogue251/DBSubsetter/archive/"$1".tar.gz
   tar xzf /load-test/DBSubsetter-"$1".tar.gz --directory=/load-test
   rm /load-test/DBSubsetter-"$1".tar.gz
   cd /load-test/DBSubsetter-"$1"*
-  ./../sbt/bin/sbt --java-home /load-test/jdk8 'set assemblyOutputPath in assembly := new File("/load-test/DBSubsetter'"$1"'.jar")' assembly
+  ./../sbt/bin/sbt --java-home /load-test/jdk8 'set assemblyOutputPath in assembly := new File("/load-test/DBSubsetter-'"$1"'.jar")' assembly
 }
 build_jar "${old-commit}"
 build_jar "${new-commit}"
