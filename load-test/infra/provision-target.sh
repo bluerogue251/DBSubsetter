@@ -105,7 +105,7 @@ for i in {1..3}; do
     --excludeTable "school_db.empty_table_2" \
     --exposeMetrics
   sudo -u postgres pg_restore --dbname school_db /load-test/school-db-post.pgdump
-  sleep 90
+  sleep 15
 done
 
 PGPASSWORD=load-test-pw psql \

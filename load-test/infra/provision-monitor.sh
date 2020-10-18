@@ -67,22 +67,28 @@ EOF
 sleep 5
 
 #
-# Set up Grafana Dashboard
+# Connect Grafana to Prometheus
 #
 curl \
   -X POST \
   -H 'Content-Type: application/json' \
-  --data '{"name": "prometheus", "type": "prometheus", "url": "http://localhost:9090", "access": "browser", "jsonData": { "timeInterval": "500ms" } }' \
+  --data '{"name": "prometheus", "type": "prometheus", "url": "http://localhost:9090", "access": "proxy", "jsonData": { "timeInterval": "500ms" } }' \
   admin:admin@localhost:3000/api/datasources
 
+#
+# Create Grafana Dashboard
+#
 curl \
   -X POST \
   -H 'Content-Type: application/json' \
   --data @/load-test/grafana-dashboard.json \
   admin:admin@localhost:3000/api/dashboards/db
 
+#
+# Set Dashboard as Grafana Homepage
+#
 curl \
   -X PUT \
   -H 'Content-Type: application/json' \
   --data '{ "homeDashboardId": 1 }' \
-  admin:admin@localhost:3000/api/user/preferences
+  admin:admin@localhost:3000/api/org/preferences
