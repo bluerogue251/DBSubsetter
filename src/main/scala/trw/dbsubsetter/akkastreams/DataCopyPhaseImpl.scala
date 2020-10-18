@@ -6,9 +6,9 @@ import trw.dbsubsetter.datacopy.DataCopier
 import trw.dbsubsetter.datacopyqueue.DataCopyQueue
 import trw.dbsubsetter.workflow.DataCopyTask
 
-final class DataCopyTaskRunnerImpl(queue: DataCopyQueue, copiers: Seq[DataCopier]) extends DataCopyTaskRunner {
+final class DataCopyPhaseImpl(queue: DataCopyQueue, copiers: Seq[DataCopier]) extends DataCopyPhase {
 
-  override def run(): Unit = {
+  override def runPhase(): Unit = {
     val executorService: ExecutorService = Executors.newFixedThreadPool(copiers.size)
     val latch: CountDownLatch = new CountDownLatch(copiers.size)
 

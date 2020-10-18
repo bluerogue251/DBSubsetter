@@ -3,7 +3,7 @@ package trw.dbsubsetter
 import akka.Done
 import akka.actor.{ActorRef, ActorSystem, PoisonPill}
 import akka.stream.ActorMaterializer
-import trw.dbsubsetter.akkastreams.{DataCopyTaskRunnerImpl, KeyQueryGraphFactory, PkStoreActor}
+import trw.dbsubsetter.akkastreams.{DataCopyPhaseImpl, KeyQueryGraphFactory, PkStoreActor}
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.datacopy.{DataCopier, DataCopierFactory, DataCopierFactoryImpl}
 import trw.dbsubsetter.datacopyqueue.{DataCopyQueue, DataCopyQueueFactory}
@@ -58,9 +58,9 @@ object ApplicationAkkaStreams {
       val copiers: Seq[DataCopier] =
         (1 to config.dataCopyDbConnectionCount).map(_ => copierFactory.build())
 
-      val dataCopyTaskRunner = new DataCopyTaskRunnerImpl(dataCopyQueue, copiers)
+      val dataCopyTaskRunner = new DataCopyPhaseImpl(dataCopyQueue, copiers)
 
-      dataCopyTaskRunner.run()
+      dataCopyTaskRunner.runPhase()
     }
 
     runKeyQueryPhase()

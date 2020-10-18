@@ -1,7 +1,7 @@
 package trw.dbsubsetter.akkastreams
 
-trait DataCopyTaskRunner {
+trait DataCopyPhase {
 
-  def run()
+  def runPhase()
 
 }
