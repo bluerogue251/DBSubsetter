@@ -48,6 +48,7 @@ resource "aws_key_pair" "load-test" {
 // t3.xlarge   4 vCPU   16 GB RAM
 
 resource "aws_instance" "pg-origin" {
+  availability_zone = "us-east-1f"
   ami = "ami-0dba2cb6798deb6d8"
   instance_type = "t3.xlarge"
   key_name = "load-test"
@@ -69,6 +70,7 @@ resource "aws_instance" "pg-origin" {
 }
 
 resource "aws_instance" "pg-target" {
+  availability_zone = "us-east-1f"
   ami = "ami-0dba2cb6798deb6d8"
   instance_type = "t3.medium"
   key_name = "load-test"
@@ -90,6 +92,7 @@ resource "aws_instance" "pg-target" {
 }
 
 resource "aws_instance" "monitor" {
+  availability_zone = "us-east-1f"
   ami           = "ami-0dba2cb6798deb6d8"
   instance_type = "t3.medium"
   key_name = "load-test"
