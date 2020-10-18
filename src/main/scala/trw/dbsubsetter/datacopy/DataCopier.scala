@@ -2,8 +2,8 @@ package trw.dbsubsetter.datacopy
 
 import trw.dbsubsetter.workflow.DataCopyTask
 
-trait DataCopyWorkflow {
+trait DataCopier {
 
-  def process(dataCopyTask: DataCopyTask): Unit
+  def runTask(task: DataCopyTask): Unit
 
 }

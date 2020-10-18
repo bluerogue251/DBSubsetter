@@ -5,16 +5,14 @@ import java.util.UUID
 import java.util.concurrent.Executors
 
 import org.postgresql.copy.CopyManager
-import trw.dbsubsetter.datacopy.DataCopyWorkflow
+import trw.dbsubsetter.datacopy.DataCopier
 import trw.dbsubsetter.db.{Constants, DbAccessFactory, SchemaInfo}
 import trw.dbsubsetter.workflow.DataCopyTask
 
 import scala.concurrent.{ExecutionContext, Future}
 
-private[datacopy] final class PostgresOptimizedDataCopyWorkflowImpl(
-    dbAccessFactory: DbAccessFactory,
-    schemaInfo: SchemaInfo
-) extends DataCopyWorkflow {
+private[datacopy] final class PostgresDataCopierImpl(dbAccessFactory: DbAccessFactory, schemaInfo: SchemaInfo)
+    extends DataCopier {
 
   private[this] val originCopyManager: CopyManager =
     dbAccessFactory.buildOriginPostgresCopyManager()
@@ -25,26 +23,26 @@ private[datacopy] final class PostgresOptimizedDataCopyWorkflowImpl(
   private[this] val copyOutExecutionContext: ExecutionContext =
     ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(2))
 
-  def process(dataCopyTask: DataCopyTask): Unit = {
-    if (!Constants.dataCopyBatchSizes.contains(dataCopyTask.pkValues.size)) {
-      throw new IllegalArgumentException(s"Unsupported data copy batch size: ${dataCopyTask.pkValues.size}")
+  def runTask(task: DataCopyTask): Unit = {
+    if (!Constants.dataCopyBatchSizes.contains(task.pkValues.size)) {
+      throw new IllegalArgumentException(s"Unsupported data copy batch size: ${task.pkValues.size}")
     }
 
     val allColumnNamesSql: String =
       schemaInfo
-        .dataColumnsByTableOrdered(dataCopyTask.table)
+        .dataColumnsByTableOrdered(task.table)
         .map(col => s""""${col.name}"""")
         .mkString(", ")
 
     val pkColumnNamesSql: String =
       schemaInfo
-        .pksByTable(dataCopyTask.table)
+        .pksByTable(task.table)
         .columns
         .map(col => s""""${col.name}"""")
         .mkString("(", ",", ")")
 
     val individualPkValuesSql: Seq[String] =
-      dataCopyTask.pkValues
+      task.pkValues
         .map(pkValue => {
           pkValue.individualColumnValues
             .map(quote)
@@ -57,7 +55,7 @@ private[datacopy] final class PostgresOptimizedDataCopyWorkflowImpl(
     val selectStatement: String =
       s"""
          | COPY (
-         |   select $allColumnNamesSql from "${dataCopyTask.table.schema.name}"."${dataCopyTask.table.name}"
+         |   select $allColumnNamesSql from "${task.table.schema.name}"."${task.table.name}"
          |   where $pkColumnNamesSql in ($allPkValuesSql)
          | )
          | TO STDOUT (FORMAT BINARY)
@@ -76,7 +74,7 @@ private[datacopy] final class PostgresOptimizedDataCopyWorkflowImpl(
 
     val copyToTargetSql =
       s"""
-         | COPY "${dataCopyTask.table.schema.name}"."${dataCopyTask.table.name}"($allColumnNamesSql)
+         | COPY "${task.table.schema.name}"."${task.table.name}"($allColumnNamesSql)
          | FROM STDIN (FORMAT BINARY)
          | """.stripMargin
 

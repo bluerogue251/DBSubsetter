@@ -3,8 +3,9 @@ package trw.dbsubsetter
 import akka.Done
 import akka.actor.{ActorRef, ActorSystem, PoisonPill}
 import akka.stream.ActorMaterializer
-import trw.dbsubsetter.akkastreams.{DataCopyGraphFactory, KeyQueryGraphFactory, PkStoreActor}
+import trw.dbsubsetter.akkastreams.{DataCopyPhase, DataCopyPhaseImpl, KeyQueryGraphFactory, PkStoreActor}
 import trw.dbsubsetter.config.Config
+import trw.dbsubsetter.datacopy.{DataCopier, DataCopierFactory, DataCopierFactoryImpl}
 import trw.dbsubsetter.datacopyqueue.{DataCopyQueue, DataCopyQueueFactory}
 import trw.dbsubsetter.db.{DbAccessFactory, SchemaInfo}
 import trw.dbsubsetter.fktaskqueue.{ForeignKeyTaskQueue, ForeignKeyTaskQueueFactory}
@@ -51,13 +52,16 @@ object ApplicationAkkaStreams {
 
     // Encapsulate in method for consistency with runKeyQueryPhase()
     def runDataCopyPhase(): Unit = {
-      val dataCopyPhase: Future[Done] =
-        DataCopyGraphFactory
-          .build(config, schemaInfo, dbAccessFactory, dataCopyQueue)
-          .run()
+      val copierFactory: DataCopierFactory =
+        new DataCopierFactoryImpl(dbAccessFactory, schemaInfo)
 
-      // Wait for the data copy phase to complete. Use `result` rather than `ready` to ensure an exception is thrown on failure.
-      Await.result(dataCopyPhase, Duration.Inf)
+      val copiers: Seq[DataCopier] =
+        (1 to config.dataCopyDbConnectionCount).map(_ => copierFactory.build())
+
+      val dataCopyPhase: DataCopyPhase =
+        new DataCopyPhaseImpl(dataCopyQueue, copiers)
+
+      dataCopyPhase.runPhase()
     }
 
     runKeyQueryPhase()
