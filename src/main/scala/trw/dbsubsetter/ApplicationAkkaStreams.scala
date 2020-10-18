@@ -58,9 +58,9 @@ object ApplicationAkkaStreams {
       val copiers: Seq[DataCopier] =
         (1 to config.dataCopyDbConnectionCount).map(_ => copierFactory.build())
 
-      val dataCopyTaskRunner = new DataCopyPhaseImpl(dataCopyQueue, copiers)
+      val dataCopyPhase = new DataCopyPhaseImpl(dataCopyQueue, copiers)
 
-      dataCopyTaskRunner.runPhase()
+      dataCopyPhase.runPhase()
     }
 
     runKeyQueryPhase()
