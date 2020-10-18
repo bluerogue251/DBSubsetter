@@ -10,7 +10,7 @@ private[datacopy] final class GenericDataCopierImpl(dbAccessFactory: DbAccessFac
 
   private[this] val targetDbAccess = dbAccessFactory.buildTargetDbAccess()
 
-  def copy(task: DataCopyTask): Unit = {
+  def runTask(task: DataCopyTask): Unit = {
     val pkValues: Seq[PrimaryKeyValue] = task.pkValues
 
     if (!Constants.dataCopyBatchSizes.contains(pkValues.size)) {

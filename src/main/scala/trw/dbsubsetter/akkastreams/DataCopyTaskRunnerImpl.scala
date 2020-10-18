@@ -15,7 +15,7 @@ final class DataCopyTaskRunnerImpl(queue: DataCopyQueue, copiers: Seq[DataCopier
     copiers.foreach { copier =>
       var nextTask = dequeueTask()
       while (nextTask.nonEmpty) {
-        copier.copy(nextTask.get)
+        copier.runTask(nextTask.get)
         nextTask = dequeueTask()
       }
       latch.countDown()

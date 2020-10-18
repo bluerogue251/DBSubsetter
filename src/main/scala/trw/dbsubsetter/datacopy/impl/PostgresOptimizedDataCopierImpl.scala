@@ -25,7 +25,7 @@ private[datacopy] final class PostgresOptimizedDataCopierImpl(
   private[this] val copyOutExecutionContext: ExecutionContext =
     ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(2))
 
-  def copy(task: DataCopyTask): Unit = {
+  def runTask(task: DataCopyTask): Unit = {
     if (!Constants.dataCopyBatchSizes.contains(task.pkValues.size)) {
       throw new IllegalArgumentException(s"Unsupported data copy batch size: ${task.pkValues.size}")
     }
