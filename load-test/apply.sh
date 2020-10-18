@@ -12,4 +12,7 @@ docker run \
   --volume ~/.aws:/root/.aws \
   --workdir /tf \
   hashicorp/terraform:0.13.4 \
-  apply -auto-approve
+  apply \
+  -auto-approve \
+  -var="old-commit=$1" \
+  -var="new-commit=$2"

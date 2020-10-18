@@ -56,11 +56,18 @@ rm /load-test/sbt.tgz
 #
 # Build DBSubsetter
 #
-wget --quiet -O /load-test/DBSubsetter.tar.gz https://github.com/bluerogue251/DBSubsetter/archive/b5d7570.tar.gz
-tar xzf /load-test/DBSubsetter.tar.gz --directory=/load-test
-rm /load-test/DBSubsetter.tar.gz
-cd /load-test/DBSubsetter-*
-./../sbt/bin/sbt --java-home /load-test/jdk8 'set assemblyOutputPath in assembly := new File("/load-test/DBSubsetter.jar")' assembly
+build_jar() {
+  echo "Building DBSubsetter-$1.jar"
+  wget --quiet -O /load-test/DBSubsetter-"$1".tar.gz https://github.com/bluerogue251/DBSubsetter/archive/"$1".tar.gz
+  wget --quiet -O /load-test/DBSubsetter-"$1".tar.gz https://github.com/bluerogue251/DBSubsetter/archive/"$1".tar.gz
+  tar xzf /load-test/DBSubsetter-"$1".tar.gz --directory=/load-test
+  rm /load-test/DBSubsetter-"$1".tar.gz
+  cd /load-test/DBSubsetter-"$1"*
+  ./../sbt/bin/sbt --java-home /load-test/jdk8 'set assemblyOutputPath in assembly := new File("/load-test/DBSubsetter-'"$1"'.jar")' assembly
+}
+build_jar "${old-commit}"
+build_jar "${new-commit}"
+
 
 #
 # Wait for origin school_db to be ready
@@ -94,7 +101,7 @@ run_school_db_load_test() {
   sudo -u postgres createdb school_db
   sudo -u postgres psql --quiet --dbname school_db < /load-test/school-db-pre.sql
   echo "Running school_db load test"
-  /load-test/jdk8/bin/java -Xmx2G -jar /load-test/DBSubsetter.jar \
+  /load-test/jdk8/bin/java -Xmx2G -jar /load-test/DBSubsetter-"$1".jar \
     --originDbConnStr "jdbc:postgresql://${pg-origin-ip}:5432/school_db?user=loadtest&password=load-test-pw" \
     --targetDbConnStr "jdbc:postgresql://localhost:5432/school_db?user=loadtest&password=load-test-pw" \
     --keyCalculationDbConnectionCount 6 \
@@ -110,10 +117,16 @@ run_school_db_load_test() {
 }
 
 #
-# Run school_db load test twice
+# Run school_db load test three times for each commit
 #
-run_school_db_load_test
-run_school_db_load_test
+run_school_db_load_test "${old-commit}"
+run_school_db_load_test "${new-commit}"
+sleep 120
+run_school_db_load_test "${old-commit}"
+run_school_db_load_test "${new-commit}"
+sleep 120
+run_school_db_load_test "${old-commit}"
+run_school_db_load_test "${new-commit}"
 
 #
 # Signal school_db load test is complete
@@ -156,7 +169,7 @@ run_physics_db_load_test() {
   sudo -u postgres createdb physics_db
   sudo -u postgres psql --quiet --dbname physics_db < /load-test/physics-db-pre.sql
   echo "Running physics_db load test"
-  /load-test/jdk8/bin/java -Xmx2G -jar /load-test/DBSubsetter.jar \
+  /load-test/jdk8/bin/java -Xmx2G -jar /load-test/DBSubsetter-"$1".jar \
     --originDbConnStr "jdbc:postgresql://${pg-origin-ip}:5432/physics_db?user=loadtest&password=load-test-pw" \
     --targetDbConnStr "jdbc:postgresql://localhost:5432/physics_db?user=loadtest&password=load-test-pw" \
     --keyCalculationDbConnectionCount 6 \
@@ -168,11 +181,11 @@ run_physics_db_load_test() {
 }
 
 #
-# Run both school_db and physics_db load tests twice
-# (repeating school_db to make its graphs closer in Grafana)
+# Run physics_db load test three times for each commit
 #
-run_school_db_load_test
-run_school_db_load_test
-sleep 600 # Sleep 10 minutes to visually separate the graphs
-run_physics_db_load_test
-run_physics_db_load_test
+run_physics_db_load_test "${old-commit}"
+run_physics_db_load_test "${new-commit}"
+run_physics_db_load_test "${old-commit}"
+run_physics_db_load_test "${new-commit}"
+run_physics_db_load_test "${old-commit}"
+run_physics_db_load_test "${new-commit}"

@@ -11,6 +11,14 @@ terraform {
   }
 }
 
+variable "old-commit" {
+  type = string
+}
+
+variable "new-commit" {
+  type = string
+}
+
 data "template_file" "ssh-public-key" {
   template = file("./load-test.pem.pub")
 }
@@ -23,6 +31,8 @@ data "template_file" "provision-target" {
   template = file("./provision-target.sh")
   vars = {
     pg-origin-ip = aws_instance.pg-origin.private_ip
+    old-commit = var.old-commit
+    new-commit = var.new-commit
   }
 }
 
