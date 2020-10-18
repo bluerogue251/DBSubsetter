@@ -18,14 +18,16 @@ final class DataCopyPhaseImpl(queue: DataCopyQueue, copiers: Seq[DataCopier]) ex
       new CountDownLatch(copiers.size)
 
     copiers.foreach { copier =>
-      try {
-        copyTillExhausted(copier)
-        latch.countDown()
-        Unit
-      } catch {
-        case e: Throwable =>
-          e.printStackTrace()
-          System.exit(1)
+      executorService.submit { () =>
+        try {
+          copyTillExhausted(copier)
+          latch.countDown()
+          Unit
+        } catch {
+          case e: Throwable =>
+            e.printStackTrace()
+            System.exit(1)
+        }
       }
     }
 
