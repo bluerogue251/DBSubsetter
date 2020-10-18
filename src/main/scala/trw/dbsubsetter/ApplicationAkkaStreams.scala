@@ -23,18 +23,18 @@ object ApplicationAkkaStreams {
     val dbAccessFactory: DbAccessFactory = new DbAccessFactory(config, schemaInfo)
     val dataCopyQueue: DataCopyQueue = DataCopyQueueFactory.buildDataCopyQueue(config, schemaInfo)
 
-    // Encapsulate in method so as to encourage JVM to garbage-collect the Primary Key Store as early as possible
-    def runKeyQueryPhase(): Unit = {
-      val pkStore: ActorRef = system.actorOf(PkStoreActor.props(schemaInfo))
-      val fkTaskCreationWorkflow: FkTaskCreationWorkflow = new FkTaskCreationWorkflow(schemaInfo)
-      val fkTaskQueue: ForeignKeyTaskQueue = ForeignKeyTaskQueueFactory.build(config, schemaInfo)
+    val pkStore: ActorRef = system.actorOf(PkStoreActor.props(schemaInfo))
+    val fkTaskCreationWorkflow: FkTaskGenerator = new FkTaskGenerator(schemaInfo)
+    val fkTaskQueue: ForeignKeyTaskQueue = ForeignKeyTaskQueueFactory.build(config, schemaInfo)
 
+    def runBaseQueryPhase(): Unit = {}
+
+    def runKeyCalculationPhase(): Unit = {
       val keyQueryPhase: Future[Done] =
         KeyQueryGraphFactory
           .build(
             config,
             schemaInfo,
-            baseQueries,
             pkStore,
             dbAccessFactory,
             fkTaskCreationWorkflow,
@@ -50,7 +50,6 @@ object ApplicationAkkaStreams {
       pkStore.tell(PoisonPill, ActorRef.noSender)
     }
 
-    // Encapsulate in method for consistency with runKeyQueryPhase()
     def runDataCopyPhase(): Unit = {
       val copierFactory: DataCopierFactory =
         new DataCopierFactoryImpl(dbAccessFactory, schemaInfo)
@@ -64,7 +63,9 @@ object ApplicationAkkaStreams {
       dataCopyPhase.runPhase()
     }
 
-    runKeyQueryPhase()
+    // Encourage JVM to garbage-collect the Primary Key Store as early as possible
+    runBaseQueryPhase()
+    runKeyCalculationPhase()
     runDataCopyPhase()
 
     // Clean up after successful subsetting run

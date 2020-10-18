@@ -7,7 +7,7 @@ import akka.actor.ActorRef
 import akka.pattern.ask
 import akka.stream.ClosedShape
 import akka.stream.scaladsl.GraphDSL.Implicits._
-import akka.stream.scaladsl.{Balance, Broadcast, Flow, GraphDSL, Merge, Partition, RunnableGraph, Source}
+import akka.stream.scaladsl.{Balance, Broadcast, Flow, GraphDSL, Merge, Partition, RunnableGraph}
 import akka.util.Timeout
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.datacopyqueue.DataCopyQueue
@@ -22,18 +22,16 @@ object KeyQueryGraphFactory {
   def build(
       config: Config,
       schemaInfo: SchemaInfo,
-      baseQueries: Set[BaseQuery],
       pkStore: ActorRef,
       dbAccessFactory: DbAccessFactory,
-      fkTaskCreationWorkflow: FkTaskCreationWorkflow,
+      fkTaskGenerator: FkTaskGenerator,
       fkTaskQueue: ForeignKeyTaskQueue,
       dataCopyQueue: DataCopyQueue
   )(implicit ec: ExecutionContext): RunnableGraph[Future[Done]] = RunnableGraph.fromGraph(
     GraphDSL.create(BufferFactory.dataCopyBufferSink(dataCopyQueue)) { implicit b => dataCopyBufferSink =>
       // Infrastructure: Timeouts, Merges, Balances, Partitions, Broadcasts
-      implicit val askTimeout: Timeout =
-        Timeout(48, TimeUnit.HOURS) // For `mapAsyncUnordered`. The need for this timeout may be a code smell.
-      val mergeOriginDbRequests = b.add(Merge[OriginDbRequest](3))
+      implicit val askTimeout: Timeout = Timeout(48, TimeUnit.HOURS)
+      val mergeOriginDbRequests = b.add(Merge[OriginDbRequest](2))
       val balanceOriginDb =
         b.add(Balance[OriginDbRequest](config.keyCalculationDbConnectionCount, waitForAllDownstreams = true))
       val mergeOriginDbResults = b.add(Merge[OriginDbResult](config.keyCalculationDbConnectionCount))
@@ -52,10 +50,6 @@ object KeyQueryGraphFactory {
       val fkTaskBufferFlow = b.add(BufferFactory.fkTaskBuffer(fkTaskQueue).async)
       val mergeToOutstandingTaskCounter = b.add(Merge[IndexedSeq[ForeignKeyTask]](2))
 
-      // Start everything off
-      Source(baseQueries.toVector) ~>
-        mergeOriginDbRequests
-
       // Process Origin DB Queries in Parallel
       mergeOriginDbRequests.out ~> balanceOriginDb
       for (_ <- 0 until config.keyCalculationDbConnectionCount) {
@@ -69,11 +63,11 @@ object KeyQueryGraphFactory {
         broadcastPksAdded
 
       broadcastPksAdded ~>
-        FkTaskCreation.flow(fkTaskCreationWorkflow) ~>
+        FkTaskCreation.flow(fkTaskGenerator) ~>
         mergeToOutstandingTaskCounter
 
       mergeToOutstandingTaskCounter ~>
-        TaskCountCircuitBreaker.statefulCounter(baseQueries.size) ~>
+        TaskCountCircuitBreaker.statefulCounter(fkTaskQueue.size) ~>
         Flow[IndexedSeq[ForeignKeyTask]].mapConcat(_.to[collection.immutable.Iterable]) ~>
         fkTaskBufferFlow
 

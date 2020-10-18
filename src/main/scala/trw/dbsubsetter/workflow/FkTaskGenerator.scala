@@ -3,12 +3,12 @@ package trw.dbsubsetter.workflow
 import trw.dbsubsetter.db._
 import trw.dbsubsetter.keyextraction.KeyExtractionUtil
 
-final class FkTaskCreationWorkflow(schemaInfo: SchemaInfo) {
+final class FkTaskGenerator(schemaInfo: SchemaInfo) {
 
   private[this] val fkExtractionFunctions: Map[(ForeignKey, Boolean), Keys => ForeignKeyValue] =
     KeyExtractionUtil.fkExtractionFunctions(schemaInfo)
 
-  def createFkTasks(pksAdded: PksAdded): IndexedSeq[ForeignKeyTask] = {
+  def generateFrom(pksAdded: PksAdded): IndexedSeq[ForeignKeyTask] = {
     val PksAdded(table, rowsNeedingParentTasks, rowsNeedingChildTasks, viaTableOpt) = pksAdded
     val parentTasks = calcParentTasks(table, rowsNeedingParentTasks, viaTableOpt)
     val childTasks = calcChildTasks(table, rowsNeedingChildTasks)

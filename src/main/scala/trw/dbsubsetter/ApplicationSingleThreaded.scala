@@ -25,8 +25,8 @@ class ApplicationSingleThreaded(config: Config, schemaInfo: SchemaInfo, baseQuer
   private[this] val pkWorkflow: PkStoreWorkflow =
     new PkStoreWorkflow(pkStore, schemaInfo)
 
-  private[this] val fkTaskCreationWorkflow: FkTaskCreationWorkflow =
-    new FkTaskCreationWorkflow(schemaInfo)
+  private[this] val fkTaskGenerator: FkTaskGenerator =
+    new FkTaskGenerator(schemaInfo)
 
   private[this] val fkTaskQueue: ForeignKeyTaskQueue =
     ForeignKeyTaskQueueFactory.build(config, schemaInfo)
@@ -81,8 +81,8 @@ class ApplicationSingleThreaded(config: Config, schemaInfo: SchemaInfo, baseQuer
     dataCopyQueue.enqueue(pksAdded)
 
     // Queue up any new tasks resulting from this stage
-    fkTaskCreationWorkflow
-      .createFkTasks(pksAdded)
+    fkTaskGenerator
+      .generateFrom(pksAdded)
       .foreach(fkTaskQueue.enqueue)
   }
 }
