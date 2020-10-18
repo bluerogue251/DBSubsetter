@@ -23,3 +23,5 @@ printf "\n\n"
 echo "Spinning up load test infrastructure"
 ./load-test/apply.sh
 printf "\n\n"
+
+echo "View results on the monitor instance's Grafana at http://monitor-ip:3000"

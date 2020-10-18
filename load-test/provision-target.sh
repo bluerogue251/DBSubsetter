@@ -166,7 +166,6 @@ run_physics_db_load_test() {
     --baseQuery "public.scientists ::: id in (2) ::: includeChildren" \
     --exposeMetrics
   sudo -u postgres pg_restore --dbname physics_db /load-test/physics-db-post.pgdump
-  sleep 15
 }
 
 #
@@ -176,6 +175,7 @@ run_physics_db_load_test() {
 run_school_db_load_test
 run_school_db_load_test
 run_school_db_load_test
+sleep 600 # Sleep 10 minutes to visually separate the graphs
 run_physics_db_load_test
 run_physics_db_load_test
 run_physics_db_load_test
