@@ -1,24 +1,24 @@
 package trw.dbsubsetter.datacopy.impl
 
-import trw.dbsubsetter.datacopy.DataCopyWorkflow
+import trw.dbsubsetter.datacopy.DataCopier
 import trw.dbsubsetter.db.{Constants, DbAccessFactory, PrimaryKeyValue, Row}
 import trw.dbsubsetter.workflow.DataCopyTask
 
-private[datacopy] final class GenericDataCopyWorkflowImpl(dbAccessFactory: DbAccessFactory) extends DataCopyWorkflow {
+private[datacopy] final class GenericDataCopierImpl(dbAccessFactory: DbAccessFactory) extends DataCopier {
 
   private[this] val originDbAccess = dbAccessFactory.buildOriginDbAccess()
 
   private[this] val targetDbAccess = dbAccessFactory.buildTargetDbAccess()
 
-  def process(dataCopyTask: DataCopyTask): Unit = {
-    val pkValues: Seq[PrimaryKeyValue] = dataCopyTask.pkValues
+  def copy(task: DataCopyTask): Unit = {
+    val pkValues: Seq[PrimaryKeyValue] = task.pkValues
 
     if (!Constants.dataCopyBatchSizes.contains(pkValues.size)) {
       throw new IllegalArgumentException(s"Unsupported data copy batch size: ${pkValues.size}")
     }
 
     val rowsToInsert: Vector[Row] =
-      originDbAccess.getRowsFromPrimaryKeyValues(dataCopyTask.table, pkValues)
+      originDbAccess.getRowsFromPrimaryKeyValues(task.table, pkValues)
 
     if (!rowsToInsert.size.equals(pkValues.size)) {
       val message: String =
@@ -28,6 +28,6 @@ private[datacopy] final class GenericDataCopyWorkflowImpl(dbAccessFactory: DbAcc
       throw new IllegalStateException(message)
     }
 
-    targetDbAccess.insertRows(dataCopyTask.table, rowsToInsert)
+    targetDbAccess.insertRows(task.table, rowsToInsert)
   }
 }

@@ -1,7 +1,6 @@
 package trw.dbsubsetter
 
 import trw.dbsubsetter.config.Config
-import trw.dbsubsetter.datacopy.DataCopyWorkflowFactory
 import trw.dbsubsetter.datacopyqueue.{DataCopyQueue, DataCopyQueueFactory}
 import trw.dbsubsetter.db.{DbAccessFactory, PrimaryKeyValue, SchemaInfo, Table}
 import trw.dbsubsetter.fktaskqueue.{ForeignKeyTaskQueue, ForeignKeyTaskQueueFactory}
