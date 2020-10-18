@@ -67,6 +67,7 @@ done
 #
 # Load physics_db origin dataset
 #
+echo "Loading physics db dataset"
 wget --quiet -O /load-test/physics-db-z1.dump "https://s3.amazonaws.com/db-subsetter/load-test/physics-db/physics-db-z1.dump"
 sudo -u postgres createdb physics_db
 time sudo -u postgres pg_restore --exit-on-error --verbose --jobs 4 --dbname physics_db /load-test/physics-db-z1.dump
