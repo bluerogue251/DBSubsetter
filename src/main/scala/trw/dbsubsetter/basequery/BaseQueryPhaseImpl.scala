@@ -1,16 +1,31 @@
 package trw.dbsubsetter.basequery
 
 import trw.dbsubsetter.config.BaseQuery
-import trw.dbsubsetter.db.OriginDbAccess
-import trw.dbsubsetter.workflow.{OriginDbResult, PksAdded}
+import trw.dbsubsetter.datacopyqueue.DataCopyQueue
+import trw.dbsubsetter.db.{Keys, OriginDbAccess}
+import trw.dbsubsetter.fktaskqueue.ForeignKeyTaskQueue
+import trw.dbsubsetter.workflow.{FkTaskGenerator, OriginDbResult, PkStoreWorkflow, PksAdded}
 
-final class BaseQueryPhaseImpl(baseQueries: Seq[BaseQuery], dbAccess: OriginDbAccess) extends BaseQueryPhase {
+final class BaseQueryPhaseImpl(
+    baseQueries: Seq[BaseQuery],
+    dbAccess: OriginDbAccess,
+    pkWorkflow: PkStoreWorkflow,
+    dataCopyQueue: DataCopyQueue,
+    fkTaskGenerator: FkTaskGenerator,
+    fkTaskQueue: ForeignKeyTaskQueue
+) extends BaseQueryPhase {
+
   override def runPhase(): Unit = {
     baseQueries.foreach { baseQuery =>
-      // Query the origin database
-      val dbResult: OriginDbResult = dbAccess.getRowsFromWhereClause(baseQuery.)
+      // Fetch the primary and foreign key values from the origin database
+      val keys: Vector[Keys] =
+        dbAccess.getRowsFromWhereClause(
+          baseQuery.table,
+          baseQuery.whereClause
+        )
 
-      // Calculate which rows we've seen already
+      // Calculate which primary key values we've seen already
+      val dbResult: OriginDbResult = OriginDbResult(baseQuery.table, keys, None, baseQuery.includeChildren)
       val pksAdded: PksAdded = pkWorkflow.add(dbResult)
 
       // Queue up the newly seen rows to be copied into the target database
@@ -20,7 +35,6 @@ final class BaseQueryPhaseImpl(baseQueries: Seq[BaseQuery], dbAccess: OriginDbAc
       fkTaskGenerator
         .generateFrom(pksAdded)
         .foreach(fkTaskQueue.enqueue)
-
     }
   }
 }
