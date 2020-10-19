@@ -48,7 +48,6 @@ object ApplicationAkkaStreams {
           .generateFrom(pksAdded)
           .foreach(fkTaskQueue.enqueue)
       }
-
     }
 
     def runKeyCalculationPhase(): Unit = {
