@@ -53,7 +53,7 @@ object KeyQueryGraphFactory {
       // Process Origin DB Queries in Parallel
       mergeOriginDbRequests.out ~> balanceOriginDb
       for (_ <- 0 until config.keyCalculationDbConnectionCount) {
-        balanceOriginDb ~> OriginDb.query(config, schemaInfo, dbAccessFactory).async ~> mergeOriginDbResults
+        balanceOriginDb ~> OriginDb.query(dbAccessFactory).async ~> mergeOriginDbResults
       }
 
       // TODO try to understand if it's really necessary for pkStore to be in an actor... given that we should
