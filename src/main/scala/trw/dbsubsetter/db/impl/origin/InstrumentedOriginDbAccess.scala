@@ -2,7 +2,7 @@ package trw.dbsubsetter.db.impl.origin
 
 import io.prometheus.client.Histogram
 import io.prometheus.client.Histogram.Timer
-import trw.dbsubsetter.db.{ForeignKey, ForeignKeyValue, Keys, OriginDbAccess, PrimaryKeyValue, Row, SqlQuery, Table}
+import trw.dbsubsetter.db.{ForeignKey, ForeignKeyValue, Keys, OriginDbAccess, PrimaryKeyValue, Row, Table}
 import trw.dbsubsetter.metrics.Metrics
 
 private[db] class InstrumentedOriginDbAccess(delegatee: OriginDbAccess) extends OriginDbAccess {
@@ -21,8 +21,8 @@ private[db] class InstrumentedOriginDbAccess(delegatee: OriginDbAccess) extends 
     delegatee.getRowsFromPrimaryKeyValues(table, primaryKeyValues)
   }
 
-  override def getRows(query: SqlQuery, table: Table): Vector[Keys] = {
-    instrument(() => delegatee.getRows(query, table))
+  override def getRowsFromWhereClause(table: Table, whereClause: String): Vector[Keys] = {
+    instrument(() => delegatee.getRowsFromWhereClause(table, whereClause))
   }
 
   private[this] def instrument(func: () => Vector[Keys]): Vector[Keys] = {
@@ -33,7 +33,6 @@ private[db] class InstrumentedOriginDbAccess(delegatee: OriginDbAccess) extends 
     if (result.nonEmpty) { // TODO test the divide by zero case
       durationPerRow.observe(statementDuration / result.length)
     }
-
     result
   }
 }

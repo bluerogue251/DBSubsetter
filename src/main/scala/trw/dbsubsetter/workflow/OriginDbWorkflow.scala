@@ -6,7 +6,7 @@ final class OriginDbWorkflow(dbAccessFactory: DbAccessFactory) {
 
   private[this] val dbAccess = dbAccessFactory.buildOriginDbAccess()
 
-  def process(request: OriginDbRequest): OriginDbResult = {
+  def process(request: ForeignKeyTask): OriginDbResult = {
     val result = request match {
       case FetchParentTask(foreignKey, fkValueFromChild) =>
         val table: Table = foreignKey.toTable
@@ -16,9 +16,6 @@ final class OriginDbWorkflow(dbAccessFactory: DbAccessFactory) {
         val table: Table = foreignKey.fromTable
         val rows = dbAccess.getRowsFromForeignKeyValue(foreignKey, table, fkValueFromParent)
         OriginDbResult(table, rows, viaTableOpt = Some(foreignKey.toTable), fetchChildren = true)
-      case BaseQuery(table, sql, fetchChildren) =>
-        val rows = dbAccess.getRows(sql, table)
-        OriginDbResult(table, rows, viaTableOpt = None, fetchChildren)
     }
     result
   }

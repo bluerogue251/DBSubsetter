@@ -41,8 +41,8 @@ trait NonEmptySchemaValidationTest extends FunSuiteLike with AssertionUtil {
 
   private val fooIdColumn: ConfigColumn = ConfigColumn(fooTable, "id")
 
-  private val validBaseQuery: ConfigBaseQuery =
-    ConfigBaseQuery(
+  private val validBaseQuery: BaseQuery =
+    BaseQuery(
       table = fooTable,
       whereClause = "true",
       includeChildren = true
@@ -85,7 +85,7 @@ trait NonEmptySchemaValidationTest extends FunSuiteLike with AssertionUtil {
 
   test("Base Query Table Not Found") {
     val nonexistentTable = Table(validSchema, "t")
-    val baseQuery = ConfigBaseQuery(nonexistentTable, "true", includeChildren = true)
+    val baseQuery = BaseQuery(nonexistentTable, "true", includeChildren = true)
     val invalidSchemaConfig = validSchemaConfig.copy(baseQueries = Set(baseQuery))
     assertErrorMessage(invalidSchemaConfig, "Table 'valid_schema.t' specified in --baseQuery not found in database")
   }
@@ -218,8 +218,8 @@ trait NonEmptySchemaValidationTest extends FunSuiteLike with AssertionUtil {
   }
 
   test("--excludeTable fixes missing primary keys") {
-    val baseQuery: ConfigBaseQuery =
-      ConfigBaseQuery(barTable, "1 = 1", includeChildren = true)
+    val baseQuery: BaseQuery =
+      BaseQuery(barTable, "1 = 1", includeChildren = true)
 
     assertValid(
       validSchemaConfig.copy(

@@ -4,11 +4,7 @@ import trw.dbsubsetter.db._
 
 package object workflow {
 
-  sealed trait OriginDbRequest
-
-  case class BaseQuery(table: Table, sql: SqlQuery, fetchChildren: Boolean) extends OriginDbRequest
-
-  sealed trait ForeignKeyTask extends OriginDbRequest
+  sealed trait ForeignKeyTask
   case class FetchParentTask(fk: ForeignKey, fkValueFromChild: ForeignKeyValue) extends ForeignKeyTask
   case class FetchChildrenTask(fk: ForeignKey, fkValueFromParent: ForeignKeyValue) extends ForeignKeyTask
 

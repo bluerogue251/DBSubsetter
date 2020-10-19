@@ -4,14 +4,14 @@ import trw.dbsubsetter.db.{Schema, Table}
 
 case class SchemaConfig(
     schemas: Set[Schema] = Set.empty,
-    baseQueries: Set[ConfigBaseQuery] = Set.empty,
+    baseQueries: Set[BaseQuery] = Set.empty,
     extraPrimaryKeys: Set[ConfigPrimaryKey] = Set.empty,
     extraForeignKeys: Set[ConfigForeignKey] = Set.empty,
     excludeTables: Set[Table] = Set.empty,
     excludeColumns: Set[ConfigColumn] = Set.empty
 )
 
-case class ConfigBaseQuery(
+case class BaseQuery(
     table: Table,
     whereClause: String,
     includeChildren: Boolean

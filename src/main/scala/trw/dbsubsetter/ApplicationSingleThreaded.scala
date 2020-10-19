@@ -70,19 +70,5 @@ class ApplicationSingleThreaded(config: Config, schemaInfo: SchemaInfo, baseQuer
     }
   }
 
-  private def handleKeyCalculationTask(task: OriginDbRequest): Unit = {
-    // Query the origin database
-    val dbResult: OriginDbResult = originDbWorkflow.process(task)
-
-    // Calculate which rows we've seen already
-    val pksAdded: PksAdded = pkWorkflow.add(dbResult)
-
-    // Queue up the newly seen rows to be copied into the target database
-    dataCopyQueue.enqueue(pksAdded)
-
-    // Queue up any new tasks resulting from this stage
-    fkTaskGenerator
-      .generateFrom(pksAdded)
-      .foreach(fkTaskQueue.enqueue)
-  }
+  private def handleKeyCalculationTask(task: OriginDbRequest): Unit = {}
 }

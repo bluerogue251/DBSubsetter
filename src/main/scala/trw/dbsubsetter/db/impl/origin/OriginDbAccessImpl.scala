@@ -8,7 +8,7 @@ import trw.dbsubsetter.db.impl.mapper.JdbcResultConverter
 
 private[db] class OriginDbAccessImpl(
     connStr: String,
-    sch: SchemaInfo,
+    schemaInfo: SchemaInfo,
     mapper: JdbcResultConverter,
     connectionFactory: ConnectionFactory
 ) extends OriginDbAccess {
@@ -16,12 +16,12 @@ private[db] class OriginDbAccessImpl(
   private[this] val conn = connectionFactory.getReadOnlyConnection(connStr)
 
   private[this] val foreignKeyTemplateStatements: Map[(ForeignKey, Table), PreparedStatement] =
-    Sql.queryByFkSqlTemplates(sch).data.map { case ((fk, table), sqlQuery) =>
+    Sql.queryByFkSqlTemplates(schemaInfo).data.map { case ((fk, table), sqlQuery) =>
       (fk, table) -> conn.prepareStatement(sqlQuery.value)
     }
 
   private[this] val primaryKeyTemplateStatements: Map[(Table, Short), PreparedStatement] =
-    Sql.queryByPkSqlTemplates(sch).data.map { case (tableWithBatchSize, sqlQuery) =>
+    Sql.queryByPkSqlTemplates(schemaInfo).data.map { case (tableWithBatchSize, sqlQuery) =>
       tableWithBatchSize -> conn.prepareStatement(sqlQuery.value)
     }
 
@@ -53,8 +53,10 @@ private[db] class OriginDbAccessImpl(
     mapper.convertToRows(jdbcResult, table)
   }
 
-  override def getRows(query: SqlQuery, table: Table): Vector[Keys] = {
-    val jdbcResult = conn.createStatement().executeQuery(query.value)
+  override def getRowsFromWhereClause(table: Table, whereClause: String): Vector[Keys] = {
+    val selectColumns = schemaInfo.keyColumnsByTableOrdered(table)
+    val sqlString = Sql.makeQueryString(table, selectColumns, whereClause)
+    val jdbcResult = conn.createStatement().executeQuery(sqlString.value)
     mapper.convertToKeys(jdbcResult, table)
   }
 }

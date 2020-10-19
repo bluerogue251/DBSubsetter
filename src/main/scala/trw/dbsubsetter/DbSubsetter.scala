@@ -2,8 +2,9 @@ package trw.dbsubsetter
 
 import io.prometheus.client.exporter.HTTPServer
 import io.prometheus.client.hotspot.DefaultExports
+import trw.dbsubsetter.basequery.BaseQueries
 import trw.dbsubsetter.config._
-import trw.dbsubsetter.db.{BaseQueries, DbMetadataQueries, OK, SchemaInfoRetrieval, SchemaValidation, ValidationError}
+import trw.dbsubsetter.db.{DbMetadataQueries, OK, SchemaInfoRetrieval, SchemaValidation, ValidationError}
 
 object DbSubsetter {
   def run(schemaConfig: SchemaConfig, config: Config): DbSubsetterResult = {
