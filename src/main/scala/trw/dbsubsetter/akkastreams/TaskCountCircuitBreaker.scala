@@ -9,8 +9,8 @@ import trw.dbsubsetter.workflow.ForeignKeyTask
   * This allows stream processing to eventually complete even though the graph contains cycles.
   */
 private[akkastreams] object TaskCountCircuitBreaker {
-  def statefulCounter(numBaseQueries: Int): Flow[IndexedSeq[ForeignKeyTask], IndexedSeq[ForeignKeyTask], NotUsed] = {
-    var count: Long = numBaseQueries
+  def statefulCounter(initialCount: Long): Flow[IndexedSeq[ForeignKeyTask], IndexedSeq[ForeignKeyTask], NotUsed] = {
+    var count: Long = initialCount
 
     val counterFlow: Flow[IndexedSeq[ForeignKeyTask], (Long, IndexedSeq[ForeignKeyTask]), NotUsed] =
       Flow[IndexedSeq[ForeignKeyTask]].map { newTasks =>

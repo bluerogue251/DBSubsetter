@@ -67,7 +67,7 @@ object KeyQueryGraphFactory {
         mergeToOutstandingTaskCounter
 
       mergeToOutstandingTaskCounter ~>
-        TaskCountCircuitBreaker.statefulCounter(fkTaskQueue.size) ~>
+        TaskCountCircuitBreaker.statefulCounter(fkTaskQueue.size()) ~>
         Flow[IndexedSeq[ForeignKeyTask]].mapConcat(_.to[collection.immutable.Iterable]) ~>
         fkTaskBufferFlow
 

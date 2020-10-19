@@ -28,4 +28,8 @@ private[fktaskqueue] final class ForeignKeyTaskQueueInstrumented(delegatee: Fore
   override def isEmpty(): Boolean = {
     delegatee.isEmpty()
   }
+
+  override def size(): Long = {
+    delegatee.size()
+  }
 }

@@ -9,6 +9,7 @@ import trw.dbsubsetter.datacopy.{DataCopier, DataCopierFactory, DataCopierFactor
 import trw.dbsubsetter.datacopyqueue.{DataCopyQueue, DataCopyQueueFactory}
 import trw.dbsubsetter.db.{DbAccessFactory, SchemaInfo}
 import trw.dbsubsetter.fktaskqueue.{ForeignKeyTaskQueue, ForeignKeyTaskQueueFactory}
+import trw.dbsubsetter.primarykeystore.{PrimaryKeyStore, PrimaryKeyStoreFactory}
 import trw.dbsubsetter.workflow._
 
 import scala.concurrent.duration.Duration
@@ -20,16 +21,39 @@ object ApplicationAkkaStreams {
     implicit val materializer: ActorMaterializer = ActorMaterializer()
     implicit val ec: ExecutionContext = system.dispatcher
 
+    val pkStore: PrimaryKeyStore = PrimaryKeyStoreFactory.buildPrimaryKeyStore(schemaInfo)
+    val pkStoreWorkflow: PkStoreWorkflow = new PkStoreWorkflow(pkStore, schemaInfo)
+
     val dbAccessFactory: DbAccessFactory = new DbAccessFactory(config, schemaInfo)
     val dataCopyQueue: DataCopyQueue = DataCopyQueueFactory.buildDataCopyQueue(config, schemaInfo)
 
-    val pkStore: ActorRef = system.actorOf(PkStoreActor.props(schemaInfo))
-    val fkTaskCreationWorkflow: FkTaskGenerator = new FkTaskGenerator(schemaInfo)
+    val fkTaskGenerator: FkTaskGenerator = new FkTaskGenerator(schemaInfo)
     val fkTaskQueue: ForeignKeyTaskQueue = ForeignKeyTaskQueueFactory.build(config, schemaInfo)
 
-    def runBaseQueryPhase(): Unit = {}
+    def runBaseQueryPhase(): Unit = {
+      val originDbWorkflow: OriginDbWorkflow = new OriginDbWorkflow(dbAccessFactory)
+
+      baseQueries.foreach { baseQuery =>
+        // Query the origin database
+        val dbResult: OriginDbResult = originDbWorkflow.process(baseQuery)
+
+        // Calculate which rows we've seen already
+        val pksAdded: PksAdded = pkStoreWorkflow.add(dbResult)
+
+        // Queue up the newly seen rows to be copied into the target database
+        dataCopyQueue.enqueue(pksAdded)
+
+        // Queue up any new tasks resulting from this stage
+        fkTaskGenerator
+          .generateFrom(pksAdded)
+          .foreach(fkTaskQueue.enqueue)
+      }
+
+    }
 
     def runKeyCalculationPhase(): Unit = {
+      val pkStore: ActorRef = system.actorOf(PkStoreActor.props(pkStoreWorkflow))
+
       val keyQueryPhase: Future[Done] =
         KeyQueryGraphFactory
           .build(
@@ -37,7 +61,7 @@ object ApplicationAkkaStreams {
             schemaInfo,
             pkStore,
             dbAccessFactory,
-            fkTaskCreationWorkflow,
+            fkTaskGenerator,
             fkTaskQueue,
             dataCopyQueue
           )

@@ -6,4 +6,5 @@ trait ForeignKeyTaskQueue {
   def enqueue(foreignKeyTask: ForeignKeyTask): Unit
   def dequeue(): Option[ForeignKeyTask]
   def isEmpty(): Boolean
+  def size(): Long
 }
