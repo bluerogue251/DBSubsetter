@@ -14,8 +14,8 @@ class ApplicationSingleThreaded(config: Config, schemaInfo: SchemaInfo, baseQuer
   private[this] val dbAccessFactory =
     new DbAccessFactory(config, schemaInfo)
 
-  private[this] val originDbWorkflow =
-    new OriginDbWorkflow(dbAccessFactory)
+  private[this] val foreignKeyTaskHandler =
+    new ForeignKeyTaskHandler(dbAccessFactory)
 
   private[this] val dataCopier =
     new DataCopierFactoryImpl(dbAccessFactory, schemaInfo).build()
@@ -77,7 +77,7 @@ class ApplicationSingleThreaded(config: Config, schemaInfo: SchemaInfo, baseQuer
       }
 
     if (!isDuplicate) {
-      val dbResult = originDbWorkflow.process(task)
+      val dbResult = foreignKeyTaskHandler.handle(task)
       val pksAdded: PksAdded = pkWorkflow.add(dbResult)
 
       // Queue up the newly seen rows to be copied into the target database
