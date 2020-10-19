@@ -1,6 +1,7 @@
 package trw.dbsubsetter
 
-import trw.dbsubsetter.config.Config
+import trw.dbsubsetter.basequery.{BaseQueryPhase, BaseQueryPhaseImpl}
+import trw.dbsubsetter.config.{BaseQuery, Config}
 import trw.dbsubsetter.datacopy.DataCopierFactoryImpl
 import trw.dbsubsetter.datacopyqueue.{DataCopyQueue, DataCopyQueueFactory}
 import trw.dbsubsetter.db.{DbAccessFactory, PrimaryKeyValue, SchemaInfo, Table}
@@ -14,7 +15,7 @@ class ApplicationSingleThreaded(config: Config, schemaInfo: SchemaInfo, baseQuer
     new DbAccessFactory(config, schemaInfo)
 
   private[this] val originDbWorkflow =
-    new OriginDbWorkflow(config, schemaInfo, dbAccessFactory)
+    new OriginDbWorkflow(dbAccessFactory)
 
   private[this] val dataCopier =
     new DataCopierFactoryImpl(dbAccessFactory, schemaInfo).build()
@@ -34,9 +35,19 @@ class ApplicationSingleThreaded(config: Config, schemaInfo: SchemaInfo, baseQuer
   private[this] val dataCopyQueue: DataCopyQueue =
     DataCopyQueueFactory.buildDataCopyQueue(config, schemaInfo)
 
+  private[this] val baseQueryPhase: BaseQueryPhase =
+    new BaseQueryPhaseImpl(
+      baseQueries,
+      dbAccessFactory.buildOriginDbAccess(),
+      pkWorkflow,
+      dataCopyQueue,
+      fkTaskGenerator,
+      fkTaskQueue
+    )
+
   def run(): Unit = {
     // Handle all key calculation from base queries
-    baseQueries.foreach(handleKeyCalculationTask)
+    baseQueryPhase.runPhase()
 
     // Handle all key calculation foreign key tasks
     while (!fkTaskQueue.isEmpty()) {
@@ -66,9 +77,16 @@ class ApplicationSingleThreaded(config: Config, schemaInfo: SchemaInfo, baseQuer
       }
 
     if (!isDuplicate) {
-      handleKeyCalculationTask(task)
+      val dbResult = originDbWorkflow.process(task)
+      val pksAdded: PksAdded = pkWorkflow.add(dbResult)
+
+      // Queue up the newly seen rows to be copied into the target database
+      dataCopyQueue.enqueue(pksAdded)
+
+      // Queue up any new tasks resulting from this stage
+      fkTaskGenerator
+        .generateFrom(pksAdded)
+        .foreach(fkTaskQueue.enqueue)
     }
   }
-
-  private def handleKeyCalculationTask(task: OriginDbRequest): Unit = {}
 }

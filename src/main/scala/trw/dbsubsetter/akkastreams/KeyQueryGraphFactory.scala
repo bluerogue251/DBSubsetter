@@ -31,9 +31,9 @@ object KeyQueryGraphFactory {
     GraphDSL.create(BufferFactory.dataCopyBufferSink(dataCopyQueue)) { implicit b => dataCopyBufferSink =>
       // Infrastructure: Timeouts, Merges, Balances, Partitions, Broadcasts
       implicit val askTimeout: Timeout = Timeout(48, TimeUnit.HOURS)
-      val mergeOriginDbRequests = b.add(Merge[OriginDbRequest](2))
+      val mergeOriginDbRequests = b.add(Merge[ForeignKeyTask](2))
       val balanceOriginDb =
-        b.add(Balance[OriginDbRequest](config.keyCalculationDbConnectionCount, waitForAllDownstreams = true))
+        b.add(Balance[ForeignKeyTask](config.keyCalculationDbConnectionCount, waitForAllDownstreams = true))
       val mergeOriginDbResults = b.add(Merge[OriginDbResult](config.keyCalculationDbConnectionCount))
       val partitionFkTasks = b.add(
         Partition[ForeignKeyTask](

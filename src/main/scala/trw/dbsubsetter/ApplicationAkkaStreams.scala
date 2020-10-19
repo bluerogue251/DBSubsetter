@@ -4,7 +4,8 @@ import akka.Done
 import akka.actor.{ActorRef, ActorSystem, PoisonPill}
 import akka.stream.ActorMaterializer
 import trw.dbsubsetter.akkastreams.{DataCopyPhase, DataCopyPhaseImpl, KeyQueryGraphFactory, PkStoreActor}
-import trw.dbsubsetter.config.Config
+import trw.dbsubsetter.basequery.{BaseQueryPhase, BaseQueryPhaseImpl}
+import trw.dbsubsetter.config.{BaseQuery, Config}
 import trw.dbsubsetter.datacopy.{DataCopier, DataCopierFactory, DataCopierFactoryImpl}
 import trw.dbsubsetter.datacopyqueue.{DataCopyQueue, DataCopyQueueFactory}
 import trw.dbsubsetter.db.{DbAccessFactory, SchemaInfo}
@@ -31,23 +32,17 @@ object ApplicationAkkaStreams {
     val fkTaskQueue: ForeignKeyTaskQueue = ForeignKeyTaskQueueFactory.build(config, schemaInfo)
 
     def runBaseQueryPhase(): Unit = {
-      val originDbWorkflow: OriginDbWorkflow = new OriginDbWorkflow(dbAccessFactory)
+      val baseQueryPhase: BaseQueryPhase =
+        new BaseQueryPhaseImpl(
+          baseQueries,
+          dbAccessFactory.buildOriginDbAccess(),
+          pkStoreWorkflow,
+          dataCopyQueue,
+          fkTaskGenerator,
+          fkTaskQueue
+        )
 
-      baseQueries.foreach { baseQuery =>
-        // Query the origin database
-        val dbResult: OriginDbResult = originDbWorkflow.process(baseQuery)
-
-        // Calculate which rows we've seen already
-        val pksAdded: PksAdded = pkStoreWorkflow.add(dbResult)
-
-        // Queue up the newly seen rows to be copied into the target database
-        dataCopyQueue.enqueue(pksAdded)
-
-        // Queue up any new tasks resulting from this stage
-        fkTaskGenerator
-          .generateFrom(pksAdded)
-          .foreach(fkTaskQueue.enqueue)
-      }
+      baseQueryPhase.runPhase()
     }
 
     def runKeyCalculationPhase(): Unit = {

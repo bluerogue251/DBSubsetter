@@ -12,9 +12,9 @@ private[akkastreams] object OriginDb {
       config: Config,
       schemaInfo: SchemaInfo,
       dbAccessFactory: DbAccessFactory
-  ): Flow[OriginDbRequest, OriginDbResult, NotUsed] = {
-    Flow[OriginDbRequest].statefulMapConcat { () =>
-      val dbWorkflow = new OriginDbWorkflow(config, schemaInfo, dbAccessFactory)
+  ): Flow[ForeignKeyTask, OriginDbResult, NotUsed] = {
+    Flow[ForeignKeyTask].statefulMapConcat { () =>
+      val dbWorkflow = new OriginDbWorkflow(dbAccessFactory)
       req => {
         List(dbWorkflow.process(req))
       }

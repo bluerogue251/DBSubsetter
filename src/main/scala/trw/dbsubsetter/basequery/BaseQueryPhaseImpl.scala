@@ -7,7 +7,7 @@ import trw.dbsubsetter.fktaskqueue.ForeignKeyTaskQueue
 import trw.dbsubsetter.workflow.{FkTaskGenerator, OriginDbResult, PkStoreWorkflow, PksAdded}
 
 final class BaseQueryPhaseImpl(
-    baseQueries: Seq[BaseQuery],
+    baseQueries: Set[BaseQuery],
     dbAccess: OriginDbAccess,
     pkWorkflow: PkStoreWorkflow,
     dataCopyQueue: DataCopyQueue,
