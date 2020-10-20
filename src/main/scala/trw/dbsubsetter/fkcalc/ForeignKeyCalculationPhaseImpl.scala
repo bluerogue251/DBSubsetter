@@ -17,7 +17,9 @@ final class ForeignKeyCalculationPhaseImpl(
 
   private[this] val counter: AtomicLong = new AtomicLong(foreignKeyTaskQueue.size())
 
-  private[this] val guard: Object = new Object()
+  private[this] val readGuard: Object = new Object()
+
+  private[this] val writeGuard: Object = new Object()
 
   override def runPhase(): Unit = {
     val executorService: ExecutorService =
@@ -57,7 +59,7 @@ final class ForeignKeyCalculationPhaseImpl(
   }
 
   private def dequeueTask(): Option[ForeignKeyTask] = {
-    guard.synchronized {
+    readGuard.synchronized {
       foreignKeyTaskQueue.dequeue()
     }
   }
@@ -77,7 +79,11 @@ final class ForeignKeyCalculationPhaseImpl(
       0
     } else {
       val dbResult = taskHandler.handle(task)
-      keyIngester.ingest(dbResult)
+      var newTaskCount = 0L
+      writeGuard.synchronized {
+        newTaskCount = keyIngester.ingest(dbResult)
+      }
+      newTaskCount
     }
   }
 }
