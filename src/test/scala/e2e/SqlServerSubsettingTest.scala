@@ -8,7 +8,6 @@ abstract class SqlServerSubsettingTest extends SqlServerEnabledTest with Subsett
 
   override def beforeAll(): Unit = {
     super.beforeAll()
-    s"./src/test/util/sqlserver_post_subset.sh ${dbs.origin.host} ${dbs.targetSingleThreaded.name}".!!
     s"./src/test/util/sqlserver_post_subset.sh ${dbs.origin.host} ${dbs.target.name}".!!
   }
 }

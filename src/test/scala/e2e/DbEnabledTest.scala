@@ -15,7 +15,7 @@ abstract class DbEnabledTest[T <: Database] extends FunSuite with BeforeAndAfter
 
   protected def createOriginDatabase(): Unit
 
-  protected def createTargetDatabases(): Unit
+  protected def createTargetDatabase(): Unit
 
   protected def dbs: DatabaseSet[T]
 
@@ -43,7 +43,7 @@ abstract class DbEnabledTest[T <: Database] extends FunSuite with BeforeAndAfter
      * Create origin and target databases
      */
     createOriginDatabase()
-    createTargetDatabases()
+    createTargetDatabase()
 
     /*
      * Create slick connections to the origin and target DBs. These connections are utilities for testing
@@ -51,7 +51,6 @@ abstract class DbEnabledTest[T <: Database] extends FunSuite with BeforeAndAfter
      * to make assertions about their contents, etc.
      */
     originSlick = profile.backend.Database.forURL(dbs.origin.connectionString)
-    targetSingleThreadedSlick = profile.backend.Database.forURL(dbs.targetSingleThreaded.connectionString)
     targetSlick = profile.backend.Database.forURL(dbs.target.connectionString)
 
     /*
@@ -74,7 +73,6 @@ abstract class DbEnabledTest[T <: Database] extends FunSuite with BeforeAndAfter
      * Close slick JDBC connections
      */
     originSlick.close()
-    targetSingleThreadedSlick.close()
     targetSlick.close()
   }
 }

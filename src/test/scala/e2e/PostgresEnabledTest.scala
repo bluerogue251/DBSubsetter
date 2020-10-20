@@ -20,7 +20,7 @@ abstract class PostgresEnabledTest extends DbEnabledTest[PostgresDatabase] {
     createDb(dbs.origin)
   }
 
-  override protected def createTargetDatabases(): Unit = {
+  override protected def createTargetDatabase(): Unit = {
     createDb(dbs.target)
   }
 

@@ -18,7 +18,7 @@ abstract class MySqlEnabledTest extends DbEnabledTest[MySqlDatabase] {
     MysqlEndToEndTestUtil.createSchemas(dbs.origin, additionalSchemas + dbs.origin.name)
   }
 
-  override protected def createTargetDatabases(): Unit = {
+  override protected def createTargetDatabase(): Unit = {
     MysqlEndToEndTestUtil.createSchemas(dbs.target, additionalSchemas + dbs.target.name)
   }
 
