@@ -103,5 +103,6 @@ object ApplicationAkkaStreams {
       new DataCopyPhaseImpl(dataCopyQueue, copiers)
 
     dataCopyPhase.runPhase()
+    dbAccessFactory.closeAllConnections()
   }
 }
