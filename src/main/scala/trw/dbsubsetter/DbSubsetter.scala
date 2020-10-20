@@ -27,15 +27,8 @@ object DbSubsetter {
               new HTTPServer(port)
             }
 
-        config.runMode match {
-          case AkkaStreamsMode =>
-            ApplicationAkkaStreams.run(config, schemaInfo, schemaConfig.baseQueries)
-          case DebugMode =>
-            new ApplicationSingleThreaded(config, schemaInfo, schemaConfig.baseQueries).run()
-        }
-
+        ApplicationAkkaStreams.run(config, schemaInfo, schemaConfig.baseQueries)
         metricsEndpoint.foreach(_.stop())
-
         SubsetCompletedSuccessfully
     }
   }

@@ -14,7 +14,6 @@ case class CommandLineArgs(
     excludeTables: Set[String] = Set.empty,
     excludeColumns: Set[String] = Set.empty,
     tempfileStorageDirectoryOverride: Option[File] = None,
-    runMode: RunMode = AkkaStreamsMode,
     metricsPort: Option[Int] = None
 )
 

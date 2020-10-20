@@ -9,7 +9,7 @@ abstract class PostgresSubsettingTest extends PostgresEnabledTest with Subsettin
   override protected def beforeAll(): Unit = {
     super.beforeAll()
     postSubsetDdlSync(dbs.origin, dbs.targetSingleThreaded)
-    postSubsetDdlSync(dbs.origin, dbs.targetAkkaStreams)
+    postSubsetDdlSync(dbs.origin, dbs.target)
   }
 
   private def postSubsetDdlSync(origin: PostgresDatabase, target: PostgresDatabase): Unit = {

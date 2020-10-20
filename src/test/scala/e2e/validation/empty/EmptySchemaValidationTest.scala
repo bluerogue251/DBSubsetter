@@ -46,7 +46,7 @@ trait EmptySchemaValidationTest extends FunSuiteLike with AssertionUtil {
   private val validConfig: Config =
     ConfigFixtures.emptyConfig.copy(
       originDbConnectionString = dbs.origin.connectionString,
-      targetDbConnectionString = dbs.targetAkkaStreams.connectionString
+      targetDbConnectionString = dbs.target.connectionString
     )
 
   test("Single nonexistent schema") {

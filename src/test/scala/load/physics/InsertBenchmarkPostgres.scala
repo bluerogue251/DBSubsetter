@@ -66,7 +66,7 @@ class InsertBenchmarkPostgres extends PostgresEnabledTest {
     new DatabaseSet[PostgresDatabase](
       originDb,
       defaults.targetSingleThreaded,
-      defaults.targetAkkaStreams
+      defaults.target
     )
   }
 

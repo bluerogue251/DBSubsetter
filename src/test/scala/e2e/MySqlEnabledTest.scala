@@ -20,7 +20,7 @@ abstract class MySqlEnabledTest extends DbEnabledTest[MySqlDatabase] {
 
   override protected def createTargetDatabases(): Unit = {
     MysqlEndToEndTestUtil.createSchemas(dbs.targetSingleThreaded, additionalSchemas + dbs.targetSingleThreaded.name)
-    MysqlEndToEndTestUtil.createSchemas(dbs.targetAkkaStreams, additionalSchemas + dbs.targetAkkaStreams.name)
+    MysqlEndToEndTestUtil.createSchemas(dbs.target, additionalSchemas + dbs.target.name)
   }
 
   override protected def dbs: DatabaseSet[MySqlDatabase] = {
@@ -74,7 +74,7 @@ abstract class MySqlEnabledTest extends DbEnabledTest[MySqlDatabase] {
   override protected def prepareTargetDDL(): Unit = {
     val allSchemas: Set[String] = additionalSchemas + dbs.origin.name
     MysqlEndToEndTestUtil.preSubsetDdlSync(dbs.origin, dbs.targetSingleThreaded, allSchemas)
-    MysqlEndToEndTestUtil.preSubsetDdlSync(dbs.origin, dbs.targetAkkaStreams, allSchemas)
+    MysqlEndToEndTestUtil.preSubsetDdlSync(dbs.origin, dbs.target, allSchemas)
   }
 }
 

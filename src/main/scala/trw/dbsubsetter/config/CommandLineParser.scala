@@ -121,16 +121,6 @@ object CommandLineParser {
               |                           Defaults to the standard tempfile location of your OS
               |""".stripMargin)
 
-    opt[Unit]("singleThreadedDebugMode")
-      .action((_, c) => c.copy(runMode = DebugMode))
-      .text("""Run DBSubsetter in debug mode (NOT recommended)
-              |                           Uses a simplified, single-threaded architecture
-              |                           Avoids using Akka Streams and Chronicle-Queue
-              |                           Ignores `--keyCalculationDbConnectionCount` and `--dataCopyDbConnectionCount` and uses one connection per database
-              |                           Subsetting may be significantly slower
-              |                           The resulting subset should be exactly the same as in regular mode
-              |""".stripMargin)
-
     opt[Unit]("exposeMetrics")
       .action((_, c) => c.copy(metricsPort = Some(9092)))
       .text("""Exposes performance metrics at localhost:9092/metrics

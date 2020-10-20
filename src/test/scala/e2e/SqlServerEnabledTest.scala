@@ -20,7 +20,7 @@ abstract class SqlServerEnabledTest extends DbEnabledTest[SqlServerDatabase] {
 
   override protected def createTargetDatabases(): Unit = {
     createEmptyDb(dbs.targetSingleThreaded.name)
-    createEmptyDb(dbs.targetAkkaStreams.name)
+    createEmptyDb(dbs.target.name)
     Thread.sleep(2000) // Try to get around flaky SqlServer tests
   }
 
@@ -50,7 +50,7 @@ abstract class SqlServerEnabledTest extends DbEnabledTest[SqlServerDatabase] {
 
   override protected def prepareTargetDDL(): Unit = {
     s"./src/test/util/sync_sqlserver_origin_to_target.sh ${dbs.origin.host} ${dbs.origin.name} ${dbs.targetSingleThreaded.name}".!!
-    s"./src/test/util/sync_sqlserver_origin_to_target.sh ${dbs.origin.host} ${dbs.origin.name} ${dbs.targetAkkaStreams.name}".!!
+    s"./src/test/util/sync_sqlserver_origin_to_target.sh ${dbs.origin.host} ${dbs.origin.name} ${dbs.target.name}".!!
   }
 
   private def createEmptyDb(dbName: String): Unit = {

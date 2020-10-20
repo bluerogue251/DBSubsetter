@@ -17,20 +17,11 @@ import scala.concurrent.duration.Duration
 trait LoadTest[T <: Database] extends SubsettingTest[T] {
 
   /**
-    * The maximum amount of time the subsetting run is allowed to take in `--singleThreadedDebugMode`
-    */
-  protected def debugModeLimit: Duration
-
-  /**
     * The maximum amount of time the subsetting run is allowed to take in its normal running mode
     */
   protected def akkaStreamsModeLimit: Duration
 
-  test("Check that single threaded runtime did not significantly increase") {
-    assert(debugModeResult.runDuration < debugModeLimit)
-  }
-
   test("Check that Akka Streams runtime did not significantly increase") {
-    assert(akkaStreamsModeResult.runDuration < akkaStreamsModeLimit)
+    assert(subsettingResult.runDuration < akkaStreamsModeLimit)
   }
 }

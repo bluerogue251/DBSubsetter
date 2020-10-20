@@ -34,9 +34,7 @@ abstract class DbEnabledTest[T <: Database] extends FunSuite with BeforeAndAfter
    */
   protected var originSlick: JdbcBackend#DatabaseDef = _
 
-  protected var targetSingleThreadedSlick: JdbcBackend#DatabaseDef = _
-
-  protected var targetAkkaStreamsSlick: JdbcBackend#DatabaseDef = _
+  protected var targetSlick: JdbcBackend#DatabaseDef = _
 
   override protected def beforeAll(): Unit = {
     super.beforeAll()
@@ -54,7 +52,7 @@ abstract class DbEnabledTest[T <: Database] extends FunSuite with BeforeAndAfter
      */
     originSlick = profile.backend.Database.forURL(dbs.origin.connectionString)
     targetSingleThreadedSlick = profile.backend.Database.forURL(dbs.targetSingleThreaded.connectionString)
-    targetAkkaStreamsSlick = profile.backend.Database.forURL(dbs.targetAkkaStreams.connectionString)
+    targetSlick = profile.backend.Database.forURL(dbs.target.connectionString)
 
     /*
      * Set up the DDL and DML in the origin DB
@@ -77,6 +75,6 @@ abstract class DbEnabledTest[T <: Database] extends FunSuite with BeforeAndAfter
      */
     originSlick.close()
     targetSingleThreadedSlick.close()
-    targetAkkaStreamsSlick.close()
+    targetSlick.close()
   }
 }

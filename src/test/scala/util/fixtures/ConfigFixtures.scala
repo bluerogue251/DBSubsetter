@@ -1,6 +1,6 @@
 package util.fixtures
 
-import trw.dbsubsetter.config.{AkkaStreamsMode, Config}
+import trw.dbsubsetter.config.Config
 
 object ConfigFixtures {
   val emptyConfig: Config =
@@ -10,7 +10,6 @@ object ConfigFixtures {
       keyCalculationDbConnectionCount = 1,
       dataCopyDbConnectionCount = 1,
       tempfileStorageDirectoryOverride = None,
-      runMode = AkkaStreamsMode,
       metricsPort = None
     )
 }

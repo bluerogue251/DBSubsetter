@@ -22,7 +22,7 @@ abstract class PostgresEnabledTest extends DbEnabledTest[PostgresDatabase] {
 
   override protected def createTargetDatabases(): Unit = {
     createDb(dbs.targetSingleThreaded)
-    createDb(dbs.targetAkkaStreams)
+    createDb(dbs.target)
   }
 
   override protected def dbs: DatabaseSet[PostgresDatabase] = {
@@ -55,7 +55,7 @@ abstract class PostgresEnabledTest extends DbEnabledTest[PostgresDatabase] {
 
   override protected def prepareTargetDDL(): Unit = {
     syncSchemaToTarget(dbs.origin, dbs.targetSingleThreaded)
-    syncSchemaToTarget(dbs.origin, dbs.targetAkkaStreams)
+    syncSchemaToTarget(dbs.origin, dbs.target)
   }
 
   private[this] def createDb(db: PostgresDatabase): Unit = {

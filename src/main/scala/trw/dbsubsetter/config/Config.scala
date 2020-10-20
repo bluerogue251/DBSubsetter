@@ -8,6 +8,5 @@ case class Config(
     keyCalculationDbConnectionCount: Int,
     dataCopyDbConnectionCount: Int,
     tempfileStorageDirectoryOverride: Option[File],
-    runMode: RunMode,
     metricsPort: Option[Int]
 )
