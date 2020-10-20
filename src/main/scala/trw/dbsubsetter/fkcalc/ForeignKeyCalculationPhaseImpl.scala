@@ -1,4 +1,4 @@
-package trw.dbsubsetter.fkcalc.basequery
+package trw.dbsubsetter.fkcalc
 
 import java.util.concurrent.{CountDownLatch, ExecutorService, Executors}
 

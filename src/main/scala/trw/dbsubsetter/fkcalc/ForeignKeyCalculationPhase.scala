@@ -1,4 +1,4 @@
-package trw.dbsubsetter.fkcalc.basequery
+package trw.dbsubsetter.fkcalc
 
 trait ForeignKeyCalculationPhase {
   def runPhase()
