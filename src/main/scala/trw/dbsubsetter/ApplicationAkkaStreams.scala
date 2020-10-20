@@ -63,27 +63,29 @@ object ApplicationAkkaStreams {
     baseQueryPhase.runPhase()
     dbAccessFactory.closeAllConnections()
 
-    implicit val system: ActorSystem = ActorSystem("DbSubsetter")
-    implicit val materializer: ActorMaterializer = ActorMaterializer()
-    implicit val ec: ExecutionContext = system.dispatcher
-    val pkStoreActorRef: ActorRef = system.actorOf(PkStoreActor.props(pkStoreWorkflow))
+    if (fkTaskQueue.nonEmpty()) {
+      implicit val system: ActorSystem = ActorSystem("DbSubsetter")
+      implicit val materializer: ActorMaterializer = ActorMaterializer()
+      implicit val ec: ExecutionContext = system.dispatcher
+      val pkStoreActorRef: ActorRef = system.actorOf(PkStoreActor.props(pkStoreWorkflow))
 
-    val keyQueryPhase: Future[Done] =
-      KeyQueryGraphFactory
-        .build(
-          config,
-          pkStoreActorRef,
-          dbAccessFactory,
-          fkTaskGenerator,
-          fkTaskQueue,
-          dataCopyQueue
-        )
-        .run()
+      val keyQueryPhase: Future[Done] =
+        KeyQueryGraphFactory
+          .build(
+            config,
+            pkStoreActorRef,
+            dbAccessFactory,
+            fkTaskGenerator,
+            fkTaskQueue,
+            dataCopyQueue
+          )
+          .run()
 
-    // Wait for the key query phase to complete. Use `result` rather than `ready` to ensure an exception is thrown on failure.
-    Await.result(keyQueryPhase, Duration.Inf)
-    system.terminate()
-    dbAccessFactory.closeAllConnections()
+      // Wait for the key query phase to complete. Use `result` rather than `ready` to ensure an exception is thrown on failure.
+      Await.result(keyQueryPhase, Duration.Inf)
+      system.terminate()
+      dbAccessFactory.closeAllConnections()
+    }
   }
 
   def runDataCopyPhase(

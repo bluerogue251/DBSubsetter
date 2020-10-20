@@ -106,6 +106,10 @@ private[fktaskqueue] final class ForeignKeyTaskChronicleQueue(config: Config, sc
     queuedTaskCount == 0L
   }
 
+  override def nonEmpty(): Boolean = {
+    queuedTaskCount != 0L
+  }
+
   override def size(): Long = {
     queuedTaskCount
   }
