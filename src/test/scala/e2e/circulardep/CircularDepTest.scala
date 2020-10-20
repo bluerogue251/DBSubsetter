@@ -32,15 +32,20 @@ trait CircularDepTest extends FunSuiteLike with AssertionUtil {
 
   test("All grandparents have correct number of parents") {
     (0 to 10 by 6).foreach { i =>
-      assert(Await.result(targetSingleThreadedSlick.run(ddl.Parents.filter(_.grandparentId === i).size.result), Duration.Inf) === 10)
-      assert(Await.result(targetAkkaStreamsSlick.run(ddl.Parents.filter(_.grandparentId === i).size.result), Duration.Inf) === 10)
+      assert(
+        Await.result(
+          targetSlick.run(ddl.Parents.filter(_.grandparentId === i).size.result),
+          Duration.Inf
+        ) === 10
+      )
     }
   }
 
   test("All parents have correct number of children") {
     (0 to 9).foreach { i =>
-      assert(Await.result(targetSingleThreadedSlick.run(ddl.Children.filter(_.parentId === i).size.result), Duration.Inf) === 5)
-      assert(Await.result(targetAkkaStreamsSlick.run(ddl.Children.filter(_.parentId === i).size.result), Duration.Inf) === 5)
+      assert(
+        Await.result(targetSlick.run(ddl.Children.filter(_.parentId === i).size.result), Duration.Inf) === 5
+      )
     }
   }
 }

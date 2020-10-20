@@ -18,9 +18,8 @@ abstract class SqlServerEnabledTest extends DbEnabledTest[SqlServerDatabase] {
     createEmptyDb(dbs.origin.name)
   }
 
-  override protected def createTargetDatabases(): Unit = {
-    createEmptyDb(dbs.targetSingleThreaded.name)
-    createEmptyDb(dbs.targetAkkaStreams.name)
+  override protected def createTargetDatabase(): Unit = {
+    createEmptyDb(dbs.target.name)
     Thread.sleep(2000) // Try to get around flaky SqlServer tests
   }
 
@@ -28,13 +27,11 @@ abstract class SqlServerEnabledTest extends DbEnabledTest[SqlServerDatabase] {
     val host = Properties.envOrElse("DB_SUBSETTER_SQL_SERVER_HOST", "localhost")
     val port = Ports.sharedSqlServerPort
     val originDbName = s"${testName}_origin"
-    val targetSingleThreadedDbName = s"${testName}_target_single_threaded"
-    val targetAkkaStreamsDbName = s"${testName}_target_akka_streams"
+    val targetDbName = s"${testName}_target"
 
     new DatabaseSet(
       buildDatabase(host, originDbName, port),
-      buildDatabase(host, targetSingleThreadedDbName, port),
-      buildDatabase(host, targetAkkaStreamsDbName, port)
+      buildDatabase(host, targetDbName, port)
     )
   }
 
@@ -49,8 +46,7 @@ abstract class SqlServerEnabledTest extends DbEnabledTest[SqlServerDatabase] {
   override protected def prepareOriginDML(): Unit
 
   override protected def prepareTargetDDL(): Unit = {
-    s"./src/test/util/sync_sqlserver_origin_to_target.sh ${dbs.origin.host} ${dbs.origin.name} ${dbs.targetSingleThreaded.name}".!!
-    s"./src/test/util/sync_sqlserver_origin_to_target.sh ${dbs.origin.host} ${dbs.origin.name} ${dbs.targetAkkaStreams.name}".!!
+    s"./src/test/util/sync_sqlserver_origin_to_target.sh ${dbs.origin.host} ${dbs.origin.name} ${dbs.target.name}".!!
   }
 
   private def createEmptyDb(dbName: String): Unit = {

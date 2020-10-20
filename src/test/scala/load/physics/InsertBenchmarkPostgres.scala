@@ -65,8 +65,7 @@ class InsertBenchmarkPostgres extends PostgresEnabledTest {
 
     new DatabaseSet[PostgresDatabase](
       originDb,
-      defaults.targetSingleThreaded,
-      defaults.targetAkkaStreams
+      defaults.target
     )
   }
 
@@ -103,7 +102,7 @@ class InsertBenchmarkPostgres extends PostgresEnabledTest {
       bulkCopy10000
     )
 
-    Await.ready(targetSingleThreadedSlick.run(createTableStatements), Duration.Inf)
+    Await.ready(targetSlick.run(createTableStatements), Duration.Inf)
   }
 
   test("JDBC Batch Insert 100 Rows At A Time") {
@@ -337,7 +336,7 @@ class InsertBenchmarkPostgres extends PostgresEnabledTest {
 
   private[this] lazy val targetJdbcConnection: Connection = {
     val connectionString =
-      s"jdbc:postgresql://localhost:${dbs.targetSingleThreaded.port}/${dbs.targetSingleThreaded.name}?user=postgres"
+      s"jdbc:postgresql://localhost:${dbs.target.port}/${dbs.target.name}?user=postgres"
     val connection: Connection = DriverManager.getConnection(connectionString)
     connection.setAutoCommit(false)
     connection

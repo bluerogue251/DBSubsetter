@@ -25,12 +25,7 @@ services:
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: "true"
 
-  - name: mysql_target_single_threaded
-    image: mysql:8.0.3
-    environment:
-      MYSQL_ALLOW_EMPTY_PASSWORD: "true"
-
-  - name: mysql_target_akka_streams
+  - name: mysql_target
     image: mysql:8.0.3
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: "true"
@@ -62,16 +57,14 @@ steps:
       DB_SUBSETTER_POSTGRES_HOST: postgres
       DB_SUBSETTER_SQL_SERVER_HOST: sql_server
       DB_SUBSETTER_MYSQL_ORIGIN_HOST: mysql_origin
-      DB_SUBSETTER_MYSQL_TARGET_SINGLE_THREADED_HOST: mysql_target_single_threaded
-      DB_SUBSETTER_MYSQL_TARGET_AKKA_STREAMS_HOST: mysql_target_akka_streams
+      DB_SUBSETTER_MYSQL_TARGET_HOST: mysql_target
       DB_SUBSETTER_MYSQL_ORIGIN_PORT: 3306
-      DB_SUBSETTER_MYSQL_TARGET_SINGLE_THREADED_PORT: 3306
-      DB_SUBSETTER_MYSQL_TARGET_AKKA_STREAMS_PORT: 3306
+      DB_SUBSETTER_MYSQL_TARGET_PORT: 3306
     commands:
       - sbt "testOnly e2e.*"
 
 ---
 kind: signature
-hmac: 38a2c7f94f43d2fc7e0a792583f543a7fd1ce1e01d5f187104167e657dc62569
+hmac: c738f6ba607e3b4763d6b2e2c5f35fce5510c201b9310b78fc0bce20a1c5ed21
 
 ...

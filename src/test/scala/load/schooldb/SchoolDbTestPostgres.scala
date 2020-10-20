@@ -17,9 +17,7 @@ class SchoolDbTestPostgres extends PostgresSubsettingTest with LoadTest[Postgres
    * only catching major performance degradations. For more rigorous testing, do load testing on AWS.
    * See the load-test directory for details.
    */
-  override val debugModeLimit: Duration = 25.seconds
-
-  override val akkaStreamsModeLimit: Duration = 20.seconds
+  override val runtimeLimit: Duration = 20.seconds
 
   /*
    * Only to be used when manually changing the origin db definition. In this case, the origin DB needs

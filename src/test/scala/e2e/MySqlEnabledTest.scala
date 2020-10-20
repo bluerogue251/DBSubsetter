@@ -18,51 +18,36 @@ abstract class MySqlEnabledTest extends DbEnabledTest[MySqlDatabase] {
     MysqlEndToEndTestUtil.createSchemas(dbs.origin, additionalSchemas + dbs.origin.name)
   }
 
-  override protected def createTargetDatabases(): Unit = {
-    MysqlEndToEndTestUtil.createSchemas(dbs.targetSingleThreaded, additionalSchemas + dbs.targetSingleThreaded.name)
-    MysqlEndToEndTestUtil.createSchemas(dbs.targetAkkaStreams, additionalSchemas + dbs.targetAkkaStreams.name)
+  override protected def createTargetDatabase(): Unit = {
+    MysqlEndToEndTestUtil.createSchemas(dbs.target, additionalSchemas + dbs.target.name)
   }
 
   override protected def dbs: DatabaseSet[MySqlDatabase] = {
     val mySqlOriginHost: String =
       Properties.envOrElse("DB_SUBSETTER_MYSQL_ORIGIN_HOST", "0.0.0.0")
 
-    val mySqlTargetSingleThreadedHost: String =
-      Properties.envOrElse("DB_SUBSETTER_MYSQL_TARGET_SINGLE_THREADED_HOST", "0.0.0.0")
-
-    val mySqlTargetAkkaStreamsHost: String =
-      Properties.envOrElse("DB_SUBSETTER_MYSQL_TARGET_AKKA_STREAMS_HOST", "0.0.0.0")
+    val mySqlTargetHost: String =
+      Properties.envOrElse("DB_SUBSETTER_MYSQL_TARGET_HOST", "0.0.0.0")
 
     val mySqlOriginPort: Int =
       Properties.envOrElse("DB_SUBSETTER_MYSQL_ORIGIN_PORT", Ports.sharedMySqlOriginPort.toString).toInt
 
-    val mySqlTargetSingleThreadedPort: Int =
+    val mySqlTargetPort: Int =
       Properties
-        .envOrElse("DB_SUBSETTER_MYSQL_TARGET_SINGLE_THREADED_PORT", Ports.sharedMySqlTargetSingleThreadedPort.toString)
+        .envOrElse("DB_SUBSETTER_MYSQL_TARGET_PORT", Ports.sharedMySqlTargetPort.toString)
         .toInt
 
-    val mySqlTargetAkkaStreamsPort: Int =
-      Properties
-        .envOrElse("DB_SUBSETTER_MYSQL_TARGET_AKKA_STREAMS_PORT", Ports.sharedMySqlTargetAkkaStreamsPort.toString)
-        .toInt
+    lazy val mySqlOrigin: MySqlDatabase =
+      buildDatabase(mySqlOriginHost, mySqlOriginPort)
 
-    lazy val mysqlOrigin: MySqlDatabase = buildDatabase(mySqlOriginHost, mySqlOriginPort)
-
-    lazy val mysqlTargetSingleThreaded: MySqlDatabase =
-      buildDatabase(mySqlTargetSingleThreadedHost, mySqlTargetSingleThreadedPort)
-
-    lazy val mysqlTargetAkkaStreams: MySqlDatabase =
-      buildDatabase(mySqlTargetAkkaStreamsHost, mySqlTargetAkkaStreamsPort)
+    lazy val mySqlTarget: MySqlDatabase =
+      buildDatabase(mySqlTargetHost, mySqlTargetPort)
 
     def buildDatabase(host: String, port: Int): MySqlDatabase = {
       new MySqlDatabase(host, port, testName)
     }
 
-    new DatabaseSet[MySqlDatabase](
-      mysqlOrigin,
-      mysqlTargetSingleThreaded,
-      mysqlTargetAkkaStreams
-    )
+    new DatabaseSet[MySqlDatabase](mySqlOrigin, mySqlTarget)
   }
 
   override protected def prepareOriginSchemas(): Unit = {}
@@ -73,8 +58,7 @@ abstract class MySqlEnabledTest extends DbEnabledTest[MySqlDatabase] {
 
   override protected def prepareTargetDDL(): Unit = {
     val allSchemas: Set[String] = additionalSchemas + dbs.origin.name
-    MysqlEndToEndTestUtil.preSubsetDdlSync(dbs.origin, dbs.targetSingleThreaded, allSchemas)
-    MysqlEndToEndTestUtil.preSubsetDdlSync(dbs.origin, dbs.targetAkkaStreams, allSchemas)
+    MysqlEndToEndTestUtil.preSubsetDdlSync(dbs.origin, dbs.target, allSchemas)
   }
 }
 

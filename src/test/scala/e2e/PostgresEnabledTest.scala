@@ -20,9 +20,8 @@ abstract class PostgresEnabledTest extends DbEnabledTest[PostgresDatabase] {
     createDb(dbs.origin)
   }
 
-  override protected def createTargetDatabases(): Unit = {
-    createDb(dbs.targetSingleThreaded)
-    createDb(dbs.targetAkkaStreams)
+  override protected def createTargetDatabase(): Unit = {
+    createDb(dbs.target)
   }
 
   override protected def dbs: DatabaseSet[PostgresDatabase] = {
@@ -30,13 +29,11 @@ abstract class PostgresEnabledTest extends DbEnabledTest[PostgresDatabase] {
     val port = Ports.sharedPostgresPort
 
     val originDb = s"${testName}_origin"
-    val targetSingleThreadedDb = s"${testName}_target_single_threaded"
-    val targetAkkaStreamsDb = s"${testName}_target_akka_streams"
+    val targetDb = s"${testName}_target"
 
     new DatabaseSet(
       new PostgresDatabase(host, port, originDb),
-      new PostgresDatabase(host, port, targetSingleThreadedDb),
-      new PostgresDatabase(host, port, targetAkkaStreamsDb)
+      new PostgresDatabase(host, port, targetDb)
     )
   }
 
@@ -54,8 +51,7 @@ abstract class PostgresEnabledTest extends DbEnabledTest[PostgresDatabase] {
   override protected def prepareOriginDML(): Unit
 
   override protected def prepareTargetDDL(): Unit = {
-    syncSchemaToTarget(dbs.origin, dbs.targetSingleThreaded)
-    syncSchemaToTarget(dbs.origin, dbs.targetAkkaStreams)
+    syncSchemaToTarget(dbs.origin, dbs.target)
   }
 
   private[this] def createDb(db: PostgresDatabase): Unit = {
