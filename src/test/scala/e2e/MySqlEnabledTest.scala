@@ -34,7 +34,7 @@ abstract class MySqlEnabledTest extends DbEnabledTest[MySqlDatabase] {
 
     val mySqlTargetPort: Int =
       Properties
-        .envOrElse("DB_SUBSETTER_MYSQL_TARGET_PORT", Ports.sharedMySqlTargetAkkaStreamsPort.toString)
+        .envOrElse("DB_SUBSETTER_MYSQL_TARGET_PORT", Ports.sharedMySqlTargetPort.toString)
         .toInt
 
     lazy val mysqlOrigin: MySqlDatabase =

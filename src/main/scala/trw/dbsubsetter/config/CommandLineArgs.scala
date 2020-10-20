@@ -16,7 +16,3 @@ case class CommandLineArgs(
     tempfileStorageDirectoryOverride: Option[File] = None,
     metricsPort: Option[Int] = None
 )
-
-sealed trait RunMode
-case object DebugMode extends RunMode
-case object AkkaStreamsMode extends RunMode

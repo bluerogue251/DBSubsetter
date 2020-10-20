@@ -33,7 +33,7 @@ trait SubsettingTest[T <: Database] extends DbEnabledTest[T] {
     val finalArgs: Array[String] = defaultArgs ++ programArgs
 
     val result = timedSubsetMilliseconds(finalArgs)
-    println(s"Akka Streams Mode Result: $result")
+    println(s"Subsetting Result: $result")
     result
   }
 
