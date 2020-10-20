@@ -6,6 +6,7 @@ import trw.dbsubsetter.datacopy.DataCopierFactoryImpl
 import trw.dbsubsetter.datacopyqueue.{DataCopyQueue, DataCopyQueueFactory}
 import trw.dbsubsetter.db.{DbAccessFactory, PrimaryKeyValue, SchemaInfo, Table}
 import trw.dbsubsetter.fktaskqueue.{ForeignKeyTaskQueue, ForeignKeyTaskQueueFactory}
+import trw.dbsubsetter.keyingestion.{KeyIngester, KeyIngesterImpl}
 import trw.dbsubsetter.primarykeystore.{PrimaryKeyStore, PrimaryKeyStoreFactory}
 import trw.dbsubsetter.workflow._
 
@@ -35,15 +36,11 @@ class ApplicationSingleThreaded(config: Config, schemaInfo: SchemaInfo, baseQuer
   private[this] val dataCopyQueue: DataCopyQueue =
     DataCopyQueueFactory.buildDataCopyQueue(config, schemaInfo)
 
+  private[this] val keyIngester: KeyIngester =
+    new KeyIngesterImpl(pkWorkflow, dataCopyQueue, fkTaskGenerator, fkTaskQueue)
+
   private[this] val baseQueryPhase: BaseQueryPhase =
-    new BaseQueryPhaseImpl(
-      baseQueries,
-      dbAccessFactory.buildOriginDbAccess(),
-      pkWorkflow,
-      dataCopyQueue,
-      fkTaskGenerator,
-      fkTaskQueue
-    )
+    new BaseQueryPhaseImpl(baseQueries, dbAccessFactory.buildOriginDbAccess(), keyIngester)
 
   def run(): Unit = {
     // Handle all key calculation from base queries
@@ -78,15 +75,7 @@ class ApplicationSingleThreaded(config: Config, schemaInfo: SchemaInfo, baseQuer
 
     if (!isDuplicate) {
       val dbResult = foreignKeyTaskHandler.handle(task)
-      val pksAdded: PksAdded = pkWorkflow.add(dbResult)
-
-      // Queue up the newly seen rows to be copied into the target database
-      dataCopyQueue.enqueue(pksAdded)
-
-      // Queue up any new tasks resulting from this stage
-      fkTaskGenerator
-        .generateFrom(pksAdded)
-        .foreach(fkTaskQueue.enqueue)
+      keyIngester.ingest(dbResult)
     }
   }
 }

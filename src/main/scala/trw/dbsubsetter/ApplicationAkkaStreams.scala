@@ -10,6 +10,7 @@ import trw.dbsubsetter.datacopy.{DataCopier, DataCopierFactory, DataCopierFactor
 import trw.dbsubsetter.datacopyqueue.{DataCopyQueue, DataCopyQueueFactory}
 import trw.dbsubsetter.db.{DbAccessFactory, SchemaInfo}
 import trw.dbsubsetter.fktaskqueue.{ForeignKeyTaskQueue, ForeignKeyTaskQueueFactory}
+import trw.dbsubsetter.keyingestion.{KeyIngester, KeyIngesterImpl}
 import trw.dbsubsetter.primarykeystore.{PrimaryKeyStore, PrimaryKeyStoreFactory}
 import trw.dbsubsetter.workflow._
 
@@ -31,15 +32,14 @@ object ApplicationAkkaStreams {
     val fkTaskGenerator: FkTaskGenerator = new FkTaskGenerator(schemaInfo)
     val fkTaskQueue: ForeignKeyTaskQueue = ForeignKeyTaskQueueFactory.build(config, schemaInfo)
 
+    val keyIngester: KeyIngester = new KeyIngesterImpl(pkStoreWorkflow, dataCopyQueue, fkTaskGenerator, fkTaskQueue)
+
     def runBaseQueryPhase(): Unit = {
       val baseQueryPhase: BaseQueryPhase =
         new BaseQueryPhaseImpl(
           baseQueries,
           dbAccessFactory.buildOriginDbAccess(),
-          pkStoreWorkflow,
-          dataCopyQueue,
-          fkTaskGenerator,
-          fkTaskQueue
+          keyIngester
         )
 
       baseQueryPhase.runPhase()
