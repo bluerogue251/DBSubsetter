@@ -11,7 +11,7 @@ import akka.stream.scaladsl.{Balance, Broadcast, Flow, GraphDSL, Merge, Partitio
 import akka.util.Timeout
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.datacopyqueue.DataCopyQueue
-import trw.dbsubsetter.db.{DbAccessFactory, SchemaInfo}
+import trw.dbsubsetter.db.DbAccessFactory
 import trw.dbsubsetter.fktaskqueue.ForeignKeyTaskQueue
 import trw.dbsubsetter.workflow.{AlreadySeen, _}
 
@@ -21,7 +21,6 @@ object KeyQueryGraphFactory {
 
   def build(
       config: Config,
-      schemaInfo: SchemaInfo,
       pkStore: ActorRef,
       dbAccessFactory: DbAccessFactory,
       fkTaskGenerator: FkTaskGenerator,

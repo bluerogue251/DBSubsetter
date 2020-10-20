@@ -72,7 +72,6 @@ object ApplicationAkkaStreams {
       KeyQueryGraphFactory
         .build(
           config,
-          schemaInfo,
           pkStoreActorRef,
           dbAccessFactory,
           fkTaskGenerator,
