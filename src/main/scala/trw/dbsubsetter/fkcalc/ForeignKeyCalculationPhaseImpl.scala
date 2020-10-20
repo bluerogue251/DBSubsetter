@@ -45,11 +45,14 @@ final class ForeignKeyCalculationPhaseImpl(
   }
 
   private def calculateTillExhausted(taskHandler: ForeignKeyTaskHandler): Unit = {
-    var nextTask = dequeueTask()
-    while (nextTask.nonEmpty || counter.get() != 0L) {
-      val newTasksAdded: Long = handle(taskHandler, nextTask.get)
-      counter.addAndGet(newTasksAdded - 1)
-      nextTask = dequeueTask()
+    while (counter.get() > 0) {
+      var nextTask = dequeueTask()
+      while (nextTask.nonEmpty) {
+        val newTasksAdded: Long = handle(taskHandler, nextTask.get)
+        counter.addAndGet(newTasksAdded - 1)
+        nextTask = dequeueTask()
+      }
+      Thread.sleep(50)
     }
   }
 
