@@ -1,7 +1,7 @@
 package trw.dbsubsetter
 
 import akka.Done
-import akka.actor.{ActorRef, ActorSystem, PoisonPill}
+import akka.actor.{ActorRef, ActorSystem}
 import akka.stream.ActorMaterializer
 import trw.dbsubsetter.akkastreams.{DataCopyPhase, DataCopyPhaseImpl, KeyQueryGraphFactory, PkStoreActor}
 import trw.dbsubsetter.basequery.{BaseQueryPhase, BaseQueryPhaseImpl}
@@ -19,75 +19,89 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 
 object ApplicationAkkaStreams {
   def run(config: Config, schemaInfo: SchemaInfo, baseQueries: Set[BaseQuery]): Unit = {
-    implicit val system: ActorSystem = ActorSystem("DbSubsetter")
-    implicit val materializer: ActorMaterializer = ActorMaterializer()
-    implicit val ec: ExecutionContext = system.dispatcher
-
-    val pkStore: PrimaryKeyStore = PrimaryKeyStoreFactory.buildPrimaryKeyStore(schemaInfo)
-    val pkStoreWorkflow: PkStoreWorkflow = new PkStoreWorkflow(pkStore, schemaInfo)
-
     val dbAccessFactory: DbAccessFactory = new DbAccessFactory(config, schemaInfo)
     val dataCopyQueue: DataCopyQueue = DataCopyQueueFactory.buildDataCopyQueue(config, schemaInfo)
 
+    runKeyCalculationPhase(
+      config,
+      baseQueries,
+      dbAccessFactory,
+      schemaInfo,
+      dataCopyQueue
+    )
+
+    runDataCopyPhase(
+      dbAccessFactory,
+      schemaInfo,
+      config.dataCopyDbConnectionCount,
+      dataCopyQueue
+    )
+  }
+
+  // Ensure all primary key store things stay inside so that they are JVM Garbage Collected Earlier
+  def runKeyCalculationPhase(
+      config: Config,
+      baseQueries: Set[BaseQuery],
+      dbAccessFactory: DbAccessFactory,
+      schemaInfo: SchemaInfo,
+      dataCopyQueue: DataCopyQueue
+  ): Unit = {
     val fkTaskGenerator: FkTaskGenerator = new FkTaskGenerator(schemaInfo)
     val fkTaskQueue: ForeignKeyTaskQueue = ForeignKeyTaskQueueFactory.build(config, schemaInfo)
 
+    val pkStore: PrimaryKeyStore = PrimaryKeyStoreFactory.buildPrimaryKeyStore(schemaInfo)
+    val pkStoreWorkflow: PkStoreWorkflow = new PkStoreWorkflow(pkStore, schemaInfo)
     val keyIngester: KeyIngester = new KeyIngesterImpl(pkStoreWorkflow, dataCopyQueue, fkTaskGenerator, fkTaskQueue)
 
-    def runBaseQueryPhase(): Unit = {
-      val baseQueryPhase: BaseQueryPhase =
-        new BaseQueryPhaseImpl(
-          baseQueries,
-          dbAccessFactory.buildOriginDbAccess(),
-          keyIngester
-        )
-
-      baseQueryPhase.runPhase()
-    }
-
-    def runKeyCalculationPhase(): Unit = {
-      val pkStore: ActorRef = system.actorOf(PkStoreActor.props(pkStoreWorkflow))
-
-      val keyQueryPhase: Future[Done] =
-        KeyQueryGraphFactory
-          .build(
-            config,
-            schemaInfo,
-            pkStore,
-            dbAccessFactory,
-            fkTaskGenerator,
-            fkTaskQueue,
-            dataCopyQueue
-          )
-          .run()
-
-      // Wait for the key query phase to complete. Use `result` rather than `ready` to ensure an exception is thrown on failure.
-      Await.result(keyQueryPhase, Duration.Inf)
-
-      // Explicitly remove the actor from the actor system to allow for JVM Garbage Collection
-      pkStore.tell(PoisonPill, ActorRef.noSender)
-    }
-
-    def runDataCopyPhase(): Unit = {
-      val copierFactory: DataCopierFactory =
-        new DataCopierFactoryImpl(dbAccessFactory, schemaInfo)
-
-      val copiers: Seq[DataCopier] =
-        (1 to config.dataCopyDbConnectionCount).map(_ => copierFactory.build())
-
-      val dataCopyPhase: DataCopyPhase =
-        new DataCopyPhaseImpl(dataCopyQueue, copiers)
-
-      dataCopyPhase.runPhase()
-    }
-
-    // Encourage JVM to garbage-collect the Primary Key Store as early as possible
-    runBaseQueryPhase()
-    runKeyCalculationPhase()
-    runDataCopyPhase()
-
-    // Clean up after successful subsetting run
+    // Run Base Query Phase
+    val baseQueryPhase: BaseQueryPhase =
+      new BaseQueryPhaseImpl(
+        baseQueries,
+        dbAccessFactory.buildOriginDbAccess(),
+        keyIngester
+      )
+    baseQueryPhase.runPhase()
     dbAccessFactory.closeAllConnections()
+
+    implicit val system: ActorSystem = ActorSystem("DbSubsetter")
+    implicit val materializer: ActorMaterializer = ActorMaterializer()
+    implicit val ec: ExecutionContext = system.dispatcher
+    val pkStoreActorRef: ActorRef = system.actorOf(PkStoreActor.props(pkStoreWorkflow))
+
+    val keyQueryPhase: Future[Done] =
+      KeyQueryGraphFactory
+        .build(
+          config,
+          schemaInfo,
+          pkStoreActorRef,
+          dbAccessFactory,
+          fkTaskGenerator,
+          fkTaskQueue,
+          dataCopyQueue
+        )
+        .run()
+
+    // Wait for the key query phase to complete. Use `result` rather than `ready` to ensure an exception is thrown on failure.
+    Await.result(keyQueryPhase, Duration.Inf)
     system.terminate()
+    dbAccessFactory.closeAllConnections()
+  }
+
+  def runDataCopyPhase(
+      dbAccessFactory: DbAccessFactory,
+      schemaInfo: SchemaInfo,
+      dataCopyDbConnectionCount: Int,
+      dataCopyQueue: DataCopyQueue
+  ): Unit = {
+    val copierFactory: DataCopierFactory =
+      new DataCopierFactoryImpl(dbAccessFactory, schemaInfo)
+
+    val copiers: Seq[DataCopier] =
+      (1 to dataCopyDbConnectionCount).map(_ => copierFactory.build())
+
+    val dataCopyPhase: DataCopyPhase =
+      new DataCopyPhaseImpl(dataCopyQueue, copiers)
+
+    dataCopyPhase.runPhase()
   }
 }

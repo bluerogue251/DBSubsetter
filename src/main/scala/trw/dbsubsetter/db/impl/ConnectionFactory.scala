@@ -18,6 +18,7 @@ private[db] final class ConnectionFactory {
 
   def closeAllConnections(): Unit = {
     registry.foreach(_.close())
+    registry.clear()
   }
 
   def getReadOnlyConnection(connectionString: String): Connection = {
