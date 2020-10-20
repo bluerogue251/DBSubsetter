@@ -3,7 +3,7 @@ package trw.dbsubsetter
 import io.prometheus.client.exporter.HTTPServer
 import io.prometheus.client.hotspot.DefaultExports
 import trw.dbsubsetter.config._
-import trw.dbsubsetter.db.{BaseQueries, DbMetadataQueries, OK, SchemaInfoRetrieval, SchemaValidation, ValidationError}
+import trw.dbsubsetter.db.{DbMetadataQueries, OK, SchemaInfoRetrieval, SchemaValidation, ValidationError}
 
 object DbSubsetter {
   def run(schemaConfig: SchemaConfig, config: Config): DbSubsetterResult = {
@@ -19,7 +19,6 @@ object DbSubsetter {
 
       case OK =>
         val schemaInfo = SchemaInfoRetrieval.getSchemaInfo(dbMetadata, schemaConfig)
-        val baseQueries = BaseQueries.get(schemaConfig, schemaInfo)
 
         val metricsEndpoint: Option[HTTPServer] =
           config.metricsPort
@@ -30,9 +29,9 @@ object DbSubsetter {
 
         config.runMode match {
           case AkkaStreamsMode =>
-            ApplicationAkkaStreams.run(config, schemaInfo, baseQueries)
+            ApplicationAkkaStreams.run(config, schemaInfo, schemaConfig.baseQueries)
           case DebugMode =>
-            new ApplicationSingleThreaded(config, schemaInfo, baseQueries).run()
+            new ApplicationSingleThreaded(config, schemaInfo, schemaConfig.baseQueries).run()
         }
 
         metricsEndpoint.foreach(_.stop())

@@ -22,7 +22,7 @@ object ConfigExtractor {
         .map {
           case baseQueryRegex(schemaName, tableName, whereClause, includeChildren) =>
             val table = normalizeTable(schemaName, tableName)
-            ConfigBaseQuery(table, whereClause.trim, includeChildren == "includeChildren")
+            BaseQuery(table, whereClause.trim, includeChildren == "includeChildren")
           case baseQueryString =>
             return Invalid(InvalidBaseQuery(baseQueryString))
         }

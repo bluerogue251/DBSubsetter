@@ -106,6 +106,14 @@ private[fktaskqueue] final class ForeignKeyTaskChronicleQueue(config: Config, sc
     queuedTaskCount == 0L
   }
 
+  override def nonEmpty(): Boolean = {
+    queuedTaskCount != 0L
+  }
+
+  override def size(): Long = {
+    queuedTaskCount
+  }
+
   private[this] def write(writer: ChronicleQueueFkTaskWriter, fetchChildren: Boolean, value: ForeignKeyValue): Unit = {
     val writeMarshallable: WriteMarshallable = writer.writeHandler(fetchChildren, value)
     appender.writeDocument(writeMarshallable)

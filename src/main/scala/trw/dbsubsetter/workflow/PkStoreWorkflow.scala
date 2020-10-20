@@ -9,6 +9,10 @@ final class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
   private[this] val pkValueExtractionFunctions: Map[Table, Keys => PrimaryKeyValue] =
     KeyExtractionUtil.pkExtractionFunctions(schemaInfo)
 
+  def alreadySeen(table: Table, primaryKeyValue: PrimaryKeyValue): Boolean = {
+    pkStore.alreadySeen(table, primaryKeyValue)
+  }
+
   def add(req: OriginDbResult): PksAdded = {
     val OriginDbResult(table, rows, viaTableOpt, fetchChildren) = req
     val pkValueExtractionFunction: Keys => PrimaryKeyValue = pkValueExtractionFunctions(table)

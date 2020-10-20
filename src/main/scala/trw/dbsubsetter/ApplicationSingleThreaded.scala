@@ -1,10 +1,12 @@
 package trw.dbsubsetter
 
-import trw.dbsubsetter.config.Config
+import trw.dbsubsetter.basequery.{BaseQueryPhase, BaseQueryPhaseImpl}
+import trw.dbsubsetter.config.{BaseQuery, Config}
 import trw.dbsubsetter.datacopy.DataCopierFactoryImpl
 import trw.dbsubsetter.datacopyqueue.{DataCopyQueue, DataCopyQueueFactory}
 import trw.dbsubsetter.db.{DbAccessFactory, PrimaryKeyValue, SchemaInfo, Table}
 import trw.dbsubsetter.fktaskqueue.{ForeignKeyTaskQueue, ForeignKeyTaskQueueFactory}
+import trw.dbsubsetter.keyingestion.{KeyIngester, KeyIngesterImpl}
 import trw.dbsubsetter.primarykeystore.{PrimaryKeyStore, PrimaryKeyStoreFactory}
 import trw.dbsubsetter.workflow._
 
@@ -13,8 +15,8 @@ class ApplicationSingleThreaded(config: Config, schemaInfo: SchemaInfo, baseQuer
   private[this] val dbAccessFactory =
     new DbAccessFactory(config, schemaInfo)
 
-  private[this] val originDbWorkflow =
-    new OriginDbWorkflow(config, schemaInfo, dbAccessFactory)
+  private[this] val foreignKeyTaskHandler =
+    new ForeignKeyTaskHandler(dbAccessFactory)
 
   private[this] val dataCopier =
     new DataCopierFactoryImpl(dbAccessFactory, schemaInfo).build()
@@ -25,8 +27,8 @@ class ApplicationSingleThreaded(config: Config, schemaInfo: SchemaInfo, baseQuer
   private[this] val pkWorkflow: PkStoreWorkflow =
     new PkStoreWorkflow(pkStore, schemaInfo)
 
-  private[this] val fkTaskCreationWorkflow: FkTaskCreationWorkflow =
-    new FkTaskCreationWorkflow(schemaInfo)
+  private[this] val fkTaskGenerator: FkTaskGenerator =
+    new FkTaskGenerator(schemaInfo)
 
   private[this] val fkTaskQueue: ForeignKeyTaskQueue =
     ForeignKeyTaskQueueFactory.build(config, schemaInfo)
@@ -34,9 +36,15 @@ class ApplicationSingleThreaded(config: Config, schemaInfo: SchemaInfo, baseQuer
   private[this] val dataCopyQueue: DataCopyQueue =
     DataCopyQueueFactory.buildDataCopyQueue(config, schemaInfo)
 
+  private[this] val keyIngester: KeyIngester =
+    new KeyIngesterImpl(pkWorkflow, dataCopyQueue, fkTaskGenerator, fkTaskQueue)
+
+  private[this] val baseQueryPhase: BaseQueryPhase =
+    new BaseQueryPhaseImpl(baseQueries, dbAccessFactory.buildOriginDbAccess(), keyIngester)
+
   def run(): Unit = {
     // Handle all key calculation from base queries
-    baseQueries.foreach(handleKeyCalculationTask)
+    baseQueryPhase.runPhase()
 
     // Handle all key calculation foreign key tasks
     while (!fkTaskQueue.isEmpty()) {
@@ -66,23 +74,8 @@ class ApplicationSingleThreaded(config: Config, schemaInfo: SchemaInfo, baseQuer
       }
 
     if (!isDuplicate) {
-      handleKeyCalculationTask(task)
+      val dbResult = foreignKeyTaskHandler.handle(task)
+      keyIngester.ingest(dbResult)
     }
-  }
-
-  private def handleKeyCalculationTask(task: OriginDbRequest): Unit = {
-    // Query the origin database
-    val dbResult: OriginDbResult = originDbWorkflow.process(task)
-
-    // Calculate which rows we've seen already
-    val pksAdded: PksAdded = pkWorkflow.add(dbResult)
-
-    // Queue up the newly seen rows to be copied into the target database
-    dataCopyQueue.enqueue(pksAdded)
-
-    // Queue up any new tasks resulting from this stage
-    fkTaskCreationWorkflow
-      .createFkTasks(pksAdded)
-      .foreach(fkTaskQueue.enqueue)
   }
 }
