@@ -37,17 +37,17 @@ abstract class MySqlEnabledTest extends DbEnabledTest[MySqlDatabase] {
         .envOrElse("DB_SUBSETTER_MYSQL_TARGET_PORT", Ports.sharedMySqlTargetPort.toString)
         .toInt
 
-    lazy val mysqlOrigin: MySqlDatabase =
+    lazy val mySqlOrigin: MySqlDatabase =
       buildDatabase(mySqlOriginHost, mySqlOriginPort)
 
-    lazy val mysqlTarget: MySqlDatabase =
+    lazy val mySqlTarget: MySqlDatabase =
       buildDatabase(mySqlTargetHost, mySqlTargetPort)
 
     def buildDatabase(host: String, port: Int): MySqlDatabase = {
       new MySqlDatabase(host, port, testName)
     }
 
-    new DatabaseSet[MySqlDatabase](mysqlOrigin, mysqlTarget)
+    new DatabaseSet[MySqlDatabase](mySqlOrigin, mySqlTarget)
   }
 
   override protected def prepareOriginSchemas(): Unit = {}
