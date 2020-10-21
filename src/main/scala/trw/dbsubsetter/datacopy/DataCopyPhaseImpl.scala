@@ -1,8 +1,7 @@
-package trw.dbsubsetter.akkastreams
+package trw.dbsubsetter.datacopy
 
 import java.util.concurrent.{CountDownLatch, ExecutorService, Executors}
 
-import trw.dbsubsetter.datacopy.DataCopier
 import trw.dbsubsetter.datacopyqueue.DataCopyQueue
 import trw.dbsubsetter.workflow.DataCopyTask
 

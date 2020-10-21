@@ -100,7 +100,7 @@ run_school_db_load_test() {
   sudo -u postgres dropdb --if-exists school_db
   sudo -u postgres createdb school_db
   sudo -u postgres psql --quiet --dbname school_db < /load-test/school-db-pre.sql
-  echo "Running school_db load test"
+  echo "Running school_db load test ($1)"
   /load-test/jdk8/bin/java -Xmx2G -jar /load-test/DBSubsetter-"$1".jar \
     --originDbConnStr "jdbc:postgresql://${pg-origin-ip}:5432/school_db?user=loadtest&password=load-test-pw" \
     --targetDbConnStr "jdbc:postgresql://localhost:5432/school_db?user=loadtest&password=load-test-pw" \
@@ -168,7 +168,7 @@ run_physics_db_load_test() {
   sudo -u postgres dropdb --if-exists physics_db
   sudo -u postgres createdb physics_db
   sudo -u postgres psql --quiet --dbname physics_db < /load-test/physics-db-pre.sql
-  echo "Running physics_db load test"
+  echo "Running physics_db load test ($1)"
   /load-test/jdk8/bin/java -Xmx2G -jar /load-test/DBSubsetter-"$1".jar \
     --originDbConnStr "jdbc:postgresql://${pg-origin-ip}:5432/physics_db?user=loadtest&password=load-test-pw" \
     --targetDbConnStr "jdbc:postgresql://localhost:5432/physics_db?user=loadtest&password=load-test-pw" \
