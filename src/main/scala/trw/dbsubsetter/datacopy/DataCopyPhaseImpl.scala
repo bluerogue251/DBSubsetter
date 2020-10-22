@@ -3,7 +3,6 @@ package trw.dbsubsetter.datacopy
 import java.util.concurrent.{CountDownLatch, ExecutorService, Executors}
 
 import trw.dbsubsetter.datacopyqueue.DataCopyQueue
-import trw.dbsubsetter.workflow.DataCopyTask
 
 final class DataCopyPhaseImpl(queue: DataCopyQueue, copiers: Seq[DataCopier]) extends DataCopyPhase {
 

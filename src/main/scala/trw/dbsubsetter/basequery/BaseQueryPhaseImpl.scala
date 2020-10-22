@@ -1,9 +1,9 @@
 package trw.dbsubsetter.basequery
 
+import trw.dbsubsetter.OriginDbResult
 import trw.dbsubsetter.config.BaseQuery
 import trw.dbsubsetter.db.{Keys, OriginDbAccess}
 import trw.dbsubsetter.keyingestion.KeyIngester
-import trw.dbsubsetter.workflow.OriginDbResult
 
 final class BaseQueryPhaseImpl(
     baseQueries: Set[BaseQuery],

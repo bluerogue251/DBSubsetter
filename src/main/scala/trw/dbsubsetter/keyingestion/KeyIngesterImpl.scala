@@ -1,8 +1,10 @@
 package trw.dbsubsetter.keyingestion
 
+import trw.dbsubsetter.OriginDbResult
 import trw.dbsubsetter.datacopyqueue.DataCopyQueue
+import trw.dbsubsetter.fkcalc.{FkTaskGenerator, ForeignKeyTask}
 import trw.dbsubsetter.fktaskqueue.ForeignKeyTaskQueue
-import trw.dbsubsetter.workflow._
+import trw.dbsubsetter.pkstore.{PkStoreWorkflow, PksAdded}
 
 final class KeyIngesterImpl(
     pkWorkflow: PkStoreWorkflow,

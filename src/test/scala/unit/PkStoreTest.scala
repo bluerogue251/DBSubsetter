@@ -2,7 +2,7 @@ package unit
 
 import org.scalatest.FunSuite
 import trw.dbsubsetter.db.{Column, PrimaryKey, PrimaryKeyValue, Schema, SchemaInfo, Table}
-import trw.dbsubsetter.primarykeystore._
+import trw.dbsubsetter.pkstore._
 
 class PkStoreTest extends FunSuite {
   test("PkStore is conscious of whether children have been processed yet") {

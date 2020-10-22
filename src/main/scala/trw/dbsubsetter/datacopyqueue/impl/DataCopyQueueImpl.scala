@@ -1,11 +1,12 @@
 package trw.dbsubsetter.datacopyqueue.impl
 
 import trw.dbsubsetter.config.Config
+import trw.dbsubsetter.datacopy.DataCopyTask
 import trw.dbsubsetter.datacopyqueue.DataCopyQueue
 import trw.dbsubsetter.db.ColumnTypes.ColumnType
 import trw.dbsubsetter.db.{Constants, Keys, PrimaryKeyValue, SchemaInfo, Table}
 import trw.dbsubsetter.keyextraction.KeyExtractionUtil
-import trw.dbsubsetter.workflow.{DataCopyTask, PksAdded}
+import trw.dbsubsetter.pkstore.PksAdded
 
 import scala.collection.mutable
 

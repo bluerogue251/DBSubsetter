@@ -1,8 +1,7 @@
 package trw.dbsubsetter.datacopy.impl
 
-import trw.dbsubsetter.datacopy.DataCopier
+import trw.dbsubsetter.datacopy.{DataCopier, DataCopyTask}
 import trw.dbsubsetter.db.{Constants, DbAccessFactory, PrimaryKeyValue, Row}
-import trw.dbsubsetter.workflow.DataCopyTask
 
 private[datacopy] final class GenericDataCopierImpl(dbAccessFactory: DbAccessFactory) extends DataCopier {
 

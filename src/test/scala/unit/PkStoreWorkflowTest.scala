@@ -1,9 +1,9 @@
 package unit
 
 import org.scalatest.FunSuite
+import trw.dbsubsetter.OriginDbResult
 import trw.dbsubsetter.db.{Column, Keys, PrimaryKey, PrimaryKeyValue, Schema, SchemaInfo, Table}
-import trw.dbsubsetter.primarykeystore.{PrimaryKeyStore, PrimaryKeyStoreFactory}
-import trw.dbsubsetter.workflow._
+import trw.dbsubsetter.pkstore.{PkStoreWorkflow, PksAdded, PrimaryKeyStore, PrimaryKeyStoreFactory}
 
 class PkStoreWorkflowTest extends FunSuite {
   test("PkStoreWorkflow is conscious of fetchChildren") {

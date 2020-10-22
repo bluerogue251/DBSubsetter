@@ -1,7 +1,7 @@
-package trw.dbsubsetter.primarykeystore
+package trw.dbsubsetter.pkstore
 
 import trw.dbsubsetter.db.SchemaInfo
-import trw.dbsubsetter.primarykeystore.impl.{InMemoryPrimaryKeyStore, InstrumentedPrimaryKeyStore}
+import trw.dbsubsetter.pkstore.impl.{InMemoryPrimaryKeyStore, InstrumentedPrimaryKeyStore}
 
 object PrimaryKeyStoreFactory {
 

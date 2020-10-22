@@ -1,4 +1,4 @@
-package trw.dbsubsetter.workflow
+package trw.dbsubsetter.fkcalc
 
 object FkTaskPreCheck {
   /*

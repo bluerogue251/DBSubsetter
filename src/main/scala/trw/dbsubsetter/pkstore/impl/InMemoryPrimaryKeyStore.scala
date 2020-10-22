@@ -1,14 +1,14 @@
-package trw.dbsubsetter.primarykeystore.impl
+package trw.dbsubsetter.pkstore.impl
 
 import trw.dbsubsetter.db.{PrimaryKeyValue, SchemaInfo, Table}
-import trw.dbsubsetter.primarykeystore._
+import trw.dbsubsetter.pkstore._
 
 import scala.collection.mutable
 
 /**
   * WARNING: this class is not threadsafe
   */
-private[primarykeystore] final class InMemoryPrimaryKeyStore(schemaInfo: SchemaInfo) extends PrimaryKeyStore {
+private[pkstore] final class InMemoryPrimaryKeyStore(schemaInfo: SchemaInfo) extends PrimaryKeyStore {
 
   /*
    * If `seenWithChildrenStorage` contains a PK, then both its children AND its parents have been fetched.
