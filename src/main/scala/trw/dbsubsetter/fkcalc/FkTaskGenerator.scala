@@ -1,13 +1,12 @@
 package trw.dbsubsetter.fkcalc
 
 import trw.dbsubsetter.db._
-import trw.dbsubsetter.keyextraction.KeyExtractionUtil
 import trw.dbsubsetter.pkstore.PksAdded
 
 final class FkTaskGenerator(schemaInfo: SchemaInfo) {
 
   private[this] val fkExtractionFunctions: Map[(ForeignKey, Boolean), Keys => ForeignKeyValue] =
-    KeyExtractionUtil.fkExtractionFunctions(schemaInfo)
+    FkExtractor.fkExtractionFunctions(schemaInfo)
 
   def generateFrom(pksAdded: PksAdded): IndexedSeq[ForeignKeyTask] = {
     val PksAdded(table, rowsNeedingParentTasks, rowsNeedingChildTasks, viaTableOpt) = pksAdded

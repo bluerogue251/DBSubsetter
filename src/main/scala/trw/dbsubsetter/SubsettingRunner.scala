@@ -96,14 +96,13 @@ object SubsettingRunner {
       dataCopyDbConnectionCount: Int,
       dataCopyQueue: DataCopyQueue
   ): Unit = {
-    val copierFactory: DataCopierFactory =
-      new DataCopierFactoryImpl(dbAccessFactory, schemaInfo)
-
-    val copiers: Seq[DataCopier] =
-      (1 to dataCopyDbConnectionCount).map(_ => copierFactory.build())
-
     val phase: DataCopyPhase =
-      new DataCopyPhaseImpl(dataCopyQueue, copiers)
+      DataCopyPhase.from(
+        dataCopyDbConnectionCount,
+        dbAccessFactory,
+        schemaInfo,
+        dataCopyQueue
+      )
 
     phase.runPhase()
     dbAccessFactory.closeAllConnections()
