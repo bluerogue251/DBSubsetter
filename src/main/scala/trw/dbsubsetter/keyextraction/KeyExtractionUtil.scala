@@ -1,6 +1,6 @@
 package trw.dbsubsetter.keyextraction
 
-import trw.dbsubsetter.db.{ForeignKey, ForeignKeyValue, Keys, PrimaryKeyValue, SchemaInfo, Table}
+import trw.dbsubsetter.db.{Keys, PrimaryKeyValue, SchemaInfo, Table}
 
 object KeyExtractionUtil {
 
@@ -11,18 +11,4 @@ object KeyExtractionUtil {
     }
   }
 
-  def fkExtractionFunctions(schemaInfo: SchemaInfo): Map[(ForeignKey, Boolean), Keys => ForeignKeyValue] = {
-    schemaInfo.fksOrdered.flatMap { foreignKey =>
-      val parentExtractionFunction: Keys => ForeignKeyValue =
-        keys => keys.getValue(foreignKey, confusingTechDebt = false)
-
-      val childExtractionFunction: Keys => ForeignKeyValue =
-        keys => keys.getValue(foreignKey, confusingTechDebt = true)
-
-      Seq(
-        (foreignKey, false) -> parentExtractionFunction,
-        (foreignKey, true) -> childExtractionFunction
-      )
-    }.toMap
-  }
 }

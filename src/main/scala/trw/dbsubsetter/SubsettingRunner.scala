@@ -2,8 +2,7 @@ package trw.dbsubsetter
 
 import trw.dbsubsetter.basequery.{BaseQueryPhase, BaseQueryPhaseImpl}
 import trw.dbsubsetter.config.{BaseQuery, Config}
-import trw.dbsubsetter.datacopy._
-import trw.dbsubsetter.datacopyqueue.{DataCopyQueue, DataCopyQueueFactory}
+import trw.dbsubsetter.datacopy.{DataCopyPhase, DataCopyQueue}
 import trw.dbsubsetter.db.{DbAccessFactory, SchemaInfo}
 import trw.dbsubsetter.fkcalc._
 import trw.dbsubsetter.fktaskqueue.{ForeignKeyTaskQueue, ForeignKeyTaskQueueFactory}
@@ -13,7 +12,7 @@ import trw.dbsubsetter.pkstore.{PkStoreWorkflow, PrimaryKeyStore, PrimaryKeyStor
 object SubsettingRunner {
   def run(config: Config, schemaInfo: SchemaInfo, baseQueries: Set[BaseQuery]): Unit = {
     val dbAccessFactory: DbAccessFactory = new DbAccessFactory(config, schemaInfo)
-    val dataCopyQueue: DataCopyQueue = DataCopyQueueFactory.buildDataCopyQueue(config, schemaInfo)
+    val dataCopyQueue: DataCopyQueue = DataCopyQueue.from(config, schemaInfo)
 
     runKeyCalculationPhase(
       config,
@@ -97,14 +96,13 @@ object SubsettingRunner {
       dataCopyDbConnectionCount: Int,
       dataCopyQueue: DataCopyQueue
   ): Unit = {
-    val copierFactory: DataCopierFactory =
-      new DataCopierFactoryImpl(dbAccessFactory, schemaInfo)
-
-    val copiers: Seq[DataCopier] =
-      (1 to dataCopyDbConnectionCount).map(_ => copierFactory.build())
-
     val phase: DataCopyPhase =
-      new DataCopyPhaseImpl(dataCopyQueue, copiers)
+      DataCopyPhase.from(
+        dataCopyDbConnectionCount,
+        dbAccessFactory,
+        schemaInfo,
+        dataCopyQueue
+      )
 
     phase.runPhase()
     dbAccessFactory.closeAllConnections()

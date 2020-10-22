@@ -2,9 +2,7 @@ package trw.dbsubsetter.datacopy
 
 import java.util.concurrent.{CountDownLatch, ExecutorService, Executors}
 
-import trw.dbsubsetter.datacopyqueue.DataCopyQueue
-
-final class DataCopyPhaseImpl(queue: DataCopyQueue, copiers: Seq[DataCopier]) extends DataCopyPhase {
+private[datacopy] final class DataCopyPhaseImpl(queue: DataCopyQueue, copiers: Seq[DataCopier]) extends DataCopyPhase {
 
   private[this] val guard: Object = new Object()
 

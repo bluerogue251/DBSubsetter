@@ -1,9 +1,8 @@
-package trw.dbsubsetter.datacopy.impl
+package trw.dbsubsetter.datacopy
 
-import trw.dbsubsetter.datacopy.{DataCopier, DataCopyTask}
 import trw.dbsubsetter.db.{Constants, DbAccessFactory, PrimaryKeyValue, Row}
 
-private[datacopy] final class GenericDataCopierImpl(dbAccessFactory: DbAccessFactory) extends DataCopier {
+private[datacopy] final class DataCopierGenericImpl(dbAccessFactory: DbAccessFactory) extends DataCopier {
 
   private[this] val originDbAccess = dbAccessFactory.buildOriginDbAccess()
 

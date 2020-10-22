@@ -1,10 +1,9 @@
-package trw.dbsubsetter.pkstore.impl
+package trw.dbsubsetter.pkstore
 
 import trw.dbsubsetter.db.{PrimaryKeyValue, Table}
 import trw.dbsubsetter.metrics.Metrics
-import trw.dbsubsetter.pkstore._
 
-private[pkstore] final class InstrumentedPrimaryKeyStore(delegatee: PrimaryKeyStore) extends PrimaryKeyStore {
+private[pkstore] final class PrimaryKeyStoreInstrumentedImpl(delegatee: PrimaryKeyStore) extends PrimaryKeyStore {
 
   private[this] val pkStoreMarkSeenHistogram = Metrics.PkStoreMarkSeenHistogram
 

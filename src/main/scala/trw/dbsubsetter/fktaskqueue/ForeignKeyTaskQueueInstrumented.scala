@@ -1,7 +1,6 @@
-package trw.dbsubsetter.fktaskqueue.impl
+package trw.dbsubsetter.fktaskqueue
 
 import trw.dbsubsetter.fkcalc.ForeignKeyTask
-import trw.dbsubsetter.fktaskqueue.ForeignKeyTaskQueue
 import trw.dbsubsetter.metrics.Metrics
 
 private[fktaskqueue] final class ForeignKeyTaskQueueInstrumented(delegatee: ForeignKeyTaskQueue)

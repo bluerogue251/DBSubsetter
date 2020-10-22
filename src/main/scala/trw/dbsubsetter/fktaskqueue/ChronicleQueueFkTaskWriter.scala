@@ -1,11 +1,11 @@
-package trw.dbsubsetter.fktaskqueue.impl
+package trw.dbsubsetter.fktaskqueue
 
 import net.openhft.chronicle.wire.{ValueOut, WireOut, WriteMarshallable}
 import trw.dbsubsetter.chronicle.ChronicleQueueFunctions
 import trw.dbsubsetter.db.ColumnTypes.ColumnType
 import trw.dbsubsetter.db.ForeignKeyValue
 
-private[impl] final class ChronicleQueueFkTaskWriter(fkOrdinal: Short, columnTypes: Seq[ColumnType]) {
+private[fktaskqueue] final class ChronicleQueueFkTaskWriter(fkOrdinal: Short, columnTypes: Seq[ColumnType]) {
   private[this] val valueWriter: (ValueOut, ForeignKeyValue) => Unit = {
     val singleColumnWriteFunctions: Seq[(ValueOut, Any) => WireOut] =
       columnTypes.map(ChronicleQueueFunctions.singleValueWrite)
