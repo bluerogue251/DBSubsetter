@@ -9,8 +9,6 @@ scalacOptions ++= Seq("-deprecation", "-Xfatal-warnings")
 libraryDependencies ++= Seq(
   // Command line parser
   "com.github.scopt" %% "scopt" % "3.7.0",
-  // Akka stream processing
-  "com.typesafe.akka" %% "akka-stream" % "2.5.25",
   // JDBC drivers
   "org.postgresql" % "postgresql" % "42.1.4",
   "mysql" % "mysql-connector-java" % "8.0.8-dmr",

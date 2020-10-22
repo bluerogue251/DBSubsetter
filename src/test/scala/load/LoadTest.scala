@@ -21,7 +21,7 @@ trait LoadTest[T <: Database] extends SubsettingTest[T] {
     */
   protected def runtimeLimit: Duration
 
-  test("Check that Akka Streams runtime did not significantly increase") {
+  test("Check that runtime did not significantly increase") {
     assert(subsettingResult.runDuration < runtimeLimit)
   }
 }
