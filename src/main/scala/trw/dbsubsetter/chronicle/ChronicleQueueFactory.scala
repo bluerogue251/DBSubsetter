@@ -1,22 +1,15 @@
 package trw.dbsubsetter.chronicle
 
-import java.nio.file.Files
+import java.nio.file.Path
 
 import net.openhft.chronicle.queue.RollCycles
 import net.openhft.chronicle.queue.impl.single.{SingleChronicleQueue, SingleChronicleQueueBuilder}
-import trw.dbsubsetter.config.Config
 
 object ChronicleQueueFactory {
 
-  def createQueue(config: Config): SingleChronicleQueue = {
-    val storageDir =
-      config.tempfileStorageDirectoryOverride match {
-        case Some(dir) => dir.toPath
-        case None      => Files.createTempDirectory("DBSubsetter-")
-      }
-
+  def createQueue(storageDirectory: Path): SingleChronicleQueue = {
     SingleChronicleQueueBuilder
-      .binary(storageDir)
+      .binary(storageDirectory)
       .rollCycle(RollCycles.MINUTELY)
       .build()
   }

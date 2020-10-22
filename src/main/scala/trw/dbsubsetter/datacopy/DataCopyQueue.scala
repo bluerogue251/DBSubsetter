@@ -1,6 +1,7 @@
 package trw.dbsubsetter.datacopy
 
-import trw.dbsubsetter.config.Config
+import java.nio.file.Path
+
 import trw.dbsubsetter.db.SchemaInfo
 import trw.dbsubsetter.pkstore.PksAdded
 
@@ -18,8 +19,8 @@ trait DataCopyQueue {
 }
 
 object DataCopyQueue {
-  def from(config: Config, schemaInfo: SchemaInfo): DataCopyQueue = {
-    val base = new DataCopyQueueImpl(config, schemaInfo)
+  def from(storageDirectory: Path, schemaInfo: SchemaInfo): DataCopyQueue = {
+    val base = new DataCopyQueueImpl(storageDirectory, schemaInfo)
     new DataCopyQueueInstrumentedImpl(base)
   }
 }

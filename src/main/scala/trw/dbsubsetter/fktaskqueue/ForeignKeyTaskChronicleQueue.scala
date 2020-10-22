@@ -1,21 +1,22 @@
 package trw.dbsubsetter.fktaskqueue
 
+import java.nio.file.Path
+
 import net.openhft.chronicle.queue.impl.single.SingleChronicleQueue
 import net.openhft.chronicle.wire.WriteMarshallable
 import trw.dbsubsetter.chronicle.ChronicleQueueFactory
-import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.{ForeignKey, ForeignKeyValue, SchemaInfo}
 import trw.dbsubsetter.fkcalc.{FetchChildrenTask, FetchParentTask, ForeignKeyTask}
 
 /**
   * WARNING: this class is not threadsafe
   */
-private[fktaskqueue] final class ForeignKeyTaskChronicleQueue(config: Config, schemaInfo: SchemaInfo)
+private[fktaskqueue] final class ForeignKeyTaskChronicleQueue(storageDirectory: Path, schemaInfo: SchemaInfo)
     extends ForeignKeyTaskQueue {
 
   private[this] var queuedTaskCount: Long = 0L
 
-  private[this] val queue: SingleChronicleQueue = ChronicleQueueFactory.createQueue(config)
+  private[this] val queue: SingleChronicleQueue = ChronicleQueueFactory.createQueue(storageDirectory)
 
   private[this] val appender = queue.acquireAppender()
 
