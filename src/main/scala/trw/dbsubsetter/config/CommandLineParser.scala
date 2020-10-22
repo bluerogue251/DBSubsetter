@@ -108,7 +108,8 @@ object CommandLineParser {
       .valueName("</path/to/storage/directory>")
       .action((dir, c) => c.copy(storageDirectory = Some(dir.toPath)))
       .validate { dir =>
-        if (dir.exists() && (!dir.isDirectory || dir.listFiles().nonEmpty)) {
+        if (!dir.exists()) dir.mkdir()
+        if (!dir.isDirectory || dir.listFiles().nonEmpty) {
           failure("--storageDirectory must be an empty directory")
         } else {
           success
