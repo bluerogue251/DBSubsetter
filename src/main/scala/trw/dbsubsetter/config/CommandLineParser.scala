@@ -115,8 +115,9 @@ object CommandLineParser {
           success
         }
       }
-      .text("""Directory where DBSubsetter will store temporary working data
-                           Defaults to the standard tempfile location of your OS
+      .text("""Directory where DBSubsetter stores internal working data
+              |            This data includes all primary and foreign key values in the subset
+              |            Defaults to the standard tempfile location of your OS
               |""".stripMargin)
 
     opt[Unit]("exposeMetrics")
