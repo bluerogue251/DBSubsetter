@@ -5,12 +5,7 @@ import trw.dbsubsetter.config.{BaseQuery, Config}
 import trw.dbsubsetter.datacopy._
 import trw.dbsubsetter.datacopyqueue.{DataCopyQueue, DataCopyQueueFactory}
 import trw.dbsubsetter.db.{DbAccessFactory, SchemaInfo}
-import trw.dbsubsetter.fkcalc.{
-  FkTaskGenerator,
-  ForeignKeyCalculationPhase,
-  ForeignKeyCalculationPhaseImpl,
-  ForeignKeyTaskHandler
-}
+import trw.dbsubsetter.fkcalc._
 import trw.dbsubsetter.fktaskqueue.{ForeignKeyTaskQueue, ForeignKeyTaskQueueFactory}
 import trw.dbsubsetter.keyingestion.{KeyIngester, KeyIngesterImpl}
 import trw.dbsubsetter.pkstore.{PkStoreWorkflow, PrimaryKeyStore, PrimaryKeyStoreFactory}
