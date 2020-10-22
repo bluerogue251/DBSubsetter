@@ -1,6 +1,6 @@
 name := "DBSubsetter"
 
-version := "v1.0.0-beta.6"
+version := "v1.0.0-beta.7"
 
 scalaVersion := "2.12.3"
 

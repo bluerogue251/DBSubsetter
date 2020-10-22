@@ -6,7 +6,7 @@ import scopt.OptionParser
 
 object CommandLineParser {
   val parser: OptionParser[CommandLineArgs] = new OptionParser[CommandLineArgs]("DBSubsetter") {
-    head("DBSubsetter", "v1.0.0-beta.6")
+    head("DBSubsetter", "v1.0.0-beta.7")
     help("help").text("Prints this usage text\n")
     version("version").text("Prints the application version\n")
 
