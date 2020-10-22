@@ -1,6 +1,5 @@
-package trw.dbsubsetter.datacopyqueue
+package trw.dbsubsetter.datacopy
 
-import trw.dbsubsetter.datacopy.DataCopyTask
 import trw.dbsubsetter.pkstore.PksAdded
 
 trait DataCopyQueue {

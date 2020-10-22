@@ -1,4 +1,4 @@
-package trw.dbsubsetter.datacopyqueue.impl
+package trw.dbsubsetter.datacopy
 
 import java.util.function.BiConsumer
 
@@ -9,7 +9,7 @@ import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.ColumnTypes.ColumnType
 import trw.dbsubsetter.db.PrimaryKeyValue
 
-private[impl] final class ChronicleQueueAccess(config: Config, columnTypes: Seq[ColumnType]) {
+private[datacopy] final class ChronicleQueueAccess(config: Config, columnTypes: Seq[ColumnType]) {
 
   private[this] val queue: SingleChronicleQueue =
     ChronicleQueueFactory.createQueue(config)

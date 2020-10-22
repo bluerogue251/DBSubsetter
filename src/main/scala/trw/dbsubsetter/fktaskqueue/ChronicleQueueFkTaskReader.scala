@@ -1,11 +1,11 @@
-package trw.dbsubsetter.fktaskqueue.impl
+package trw.dbsubsetter.fktaskqueue
 
 import net.openhft.chronicle.wire.ValueIn
 import trw.dbsubsetter.chronicle.ChronicleQueueFunctions
 import trw.dbsubsetter.db.ColumnTypes.ColumnType
 import trw.dbsubsetter.db.ForeignKeyValue
 
-private[impl] final class ChronicleQueueFkTaskReader(columnTypes: Seq[ColumnType]) {
+private[fktaskqueue] final class ChronicleQueueFkTaskReader(columnTypes: Seq[ColumnType]) {
   private[this] val valueReader: ValueIn => ForeignKeyValue = {
     val singleColumnReadFunctions: Seq[ValueIn => Any] =
       columnTypes.map(ChronicleQueueFunctions.singleValueRead)

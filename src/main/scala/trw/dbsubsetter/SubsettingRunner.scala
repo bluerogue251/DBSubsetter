@@ -3,7 +3,6 @@ package trw.dbsubsetter
 import trw.dbsubsetter.basequery.{BaseQueryPhase, BaseQueryPhaseImpl}
 import trw.dbsubsetter.config.{BaseQuery, Config}
 import trw.dbsubsetter.datacopy._
-import trw.dbsubsetter.datacopyqueue.{DataCopyQueue, DataCopyQueueFactory}
 import trw.dbsubsetter.db.{DbAccessFactory, SchemaInfo}
 import trw.dbsubsetter.fkcalc._
 import trw.dbsubsetter.fktaskqueue.{ForeignKeyTaskQueue, ForeignKeyTaskQueueFactory}

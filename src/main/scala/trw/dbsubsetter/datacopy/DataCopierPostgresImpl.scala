@@ -1,16 +1,15 @@
-package trw.dbsubsetter.datacopy.impl
+package trw.dbsubsetter.datacopy
 
 import java.io.{PipedInputStream, PipedOutputStream}
 import java.util.UUID
 import java.util.concurrent.Executors
 
 import org.postgresql.copy.CopyManager
-import trw.dbsubsetter.datacopy.{DataCopier, DataCopyTask}
 import trw.dbsubsetter.db.{Constants, DbAccessFactory, SchemaInfo}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-private[datacopy] final class PostgresDataCopierImpl(dbAccessFactory: DbAccessFactory, schemaInfo: SchemaInfo)
+private[datacopy] final class DataCopierPostgresImpl(dbAccessFactory: DbAccessFactory, schemaInfo: SchemaInfo)
     extends DataCopier {
 
   private[this] val originCopyManager: CopyManager =

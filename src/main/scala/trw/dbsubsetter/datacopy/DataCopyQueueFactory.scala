@@ -1,7 +1,6 @@
-package trw.dbsubsetter.datacopyqueue
+package trw.dbsubsetter.datacopy
 
 import trw.dbsubsetter.config.Config
-import trw.dbsubsetter.datacopyqueue.impl.{DataCopyQueueImpl, DataCopyQueueInstrumented}
 import trw.dbsubsetter.db.SchemaInfo
 
 object DataCopyQueueFactory {
