@@ -1,12 +1,12 @@
 package trw.dbsubsetter.config
 
-import java.io.File
+import java.nio.file.Path
 
 case class Config(
     originDbConnectionString: String,
     targetDbConnectionString: String,
     keyCalculationDbConnectionCount: Int,
     dataCopyDbConnectionCount: Int,
-    tempfileStorageDirectoryOverride: Option[File],
+    storageDirectory: Option[Path],
     metricsPort: Option[Int]
 )

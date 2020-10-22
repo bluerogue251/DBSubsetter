@@ -9,7 +9,7 @@ object ConfigFixtures {
       targetDbConnectionString = "",
       keyCalculationDbConnectionCount = 1,
       dataCopyDbConnectionCount = 1,
-      tempfileStorageDirectoryOverride = None,
+      storageDirectory = None,
       metricsPort = None
     )
 }

@@ -1,6 +1,6 @@
 package trw.dbsubsetter.config
 
-import java.io.File
+import java.nio.file.Path
 
 case class CommandLineArgs(
     schemas: Set[String] = Set.empty,
@@ -13,6 +13,6 @@ case class CommandLineArgs(
     extraPrimaryKeys: Set[String] = Set.empty,
     excludeTables: Set[String] = Set.empty,
     excludeColumns: Set[String] = Set.empty,
-    tempfileStorageDirectoryOverride: Option[File] = None,
+    storageDirectory: Option[Path] = None,
     metricsPort: Option[Int] = None
 )
