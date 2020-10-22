@@ -1,6 +1,6 @@
 package trw.dbsubsetter
 
-import java.nio.file.{Files, Path}
+import java.nio.file.{Files, Path, Paths}
 
 import trw.dbsubsetter.basequery.{BaseQueryPhase, BaseQueryPhaseImpl}
 import trw.dbsubsetter.config.{BaseQuery, Config}
@@ -14,16 +14,18 @@ import trw.dbsubsetter.pkstore.{PkStoreWorkflow, PrimaryKeyStore, PrimaryKeyStor
 object SubsettingRunner {
   def run(config: Config, schemaInfo: SchemaInfo, baseQueries: Set[BaseQuery]): Unit = {
     val dbAccessFactory: DbAccessFactory = new DbAccessFactory(config, schemaInfo)
-    val queueStorageDirectory: Path =
+    val baseStorageDirectory: Path =
       config.tempfileStorageDirectoryOverride match {
         case Some(dir) => dir.toPath
         case None      => Files.createTempDirectory("DBSubsetter-")
       }
-    val dataCopyQueue: DataCopyQueue = DataCopyQueue.from(queueStorageDirectory, schemaInfo)
+    val dataCopyQueueStorageDirectory = Paths.get(baseStorageDirectory.toString, "data-copy")
+    val dataCopyQueue: DataCopyQueue = DataCopyQueue.from(dataCopyQueueStorageDirectory, schemaInfo)
 
+    val keyCalculationQueueStorageDirectory = Paths.get(baseStorageDirectory.toString, "key-calculation")
     runKeyCalculationPhase(
       config.keyCalculationDbConnectionCount,
-      queueStorageDirectory,
+      keyCalculationQueueStorageDirectory,
       baseQueries,
       dbAccessFactory,
       schemaInfo,
