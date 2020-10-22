@@ -11,7 +11,7 @@ import trw.dbsubsetter.keyingestion.{KeyIngester, KeyIngesterImpl}
 import trw.dbsubsetter.primarykeystore.{PrimaryKeyStore, PrimaryKeyStoreFactory}
 import trw.dbsubsetter.workflow._
 
-object ApplicationAkkaStreams {
+object SubsettingRunner {
   def run(config: Config, schemaInfo: SchemaInfo, baseQueries: Set[BaseQuery]): Unit = {
     val dbAccessFactory: DbAccessFactory = new DbAccessFactory(config, schemaInfo)
     val dataCopyQueue: DataCopyQueue = DataCopyQueueFactory.buildDataCopyQueue(config, schemaInfo)
