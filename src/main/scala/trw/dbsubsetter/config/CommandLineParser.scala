@@ -110,13 +110,15 @@ object CommandLineParser {
       .validate { dir =>
         if (!dir.exists()) dir.mkdir()
         if (!dir.isDirectory || dir.listFiles().nonEmpty) {
-          failure("--storageDirectory must be an empty directory")
+          failure("--tempfileStorageDirectory must be a directory")
+        } else if (dir.listFiles().nonEmpty) {
+          failure("--tempfileStorageDirectory must be an empty directory")
         } else {
           success
         }
       }
       .text("""Directory where DBSubsetter stores internal working data
-              |            This data includes all primary and foreign key values in the subset
+              |            This data contains all primary and foreign key values included in the subset
               |            Defaults to the standard tempfile location of your OS
               |""".stripMargin)
 
