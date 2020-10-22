@@ -3,7 +3,7 @@ package trw.dbsubsetter.datacopy
 import trw.dbsubsetter.metrics.Metrics
 import trw.dbsubsetter.pkstore.PksAdded
 
-private[datacopy] final class DataCopyQueueInstrumented(delegatee: DataCopyQueue) extends DataCopyQueue {
+private[datacopy] final class DataCopyQueueInstrumentedImpl(delegatee: DataCopyQueue) extends DataCopyQueue {
 
   private[this] val pendingTaskCount = Metrics.PendingDataCopyRows
 
