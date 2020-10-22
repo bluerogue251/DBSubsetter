@@ -3,8 +3,8 @@ package integration
 import org.scalatest.FunSuite
 import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.{Column, ColumnTypes, ForeignKey, ForeignKeyValue, Schema, SchemaInfo, Table}
+import trw.dbsubsetter.fkcalc.{FetchParentTask, ForeignKeyTask}
 import trw.dbsubsetter.fktaskqueue.ForeignKeyTaskQueueFactory
-import trw.dbsubsetter.workflow.{FetchParentTask, ForeignKeyTask}
 import util.fixtures.ConfigFixtures
 
 /*

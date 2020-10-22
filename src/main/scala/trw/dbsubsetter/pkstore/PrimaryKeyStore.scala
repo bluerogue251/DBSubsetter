@@ -1,4 +1,4 @@
-package trw.dbsubsetter.primarykeystore
+package trw.dbsubsetter.pkstore
 
 import trw.dbsubsetter.db.{PrimaryKeyValue, Table}
 

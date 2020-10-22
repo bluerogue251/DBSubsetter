@@ -5,9 +5,8 @@ import java.util.UUID
 import java.util.concurrent.Executors
 
 import org.postgresql.copy.CopyManager
-import trw.dbsubsetter.datacopy.DataCopier
+import trw.dbsubsetter.datacopy.{DataCopier, DataCopyTask}
 import trw.dbsubsetter.db.{Constants, DbAccessFactory, SchemaInfo}
-import trw.dbsubsetter.workflow.DataCopyTask
 
 import scala.concurrent.{ExecutionContext, Future}
 

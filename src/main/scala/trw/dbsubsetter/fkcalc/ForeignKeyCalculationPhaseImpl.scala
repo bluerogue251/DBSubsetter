@@ -6,7 +6,7 @@ import java.util.concurrent.{CountDownLatch, ExecutorService, Executors}
 import trw.dbsubsetter.db.{PrimaryKeyValue, Table}
 import trw.dbsubsetter.fktaskqueue.ForeignKeyTaskQueue
 import trw.dbsubsetter.keyingestion.KeyIngester
-import trw.dbsubsetter.workflow._
+import trw.dbsubsetter.pkstore.PkStoreWorkflow
 
 final class ForeignKeyCalculationPhaseImpl(
     foreignKeyTaskQueue: ForeignKeyTaskQueue,

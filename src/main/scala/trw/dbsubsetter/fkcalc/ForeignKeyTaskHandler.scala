@@ -1,5 +1,6 @@
-package trw.dbsubsetter.workflow
+package trw.dbsubsetter.fkcalc
 
+import trw.dbsubsetter.OriginDbResult
 import trw.dbsubsetter.db.{DbAccessFactory, Table}
 
 final class ForeignKeyTaskHandler(dbAccessFactory: DbAccessFactory) {

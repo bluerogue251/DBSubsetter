@@ -1,7 +1,8 @@
-package trw.dbsubsetter.workflow
+package trw.dbsubsetter.fkcalc
 
 import trw.dbsubsetter.db._
 import trw.dbsubsetter.keyextraction.KeyExtractionUtil
+import trw.dbsubsetter.pkstore.PksAdded
 
 final class FkTaskGenerator(schemaInfo: SchemaInfo) {
 

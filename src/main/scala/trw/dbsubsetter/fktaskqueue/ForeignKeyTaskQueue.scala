@@ -1,6 +1,6 @@
 package trw.dbsubsetter.fktaskqueue
 
-import trw.dbsubsetter.workflow.ForeignKeyTask
+import trw.dbsubsetter.fkcalc.ForeignKeyTask
 
 trait ForeignKeyTaskQueue {
   def enqueue(foreignKeyTask: ForeignKeyTask): Unit
