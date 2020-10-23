@@ -109,7 +109,7 @@ object CommandLineParser {
       .action((dir, c) => c.copy(storageDirectory = Some(dir.toPath)))
       .validate { dir =>
         if (!dir.exists()) dir.mkdir()
-        if (!dir.isDirectory || dir.listFiles().nonEmpty) {
+        if (!dir.isDirectory) {
           failure("--tempfileStorageDirectory must be a directory")
         } else if (dir.listFiles().nonEmpty) {
           failure("--tempfileStorageDirectory must be an empty directory")
