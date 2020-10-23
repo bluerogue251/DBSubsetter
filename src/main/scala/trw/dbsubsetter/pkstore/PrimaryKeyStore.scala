@@ -1,6 +1,6 @@
 package trw.dbsubsetter.pkstore
 
-import trw.dbsubsetter.db.{PrimaryKeyValue, Table}
+import trw.dbsubsetter.db.{PrimaryKeyValue, SchemaInfo, Table}
 
 trait PrimaryKeyStore {
   def markSeen(table: Table, primaryKeyValue: PrimaryKeyValue): WriteOutcome
@@ -8,7 +8,9 @@ trait PrimaryKeyStore {
   def alreadySeen(table: Table, primaryKeyValue: PrimaryKeyValue): Boolean
 }
 
-sealed trait WriteOutcome
-case object FirstTimeSeen extends WriteOutcome
-case object AlreadySeenWithoutChildren extends WriteOutcome
-case object AlreadySeenWithChildren extends WriteOutcome
+object PrimaryKeyStore {
+  def from(schemaInfo: SchemaInfo): PrimaryKeyStore = {
+    val base: PrimaryKeyStore = new PrimaryKeyStoreInMemoryImpl(schemaInfo)
+    new PrimaryKeyStoreInstrumentedImpl(base)
+  }
+}

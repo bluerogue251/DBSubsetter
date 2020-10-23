@@ -9,7 +9,7 @@ import trw.dbsubsetter.db.{DbAccessFactory, SchemaInfo}
 import trw.dbsubsetter.fkcalc._
 import trw.dbsubsetter.fktaskqueue.ForeignKeyTaskQueue
 import trw.dbsubsetter.keyingestion.{KeyIngester, KeyIngesterImpl}
-import trw.dbsubsetter.pkstore.{PkStoreWorkflow, PrimaryKeyStore, PrimaryKeyStoreFactory}
+import trw.dbsubsetter.pkstore.{PkStoreWorkflow, PrimaryKeyStore}
 
 object SubsettingRunner {
   def run(config: Config, schemaInfo: SchemaInfo, baseQueries: Set[BaseQuery]): Unit = {
@@ -50,7 +50,7 @@ object SubsettingRunner {
     val fkTaskQueue: ForeignKeyTaskQueue = ForeignKeyTaskQueue.from(queueStorageDir, schemaInfo)
 
     // Ensure all primary key store things stay as local vars so that they are JVM Garbage Collected Earlier
-    val pkStore: PrimaryKeyStore = PrimaryKeyStoreFactory.buildPrimaryKeyStore(schemaInfo)
+    val pkStore: PrimaryKeyStore = PrimaryKeyStore.from(schemaInfo)
     val pkStoreWorkflow: PkStoreWorkflow = new PkStoreWorkflow(pkStore, schemaInfo)
     val keyIngester: KeyIngester = new KeyIngesterImpl(pkStoreWorkflow, dataCopyQueue, fkTaskGenerator, fkTaskQueue)
 

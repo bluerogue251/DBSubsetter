@@ -3,7 +3,7 @@ package unit
 import org.scalatest.FunSuite
 import trw.dbsubsetter.OriginDbResult
 import trw.dbsubsetter.db.{Column, Keys, PrimaryKey, PrimaryKeyValue, Schema, SchemaInfo, Table}
-import trw.dbsubsetter.pkstore.{PkStoreWorkflow, PksAdded, PrimaryKeyStore, PrimaryKeyStoreFactory}
+import trw.dbsubsetter.pkstore.{PkStoreWorkflow, PksAdded, PrimaryKeyStore}
 
 class PkStoreWorkflowTest extends FunSuite {
   test("PkStoreWorkflow is conscious of fetchChildren") {
@@ -34,7 +34,7 @@ class PkStoreWorkflowTest extends FunSuite {
       )
 
     val pkStore: PrimaryKeyStore =
-      PrimaryKeyStoreFactory.buildPrimaryKeyStore(schemaInfo)
+      PrimaryKeyStore.from(schemaInfo)
 
     val pkStoreWorkflow =
       new PkStoreWorkflow(pkStore, schemaInfo)
@@ -99,7 +99,7 @@ class PkStoreWorkflowTest extends FunSuite {
       )
 
     val pkStore: PrimaryKeyStore =
-      PrimaryKeyStoreFactory.buildPrimaryKeyStore(schemaInfo)
+      PrimaryKeyStore.from(schemaInfo)
 
     val pkStoreWorkflow: PkStoreWorkflow =
       new PkStoreWorkflow(pkStore, schemaInfo)
