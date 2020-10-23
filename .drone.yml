@@ -44,7 +44,7 @@ steps:
   - name: unit_tests
     image: bluerogue251/db-subsetter-ci:7
     commands:
-      - sbt "testOnly unit.*"
+      - sbt "testOnly unit.* trw.dbsubsetter.*"
 
   - name: integration_tests
     image: bluerogue251/db-subsetter-ci:7

@@ -3,7 +3,7 @@ package unit
 import org.scalatest.FunSuite
 import trw.dbsubsetter.OriginDbResult
 import trw.dbsubsetter.db.{Column, Keys, PrimaryKey, PrimaryKeyValue, Schema, SchemaInfo, Table}
-import trw.dbsubsetter.pkstore.{PkStoreWorkflow, PksAdded, PrimaryKeyStore}
+import trw.dbsubsetter.pkstore.{PkStoreWorkflow, PksAdded}
 
 class PkStoreWorkflowTest extends FunSuite {
   test("PkStoreWorkflow is conscious of fetchChildren") {
@@ -33,11 +33,8 @@ class PkStoreWorkflowTest extends FunSuite {
         fksToTable = Map.empty
       )
 
-    val pkStore: PrimaryKeyStore =
-      PrimaryKeyStore.from(schemaInfo)
-
     val pkStoreWorkflow =
-      new PkStoreWorkflow(pkStore, schemaInfo)
+      PkStoreWorkflow.from(schemaInfo)
 
     val fkValue: String = "fkValue"
 
@@ -54,7 +51,7 @@ class PkStoreWorkflowTest extends FunSuite {
 
     // Query whether the PK is in the pkStore given that we are only interested in parent records
     // The return value should be true, meaning that yes it's in the pkStore at least as far as having fetched its parent records
-    assert(pkStore.alreadySeen(table, correspondingPrimaryKeyValue) === true)
+    assert(pkStoreWorkflow.alreadySeen(table, correspondingPrimaryKeyValue) === true)
 
     // Now we add the the PK to the pkStore noting that we will fetch children for it
     // The fact that it was already in the PK store for having its parents fetched means that
@@ -68,7 +65,7 @@ class PkStoreWorkflowTest extends FunSuite {
     // Query whether the PK is in the pkStore given that we are only interested in parent records
     // The return value should be true, meaning that yes it's in the pkStore at least as far as having fetched its parent records
     // (This query only returns info about having fetched parent records, but it should remain true even though the last thing we did was fetch children)
-    assert(pkStore.alreadySeen(table, correspondingPrimaryKeyValue) === true)
+    assert(pkStoreWorkflow.alreadySeen(table, correspondingPrimaryKeyValue) === true)
   }
 
   test("PkStoreWorkflow is conscious of fetchChildren part2") {
@@ -98,11 +95,8 @@ class PkStoreWorkflowTest extends FunSuite {
         fksToTable = Map.empty
       )
 
-    val pkStore: PrimaryKeyStore =
-      PrimaryKeyStore.from(schemaInfo)
-
     val pkStoreWorkflow: PkStoreWorkflow =
-      new PkStoreWorkflow(pkStore, schemaInfo)
+      PkStoreWorkflow.from(schemaInfo)
 
     val fkValue: String = "fkValue"
     val singleRowKeys: Keys = new Keys(Array(fkValue))
