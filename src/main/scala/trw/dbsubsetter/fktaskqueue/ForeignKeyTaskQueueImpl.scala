@@ -11,7 +11,7 @@ import trw.dbsubsetter.fkcalc.{FetchChildrenTask, FetchParentTask, ForeignKeyTas
 /**
   * WARNING: this class is not threadsafe
   */
-private[fktaskqueue] final class ForeignKeyTaskChronicleQueue(storageDirectory: Path, schemaInfo: SchemaInfo)
+private[fktaskqueue] final class ForeignKeyTaskQueueImpl(storageDirectory: Path, schemaInfo: SchemaInfo)
     extends ForeignKeyTaskQueue {
 
   private[this] var queuedTaskCount: Long = 0L

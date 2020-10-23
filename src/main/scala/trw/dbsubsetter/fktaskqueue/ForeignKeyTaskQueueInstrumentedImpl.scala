@@ -3,7 +3,7 @@ package trw.dbsubsetter.fktaskqueue
 import trw.dbsubsetter.fkcalc.ForeignKeyTask
 import trw.dbsubsetter.metrics.Metrics
 
-private[fktaskqueue] final class ForeignKeyTaskQueueInstrumented(delegatee: ForeignKeyTaskQueue)
+private[fktaskqueue] final class ForeignKeyTaskQueueInstrumentedImpl(delegatee: ForeignKeyTaskQueue)
     extends ForeignKeyTaskQueue {
 
   private[this] val pendingTaskCount = Metrics.PendingForeignKeyTasks
