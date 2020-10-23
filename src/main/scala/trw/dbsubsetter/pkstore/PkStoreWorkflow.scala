@@ -6,6 +6,11 @@ import trw.dbsubsetter.keyextraction.KeyExtractionUtil
 
 final class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
 
+  private[this] val EmptyMap: Map[WriteOutcome, Vector[Keys]] =
+    Map
+      .empty[WriteOutcome, Vector[Keys]]
+      .withDefaultValue(Vector.empty[Keys])
+
   private[this] val pkValueExtractionFunctions: Map[Table, Keys => PrimaryKeyValue] =
     KeyExtractionUtil.pkExtractionFunctions(schemaInfo)
 
@@ -25,7 +30,7 @@ final class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
       })
 
       val outcomeMap: Map[WriteOutcome, Vector[Keys]] =
-        outcomes.foldLeft(PkStoreWorkflow.EmptyMap) { case (map, (outcome, row)) =>
+        outcomes.foldLeft(EmptyMap) { case (map, (outcome, row)) =>
           map.updated(outcome, map(outcome) :+ row)
         }
 
@@ -46,9 +51,9 @@ final class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
   }
 }
 
-private[this] object PkStoreWorkflow {
-  private val EmptyMap: Map[WriteOutcome, Vector[Keys]] =
-    Map
-      .empty[WriteOutcome, Vector[Keys]]
-      .withDefaultValue(Vector.empty[Keys])
+object PkStoreWorkflow {
+  def from(schemaInfo: SchemaInfo): PkStoreWorkflow = {
+    val pkStore: PrimaryKeyStore = PrimaryKeyStore.from(schemaInfo.pksByTable.keys.toSeq)
+    new PkStoreWorkflow(pkStore, schemaInfo)
+  }
 }
