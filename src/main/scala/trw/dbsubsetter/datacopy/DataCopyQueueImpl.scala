@@ -36,17 +36,16 @@ private[datacopy] final class DataCopyQueueImpl(storageDirectory: Path, schemaIn
     KeyExtractionUtil.pkExtractionFunctions(schemaInfo)
 
   override def enqueue(pksAdded: PksAdded): Unit = {
-    this.synchronized {
-      val rows: Vector[Keys] = pksAdded.rowsNeedingParentTasks
+    val rows: Vector[Keys] = pksAdded.rowsNeedingParentTasks
 
-      if (rows.nonEmpty) {
-        val table: Table = pksAdded.table
-        val chronicleQueueAccess: ChronicleQueueAccess = tablesToChronicleQueues(table)
-        val extractPkValue = pkValueExtractionFunctions(table)
-        val pkValues: Seq[PrimaryKeyValue] = rows.map(extractPkValue)
+    if (rows.nonEmpty) {
+      val table: Table = pksAdded.table
+      val chronicleQueueAccess: ChronicleQueueAccess = tablesToChronicleQueues(table)
+      val extractPkValue = pkValueExtractionFunctions(table)
+      val pkValues: Seq[PrimaryKeyValue] = rows.map(extractPkValue)
 
+      this.synchronized {
         chronicleQueueAccess.write(pkValues)
-
         val previousCount: Long = tablesToQueuedValueCounts(table)
         tablesToQueuedValueCounts.update(table, previousCount + pkValues.size)
         tablesWithQueuedValues.add(table)
