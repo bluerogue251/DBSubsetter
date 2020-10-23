@@ -104,21 +104,22 @@ object CommandLineParser {
               |                           Can be specified multiple times
               |""".stripMargin)
 
-    opt[File]("tempfileStorageDirectory")
-      .valueName("</path/to/tempfile/storage/directory>")
-      .action((dir, c) => c.copy(tempfileStorageDirectoryOverride = Some(dir)))
+    opt[File]("storageDirectory")
+      .valueName("</path/to/storage/directory>")
+      .action((dir, c) => c.copy(storageDirectory = Some(dir.toPath)))
       .validate { dir =>
         if (!dir.exists()) dir.mkdir()
         if (!dir.isDirectory) {
-          failure("--tempfileStorageDirectory must be a directory")
+          failure("--storageDirectory must be a directory")
         } else if (dir.listFiles().nonEmpty) {
-          failure("--tempfileStorageDirectory must be an empty directory")
+          failure("--storageDirectory must be an empty directory")
         } else {
           success
         }
       }
-      .text("""Directory in which DBSubsetter will store tempfiles containing intermediate results
-              |                           Defaults to the standard tempfile location of your OS
+      .text("""Directory where DBSubsetter stores internal working data
+              |            This data contains all primary and foreign key values included in the subset
+              |            Defaults to the standard tempfile location of your OS
               |""".stripMargin)
 
     opt[Unit]("exposeMetrics")

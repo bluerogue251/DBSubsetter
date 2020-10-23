@@ -141,7 +141,7 @@ object ConfigExtractor {
         targetDbConnectionString = args.targetDbConnectionString,
         keyCalculationDbConnectionCount = args.keyCalculationDbConnectionCount,
         dataCopyDbConnectionCount = args.dataCopyDbConnectionCount,
-        tempfileStorageDirectoryOverride = args.tempfileStorageDirectoryOverride,
+        storageDirectory = args.storageDirectory,
         metricsPort = args.metricsPort
       )
     )

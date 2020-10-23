@@ -1,11 +1,11 @@
 package integration
 
+import java.nio.file.{Files, Path}
+
 import org.scalatest.FunSuite
-import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.{Column, ColumnTypes, ForeignKey, ForeignKeyValue, Schema, SchemaInfo, Table}
 import trw.dbsubsetter.fkcalc.{FetchParentTask, ForeignKeyTask}
-import trw.dbsubsetter.fktaskqueue.ForeignKeyTaskQueueFactory
-import util.fixtures.ConfigFixtures
+import trw.dbsubsetter.fktaskqueue.ForeignKeyTaskQueue
 
 /*
  * TODO add more test cases covering various combinations of:
@@ -19,9 +19,8 @@ import util.fixtures.ConfigFixtures
 class ForeignKeyTaskQueueTest extends FunSuite {
 
   test("OffHeapTaskQueue returns an Option#None with no exception thrown when there is no data to read") {
-    val config: Config = ConfigFixtures.emptyConfig
     val schemaInfo: SchemaInfo = ForeignKeyTaskQueueTest.schemaInfo
-    val queue = ForeignKeyTaskQueueFactory.build(config, schemaInfo)
+    val queue = ForeignKeyTaskQueue.from(createStorageDir(), schemaInfo)
     // Dequeue several times -- it should always return `None` and should never throw an exception
     assert(queue.dequeue() === None)
     assert(queue.dequeue() === None)
@@ -29,9 +28,8 @@ class ForeignKeyTaskQueueTest extends FunSuite {
   }
 
   test("OffHeapTaskQueue can succesfully write values and read them back (single column foreign key)") {
-    val config: Config = ConfigFixtures.emptyConfig
     val schemaInfo: SchemaInfo = ForeignKeyTaskQueueTest.schemaInfo
-    val queue = ForeignKeyTaskQueueFactory.build(config, schemaInfo)
+    val queue = ForeignKeyTaskQueue.from(createStorageDir(), schemaInfo)
 
     val fkValue1: ForeignKeyValue = new ForeignKeyValue(Seq[Long](7))
     val fkValue2: ForeignKeyValue = new ForeignKeyValue(Seq[Long](10))
@@ -61,6 +59,10 @@ class ForeignKeyTaskQueueTest extends FunSuite {
     assert(firstTask.fkValueFromChild.individualColumnValues === fkValue1.individualColumnValues)
     assert(secondTask.fkValueFromChild.individualColumnValues === fkValue2.individualColumnValues)
     assert(thirdTask.fkValueFromChild.individualColumnValues === fkValue3.individualColumnValues)
+  }
+
+  private[this] def createStorageDir(): Path = {
+    Files.createTempDirectory("ForeignKeyTaskQueueTest-")
   }
 }
 
