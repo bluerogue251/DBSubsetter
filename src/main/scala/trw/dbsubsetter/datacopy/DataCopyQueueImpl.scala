@@ -1,6 +1,6 @@
 package trw.dbsubsetter.datacopy
 
-import java.nio.file.Path
+import java.nio.file.{Path, Paths}
 
 import trw.dbsubsetter.db.ColumnTypes.ColumnType
 import trw.dbsubsetter.db.{Constants, Keys, PrimaryKeyValue, SchemaInfo, Table}
@@ -27,10 +27,11 @@ private[datacopy] final class DataCopyQueueImpl(storageDirectory: Path, schemaIn
   private[this] val tablesWithQueuedValues: mutable.Set[Table] = new mutable.HashSet[Table]()
 
   private[this] val tablesToChronicleQueues: Map[Table, ChronicleQueueAccess] = {
-    schemaInfo.pksByTable
-      .map { case (table, primaryKey) =>
+    schemaInfo.pksByTable.zipWithIndex
+      .map { case ((table, primaryKey), i) =>
         val columnTypes: Seq[ColumnType] = primaryKey.columns.map(_.dataType)
-        table -> new ChronicleQueueAccess(storageDirectory, columnTypes)
+        val tableSubdirectory = Paths.get(storageDirectory.toString, s"t$i")
+        table -> new ChronicleQueueAccess(tableSubdirectory, columnTypes)
       }
   }
 
