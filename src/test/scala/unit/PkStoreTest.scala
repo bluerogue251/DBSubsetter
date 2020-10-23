@@ -33,7 +33,7 @@ class PkStoreTest extends FunSuite {
       )
 
     val pkStore: PrimaryKeyStore =
-      PrimaryKeyStoreFactory.buildPrimaryKeyStore(schemaInfo)
+      PrimaryKeyStore.from(schemaInfo)
 
     val pkValue: PrimaryKeyValue = new PrimaryKeyValue(Seq[String]("pkValue"))
 
