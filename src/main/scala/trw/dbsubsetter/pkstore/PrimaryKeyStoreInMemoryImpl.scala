@@ -20,34 +20,31 @@ private[pkstore] final class PrimaryKeyStoreInMemoryImpl(val tables: Seq[Table])
   override def markSeen(table: Table, primaryKeyValue: PrimaryKeyValue): WriteOutcome = {
     val rawValue: Any = extract(primaryKeyValue)
     val tableStorage: ConcurrentHashMap[Any, java.lang.Boolean] = storage(table)
-    val prevValue: java.lang.Boolean = tableStorage.putIfAbsent(rawValue, false)
-
-    if (prevValue == null) {
-      FirstTimeSeen
-    } else if (prevValue) {
-      AlreadySeenWithChildren
-    } else {
-      AlreadySeenWithoutChildren
-    }
+    val prev: java.lang.Boolean = tableStorage.putIfAbsent(rawValue, false)
+    interpret(prev)
   }
 
   override def markSeenWithChildren(table: Table, primaryKeyValue: PrimaryKeyValue): WriteOutcome = {
     val rawValue: Any = extract(primaryKeyValue)
     val tableStorage: ConcurrentHashMap[Any, java.lang.Boolean] = storage(table)
-    val prevValue: java.lang.Boolean = tableStorage.put(rawValue, true)
-
-    if (prevValue == null) {
-      FirstTimeSeen
-    } else if (prevValue) {
-      AlreadySeenWithChildren
-    } else {
-      AlreadySeenWithoutChildren
-    }
+    val prev: java.lang.Boolean = tableStorage.put(rawValue, true)
+    interpret(prev)
   }
 
   override def alreadySeen(table: Table, primaryKeyValue: PrimaryKeyValue): Boolean = {
     val rawValue: Any = extract(primaryKeyValue)
-    storage(table).containsKey(rawValue)
+    val tableStorage: ConcurrentHashMap[Any, java.lang.Boolean] = storage(table)
+    tableStorage.containsKey(rawValue)
+  }
+
+  private[this] def interpret(previousValue: java.lang.Boolean): WriteOutcome = {
+    if (previousValue == null) {
+      FirstTimeSeen
+    } else if (previousValue) {
+      AlreadySeenWithChildren
+    } else {
+      AlreadySeenWithoutChildren
+    }
   }
 
   private[this] def extract(primaryKeyValue: PrimaryKeyValue): Any = {
