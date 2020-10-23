@@ -1,19 +1,15 @@
 package trw.dbsubsetter.datacopy
 
-import java.nio.file.{Files, Path, Paths}
+import java.nio.file.Path
 import java.util.function.BiConsumer
 
 import net.openhft.chronicle.queue.impl.single.SingleChronicleQueue
 import net.openhft.chronicle.wire.{ValueIn, ValueOut, WireOut}
 import trw.dbsubsetter.chronicle.{ChronicleQueueFactory, ChronicleQueueFunctions}
-import trw.dbsubsetter.config.Config
 import trw.dbsubsetter.db.ColumnTypes.ColumnType
 import trw.dbsubsetter.db.PrimaryKeyValue
 
-private[datacopy] final class ChronicleQueueAccess(config: Config, columnTypes: Seq[ColumnType]) {
-
-  private[this] val storageDirectory: Path =
-    config.storageDirectory.getOrElse(Paths.get(Files.createTempDirectory("DBSubsetter-").toString, "data-copy"))
+private[datacopy] final class ChronicleQueueAccess(storageDirectory: Path, columnTypes: Seq[ColumnType]) {
 
   private[this] val queue: SingleChronicleQueue =
     ChronicleQueueFactory.createQueue(storageDirectory)

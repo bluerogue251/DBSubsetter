@@ -1,6 +1,7 @@
 package trw.dbsubsetter.datacopy
 
-import trw.dbsubsetter.config.Config
+import java.nio.file.Path
+
 import trw.dbsubsetter.db.ColumnTypes.ColumnType
 import trw.dbsubsetter.db.{Constants, Keys, PrimaryKeyValue, SchemaInfo, Table}
 import trw.dbsubsetter.keyextraction.KeyExtractionUtil
@@ -11,7 +12,7 @@ import scala.collection.mutable
 /**
   * WARNING: this class is not threadsafe
   */
-private[datacopy] final class DataCopyQueueImpl(config: Config, schemaInfo: SchemaInfo) extends DataCopyQueue {
+private[datacopy] final class DataCopyQueueImpl(storageDirectory: Path, schemaInfo: SchemaInfo) extends DataCopyQueue {
 
   private[this] val tablesToQueuedValueCounts: mutable.Map[Table, Long] = {
     val elems: Seq[(Table, Long)] =
@@ -29,7 +30,7 @@ private[datacopy] final class DataCopyQueueImpl(config: Config, schemaInfo: Sche
     schemaInfo.pksByTable
       .map { case (table, primaryKey) =>
         val columnTypes: Seq[ColumnType] = primaryKey.columns.map(_.dataType)
-        table -> new ChronicleQueueAccess(config, columnTypes)
+        table -> new ChronicleQueueAccess(storageDirectory, columnTypes)
       }
   }
 
