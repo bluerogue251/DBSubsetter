@@ -17,9 +17,8 @@ object SubsettingRunner {
 
     val baseStorageDirectory: Path = config.storageDirectory.getOrElse(Files.createTempDirectory("DBSubsetter-"))
     val keyCalculationQueueStorageDirectory = Paths.get(baseStorageDirectory.toString, "key-calculation")
-    val dataCopyQueueStorageDirectory = Paths.get(baseStorageDirectory.toString, "data-copy")
 
-    val dataCopyQueue: DataCopyQueue = DataCopyQueue.from(dataCopyQueueStorageDirectory, schemaInfo)
+    val dataCopyQueue: DataCopyQueue = DataCopyQueue.from(config, schemaInfo)
 
     runKeyCalculationPhase(
       config.keyCalculationDbConnectionCount,
