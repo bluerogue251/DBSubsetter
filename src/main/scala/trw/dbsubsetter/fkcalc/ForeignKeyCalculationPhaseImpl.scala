@@ -9,17 +9,13 @@ import trw.dbsubsetter.keyingestion.KeyIngester
 import trw.dbsubsetter.pkstore.PkStoreWorkflow
 
 final class ForeignKeyCalculationPhaseImpl(
-    foreignKeyTaskQueue: ForeignKeyTaskQueue,
+    fkTaskQueue: ForeignKeyTaskQueue,
     taskHandlers: Seq[ForeignKeyTaskHandler],
     pkStoreWorkflow: PkStoreWorkflow,
     keyIngester: KeyIngester
 ) extends ForeignKeyCalculationPhase {
 
-  private[this] val counter: AtomicLong = new AtomicLong(foreignKeyTaskQueue.size())
-
-  private[this] val readGuard: Object = new Object()
-
-  private[this] val writeGuard: Object = new Object()
+  private[this] val counter: AtomicLong = new AtomicLong(fkTaskQueue.size())
 
   override def runPhase(): Unit = {
     val executorService: ExecutorService =
@@ -48,19 +44,13 @@ final class ForeignKeyCalculationPhaseImpl(
 
   private def calculateTillExhausted(taskHandler: ForeignKeyTaskHandler): Unit = {
     while (counter.get() > 0) {
-      var nextTask = dequeueTask()
+      var nextTask = fkTaskQueue.dequeue()
       while (nextTask.nonEmpty) {
         val newTasksAdded: Long = handle(taskHandler, nextTask.get)
         counter.addAndGet(newTasksAdded - 1)
-        nextTask = dequeueTask()
+        nextTask = fkTaskQueue.dequeue()
       }
       Thread.sleep(50)
-    }
-  }
-
-  private def dequeueTask(): Option[ForeignKeyTask] = {
-    readGuard.synchronized {
-      foreignKeyTaskQueue.dequeue()
     }
   }
 
@@ -80,9 +70,7 @@ final class ForeignKeyCalculationPhaseImpl(
     } else {
       val dbResult = taskHandler.handle(task)
       var newTaskCount = 0L
-      writeGuard.synchronized {
-        newTaskCount = keyIngester.ingest(dbResult)
-      }
+      newTaskCount = keyIngester.ingest(dbResult)
       newTaskCount
     }
   }

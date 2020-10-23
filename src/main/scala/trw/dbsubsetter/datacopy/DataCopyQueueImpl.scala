@@ -9,9 +9,6 @@ import trw.dbsubsetter.pkstore.PksAdded
 
 import scala.collection.mutable
 
-/**
-  * WARNING: this class is not threadsafe
-  */
 private[datacopy] final class DataCopyQueueImpl(storageDirectory: Path, schemaInfo: SchemaInfo) extends DataCopyQueue {
 
   private[this] val tablesToQueuedValueCounts: mutable.Map[Table, Long] = {
@@ -39,45 +36,51 @@ private[datacopy] final class DataCopyQueueImpl(storageDirectory: Path, schemaIn
     KeyExtractionUtil.pkExtractionFunctions(schemaInfo)
 
   override def enqueue(pksAdded: PksAdded): Unit = {
-    val rows: Vector[Keys] = pksAdded.rowsNeedingParentTasks
+    this.synchronized {
+      val rows: Vector[Keys] = pksAdded.rowsNeedingParentTasks
 
-    if (rows.nonEmpty) {
-      val table: Table = pksAdded.table
-      val chronicleQueueAccess: ChronicleQueueAccess = tablesToChronicleQueues(table)
-      val extractPkValue = pkValueExtractionFunctions(table)
-      val pkValues: Seq[PrimaryKeyValue] = rows.map(extractPkValue)
+      if (rows.nonEmpty) {
+        val table: Table = pksAdded.table
+        val chronicleQueueAccess: ChronicleQueueAccess = tablesToChronicleQueues(table)
+        val extractPkValue = pkValueExtractionFunctions(table)
+        val pkValues: Seq[PrimaryKeyValue] = rows.map(extractPkValue)
 
-      chronicleQueueAccess.write(pkValues)
+        chronicleQueueAccess.write(pkValues)
 
-      val previousCount: Long = tablesToQueuedValueCounts(table)
-      tablesToQueuedValueCounts.update(table, previousCount + pkValues.size)
-      tablesWithQueuedValues.add(table)
+        val previousCount: Long = tablesToQueuedValueCounts(table)
+        tablesToQueuedValueCounts.update(table, previousCount + pkValues.size)
+        tablesWithQueuedValues.add(table)
+      }
     }
   }
 
   override def dequeue(): Option[DataCopyTask] = {
-    if (tablesWithQueuedValues.isEmpty) {
-      None
-    } else {
-      // TODO would be nice to eventually make this stuff constant time
-      val table: Table = tablesWithQueuedValues.maxBy(tablesToQueuedValueCounts)
-      val totalQuantityAvailable: Long = tablesToQueuedValueCounts(table)
-      val dequeueQuantity = Constants.dataCopyBatchSizes.filter(_ <= totalQuantityAvailable).max
+    this.synchronized {
+      if (tablesWithQueuedValues.isEmpty) {
+        None
+      } else {
+        // TODO would be nice to eventually make this stuff constant time
+        val table: Table = tablesWithQueuedValues.maxBy(tablesToQueuedValueCounts)
+        val totalQuantityAvailable: Long = tablesToQueuedValueCounts(table)
+        val dequeueQuantity = Constants.dataCopyBatchSizes.filter(_ <= totalQuantityAvailable).max
 
-      val chronicleQueueAccess: ChronicleQueueAccess = tablesToChronicleQueues(table)
-      val primaryKeyValues: Seq[PrimaryKeyValue] = chronicleQueueAccess.read(dequeueQuantity)
-      val dataCopyTask = new DataCopyTask(table, primaryKeyValues)
+        val chronicleQueueAccess: ChronicleQueueAccess = tablesToChronicleQueues(table)
+        val primaryKeyValues: Seq[PrimaryKeyValue] = chronicleQueueAccess.read(dequeueQuantity)
+        val dataCopyTask = new DataCopyTask(table, primaryKeyValues)
 
-      tablesToQueuedValueCounts.update(table, totalQuantityAvailable - dequeueQuantity)
-      if (totalQuantityAvailable == dequeueQuantity) {
-        tablesWithQueuedValues.remove(table)
+        tablesToQueuedValueCounts.update(table, totalQuantityAvailable - dequeueQuantity)
+        if (totalQuantityAvailable == dequeueQuantity) {
+          tablesWithQueuedValues.remove(table)
+        }
+
+        Some(dataCopyTask)
       }
-
-      Some(dataCopyTask)
     }
   }
 
   override def isEmpty(): Boolean = {
-    tablesWithQueuedValues.isEmpty
+    this.synchronized {
+      tablesWithQueuedValues.isEmpty
+    }
   }
 }

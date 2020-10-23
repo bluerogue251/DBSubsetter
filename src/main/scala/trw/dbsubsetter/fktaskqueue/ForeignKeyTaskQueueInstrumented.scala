@@ -24,10 +24,6 @@ private[fktaskqueue] final class ForeignKeyTaskQueueInstrumented(delegatee: Fore
     optionalTask
   }
 
-  override def isEmpty(): Boolean = {
-    delegatee.isEmpty()
-  }
-
   override def nonEmpty(): Boolean = {
     delegatee.nonEmpty()
   }

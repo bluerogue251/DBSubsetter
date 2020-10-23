@@ -47,7 +47,6 @@ final class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
 }
 
 private[this] object PkStoreWorkflow {
-
   private val EmptyMap: Map[WriteOutcome, Vector[Keys]] =
     Map
       .empty[WriteOutcome, Vector[Keys]]
