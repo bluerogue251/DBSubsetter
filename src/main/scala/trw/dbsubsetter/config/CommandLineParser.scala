@@ -110,9 +110,9 @@ object CommandLineParser {
       .validate { dir =>
         if (!dir.exists()) dir.mkdir()
         if (!dir.isDirectory) {
-          failure("--tempfileStorageDirectory must be a directory")
+          failure("--storageDirectory must be a directory")
         } else if (dir.listFiles().nonEmpty) {
-          failure("--tempfileStorageDirectory must be an empty directory")
+          failure("--storageDirectory must be an empty directory")
         } else {
           success
         }
