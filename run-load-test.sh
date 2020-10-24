@@ -25,7 +25,7 @@ echo "Initializing Terraform"
 printf "\n\n"
 
 echo "Spinning up load test infrastructure"
-./load-test/apply.sh "$1" "$2"
+./load-test/apply.sh 7da0ef6 cc8ac0c
 
 printf "\n\n"
 
