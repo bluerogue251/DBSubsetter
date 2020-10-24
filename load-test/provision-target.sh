@@ -135,6 +135,11 @@ PGPASSWORD=load-test-pw psql \
   --host "${pg-origin-ip}" \
   --user loadtest \
   --dbname school_db \
+  -c "drop database if exists school_db_complete"
+PGPASSWORD=load-test-pw psql \
+  --host "${pg-origin-ip}" \
+  --user loadtest \
+  --dbname school_db \
   -c "create database school_db_complete"
 
 #
