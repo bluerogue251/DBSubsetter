@@ -21,14 +21,14 @@ private[db] class JdbcResultConverterImpl(schemaInfo: SchemaInfo) extends JdbcRe
   }
 
   private[this] def extractMultiRowRawData(jdbcResultSet: ResultSet, columnCount: Int): Seq[Array[Any]] = {
-    val multipleRowsRawData = ArrayBuffer.empty[Array[Any]]
+    val allRows = ArrayBuffer.empty[Array[Any]]
     while (jdbcResultSet.next()) {
-      val singleRowRawData = new Array[Any](columnCount)
-      (1 to columnCount).foreach { i =>
-        singleRowRawData(i - 1) = jdbcResultSet.getObject(i)
+      val row = new Array[Any](columnCount)
+      (0 until columnCount).foreach { i =>
+        row(i) = jdbcResultSet.getObject(i + 1)
       }
-      multipleRowsRawData += singleRowRawData
+      allRows += row
     }
-    multipleRowsRawData
+    allRows
   }
 }
