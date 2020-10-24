@@ -3,6 +3,7 @@ package trw.dbsubsetter
 import java.sql.Connection
 
 import trw.dbsubsetter.db.ColumnTypes.ColumnType
+import trw.dbsubsetter.values.{ColumnValue, NullColumnValue}
 
 package object db {
 
@@ -65,11 +66,11 @@ package object db {
   }
 
   // Primary keys can be multi-column. Therefore a single primary key value is a sequence of individual column values.
-  class PrimaryKeyValue(val individualColumnValues: Seq[Any])
+  class PrimaryKeyValue(val individualColumnValues: Seq[ColumnValue])
 
   // Foreign keys can be multi-column. Therefore a single foreign key value is a sequence of individual column values.
-  class ForeignKeyValue(val individualColumnValues: Seq[Any]) {
-    val isEmpty: Boolean = individualColumnValues.forall(_ == null)
+  class ForeignKeyValue(val individualColumnValues: Seq[ColumnValue]) {
+    val isEmpty: Boolean = individualColumnValues.forall(_ == NullColumnValue)
   }
 
   // Represents a single row from the origin database including all columns
