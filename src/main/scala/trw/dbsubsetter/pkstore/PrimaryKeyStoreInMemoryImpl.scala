@@ -1,53 +1,81 @@
 package trw.dbsubsetter.pkstore
 
-import java.util.concurrent.ConcurrentHashMap
-
 import trw.dbsubsetter.db.{PrimaryKeyValue, Table}
 
-private[pkstore] final class PrimaryKeyStoreInMemoryImpl(val tables: Seq[Table]) extends PrimaryKeyStore {
+import scala.collection.mutable
+
+private[pkstore] final class PrimaryKeyStoreInMemoryImpl(tables: Seq[Table]) extends PrimaryKeyStore {
 
   /*
-   * If `storage(pkValue) == null`, then neither its parents nor its children have been fetched.
-   * If `storage(pkValue) == false`, then only its parents have been fetched.
-   * If `storage(pkValue) == true`, then both its children and its parents have been fetched.
-   * There is no such thing as having fetched a row's children but not having fetched its parents.
+   * If `seenWithChildrenStorage` contains a PK, then both its children AND its parents have been fetched.
+   * If `seenWithoutChildrenStorage` contains a PK, then only its parents have been fetched
+   *
+   * There is no such thing as having fetched a row's children but not having fetched its parents. If a PK
+   * is in there at all, then at any given time, it is either in `seenWithoutChildrenStorage` or in
+   * `seenWithChildrenStorage` -- it will never be in both at once.
    */
-  private[this] val storage: Map[Table, ConcurrentHashMap[Any, java.lang.Boolean]] =
-    tables
-      .map(_ -> new ConcurrentHashMap[Any, java.lang.Boolean])
-      .toMap
+  private[this] val seenWithoutChildrenStorage: Map[Table, mutable.HashSet[Any]] =
+    PrimaryKeyStoreInMemoryImpl.buildStorage(tables)
+
+  private[this] val seenWithChildrenStorage: Map[Table, mutable.HashSet[Any]] =
+    PrimaryKeyStoreInMemoryImpl.buildStorage(tables)
 
   override def markSeen(table: Table, primaryKeyValue: PrimaryKeyValue): WriteOutcome = {
-    val rawValue: Any = extract(primaryKeyValue)
-    val tableStorage: ConcurrentHashMap[Any, java.lang.Boolean] = storage(table)
-    val prev: java.lang.Boolean = tableStorage.putIfAbsent(rawValue, false)
-    interpret(prev)
-  }
+    this.synchronized {
+      val rawValue: Any = PrimaryKeyStoreInMemoryImpl.extract(primaryKeyValue)
 
-  override def markSeenWithChildren(table: Table, primaryKeyValue: PrimaryKeyValue): WriteOutcome = {
-    val rawValue: Any = extract(primaryKeyValue)
-    val tableStorage: ConcurrentHashMap[Any, java.lang.Boolean] = storage(table)
-    val prev: java.lang.Boolean = tableStorage.put(rawValue, true)
-    interpret(prev)
-  }
+      val alreadySeenWithChildren: Boolean =
+        seenWithChildrenStorage(table).contains(rawValue)
 
-  override def alreadySeen(table: Table, primaryKeyValue: PrimaryKeyValue): Boolean = {
-    val rawValue: Any = extract(primaryKeyValue)
-    val tableStorage: ConcurrentHashMap[Any, java.lang.Boolean] = storage(table)
-    tableStorage.containsKey(rawValue)
-  }
+      // Purposely lazy -- only do this extra work if logically necessary
+      lazy val alreadySeenWithoutChildren =
+        !seenWithoutChildrenStorage(table).add(rawValue)
 
-  private[this] def interpret(previousValue: java.lang.Boolean): WriteOutcome = {
-    if (previousValue == null) {
-      FirstTimeSeen
-    } else if (previousValue) {
-      AlreadySeenWithChildren
-    } else {
-      AlreadySeenWithoutChildren
+      if (alreadySeenWithChildren) {
+        AlreadySeenWithChildren
+      } else if (alreadySeenWithoutChildren) {
+        AlreadySeenWithoutChildren
+      } else {
+        FirstTimeSeen
+      }
     }
   }
 
-  private[this] def extract(primaryKeyValue: PrimaryKeyValue): Any = {
+  override def markSeenWithChildren(table: Table, primaryKeyValue: PrimaryKeyValue): WriteOutcome = {
+    this.synchronized {
+      val rawValue: Any = PrimaryKeyStoreInMemoryImpl.extract(primaryKeyValue)
+
+      val alreadySeenWithChildren: Boolean =
+        !seenWithChildrenStorage(table).add(rawValue)
+
+      // Purposely lazy -- only do this extra work if logically necessary
+      lazy val alreadySeenWithoutChildren: Boolean =
+        seenWithoutChildrenStorage(table).remove(rawValue)
+
+      if (alreadySeenWithChildren) {
+        AlreadySeenWithChildren
+      } else if (alreadySeenWithoutChildren) {
+        AlreadySeenWithoutChildren
+      } else {
+        FirstTimeSeen
+      }
+    }
+  }
+
+  override def alreadySeen(table: Table, primaryKeyValue: PrimaryKeyValue): Boolean = {
+    this.synchronized {
+      val rawValue: Any = PrimaryKeyStoreInMemoryImpl.extract(primaryKeyValue)
+      seenWithChildrenStorage(table).contains(rawValue) || seenWithoutChildrenStorage(table).contains(rawValue)
+    }
+  }
+}
+
+private object PrimaryKeyStoreInMemoryImpl {
+  private def buildStorage(tables: Seq[Table]): Map[Table, mutable.HashSet[Any]] = {
+    tables.map { t => t -> mutable.HashSet.empty[Any] }.toMap
+  }
+
+  private def extract(primaryKeyValue: PrimaryKeyValue): Any = {
     if (primaryKeyValue.individualColumnValues.size == 1) {
       primaryKeyValue.individualColumnValues.head
     } else {
