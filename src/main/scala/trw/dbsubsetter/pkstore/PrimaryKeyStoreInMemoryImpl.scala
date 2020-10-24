@@ -4,7 +4,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 import trw.dbsubsetter.db.{PrimaryKeyValue, Table}
 
-private[pkstore] final class PrimaryKeyStoreInMemoryImpl(val tables: Seq[Table]) extends PrimaryKeyStore {
+private[pkstore] final class PrimaryKeyStoreInMemoryImpl(tables: Seq[Table]) extends PrimaryKeyStore {
 
   /*
    * If `storage(pkValue) == null`, then neither its parents nor its children have been fetched.
