@@ -2,8 +2,7 @@ package trw.dbsubsetter.datacopy
 
 import java.nio.file.{Path, Paths}
 
-import trw.dbsubsetter.db.ColumnTypes.ColumnType
-import trw.dbsubsetter.db.{Constants, Keys, PrimaryKeyValue, SchemaInfo, Table}
+import trw.dbsubsetter.db.{Constants, Keys, MultiColumnPrimaryKeyValue, SchemaInfo, Table}
 import trw.dbsubsetter.keyextraction.KeyExtractionUtil
 import trw.dbsubsetter.pkstore.PksAdded
 
@@ -26,13 +25,12 @@ private[datacopy] final class DataCopyQueueImpl(storageDirectory: Path, schemaIn
   private[this] val tablesToChronicleQueues: Map[Table, ChronicleQueueAccess] = {
     schemaInfo.pksByTable.zipWithIndex
       .map { case ((table, primaryKey), i) =>
-        val columnTypes: Seq[ColumnType] = primaryKey.columns.map(_.dataType)
         val tableSubdirectory = Paths.get(storageDirectory.toString, s"t$i")
-        table -> new ChronicleQueueAccess(tableSubdirectory, columnTypes)
+        table -> new ChronicleQueueAccess(tableSubdirectory, primaryKey)
       }
   }
 
-  private[this] val pkValueExtractionFunctions: Map[Table, Keys => PrimaryKeyValue] =
+  private[this] val pkValueExtractionFunctions: Map[Table, Keys => MultiColumnPrimaryKeyValue] =
     KeyExtractionUtil.pkExtractionFunctions(schemaInfo)
 
   override def enqueue(pksAdded: PksAdded): Unit = {
@@ -42,7 +40,7 @@ private[datacopy] final class DataCopyQueueImpl(storageDirectory: Path, schemaIn
       val table: Table = pksAdded.table
       val chronicleQueueAccess: ChronicleQueueAccess = tablesToChronicleQueues(table)
       val extractPkValue = pkValueExtractionFunctions(table)
-      val pkValues: Seq[PrimaryKeyValue] = rows.map(extractPkValue)
+      val pkValues: Seq[MultiColumnPrimaryKeyValue] = rows.map(extractPkValue)
 
       this.synchronized {
         chronicleQueueAccess.write(pkValues)
@@ -64,7 +62,7 @@ private[datacopy] final class DataCopyQueueImpl(storageDirectory: Path, schemaIn
         val dequeueQuantity = Constants.dataCopyBatchSizes.filter(_ <= totalQuantityAvailable).max
 
         val chronicleQueueAccess: ChronicleQueueAccess = tablesToChronicleQueues(table)
-        val primaryKeyValues: Seq[PrimaryKeyValue] = chronicleQueueAccess.read(dequeueQuantity)
+        val primaryKeyValues: Seq[MultiColumnPrimaryKeyValue] = chronicleQueueAccess.read(dequeueQuantity)
         val dataCopyTask = new DataCopyTask(table, primaryKeyValues)
 
         tablesToQueuedValueCounts.update(table, totalQuantityAvailable - dequeueQuantity)

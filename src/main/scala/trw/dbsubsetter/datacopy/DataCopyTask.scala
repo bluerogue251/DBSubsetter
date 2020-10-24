@@ -1,5 +1,5 @@
 package trw.dbsubsetter.datacopy
 
-import trw.dbsubsetter.db.{PrimaryKeyValue, Table}
+import trw.dbsubsetter.db.{MultiColumnPrimaryKeyValue, Table}
 
-class DataCopyTask(val table: Table, val pkValues: Seq[PrimaryKeyValue])
+class DataCopyTask(val table: Table, val pkValues: Seq[MultiColumnPrimaryKeyValue])

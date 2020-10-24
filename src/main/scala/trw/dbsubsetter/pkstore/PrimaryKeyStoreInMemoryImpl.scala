@@ -1,6 +1,6 @@
 package trw.dbsubsetter.pkstore
 
-import trw.dbsubsetter.db.{PrimaryKeyValue, Table}
+import trw.dbsubsetter.db.{MultiColumnPrimaryKeyValue, Table}
 
 import scala.collection.mutable
 
@@ -20,7 +20,7 @@ private[pkstore] final class PrimaryKeyStoreInMemoryImpl(tables: Seq[Table]) ext
   private[this] val seenWithChildrenStorage: Map[Table, mutable.HashSet[Any]] =
     PrimaryKeyStoreInMemoryImpl.buildStorage(tables)
 
-  override def markSeen(table: Table, primaryKeyValue: PrimaryKeyValue): WriteOutcome = {
+  override def markSeen(table: Table, primaryKeyValue: MultiColumnPrimaryKeyValue): WriteOutcome = {
     this.synchronized {
       val rawValue: Any = PrimaryKeyStoreInMemoryImpl.extract(primaryKeyValue)
 
@@ -41,7 +41,7 @@ private[pkstore] final class PrimaryKeyStoreInMemoryImpl(tables: Seq[Table]) ext
     }
   }
 
-  override def markSeenWithChildren(table: Table, primaryKeyValue: PrimaryKeyValue): WriteOutcome = {
+  override def markSeenWithChildren(table: Table, primaryKeyValue: MultiColumnPrimaryKeyValue): WriteOutcome = {
     this.synchronized {
       val rawValue: Any = PrimaryKeyStoreInMemoryImpl.extract(primaryKeyValue)
 
@@ -62,7 +62,7 @@ private[pkstore] final class PrimaryKeyStoreInMemoryImpl(tables: Seq[Table]) ext
     }
   }
 
-  override def alreadySeen(table: Table, primaryKeyValue: PrimaryKeyValue): Boolean = {
+  override def alreadySeen(table: Table, primaryKeyValue: MultiColumnPrimaryKeyValue): Boolean = {
     this.synchronized {
       val rawValue: Any = PrimaryKeyStoreInMemoryImpl.extract(primaryKeyValue)
       seenWithChildrenStorage(table).contains(rawValue) || seenWithoutChildrenStorage(table).contains(rawValue)
@@ -75,11 +75,11 @@ private object PrimaryKeyStoreInMemoryImpl {
     tables.map { t => t -> mutable.HashSet.empty[Any] }.toMap
   }
 
-  private def extract(primaryKeyValue: PrimaryKeyValue): Any = {
-    if (primaryKeyValue.individualColumnValues.size == 1) {
-      primaryKeyValue.individualColumnValues.head
+  private def extract(primaryKeyValue: MultiColumnPrimaryKeyValue): Any = {
+    if (primaryKeyValue.values.size == 1) {
+      primaryKeyValue.values.head
     } else {
-      primaryKeyValue.individualColumnValues
+      primaryKeyValue.values
     }
   }
 }

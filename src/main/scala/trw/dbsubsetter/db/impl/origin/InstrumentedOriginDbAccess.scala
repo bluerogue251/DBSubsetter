@@ -2,7 +2,7 @@ package trw.dbsubsetter.db.impl.origin
 
 import io.prometheus.client.Histogram
 import io.prometheus.client.Histogram.Timer
-import trw.dbsubsetter.db.{ForeignKey, ForeignKeyValue, Keys, OriginDbAccess, PrimaryKeyValue, Row, Table}
+import trw.dbsubsetter.db.{ForeignKey, ForeignKeyValue, Keys, MultiColumnPrimaryKeyValue, OriginDbAccess, Row, Table}
 import trw.dbsubsetter.metrics.Metrics
 
 private[db] class InstrumentedOriginDbAccess(delegatee: OriginDbAccess) extends OriginDbAccess {
@@ -17,7 +17,10 @@ private[db] class InstrumentedOriginDbAccess(delegatee: OriginDbAccess) extends 
     instrument(() => delegatee.getRowsFromForeignKeyValue(fk, table, fkValue))
   }
 
-  override def getRowsFromPrimaryKeyValues(table: Table, primaryKeyValues: Seq[PrimaryKeyValue]): Vector[Row] = {
+  override def getRowsFromPrimaryKeyValues(
+      table: Table,
+      primaryKeyValues: Seq[MultiColumnPrimaryKeyValue]
+  ): Vector[Row] = {
     delegatee.getRowsFromPrimaryKeyValues(table, primaryKeyValues)
   }
 

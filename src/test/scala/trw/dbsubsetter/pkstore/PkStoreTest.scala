@@ -1,7 +1,7 @@
 package trw.dbsubsetter.pkstore
 
 import org.scalatest.FunSuite
-import trw.dbsubsetter.db.{PrimaryKeyValue, Schema, Table}
+import trw.dbsubsetter.db.{MultiColumnPrimaryKeyValue, Schema, Table}
 
 class PkStoreTest extends FunSuite {
   test("PkStore is conscious of whether children have been processed yet") {
@@ -14,7 +14,7 @@ class PkStoreTest extends FunSuite {
     val pkStore: PrimaryKeyStore =
       PrimaryKeyStore.from(Seq(table))
 
-    val pkValue: PrimaryKeyValue = new PrimaryKeyValue(Seq[String]("pkValue"))
+    val pkValue: MultiColumnPrimaryKeyValue = new MultiColumnPrimaryKeyValue(Seq[String]("pkValue"))
 
     // Add the PK to the pkStore, noting that we are not planning to fetch its children at this time
     val writeOutcome1 = pkStore.markSeen(table, pkValue)

@@ -2,8 +2,7 @@ package trw.dbsubsetter
 
 import java.sql.Connection
 
-import trw.dbsubsetter.db.ColumnTypes.ColumnType
-import trw.dbsubsetter.values.{ColumnValue, NullColumnValue}
+import trw.dbsubsetter.values.{ColumnValue, ColumnValueFactory, NullColumnValue}
 
 package object db {
 
@@ -45,10 +44,10 @@ package object db {
       var keyOrdinalPosition: Int,
       // The 0-indexed location of this column in query results where all columns are included
       val dataOrdinalPosition: Int,
-      val dataType: ColumnType
+      val valueFactory: ColumnValueFactory
   )
 
-  class PrimaryKey(val columns: Seq[Column]) {}
+  class PrimaryKey(val columns: Seq[Column])
 
   class ForeignKey(
       val fromCols: Seq[Column],
@@ -65,12 +64,18 @@ package object db {
     }
   }
 
-  // Primary keys can be multi-column. Therefore a single primary key value is a sequence of individual column values.
-  class PrimaryKeyValue(val individualColumnValues: Seq[ColumnValue])
+  sealed trait PrimaryKeyValue
+  case class SingleColumnPrimaryKeyValue(value: ColumnValue) extends PrimaryKeyValue
+  case class MultiColumnPrimaryKeyValue(values: Seq[ColumnValue]) extends PrimaryKeyValue
 
-  // Foreign keys can be multi-column. Therefore a single foreign key value is a sequence of individual column values.
-  class ForeignKeyValue(val individualColumnValues: Seq[ColumnValue]) {
-    val isEmpty: Boolean = individualColumnValues.forall(_ == NullColumnValue)
+  sealed trait ForeignKeyValue {
+    def isEmpty: Boolean
+  }
+  case class SingleColumnForeignKeyValue(value: ColumnValue) extends ForeignKeyValue {
+    val isEmpty: Boolean = value == NullColumnValue
+  }
+  case class MultiColumnForeignKeyValue(values: Seq[ColumnValue]) extends ForeignKeyValue {
+    val isEmpty: Boolean = values.forall(_ == NullColumnValue)
   }
 
   // Represents a single row from the origin database including all columns
@@ -78,19 +83,38 @@ package object db {
 
   // Represents a single row from the origin database including only primary and foreign key columns
   class Keys(data: Array[Any]) {
-
     def getValue(pk: PrimaryKey): PrimaryKeyValue = {
-      val individualColumnValues: Seq[Any] = pk.columns.map(_.keyOrdinalPosition).map(data)
-      new PrimaryKeyValue(individualColumnValues)
+      val columnValues: Seq[ColumnValue] =
+        pk.columns.map { col =>
+          val rawValue: Any = data(col.keyOrdinalPosition)
+          col.valueFactory.fromRaw(rawValue)
+        }
+
+      if (columnValues.size == 1)
+        SingleColumnPrimaryKeyValue(columnValues.head)
+      else
+        MultiColumnPrimaryKeyValue(columnValues)
     }
 
     def getValue(fk: ForeignKey, confusingTechDebt: Boolean): ForeignKeyValue = {
-      val columns: Seq[Column] = if (confusingTechDebt) fk.toCols else fk.fromCols
-      val individualColumnOrdinals: Seq[Int] = columns.map(_.keyOrdinalPosition)
-      val individualColumnValues: Seq[Any] = individualColumnOrdinals.map(data)
-      new ForeignKeyValue(individualColumnValues)
-    }
+      val columns: Seq[Column] =
+        if (confusingTechDebt)
+          fk.toCols
+        else
+          fk.fromCols
 
+      val columnValues: Seq[ColumnValue] =
+        columns.map { column =>
+          val rawValue: Any = data(column.keyOrdinalPosition)
+          column.valueFactory.fromRaw(rawValue)
+        }
+
+      if (columnValues.size == 1)
+        SingleColumnForeignKeyValue(columnValues.head)
+      else
+        MultiColumnForeignKeyValue(columnValues)
+
+    }
   }
 
   implicit class VendorAwareJdbcConnection(private val conn: Connection) {

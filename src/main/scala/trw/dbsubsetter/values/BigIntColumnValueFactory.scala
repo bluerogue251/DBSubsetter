@@ -1,7 +1,7 @@
 package trw.dbsubsetter.values
 
 final class BigIntColumnValueFactory extends ColumnValueFactory {
-  override def fromResultSet(rawValue: Any): ColumnValue = {
+  override def fromRaw(rawValue: Any): ColumnValue = {
     if (rawValue == null) {
       NullColumnValue
     } else {

@@ -42,7 +42,7 @@ private[datacopy] final class DataCopierPostgresImpl(dbAccessFactory: DbAccessFa
     val individualPkValuesSql: Seq[String] =
       task.pkValues
         .map(pkValue => {
-          pkValue.individualColumnValues
+          pkValue.values
             .map(quote)
             .mkString("(", ",", ")")
         })

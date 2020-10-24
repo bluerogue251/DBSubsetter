@@ -1,6 +1,6 @@
 package trw.dbsubsetter.datacopy
 
-import trw.dbsubsetter.db.{Constants, DbAccessFactory, PrimaryKeyValue, Row}
+import trw.dbsubsetter.db.{Constants, DbAccessFactory, MultiColumnPrimaryKeyValue, Row}
 
 private[datacopy] final class DataCopierGenericImpl(dbAccessFactory: DbAccessFactory) extends DataCopier {
 
@@ -9,7 +9,7 @@ private[datacopy] final class DataCopierGenericImpl(dbAccessFactory: DbAccessFac
   private[this] val targetDbAccess = dbAccessFactory.buildTargetDbAccess()
 
   def runTask(task: DataCopyTask): Unit = {
-    val pkValues: Seq[PrimaryKeyValue] = task.pkValues
+    val pkValues: Seq[MultiColumnPrimaryKeyValue] = task.pkValues
 
     if (!Constants.dataCopyBatchSizes.contains(pkValues.size)) {
       throw new IllegalArgumentException(s"Unsupported data copy batch size: ${pkValues.size}")

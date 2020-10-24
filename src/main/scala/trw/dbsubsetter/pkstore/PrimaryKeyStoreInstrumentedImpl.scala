@@ -1,6 +1,6 @@
 package trw.dbsubsetter.pkstore
 
-import trw.dbsubsetter.db.{PrimaryKeyValue, Table}
+import trw.dbsubsetter.db.{MultiColumnPrimaryKeyValue, Table}
 import trw.dbsubsetter.metrics.Metrics
 
 private[pkstore] final class PrimaryKeyStoreInstrumentedImpl(delegatee: PrimaryKeyStore) extends PrimaryKeyStore {
@@ -15,7 +15,7 @@ private[pkstore] final class PrimaryKeyStoreInstrumentedImpl(delegatee: PrimaryK
 
   private[this] val duplicateFkTasksDiscarded = Metrics.DuplicateFkTasksDiscarded
 
-  override def markSeen(table: Table, primaryKeyValue: PrimaryKeyValue): WriteOutcome = {
+  override def markSeen(table: Table, primaryKeyValue: MultiColumnPrimaryKeyValue): WriteOutcome = {
     val writeOutcome: WriteOutcome =
       pkStoreMarkSeenHistogram.time(() => {
         delegatee.markSeen(table, primaryKeyValue)
@@ -29,7 +29,7 @@ private[pkstore] final class PrimaryKeyStoreInstrumentedImpl(delegatee: PrimaryK
     writeOutcome
   }
 
-  override def markSeenWithChildren(table: Table, primaryKeyValue: PrimaryKeyValue): WriteOutcome = {
+  override def markSeenWithChildren(table: Table, primaryKeyValue: MultiColumnPrimaryKeyValue): WriteOutcome = {
     val writeOutcome: WriteOutcome =
       pkStoreMarkSeenWithChildrenHistogram.time(() => {
         delegatee.markSeenWithChildren(table, primaryKeyValue)
@@ -43,7 +43,7 @@ private[pkstore] final class PrimaryKeyStoreInstrumentedImpl(delegatee: PrimaryK
     writeOutcome
   }
 
-  override def alreadySeen(table: Table, primaryKeyValue: PrimaryKeyValue): Boolean = {
+  override def alreadySeen(table: Table, primaryKeyValue: MultiColumnPrimaryKeyValue): Boolean = {
     val alreadySeen: Boolean =
       pkStoreQueryAlreadySeenHistogram.time(() => {
         delegatee.alreadySeen(table, primaryKeyValue)

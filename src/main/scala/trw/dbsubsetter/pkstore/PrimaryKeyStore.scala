@@ -1,11 +1,11 @@
 package trw.dbsubsetter.pkstore
 
-import trw.dbsubsetter.db.{PrimaryKeyValue, Table}
+import trw.dbsubsetter.db.{MultiColumnPrimaryKeyValue, Table}
 
 private[pkstore] trait PrimaryKeyStore {
-  def markSeen(table: Table, primaryKeyValue: PrimaryKeyValue): WriteOutcome
-  def markSeenWithChildren(table: Table, primaryKeyValue: PrimaryKeyValue): WriteOutcome
-  def alreadySeen(table: Table, primaryKeyValue: PrimaryKeyValue): Boolean
+  def markSeen(table: Table, primaryKeyValue: MultiColumnPrimaryKeyValue): WriteOutcome
+  def markSeenWithChildren(table: Table, primaryKeyValue: MultiColumnPrimaryKeyValue): WriteOutcome
+  def alreadySeen(table: Table, primaryKeyValue: MultiColumnPrimaryKeyValue): Boolean
 }
 
 private[pkstore] object PrimaryKeyStore {

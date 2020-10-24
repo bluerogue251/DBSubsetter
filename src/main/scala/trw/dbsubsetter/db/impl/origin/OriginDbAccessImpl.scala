@@ -37,13 +37,16 @@ private[db] class OriginDbAccessImpl(
     mapper.convertToKeys(jdbcResult, table)
   }
 
-  override def getRowsFromPrimaryKeyValues(table: Table, primaryKeyValues: Seq[PrimaryKeyValue]): Vector[Row] = {
+  override def getRowsFromPrimaryKeyValues(
+      table: Table,
+      primaryKeyValues: Seq[MultiColumnPrimaryKeyValue]
+  ): Vector[Row] = {
     val stmt = primaryKeyTemplateStatements((table, primaryKeyValues.size.toShort))
     stmt.clearParameters()
 
     var i: Int = 1
     primaryKeyValues.foreach { primaryKeyValue =>
-      primaryKeyValue.individualColumnValues.foreach { individualColumnValue =>
+      primaryKeyValue.values.foreach { individualColumnValue =>
         stmt.setObject(i, individualColumnValue)
         i += 1
       }

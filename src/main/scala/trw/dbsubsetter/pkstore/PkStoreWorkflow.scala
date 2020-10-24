@@ -1,7 +1,7 @@
 package trw.dbsubsetter.pkstore
 
 import trw.dbsubsetter.OriginDbResult
-import trw.dbsubsetter.db.{Keys, PrimaryKeyValue, SchemaInfo, Table}
+import trw.dbsubsetter.db.{Keys, MultiColumnPrimaryKeyValue, SchemaInfo, Table}
 import trw.dbsubsetter.keyextraction.KeyExtractionUtil
 
 final class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
@@ -11,20 +11,20 @@ final class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
       .empty[WriteOutcome, Vector[Keys]]
       .withDefaultValue(Vector.empty[Keys])
 
-  private[this] val pkValueExtractionFunctions: Map[Table, Keys => PrimaryKeyValue] =
+  private[this] val pkValueExtractionFunctions: Map[Table, Keys => MultiColumnPrimaryKeyValue] =
     KeyExtractionUtil.pkExtractionFunctions(schemaInfo)
 
-  def alreadySeen(table: Table, primaryKeyValue: PrimaryKeyValue): Boolean = {
+  def alreadySeen(table: Table, primaryKeyValue: MultiColumnPrimaryKeyValue): Boolean = {
     pkStore.alreadySeen(table, primaryKeyValue)
   }
 
   def add(req: OriginDbResult): PksAdded = {
     val OriginDbResult(table, rows, viaTableOpt, fetchChildren) = req
-    val pkValueExtractionFunction: Keys => PrimaryKeyValue = pkValueExtractionFunctions(table)
+    val pkValueExtractionFunction: Keys => MultiColumnPrimaryKeyValue = pkValueExtractionFunctions(table)
 
     if (fetchChildren) {
       val outcomes: Vector[(WriteOutcome, Keys)] = rows.map(row => {
-        val pkValue: PrimaryKeyValue = pkValueExtractionFunction(row)
+        val pkValue: MultiColumnPrimaryKeyValue = pkValueExtractionFunction(row)
         val outcome: WriteOutcome = pkStore.markSeenWithChildren(table, pkValue)
         outcome -> row
       })
@@ -40,7 +40,7 @@ final class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
       PksAdded(table, parentsNotYetFetched, childrenNotYetFetched, viaTableOpt)
     } else {
       val newRows = rows.filter(row => {
-        val pkValue: PrimaryKeyValue = pkValueExtractionFunction(row)
+        val pkValue: MultiColumnPrimaryKeyValue = pkValueExtractionFunction(row)
         pkStore.markSeen(table, pkValue) match {
           case FirstTimeSeen => true
           case _             => false

@@ -5,7 +5,7 @@ final class IntColumnValueFactory extends ColumnValueFactory {
     if (rawValue == null) {
       NullColumnValue
     } else {
-      ShortColumnValue(rawValue.asInstanceOf[Int])
+      IntColumnValue(rawValue.asInstanceOf[Int])
     }
   }
 }
