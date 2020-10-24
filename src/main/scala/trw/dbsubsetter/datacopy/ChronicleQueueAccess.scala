@@ -6,7 +6,7 @@ import net.openhft.chronicle.bytes.WriteBytesMarshallable
 import net.openhft.chronicle.queue.impl.single.SingleChronicleQueue
 import trw.dbsubsetter.bytes.PrimaryKeyBytes
 import trw.dbsubsetter.chronicle.ChronicleQueueFactory
-import trw.dbsubsetter.db.{MultiColumnPrimaryKeyValue, PrimaryKey, PrimaryKeyValue}
+import trw.dbsubsetter.db.{PrimaryKey, PrimaryKeyValue}
 
 private[datacopy] final class ChronicleQueueAccess(storageDirectory: Path, primaryKey: PrimaryKey) {
 
@@ -31,10 +31,10 @@ private[datacopy] final class ChronicleQueueAccess(storageDirectory: Path, prima
     */
   def read(n: Short): Seq[PrimaryKeyValue] = {
     (1 to n).map { _ =>
-      var optionalValue: Option[MultiColumnPrimaryKeyValue] = None
+      var optionalValue: Option[PrimaryKeyValue] = None
 
       tailer.readDocument { r =>
-        val primaryKeyValue: MultiColumnPrimaryKeyValue = reader.apply(r.getValueIn)
+        val primaryKeyValue: PrimaryKeyValue = reader.apply(r.getValueIn)
         optionalValue = Some(primaryKeyValue)
       }
 

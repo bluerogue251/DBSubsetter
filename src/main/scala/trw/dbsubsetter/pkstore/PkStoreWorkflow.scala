@@ -1,7 +1,7 @@
 package trw.dbsubsetter.pkstore
 
 import trw.dbsubsetter.OriginDbResult
-import trw.dbsubsetter.db.{Keys, MultiColumnPrimaryKeyValue, SchemaInfo, Table}
+import trw.dbsubsetter.db.{Keys, MultiColumnPrimaryKeyValue, PrimaryKeyValue, SchemaInfo, Table}
 import trw.dbsubsetter.keyextraction.KeyExtractionUtil
 
 final class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
@@ -24,7 +24,7 @@ final class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
 
     if (fetchChildren) {
       val outcomes: Vector[(WriteOutcome, Keys)] = rows.map(row => {
-        val pkValue: MultiColumnPrimaryKeyValue = pkValueExtractionFunction(row)
+        val pkValue: PrimaryKeyValue = pkValueExtractionFunction(row)
         val outcome: WriteOutcome = pkStore.markSeenWithChildren(table, pkValue)
         outcome -> row
       })
@@ -40,7 +40,7 @@ final class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
       PksAdded(table, parentsNotYetFetched, childrenNotYetFetched, viaTableOpt)
     } else {
       val newRows = rows.filter(row => {
-        val pkValue: MultiColumnPrimaryKeyValue = pkValueExtractionFunction(row)
+        val pkValue: PrimaryKeyValue = pkValueExtractionFunction(row)
         pkStore.markSeen(table, pkValue) match {
           case FirstTimeSeen => true
           case _             => false

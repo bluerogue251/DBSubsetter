@@ -1,6 +1,7 @@
 package trw.dbsubsetter.pkstore
 
-import trw.dbsubsetter.db.{MultiColumnPrimaryKeyValue, Table}
+import trw.dbsubsetter.db
+import trw.dbsubsetter.db.{MultiColumnPrimaryKeyValue, PrimaryKeyValue, Table}
 
 import scala.collection.mutable
 
@@ -20,7 +21,7 @@ private[pkstore] final class PrimaryKeyStoreInMemoryImpl(tables: Seq[Table]) ext
   private[this] val seenWithChildrenStorage: Map[Table, mutable.HashSet[Any]] =
     PrimaryKeyStoreInMemoryImpl.buildStorage(tables)
 
-  override def markSeen(table: Table, primaryKeyValue: MultiColumnPrimaryKeyValue): WriteOutcome = {
+  override def markSeen(table: Table, primaryKeyValue: PrimaryKeyValue): WriteOutcome = {
     this.synchronized {
       val rawValue: Any = PrimaryKeyStoreInMemoryImpl.extract(primaryKeyValue)
 
@@ -41,7 +42,7 @@ private[pkstore] final class PrimaryKeyStoreInMemoryImpl(tables: Seq[Table]) ext
     }
   }
 
-  override def markSeenWithChildren(table: Table, primaryKeyValue: MultiColumnPrimaryKeyValue): WriteOutcome = {
+  override def markSeenWithChildren(table: Table, primaryKeyValue: PrimaryKeyValue): WriteOutcome = {
     this.synchronized {
       val rawValue: Any = PrimaryKeyStoreInMemoryImpl.extract(primaryKeyValue)
 
@@ -62,7 +63,7 @@ private[pkstore] final class PrimaryKeyStoreInMemoryImpl(tables: Seq[Table]) ext
     }
   }
 
-  override def alreadySeen(table: Table, primaryKeyValue: MultiColumnPrimaryKeyValue): Boolean = {
+  override def alreadySeen(table: Table, primaryKeyValue: PrimaryKeyValue): Boolean = {
     this.synchronized {
       val rawValue: Any = PrimaryKeyStoreInMemoryImpl.extract(primaryKeyValue)
       seenWithChildrenStorage(table).contains(rawValue) || seenWithoutChildrenStorage(table).contains(rawValue)
@@ -75,11 +76,10 @@ private object PrimaryKeyStoreInMemoryImpl {
     tables.map { t => t -> mutable.HashSet.empty[Any] }.toMap
   }
 
-  private def extract(primaryKeyValue: MultiColumnPrimaryKeyValue): Any = {
-    if (primaryKeyValue.values.size == 1) {
-      primaryKeyValue.values.head
-    } else {
-      primaryKeyValue.values
+  private def extract(primaryKeyValue: PrimaryKeyValue): Any = {
+    primaryKeyValue match {
+      case db.SingleColumnPrimaryKeyValue(value) => value
+      case MultiColumnPrimaryKeyValue(values)    => values
     }
   }
 }
