@@ -1,13 +1,10 @@
 package trw.dbsubsetter.pkstore
 
-import trw.dbsubsetter.db.{PrimaryKeyValue, SchemaInfo, Table}
+import trw.dbsubsetter.db.{PrimaryKeyValue, Table}
 
 import scala.collection.mutable
 
-/**
-  * WARNING: this class is not threadsafe
-  */
-private[pkstore] final class PrimaryKeyStoreInMemoryImpl(schemaInfo: SchemaInfo) extends PrimaryKeyStore {
+private[pkstore] final class PrimaryKeyStoreInMemoryImpl(tables: Seq[Table]) extends PrimaryKeyStore {
 
   /*
    * If `seenWithChildrenStorage` contains a PK, then both its children AND its parents have been fetched.
@@ -18,58 +15,63 @@ private[pkstore] final class PrimaryKeyStoreInMemoryImpl(schemaInfo: SchemaInfo)
    * `seenWithChildrenStorage` -- it will never be in both at once.
    */
   private[this] val seenWithoutChildrenStorage: Map[Table, mutable.HashSet[Any]] =
-    PrimaryKeyStoreInMemoryImpl.buildStorage(schemaInfo)
+    PrimaryKeyStoreInMemoryImpl.buildStorage(tables)
 
   private[this] val seenWithChildrenStorage: Map[Table, mutable.HashSet[Any]] =
-    PrimaryKeyStoreInMemoryImpl.buildStorage(schemaInfo)
+    PrimaryKeyStoreInMemoryImpl.buildStorage(tables)
 
   override def markSeen(table: Table, primaryKeyValue: PrimaryKeyValue): WriteOutcome = {
-    val rawValue: Any = PrimaryKeyStoreInMemoryImpl.extract(primaryKeyValue)
+    this.synchronized {
+      val rawValue: Any = PrimaryKeyStoreInMemoryImpl.extract(primaryKeyValue)
 
-    val alreadySeenWithChildren: Boolean =
-      seenWithChildrenStorage(table).contains(rawValue)
+      val alreadySeenWithChildren: Boolean =
+        seenWithChildrenStorage(table).contains(rawValue)
 
-    // Purposely lazy -- only do this extra work if logically necessary
-    lazy val alreadySeenWithoutChildren =
-      !seenWithoutChildrenStorage(table).add(rawValue)
+      // Purposely lazy -- only do this extra work if logically necessary
+      lazy val alreadySeenWithoutChildren =
+        !seenWithoutChildrenStorage(table).add(rawValue)
 
-    if (alreadySeenWithChildren) {
-      AlreadySeenWithChildren
-    } else if (alreadySeenWithoutChildren) {
-      AlreadySeenWithoutChildren
-    } else {
-      FirstTimeSeen
+      if (alreadySeenWithChildren) {
+        AlreadySeenWithChildren
+      } else if (alreadySeenWithoutChildren) {
+        AlreadySeenWithoutChildren
+      } else {
+        FirstTimeSeen
+      }
     }
   }
 
   override def markSeenWithChildren(table: Table, primaryKeyValue: PrimaryKeyValue): WriteOutcome = {
-    val rawValue: Any = PrimaryKeyStoreInMemoryImpl.extract(primaryKeyValue)
+    this.synchronized {
+      val rawValue: Any = PrimaryKeyStoreInMemoryImpl.extract(primaryKeyValue)
 
-    val alreadySeenWithChildren: Boolean =
-      !seenWithChildrenStorage(table).add(rawValue)
+      val alreadySeenWithChildren: Boolean =
+        !seenWithChildrenStorage(table).add(rawValue)
 
-    // Purposely lazy -- only do this extra work if logically necessary
-    lazy val alreadySeenWithoutChildren: Boolean =
-      seenWithoutChildrenStorage(table).remove(rawValue)
+      // Purposely lazy -- only do this extra work if logically necessary
+      lazy val alreadySeenWithoutChildren: Boolean =
+        seenWithoutChildrenStorage(table).remove(rawValue)
 
-    if (alreadySeenWithChildren) {
-      AlreadySeenWithChildren
-    } else if (alreadySeenWithoutChildren) {
-      AlreadySeenWithoutChildren
-    } else {
-      FirstTimeSeen
+      if (alreadySeenWithChildren) {
+        AlreadySeenWithChildren
+      } else if (alreadySeenWithoutChildren) {
+        AlreadySeenWithoutChildren
+      } else {
+        FirstTimeSeen
+      }
     }
   }
 
   override def alreadySeen(table: Table, primaryKeyValue: PrimaryKeyValue): Boolean = {
-    val rawValue: Any = PrimaryKeyStoreInMemoryImpl.extract(primaryKeyValue)
-    seenWithChildrenStorage(table).contains(rawValue) || seenWithoutChildrenStorage(table).contains(rawValue)
+    this.synchronized {
+      val rawValue: Any = PrimaryKeyStoreInMemoryImpl.extract(primaryKeyValue)
+      seenWithChildrenStorage(table).contains(rawValue) || seenWithoutChildrenStorage(table).contains(rawValue)
+    }
   }
 }
 
 private object PrimaryKeyStoreInMemoryImpl {
-  private def buildStorage(schemaInfo: SchemaInfo): Map[Table, mutable.HashSet[Any]] = {
-    val tables: Iterable[Table] = schemaInfo.pksByTable.keys
+  private def buildStorage(tables: Seq[Table]): Map[Table, mutable.HashSet[Any]] = {
     tables.map { t => t -> mutable.HashSet.empty[Any] }.toMap
   }
 

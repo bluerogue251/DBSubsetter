@@ -1,8 +1,7 @@
-package unit
+package trw.dbsubsetter.pkstore
 
 import org.scalatest.FunSuite
-import trw.dbsubsetter.db.{Column, PrimaryKey, PrimaryKeyValue, Schema, SchemaInfo, Table}
-import trw.dbsubsetter.pkstore._
+import trw.dbsubsetter.db.{PrimaryKeyValue, Schema, Table}
 
 class PkStoreTest extends FunSuite {
   test("PkStore is conscious of whether children have been processed yet") {
@@ -12,28 +11,8 @@ class PkStoreTest extends FunSuite {
         name = "users"
       )
 
-    val pkCol: Column =
-      new Column(
-        table = table,
-        name = null,
-        keyOrdinalPosition = 0,
-        dataOrdinalPosition = -1, // n/a
-        dataType = null
-      )
-
-    val schemaInfo: SchemaInfo =
-      new SchemaInfo(
-        tables = Seq.empty,
-        keyColumnsByTableOrdered = Map.empty,
-        dataColumnsByTableOrdered = Map.empty,
-        pksByTable = Map(table -> new PrimaryKey(Seq(pkCol))),
-        fksOrdered = Array.empty,
-        fksFromTable = Map.empty,
-        fksToTable = Map.empty
-      )
-
     val pkStore: PrimaryKeyStore =
-      PrimaryKeyStore.from(schemaInfo)
+      PrimaryKeyStore.from(Seq(table))
 
     val pkValue: PrimaryKeyValue = new PrimaryKeyValue(Seq[String]("pkValue"))
 

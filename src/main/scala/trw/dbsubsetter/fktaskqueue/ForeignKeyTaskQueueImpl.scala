@@ -11,7 +11,7 @@ import trw.dbsubsetter.fkcalc.{FetchChildrenTask, FetchParentTask, ForeignKeyTas
 /**
   * WARNING: this class is not threadsafe
   */
-private[fktaskqueue] final class ForeignKeyTaskChronicleQueue(storageDirectory: Path, schemaInfo: SchemaInfo)
+private[fktaskqueue] final class ForeignKeyTaskQueueImpl(storageDirectory: Path, schemaInfo: SchemaInfo)
     extends ForeignKeyTaskQueue {
 
   private[this] var queuedTaskCount: Long = 0L
@@ -46,72 +46,76 @@ private[fktaskqueue] final class ForeignKeyTaskChronicleQueue(storageDirectory: 
       }
 
   override def enqueue(foreignKeyTask: ForeignKeyTask): Unit = {
-    foreignKeyTask match {
-      case FetchChildrenTask(fk, fkValue) =>
-        write(
-          writer = childFkWriters(fk.i),
-          fetchChildren = true,
-          value = fkValue
-        )
-      case FetchParentTask(fk, fkValue) =>
-        write(
-          writer = parentFkWriters(fk.i),
-          fetchChildren = false,
-          value = fkValue
-        )
-    }
+    this.synchronized {
+      foreignKeyTask match {
+        case FetchChildrenTask(fk, fkValue) =>
+          write(
+            writer = childFkWriters(fk.i),
+            fetchChildren = true,
+            value = fkValue
+          )
+        case FetchParentTask(fk, fkValue) =>
+          write(
+            writer = parentFkWriters(fk.i),
+            fetchChildren = false,
+            value = fkValue
+          )
+      }
 
-    queuedTaskCount += 1L
+      queuedTaskCount += 1L
+    }
   }
 
   override def dequeue(): Option[ForeignKeyTask] = {
-    var optionalTask: Option[ForeignKeyTask] = None
+    this.synchronized {
+      var optionalTask: Option[ForeignKeyTask] = None
 
-    /*
-     * `tailer.readDocument` can early return `false` if there is no new data on-disk to read. In this case,
-     * `var optionalTask` stays set to `None` and is eventually returned as `None` from this method.
-     */
-    tailer.readDocument { r =>
-      val in = r.getValueIn
+      /*
+       * `tailer.readDocument` can early return `false` if there is no new data on-disk to read. In this case,
+       * `var optionalTask` stays set to `None` and is eventually returned as `None` from this method.
+       */
+      tailer.readDocument { r =>
+        val in = r.getValueIn
 
-      val fetchChildren: Boolean = in.bool()
-      val fkOrdinal: Short = in.int16()
+        val fetchChildren: Boolean = in.bool()
+        val fkOrdinal: Short = in.int16()
 
-      val reader: ChronicleQueueFkTaskReader =
-        if (fetchChildren) {
-          childReaders(fkOrdinal)
-        } else {
-          parentReaders(fkOrdinal)
-        }
+        val reader: ChronicleQueueFkTaskReader =
+          if (fetchChildren) {
+            childReaders(fkOrdinal)
+          } else {
+            parentReaders(fkOrdinal)
+          }
 
-      val fkValue: ForeignKeyValue = reader.read(in)
+        val fkValue: ForeignKeyValue = reader.read(in)
 
-      val foreignKey: ForeignKey = schemaInfo.fksOrdered(fkOrdinal)
+        val foreignKey: ForeignKey = schemaInfo.fksOrdered(fkOrdinal)
 
-      val task: ForeignKeyTask =
-        if (fetchChildren) {
-          FetchChildrenTask(foreignKey, fkValue)
-        } else {
-          FetchParentTask(foreignKey, fkValue)
-        }
+        val task: ForeignKeyTask =
+          if (fetchChildren) {
+            FetchChildrenTask(foreignKey, fkValue)
+          } else {
+            FetchParentTask(foreignKey, fkValue)
+          }
 
-      queuedTaskCount -= 1L
-      optionalTask = Some(task)
+        queuedTaskCount -= 1L
+        optionalTask = Some(task)
+      }
+
+      optionalTask
     }
-
-    optionalTask
-  }
-
-  override def isEmpty(): Boolean = {
-    queuedTaskCount == 0L
   }
 
   override def nonEmpty(): Boolean = {
-    queuedTaskCount != 0L
+    this.synchronized {
+      queuedTaskCount != 0L
+    }
   }
 
   override def size(): Long = {
-    queuedTaskCount
+    this.synchronized {
+      queuedTaskCount
+    }
   }
 
   private[this] def write(writer: ChronicleQueueFkTaskWriter, fetchChildren: Boolean, value: ForeignKeyValue): Unit = {
