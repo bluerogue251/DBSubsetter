@@ -2,7 +2,7 @@ package trw.dbsubsetter.datacopy
 
 import java.nio.file.{Path, Paths}
 
-import trw.dbsubsetter.db.{Constants, Keys, MultiColumnPrimaryKeyValue, SchemaInfo, Table}
+import trw.dbsubsetter.db.{Constants, Keys, MultiColumnPrimaryKeyValue, PrimaryKeyValue, SchemaInfo, Table}
 import trw.dbsubsetter.keyextraction.KeyExtractionUtil
 import trw.dbsubsetter.pkstore.PksAdded
 
@@ -40,7 +40,7 @@ private[datacopy] final class DataCopyQueueImpl(storageDirectory: Path, schemaIn
       val table: Table = pksAdded.table
       val chronicleQueueAccess: ChronicleQueueAccess = tablesToChronicleQueues(table)
       val extractPkValue = pkValueExtractionFunctions(table)
-      val pkValues: Seq[MultiColumnPrimaryKeyValue] = rows.map(extractPkValue)
+      val pkValues: Seq[PrimaryKeyValue] = rows.map(extractPkValue)
 
       this.synchronized {
         chronicleQueueAccess.write(pkValues)
