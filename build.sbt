@@ -14,7 +14,7 @@ libraryDependencies ++= Seq(
   "mysql" % "mysql-connector-java" % "8.0.8-dmr",
   "com.microsoft.sqlserver" % "mssql-jdbc" % "6.2.1.jre8",
   // Off-heap data structures
-  "net.openhft" % "chronicle-queue" % "4.6.57",
+  "net.openhft" % "chronicle-queue" % "5.20.103",
   // No-op logger to silence slf4j warnings
   "org.slf4j" % "slf4j-nop" % "1.7.25",
   // Observability tools
