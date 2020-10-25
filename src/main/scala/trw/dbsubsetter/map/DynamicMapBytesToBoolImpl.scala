@@ -4,7 +4,7 @@ import java.nio.ByteBuffer
 
 final class DynamicMapBytesToBoolImpl extends DynamicMapBytesToBool {
 
-  private[this] var storage: StaticMap[ByteBuffer, Boolean] = new StaticMapBytesToBoolInMemoryImpl(5000)
+  private[this] var storage: StaticMap[ByteBuffer, Boolean] = new StaticMapBytesToBoolInMemoryImpl(1)
 
   override def containsKey(key: ByteBuffer): Boolean = {
     this.synchronized {
@@ -29,7 +29,8 @@ final class DynamicMapBytesToBoolImpl extends DynamicMapBytesToBool {
   private def manageSize(): Unit = {
     if (storage.size() >= storage.capacity()) {
       val newCapacity: Long = storage.capacity() * 2
-      val newStorage: StaticMap[ByteBuffer, Boolean] = new StaticMapBytesToBoolChronicleImpl(newCapacity)
+      val keySample: ByteBuffer = storage.keySample()
+      val newStorage: StaticMap[ByteBuffer, Boolean] = new StaticMapBytesToBoolChronicleImpl(newCapacity, keySample)
       storage.copyTo(newStorage)
       storage.close()
       storage = newStorage

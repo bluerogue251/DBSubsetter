@@ -7,12 +7,14 @@ import net.openhft.chronicle.map.ChronicleMap
 /**
   * Not Threadsafe
   */
-private[map] final class StaticMapBytesToBoolChronicleImpl(capacity: Long) extends StaticMap[ByteBuffer, Boolean] {
+private[map] final class StaticMapBytesToBoolChronicleImpl(capacity: Long, keySample: ByteBuffer)
+    extends StaticMap[ByteBuffer, Boolean] {
 
-  private[this] val storage: ChronicleMap[ByteBuffer, Byte] =
+  private[this] val storage: ChronicleMap[ByteBuffer, java.lang.Boolean] =
     ChronicleMap
-      .of(classOf[ByteBuffer], classOf[Byte])
+      .of(classOf[ByteBuffer], classOf[java.lang.Boolean])
       .entries(capacity)
+      .averageKey(keySample)
       .create()
 
   private[this] var size: Long = 0L
@@ -22,15 +24,13 @@ private[map] final class StaticMapBytesToBoolChronicleImpl(capacity: Long) exten
   }
 
   override def put(key: ByteBuffer, value: Boolean): Option[Boolean] = {
-    val byteValue: Byte = mapToByte(value)
-    val prevByte: Byte = storage.put(key, byteValue)
-    interpret(prevByte)
+    val prev: java.lang.Boolean = storage.put(key, value)
+    interpretAndTrackSize(prev)
   }
 
   override def putIfAbsent(key: ByteBuffer, value: Boolean): Option[Boolean] = {
-    val byteValue: Byte = mapToByte(value)
-    val prevByte: Byte = storage.putIfAbsent(key, byteValue)
-    interpret(prevByte)
+    val prev: java.lang.Boolean = storage.putIfAbsent(key, value)
+    interpretAndTrackSize(prev)
   }
 
   override def capacity(): Long = {
@@ -41,10 +41,13 @@ private[map] final class StaticMapBytesToBoolChronicleImpl(capacity: Long) exten
     storage.size()
   }
 
+  override def keySample(): ByteBuffer = {
+    storage.keySet().iterator().next()
+  }
+
   override def copyTo(other: StaticMap[ByteBuffer, Boolean]): Unit = {
     storage.forEachEntry { entry =>
-      val valueBool: Boolean = mapToBoolUnsafe(entry.value().get())
-      other.put(entry.key().get(), valueBool)
+      other.put(entry.key().get(), entry.value().get())
     }
   }
 
@@ -52,30 +55,12 @@ private[map] final class StaticMapBytesToBoolChronicleImpl(capacity: Long) exten
     storage.close()
   }
 
-  private[this] def mapToByte(bool: Boolean): Byte = {
-    if (bool) 1 else 2
-  }
-
-  private[this] def interpret(prevByte: Byte): Option[Boolean] = {
-    val prevBool: Option[Boolean] = mapToBool(prevByte)
-    if (prevBool.isEmpty) {
+  private[this] def interpretAndTrackSize(prev: java.lang.Boolean): Option[Boolean] = {
+    if (prev == null) {
       size += 1
-    }
-    prevBool
-  }
-
-  private[this] def mapToBool(byte: Byte): Option[Boolean] = {
-    byte match {
-      case 0 => None
-      case 1 => Some(false)
-      case 2 => Some(true)
-    }
-  }
-
-  private[this] def mapToBoolUnsafe(byte: Byte): Boolean = {
-    byte match {
-      case 1 => false
-      case 2 => true
+      None
+    } else {
+      Some(prev.booleanValue())
     }
   }
 }

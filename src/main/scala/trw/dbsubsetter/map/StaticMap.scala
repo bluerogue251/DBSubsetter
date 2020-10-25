@@ -36,6 +36,11 @@ private[map] trait StaticMap[K, V] {
   def size(): Long
 
   /**
+    * Give a sample key from this map, or throw exception if the map is empty
+    */
+  def keySample(): K
+
+  /**
     * Copy every entry in this map into another map
     */
   def copyTo(other: StaticMap[K, V]): Unit

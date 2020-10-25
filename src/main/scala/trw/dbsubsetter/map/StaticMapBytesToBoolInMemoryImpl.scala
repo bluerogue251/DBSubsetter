@@ -36,6 +36,10 @@ private[map] final class StaticMapBytesToBoolInMemoryImpl(capacity: Int) extends
     storage.size
   }
 
+  override def keySample(): ByteBuffer = {
+    storage.keys.head
+  }
+
   override def copyTo(other: StaticMap[ByteBuffer, Boolean]): Unit = {
     storage.foreach { case (key, value) =>
       other.put(key, value)
