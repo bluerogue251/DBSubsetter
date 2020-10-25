@@ -17,20 +17,20 @@ private[pkstore] final class PrimaryKeyStoreSingleTableImpl extends PrimaryKeySt
   private[this] val storage: ConcurrentHashMap[ByteBuffer, Boolean] = new ConcurrentHashMap()
 
   override def markSeen(value: PrimaryKeyValue): WriteOutcome = {
-    val rawValue: ByteBuffer = extract(value)
-    val prev: java.lang.Boolean = storage.putIfAbsent(rawValue, false)
+    val valueBytes: ByteBuffer = extract(value)
+    val prev: java.lang.Boolean = storage.putIfAbsent(valueBytes, false)
     interpret(prev)
   }
 
   override def markSeenWithChildren(value: PrimaryKeyValue): WriteOutcome = {
-    val rawValue: ByteBuffer = extract(value)
-    val prev: java.lang.Boolean = storage.put(rawValue, true)
+    val valueBytes: ByteBuffer = extract(value)
+    val prev: java.lang.Boolean = storage.put(valueBytes, true)
     interpret(prev)
   }
 
   override def alreadySeen(value: PrimaryKeyValue): Boolean = {
-    val rawValue: ByteBuffer = extract(value)
-    storage.containsKey(rawValue)
+    val valueBytes: ByteBuffer = extract(value)
+    storage.containsKey(valueBytes)
   }
 
   private def extract(value: PrimaryKeyValue): ByteBuffer = {
