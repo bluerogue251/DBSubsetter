@@ -2,9 +2,9 @@ package trw.dbsubsetter.pkstore
 
 import java.nio.ByteBuffer
 import java.util.UUID
-import java.util.concurrent.ConcurrentHashMap
 
 import trw.dbsubsetter.db.PrimaryKeyValue
+import trw.dbsubsetter.map.DynamicMapBytesToBool
 
 private[pkstore] final class PrimaryKeyStoreSingleTableImpl extends PrimaryKeyStoreSingleTable {
 
@@ -14,17 +14,17 @@ private[pkstore] final class PrimaryKeyStoreSingleTableImpl extends PrimaryKeySt
    * If `storage(pkValue) == true`, then both its children and its parents have been fetched.
    * There is no such thing as having fetched a row's children but not having fetched its parents.
    */
-  private[this] val storage: ConcurrentHashMap[ByteBuffer, java.lang.Boolean] = new ConcurrentHashMap()
+  private[this] val storage: DynamicMapBytesToBool = DynamicMapBytesToBool.empty()
 
   override def markSeen(value: PrimaryKeyValue): WriteOutcome = {
     val valueBytes: ByteBuffer = extract(value)
-    val prev: java.lang.Boolean = storage.putIfAbsent(valueBytes, false)
+    val prev: Option[Boolean] = storage.putIfAbsent(valueBytes, false)
     interpret(prev)
   }
 
   override def markSeenWithChildren(value: PrimaryKeyValue): WriteOutcome = {
     val valueBytes: ByteBuffer = extract(value)
-    val prev: java.lang.Boolean = storage.put(valueBytes, true)
+    val prev: Option[Boolean] = storage.put(valueBytes, true)
     interpret(prev)
   }
 
@@ -76,13 +76,11 @@ private[pkstore] final class PrimaryKeyStoreSingleTableImpl extends PrimaryKeySt
     buffer
   }
 
-  private[this] def interpret(prevState: java.lang.Boolean): WriteOutcome = {
-    if (prevState == null) {
-      FirstTimeSeen
-    } else if (prevState) {
-      AlreadySeenWithChildren
-    } else {
-      AlreadySeenWithoutChildren
+  private[this] def interpret(prevState: Option[Boolean]): WriteOutcome = {
+    prevState match {
+      case None        => FirstTimeSeen
+      case Some(false) => AlreadySeenWithoutChildren
+      case Some(true)  => AlreadySeenWithChildren
     }
   }
 }
