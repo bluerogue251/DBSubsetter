@@ -40,6 +40,9 @@ private[map] trait StaticMap[K, V] {
     */
   def copyTo(other: StaticMap[K, V]): Unit
 
+  /**
+    * Release any resources held by this map
+    */
   def close(): Unit
 
 }

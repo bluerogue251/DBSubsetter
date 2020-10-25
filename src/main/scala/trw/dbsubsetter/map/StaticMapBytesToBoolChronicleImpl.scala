@@ -9,9 +9,9 @@ import net.openhft.chronicle.map.ChronicleMap
   */
 private[map] final class StaticMapBytesToBoolChronicleImpl(capacity: Long) extends StaticMap[ByteBuffer, Boolean] {
 
-  private[this] val storage: ChronicleMap[ByteBuffer, Boolean] =
+  private[this] val storage: ChronicleMap[ByteBuffer, Byte] =
     ChronicleMap
-      .of(classOf[ByteBuffer], classOf[Boolean])
+      .of(classOf[ByteBuffer], classOf[Byte])
       .entries(capacity)
       .create()
 
@@ -22,25 +22,15 @@ private[map] final class StaticMapBytesToBoolChronicleImpl(capacity: Long) exten
   }
 
   override def put(key: ByteBuffer, value: Boolean): Option[Boolean] = {
-    if (storage.containsKey(key)) {
-      val prev: Boolean = storage.put(key, value)
-      Some(prev)
-    } else {
-      size += 1
-      storage.put(key, value)
-      None
-    }
+    val byteValue: Byte = mapToByte(value)
+    val prevByte: Byte = storage.put(key, byteValue)
+    interpret(prevByte)
   }
 
   override def putIfAbsent(key: ByteBuffer, value: Boolean): Option[Boolean] = {
-    if (storage.containsKey(key)) {
-      val prev: Boolean = storage.get(key)
-      Some(prev)
-    } else {
-      size += 1
-      storage.put(key, value)
-      Some(value)
-    }
+    val byteValue: Byte = mapToByte(value)
+    val prevByte: Byte = storage.putIfAbsent(key, byteValue)
+    interpret(prevByte)
   }
 
   override def capacity(): Long = {
@@ -53,11 +43,39 @@ private[map] final class StaticMapBytesToBoolChronicleImpl(capacity: Long) exten
 
   override def copyTo(other: StaticMap[ByteBuffer, Boolean]): Unit = {
     storage.forEachEntry { entry =>
-      other.put(entry.key().get(), entry.value().get())
+      val valueBool: Boolean = mapToBoolUnsafe(entry.value().get())
+      other.put(entry.key().get(), valueBool)
     }
   }
 
   override def close(): Unit = {
     storage.close()
+  }
+
+  private[this] def mapToByte(bool: Boolean): Byte = {
+    if (bool) 1 else 2
+  }
+
+  private[this] def interpret(prevByte: Byte): Option[Boolean] = {
+    val prevBool: Option[Boolean] = mapToBool(prevByte)
+    if (prevBool.isEmpty) {
+      size += 1
+    }
+    prevBool
+  }
+
+  private[this] def mapToBool(byte: Byte): Option[Boolean] = {
+    byte match {
+      case 0 => None
+      case 1 => Some(false)
+      case 2 => Some(true)
+    }
+  }
+
+  private[this] def mapToBoolUnsafe(byte: Byte): Boolean = {
+    byte match {
+      case 1 => false
+      case 2 => true
+    }
   }
 }
