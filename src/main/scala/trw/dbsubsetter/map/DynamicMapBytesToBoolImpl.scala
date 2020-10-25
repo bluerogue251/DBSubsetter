@@ -2,12 +2,12 @@ package trw.dbsubsetter.map
 
 import java.nio.ByteBuffer
 
-final class DynamicMapBytesToBoolImpl extends DynamicMapBytesToBool {
+private[map] final class DynamicMapBytesToBoolImpl extends DynamicMap[ByteBuffer, Boolean] {
 
   /**
     * TODO fix the hard-coded number to make it higher...
     */
-  private[this] var storage: StaticMap[ByteBuffer, Boolean] = new StaticMapBytesToBoolInMemoryImpl(1)
+  private[this] var storage: StaticMap[ByteBuffer, Boolean] = new StaticMapBytesToBoolInMemoryImpl(2)
 
   override def containsKey(key: ByteBuffer): Boolean = {
     this.synchronized {

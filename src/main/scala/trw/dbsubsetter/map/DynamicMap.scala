@@ -1,8 +1,10 @@
 package trw.dbsubsetter.map
 
+import java.nio.ByteBuffer
+
 /**
   * A threadsafe map which resizes automatically as the number of mappings it manages grows, eventually switching to
-  * off-heap storage if its size becomes too large to fit comfortably in memory
+  * off-heap storage if it becomes too large to fit comfortably in memory
   */
 trait DynamicMap[K, V] {
 
@@ -25,4 +27,10 @@ trait DynamicMap[K, V] {
     */
   def putIfAbsent(key: K, value: V): Option[V]
 
+}
+
+object DynamicMap {
+  def bytesToBool(): DynamicMap[ByteBuffer, Boolean] = {
+    new DynamicMapBytesToBoolImpl()
+  }
 }

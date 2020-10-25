@@ -4,7 +4,7 @@ import java.nio.ByteBuffer
 import java.util.UUID
 
 import trw.dbsubsetter.db.PrimaryKeyValue
-import trw.dbsubsetter.map.DynamicMapBytesToBool
+import trw.dbsubsetter.map.DynamicMap
 
 private[pkstore] final class PrimaryKeyStoreSingleTableImpl extends PrimaryKeyStoreSingleTable {
 
@@ -14,7 +14,7 @@ private[pkstore] final class PrimaryKeyStoreSingleTableImpl extends PrimaryKeySt
    * If `storage(pkValue) == true`, then both its children and its parents have been fetched.
    * There is no such thing as having fetched a row's children but not having fetched its parents.
    */
-  private[this] val storage: DynamicMapBytesToBool = DynamicMapBytesToBool.empty()
+  private[this] val storage: DynamicMap[ByteBuffer, Boolean] = DynamicMap.bytesToBool()
 
   override def markSeen(value: PrimaryKeyValue): WriteOutcome = {
     val valueBytes: ByteBuffer = extract(value)
