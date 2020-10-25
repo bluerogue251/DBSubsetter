@@ -28,11 +28,11 @@ object ColumnBytes {
           .array()
 
       case StringColumnValue(string) =>
-        val valueBytes: Array[Byte] = string.getBytes
+        val stringBytes: Array[Byte] = string.getBytes
         ByteBuffer
-          .allocate(4 + valueBytes.length)
-          .putInt(valueBytes.length)
-          .put(valueBytes)
+          .allocate(4 + stringBytes.length)
+          .putInt(stringBytes.length)
+          .put(stringBytes)
           .array()
 
       case UUIDColumnValue(uuid) =>
