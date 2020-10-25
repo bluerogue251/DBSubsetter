@@ -37,6 +37,6 @@ test in assembly := {}
 
 // https://stackoverflow.com/a/39058507
 assemblyMergeStrategy in assembly := {
-  case PathList("META-INF", xs @ _*) => MergeStrategy.discard
-  case x                             => MergeStrategy.first
+  case PathList("META-INF", "MANIFEST.MF") => MergeStrategy.discard
+  case _                                   => MergeStrategy.first
 }
