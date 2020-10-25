@@ -40,7 +40,7 @@ private[datacopy] final class ChronicleQueueAccess(storageDirectory: Path, colum
     var primaryKeyValue: PrimaryKeyValue = null
 
     tailer.readDocument { r =>
-      val individualColumnValues: Seq[Array[Byte]] = (0 until columnCount).map(_ => r.getValueIn.bytes())
+      val individualColumnValues: Seq[Array[Byte]] = (0 until columnCount).map(_ => r..bytes())
       primaryKeyValue = new PrimaryKeyValue(individualColumnValues)
     }
 

@@ -29,9 +29,19 @@ private[db] class OriginDbAccessImpl(
     val stmt = foreignKeyTemplateStatements(fk, table)
     stmt.clearParameters()
 
-    fkValue.individualColumnValues.zipWithIndex.foreach { case (value, i) =>
-      stmt.setBytes(i + 1, value)
-    }
+    val columns: Seq[Column] =
+      if (fk.toTable == table)
+        fk.toCols
+      else
+        fk.fromCols
+
+    columns
+      .zip(fkValue.individualColumnValues)
+      .zipWithIndex
+      .foreach { case ((column, valueBytes), i) =>
+        val valueObject: Any = WootConverter.convert(valueBytes, column.dataType)
+        stmt.setObject(i + 1, valueObject)
+      }
 
     val jdbcResult = stmt.executeQuery()
     mapper.convertToKeys(jdbcResult, table)
