@@ -30,7 +30,7 @@ private[db] class OriginDbAccessImpl(
     stmt.clearParameters()
 
     fkValue.individualColumnValues.zipWithIndex.foreach { case (value, i) =>
-      stmt.setObject(i + 1, value)
+      stmt.setBytes(i + 1, value)
     }
 
     val jdbcResult = stmt.executeQuery()
@@ -44,7 +44,7 @@ private[db] class OriginDbAccessImpl(
     var i: Int = 1
     primaryKeyValues.foreach { primaryKeyValue =>
       primaryKeyValue.individualColumnValues.foreach { individualColumnValue =>
-        stmt.setObject(i, individualColumnValue)
+        stmt.setBytes(i, individualColumnValue)
         i += 1
       }
     }

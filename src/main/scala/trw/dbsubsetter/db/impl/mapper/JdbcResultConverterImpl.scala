@@ -20,12 +20,12 @@ private[db] class JdbcResultConverterImpl(schemaInfo: SchemaInfo) extends JdbcRe
     multipleRowsRawData.map(singleRowRawData => new Keys(singleRowRawData)).toVector
   }
 
-  private[this] def extractMultiRowRawData(jdbcResultSet: ResultSet, columnCount: Int): Seq[Array[Any]] = {
-    val multipleRowsRawData = ArrayBuffer.empty[Array[Any]]
+  private[this] def extractMultiRowRawData(jdbcResultSet: ResultSet, columnCount: Int): Seq[Array[Array[Byte]]] = {
+    val multipleRowsRawData = ArrayBuffer.empty[Array[Array[Byte]]]
     while (jdbcResultSet.next()) {
-      val singleRowRawData = new Array[Any](columnCount)
+      val singleRowRawData = new Array[Array[Byte]](columnCount)
       (1 to columnCount).foreach { i =>
-        singleRowRawData(i - 1) = jdbcResultSet.getObject(i)
+        singleRowRawData(i - 1) = jdbcResultSet.getBytes(i)
       }
       multipleRowsRawData += singleRowRawData
     }

@@ -2,9 +2,9 @@ package trw.dbsubsetter.fktaskqueue
 
 import java.nio.file.Path
 
-import net.openhft.chronicle.queue.impl.single.SingleChronicleQueue
+import net.openhft.chronicle.queue.RollCycles
+import net.openhft.chronicle.queue.impl.single.{SingleChronicleQueue, SingleChronicleQueueBuilder}
 import net.openhft.chronicle.wire.WriteMarshallable
-import trw.dbsubsetter.chronicle.ChronicleQueueFactory
 import trw.dbsubsetter.db.{ForeignKey, ForeignKeyValue, SchemaInfo}
 import trw.dbsubsetter.fkcalc.{FetchChildrenTask, FetchParentTask, ForeignKeyTask}
 
@@ -16,50 +16,42 @@ private[fktaskqueue] final class ForeignKeyTaskQueueImpl(storageDirectory: Path,
 
   private[this] var queuedTaskCount: Long = 0L
 
-  private[this] val queue: SingleChronicleQueue = ChronicleQueueFactory.createQueue(storageDirectory)
+  private[this] val queue: SingleChronicleQueue =
+    SingleChronicleQueueBuilder
+      .binary(storageDirectory)
+      .rollCycle(RollCycles.MINUTELY)
+      .build()
 
   private[this] val appender = queue.acquireAppender()
 
   private[this] val tailer = queue.createTailer()
 
-  private[this] val childReaders =
-    schemaInfo.fksOrdered
-      .map { fk =>
-        new ChronicleQueueFkTaskReader(fk.fromCols.map(_.dataType))
-      }
-
-  private[this] val parentReaders =
-    schemaInfo.fksOrdered.map { fk =>
-      new ChronicleQueueFkTaskReader(fk.toCols.map(_.dataType))
-    }
-
-  private[this] val parentFkWriters =
-    schemaInfo.fksOrdered
-      .map { fk =>
-        new ChronicleQueueFkTaskWriter(fk.i, fk.toCols.map(_.dataType))
-      }
-
-  private[this] val childFkWriters =
-    schemaInfo.fksOrdered
-      .map { fk =>
-        new ChronicleQueueFkTaskWriter(fk.i, fk.fromCols.map(_.dataType))
-      }
-
   override def enqueue(foreignKeyTask: ForeignKeyTask): Unit = {
     this.synchronized {
       foreignKeyTask match {
-        case FetchChildrenTask(fk, fkValue) =>
-          write(
-            writer = childFkWriters(fk.i),
-            fetchChildren = true,
-            value = fkValue
-          )
-        case FetchParentTask(fk, fkValue) =>
-          write(
-            writer = parentFkWriters(fk.i),
-            fetchChildren = false,
-            value = fkValue
-          )
+        case FetchParentTask(fk, fkValueFromChild) =>
+          val marshallable: WriteMarshallable =
+            wireOut => {
+              val valueOut = wireOut.getValueOut
+              valueOut.bool(false)
+              valueOut.int16(fk.i)
+              fkValueFromChild.individualColumnValues.foreach { valueAsBytes =>
+                valueOut.bytes(valueAsBytes)
+              }
+            }
+          appender.writeDocument(marshallable)
+
+        case FetchChildrenTask(fk, fkValueFromParent) =>
+          val marshallable: WriteMarshallable =
+            wireOut => {
+              val valueOut = wireOut.getValueOut
+              valueOut.bool(true)
+              valueOut.int16(fk.i)
+              fkValueFromParent.individualColumnValues.foreach { valueAsBytes =>
+                valueOut.bytes(valueAsBytes)
+              }
+            }
+          appender.writeDocument(marshallable)
       }
 
       queuedTaskCount += 1L
@@ -79,23 +71,16 @@ private[fktaskqueue] final class ForeignKeyTaskQueueImpl(storageDirectory: Path,
 
         val fetchChildren: Boolean = in.bool()
         val fkOrdinal: Short = in.int16()
-
-        val reader: ChronicleQueueFkTaskReader =
-          if (fetchChildren) {
-            childReaders(fkOrdinal)
-          } else {
-            parentReaders(fkOrdinal)
-          }
-
-        val fkValue: ForeignKeyValue = reader.read(in)
-
-        val foreignKey: ForeignKey = schemaInfo.fksOrdered(fkOrdinal)
+        val fk: ForeignKey = schemaInfo.fksOrdered(fkOrdinal)
+        val columnCount = fk.fromCols.size
+        val columnValues: Seq[Array[Byte]] = (1 to columnCount).map(_ => in.bytes())
+        val fkValue: ForeignKeyValue = new ForeignKeyValue(columnValues)
 
         val task: ForeignKeyTask =
           if (fetchChildren) {
-            FetchChildrenTask(foreignKey, fkValue)
+            FetchChildrenTask(fk, fkValue)
           } else {
-            FetchParentTask(foreignKey, fkValue)
+            FetchParentTask(fk, fkValue)
           }
 
         queuedTaskCount -= 1L
@@ -116,10 +101,5 @@ private[fktaskqueue] final class ForeignKeyTaskQueueImpl(storageDirectory: Path,
     this.synchronized {
       queuedTaskCount
     }
-  }
-
-  private[this] def write(writer: ChronicleQueueFkTaskWriter, fetchChildren: Boolean, value: ForeignKeyValue): Unit = {
-    val writeMarshallable: WriteMarshallable = writer.writeHandler(fetchChildren, value)
-    appender.writeDocument(writeMarshallable)
   }
 }

@@ -1,41 +1,19 @@
 package trw.dbsubsetter.datacopy
 
 import java.nio.file.Path
-import java.util.function.BiConsumer
 
-import net.openhft.chronicle.queue.impl.single.SingleChronicleQueue
-import net.openhft.chronicle.wire.{ValueIn, ValueOut, WireOut}
-import trw.dbsubsetter.chronicle.{ChronicleQueueFactory, ChronicleQueueFunctions}
-import trw.dbsubsetter.db.ColumnTypes.ColumnType
+import net.openhft.chronicle.bytes.WriteBytesMarshallable
+import net.openhft.chronicle.queue.RollCycles
+import net.openhft.chronicle.queue.impl.single.{SingleChronicleQueue, SingleChronicleQueueBuilder}
 import trw.dbsubsetter.db.PrimaryKeyValue
 
-private[datacopy] final class ChronicleQueueAccess(storageDirectory: Path, columnTypes: Seq[ColumnType]) {
+private[datacopy] final class ChronicleQueueAccess(storageDirectory: Path, columnCount: Int) {
 
   private[this] val queue: SingleChronicleQueue =
-    ChronicleQueueFactory.createQueue(storageDirectory)
-
-  private[this] val writer: BiConsumer[ValueOut, PrimaryKeyValue] = {
-    val singleColumnWriters: Seq[(ValueOut, Any) => WireOut] =
-      columnTypes.map(ChronicleQueueFunctions.singleValueWrite)
-
-    (valueOut, primaryKeyValue) => {
-      singleColumnWriters
-        .zip(primaryKeyValue.individualColumnValues)
-        .foreach { case (singleColumnWriter, singleColumnValue) =>
-          singleColumnWriter.apply(valueOut, singleColumnValue)
-        }
-    }
-  }
-
-  private[this] val reader: Function[ValueIn, PrimaryKeyValue] = {
-    val singleColumnReaders: Seq[ValueIn => Any] =
-      columnTypes.map(ChronicleQueueFunctions.singleValueRead)
-
-    valueIn => {
-      val individualColumnValues: Seq[Any] = singleColumnReaders.map(_.apply(valueIn))
-      new PrimaryKeyValue(individualColumnValues)
-    }
-  }
+    SingleChronicleQueueBuilder
+      .binary(storageDirectory)
+      .rollCycle(RollCycles.MINUTELY)
+      .build()
 
   private[this] val appender = queue.acquireAppender()
 
@@ -43,7 +21,10 @@ private[datacopy] final class ChronicleQueueAccess(storageDirectory: Path, colum
 
   def write(primaryKeyValues: Seq[PrimaryKeyValue]): Unit = {
     primaryKeyValues.foreach { primaryKeyValue =>
-      appender.writeDocument(primaryKeyValue, writer)
+      primaryKeyValue.individualColumnValues.foreach { valueAsBytes =>
+        val marshallable: WriteBytesMarshallable = bytesOut => bytesOut.write(valueAsBytes)
+        appender.writeBytes(marshallable)
+      }
     }
   }
 
@@ -52,19 +33,21 @@ private[datacopy] final class ChronicleQueueAccess(storageDirectory: Path, colum
     *          read, and throws an exception if that is not the case.
     */
   def read(n: Short): Seq[PrimaryKeyValue] = {
-    (1 to n).map { _ =>
-      var optionalValue: Option[PrimaryKeyValue] = None
+    (1 to n).map(_ => readSingle())
+  }
 
-      tailer.readDocument { r =>
-        val primaryKeyValue: PrimaryKeyValue = reader.apply(r.getValueIn)
-        optionalValue = Some(primaryKeyValue)
-      }
+  private[this] def readSingle(): PrimaryKeyValue = {
+    var primaryKeyValue: PrimaryKeyValue = null
 
-      if (optionalValue.isEmpty) {
-        throw new RuntimeException("Read failed from chronicle data copy queue")
-      }
-
-      optionalValue.get
+    tailer.readDocument { r =>
+      val individualColumnValues: Seq[Array[Byte]] = (0 until columnCount).map(_ => r.getValueIn.bytes())
+      primaryKeyValue = new PrimaryKeyValue(individualColumnValues)
     }
+
+    if (primaryKeyValue == null) {
+      throw new RuntimeException("Read failed from chronicle data copy queue")
+    }
+
+    primaryKeyValue
   }
 }

@@ -65,28 +65,28 @@ package object db {
   }
 
   // Primary keys can be multi-column. Therefore a single primary key value is a sequence of individual column values.
-  class PrimaryKeyValue(val individualColumnValues: Seq[Any])
+  class PrimaryKeyValue(val individualColumnValues: Seq[Array[Byte]])
 
   // Foreign keys can be multi-column. Therefore a single foreign key value is a sequence of individual column values.
-  class ForeignKeyValue(val individualColumnValues: Seq[Any]) {
+  class ForeignKeyValue(val individualColumnValues: Seq[Array[Byte]]) {
     val isEmpty: Boolean = individualColumnValues.forall(_ == null)
   }
 
   // Represents a single row from the origin database including all columns
-  class Row(val data: Array[Any])
+  class Row(val data: Array[Array[Byte]])
 
   // Represents a single row from the origin database including only primary and foreign key columns
-  class Keys(data: Array[Any]) {
+  class Keys(data: Array[Array[Byte]]) {
 
     def getValue(pk: PrimaryKey): PrimaryKeyValue = {
-      val individualColumnValues: Seq[Any] = pk.columns.map(_.keyOrdinalPosition).map(data)
+      val individualColumnValues: Seq[Array[Byte]] = pk.columns.map(_.keyOrdinalPosition).map(data)
       new PrimaryKeyValue(individualColumnValues)
     }
 
     def getValue(fk: ForeignKey, confusingTechDebt: Boolean): ForeignKeyValue = {
       val columns: Seq[Column] = if (confusingTechDebt) fk.toCols else fk.fromCols
       val individualColumnOrdinals: Seq[Int] = columns.map(_.keyOrdinalPosition)
-      val individualColumnValues: Seq[Any] = individualColumnOrdinals.map(data)
+      val individualColumnValues: Seq[Array[Byte]] = individualColumnOrdinals.map(data)
       new ForeignKeyValue(individualColumnValues)
     }
 

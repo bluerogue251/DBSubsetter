@@ -21,7 +21,7 @@ private[db] class TargetDbAccessImpl(connStr: String, sch: SchemaInfo, connectio
     rows.foreach { row =>
       row.data.zipWithIndex
         .foreach { case (singleColumnValue, i) =>
-          stmt.setObject(i + 1, singleColumnValue)
+          stmt.setBytes(i + 1, singleColumnValue)
         }
 
       stmt.addBatch()
