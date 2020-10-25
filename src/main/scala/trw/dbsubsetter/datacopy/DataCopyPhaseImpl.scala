@@ -4,8 +4,6 @@ import java.util.concurrent.{CountDownLatch, ExecutorService, Executors}
 
 private[datacopy] final class DataCopyPhaseImpl(queue: DataCopyQueue, copiers: Seq[DataCopier]) extends DataCopyPhase {
 
-  private[this] val guard: Object = new Object()
-
   override def runPhase(): Unit = {
     val executorService: ExecutorService =
       Executors.newFixedThreadPool(copiers.size)
@@ -32,16 +30,10 @@ private[datacopy] final class DataCopyPhaseImpl(queue: DataCopyQueue, copiers: S
   }
 
   private def copyTillExhausted(copier: DataCopier): Unit = {
-    var nextTask = dequeueTask()
+    var nextTask = queue.dequeue()
     while (nextTask.nonEmpty) {
       copier.runTask(nextTask.get)
-      nextTask = dequeueTask()
-    }
-  }
-
-  private def dequeueTask(): Option[DataCopyTask] = {
-    guard.synchronized {
-      queue.dequeue()
+      nextTask = queue.dequeue()
     }
   }
 }
