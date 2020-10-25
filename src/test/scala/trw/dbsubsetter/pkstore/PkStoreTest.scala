@@ -32,4 +32,33 @@ class PkStoreTest extends FunSuite {
     val writeOutcome4 = pkStore.markSeenWithChildren(table, pkValue)
     assert(writeOutcome4 === AlreadySeenWithChildren)
   }
+
+  test("PkStore accurately reports what it has seen previously") {
+    val table: Table = Table(schema = Schema("public"), name = "users")
+    val pkStore: PrimaryKeyStore = PrimaryKeyStore.from(Seq(table))
+
+    val firstStringValue: PrimaryKeyValue = new PrimaryKeyValue(Seq[String]("first-value"))
+    val otherStringValue: PrimaryKeyValue = new PrimaryKeyValue(Seq[String]("other-value"))
+    assert(pkStore.alreadySeen(table, firstStringValue) === false)
+    assert(pkStore.alreadySeen(table, otherStringValue) === false)
+    pkStore.markSeen(table, firstStringValue)
+    assert(pkStore.alreadySeen(table, firstStringValue) === true)
+    assert(pkStore.alreadySeen(table, otherStringValue) === false)
+
+    val firstIntValue: PrimaryKeyValue = new PrimaryKeyValue(Seq[Int](1))
+    val otherIntValue: PrimaryKeyValue = new PrimaryKeyValue(Seq[Int](2))
+    assert(pkStore.alreadySeen(table, firstIntValue) === false)
+    assert(pkStore.alreadySeen(table, otherIntValue) === false)
+    pkStore.markSeen(table, firstIntValue)
+    assert(pkStore.alreadySeen(table, firstIntValue) === true)
+    assert(pkStore.alreadySeen(table, otherIntValue) === false)
+
+    val firstMultiIntValue: PrimaryKeyValue = new PrimaryKeyValue(Seq[Int](1, 2))
+    val otherMultiIntValue: PrimaryKeyValue = new PrimaryKeyValue(Seq[Int](2, 3))
+    assert(pkStore.alreadySeen(table, firstMultiIntValue) === false)
+    assert(pkStore.alreadySeen(table, otherMultiIntValue) === false)
+    pkStore.markSeen(table, firstMultiIntValue)
+    assert(pkStore.alreadySeen(table, firstMultiIntValue) === true)
+    assert(pkStore.alreadySeen(table, otherMultiIntValue) === false)
+  }
 }

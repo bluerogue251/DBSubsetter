@@ -84,7 +84,7 @@ private object PrimaryKeyStoreInMemoryImpl {
     } else {
       val buffers: Seq[ByteBuffer] = primaryKeyValue.individualColumnValues.map(extractSingle)
       val count: Int = buffers.size
-      val bufferSizes: Seq[Int] = buffers.map(_.position())
+      val bufferSizes: Seq[Int] = buffers.map(_.capacity())
       /*
        * 4 Bytes for the count
        * 4 Bytes per buffer for its size
@@ -95,23 +95,28 @@ private object PrimaryKeyStoreInMemoryImpl {
       compositeBuffer.putInt(count)
       bufferSizes.foreach(compositeBuffer.putInt)
       buffers.foreach(compositeBuffer.put)
+      compositeBuffer.rewind()
       compositeBuffer
     }
   }
 
   private def extractSingle(value: Any): ByteBuffer = {
-    value match {
-      case short: Short       => ByteBuffer.allocate(2).putShort(short)
-      case int: Int           => ByteBuffer.allocate(4).putInt(int)
-      case long: Long         => ByteBuffer.allocate(8).putLong(long)
-      case bigInt: BigInt     => ByteBuffer.wrap(bigInt.toByteArray)
-      case string: String     => ByteBuffer.wrap(string.getBytes)
-      case bytes: Array[Byte] => ByteBuffer.wrap(bytes)
-      case uuid: UUID =>
-        val buffer: ByteBuffer = ByteBuffer.allocate(16)
-        buffer.putLong(uuid.getMostSignificantBits)
-        buffer.putLong(uuid.getMostSignificantBits)
-        buffer
+    val buffer: ByteBuffer = {
+      value match {
+        case short: Short       => ByteBuffer.allocate(2).putShort(short)
+        case int: Int           => ByteBuffer.allocate(4).putInt(int)
+        case long: Long         => ByteBuffer.allocate(8).putLong(long)
+        case bigInt: BigInt     => ByteBuffer.wrap(bigInt.toByteArray)
+        case string: String     => ByteBuffer.wrap(string.getBytes)
+        case bytes: Array[Byte] => ByteBuffer.wrap(bytes)
+        case uuid: UUID =>
+          val buffer: ByteBuffer = ByteBuffer.allocate(16)
+          buffer.putLong(uuid.getMostSignificantBits)
+          buffer.putLong(uuid.getMostSignificantBits)
+          buffer
+      }
     }
+    buffer.rewind()
+    buffer
   }
 }
