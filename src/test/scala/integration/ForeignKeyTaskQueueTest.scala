@@ -31,9 +31,9 @@ class ForeignKeyTaskQueueTest extends FunSuite {
     val schemaInfo: SchemaInfo = ForeignKeyTaskQueueTest.schemaInfo
     val queue = ForeignKeyTaskQueue.from(createStorageDir(), schemaInfo)
 
-    val fkValue1: ForeignKeyValue = new ForeignKeyValue(Seq[Long](7))
-    val fkValue2: ForeignKeyValue = new ForeignKeyValue(Seq[Long](10))
-    val fkValue3: ForeignKeyValue = new ForeignKeyValue(Seq[Long](23))
+    val fkValue1: ForeignKeyValue = newForeignKeyValue(7)
+    val fkValue2: ForeignKeyValue = newForeignKeyValue(10)
+    val fkValue3: ForeignKeyValue = newForeignKeyValue(23)
 
     val fk: ForeignKey = ForeignKeyTaskQueueTest.foreignKey
 
@@ -63,6 +63,15 @@ class ForeignKeyTaskQueueTest extends FunSuite {
 
   private[this] def createStorageDir(): Path = {
     Files.createTempDirectory("ForeignKeyTaskQueueTest-")
+  }
+
+  private[this] def newForeignKeyValue(seed: Int): ForeignKeyValue = {
+    val columnValue: Array[Byte] = newColumnValue(seed)
+    new ForeignKeyValue(Seq(columnValue))
+  }
+
+  private[this] def newColumnValue(size: Int): Array[Byte] = {
+    Array.fill(size)(1.toByte)
   }
 }
 

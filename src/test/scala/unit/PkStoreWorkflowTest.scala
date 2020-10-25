@@ -36,7 +36,7 @@ class PkStoreWorkflowTest extends FunSuite {
     val pkStoreWorkflow =
       PkStoreWorkflow.from(schemaInfo)
 
-    val fkValue: String = "fkValue"
+    val fkValue: Array[Byte] = "fkValue".getBytes
 
     val singleRowKeys: Keys = new Keys(Array(fkValue))
 
@@ -98,7 +98,7 @@ class PkStoreWorkflowTest extends FunSuite {
     val pkStoreWorkflow: PkStoreWorkflow =
       PkStoreWorkflow.from(schemaInfo)
 
-    val fkValue: String = "fkValue"
+    val fkValue: Array[Byte] = "fkValue".getBytes
     val singleRowKeys: Keys = new Keys(Array(fkValue))
     val multiRowKeys: Vector[Keys] = Vector(singleRowKeys)
 

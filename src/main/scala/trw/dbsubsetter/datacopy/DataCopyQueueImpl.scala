@@ -28,7 +28,7 @@ private[datacopy] final class DataCopyQueueImpl(storageDirectory: Path, schemaIn
       .map { case ((table, primaryKey), i) =>
         val columnTypes: Seq[ColumnType] = primaryKey.columns.map(_.dataType)
         val tableSubdirectory = Paths.get(storageDirectory.toString, s"t$i")
-        table -> new ChronicleQueueAccess(tableSubdirectory, columnTypes)
+        table -> new ChronicleQueueAccess(tableSubdirectory, columnTypes.size)
       }
   }
 

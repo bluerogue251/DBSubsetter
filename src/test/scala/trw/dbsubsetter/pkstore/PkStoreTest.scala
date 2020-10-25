@@ -14,7 +14,7 @@ class PkStoreTest extends FunSuite {
     val pkStore: PrimaryKeyStore =
       PrimaryKeyStore.from(Seq(table))
 
-    val pkValue: PrimaryKeyValue = new PrimaryKeyValue(Seq[String]("pkValue"))
+    val pkValue: PrimaryKeyValue = newPrimaryKeyValue(50)
 
     // Add the PK to the pkStore, noting that we are not planning to fetch its children at this time
     val writeOutcome1 = pkStore.markSeen(table, pkValue)
@@ -31,5 +31,14 @@ class PkStoreTest extends FunSuite {
     // Add the PK to the pkStore, noting that we are again planning to fetch its children
     val writeOutcome4 = pkStore.markSeenWithChildren(table, pkValue)
     assert(writeOutcome4 === AlreadySeenWithChildren)
+  }
+
+  private[this] def newPrimaryKeyValue(seed: Int): PrimaryKeyValue = {
+    val columnValue: Array[Byte] = newColumnValue(seed)
+    new PrimaryKeyValue(Seq(columnValue))
+  }
+
+  private[this] def newColumnValue(size: Int): Array[Byte] = {
+    Array.fill(size)(1.toByte)
   }
 }
