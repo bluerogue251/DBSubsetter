@@ -1,31 +1,28 @@
 package trw.dbsubsetter.chronicle
 
-import java.math.BigInteger
-import java.util.UUID
-
 import net.openhft.chronicle.wire.{ValueIn, ValueOut, WireOut}
 import trw.dbsubsetter.db.ColumnTypes
-import trw.dbsubsetter.db.ColumnTypes.ColumnType
+import trw.dbsubsetter.db.ColumnTypes._
 
 object ChronicleQueueFunctions {
 
   def singleValueRead(dataType: ColumnType): ValueIn => Any = {
     dataType match {
-      case ColumnTypes.Short =>
+      case Short =>
         (in: ValueIn) => in.int16()
-      case ColumnTypes.Int =>
+      case Int =>
         (in: ValueIn) => in.int32()
-      case ColumnTypes.Long =>
+      case Long =>
         (in: ValueIn) => in.int64()
       case ColumnTypes.BigInteger =>
         (in: ValueIn) => in.`object`()
-      case ColumnTypes.String =>
+      case String =>
         (in: ValueIn) => in.text()
-      case ColumnTypes.ByteArray =>
+      case ByteArray =>
         (in: ValueIn) => in.bytes()
-      case ColumnTypes.Uuid =>
+      case Uuid =>
         (in: ValueIn) => in.uuid()
-      case ColumnTypes.Unknown(description) =>
+      case Unknown(description) =>
         val errorMessage =
           s"Column type not yet fully supported: $description. " +
             "Please open a GitHub issue and we will try to address it promptly."
@@ -33,23 +30,20 @@ object ChronicleQueueFunctions {
     }
   }
 
-  def singleValueWrite(dataType: ColumnType): (ValueOut, Any) => WireOut = {
+  def singleValueWrite(dataType: ColumnType): (ValueOut, Array[Byte]) => WireOut = {
     dataType match {
-      case ColumnTypes.Short =>
-        (out: ValueOut, fkVal: Any) => out.int16(fkVal.asInstanceOf[Short])
-      case ColumnTypes.Int =>
-        (out: ValueOut, fkVal: Any) => out.int32(fkVal.asInstanceOf[Int])
-      case ColumnTypes.Long =>
-        (out: ValueOut, fkVal: Any) => out.int64(fkVal.asInstanceOf[Long])
-      case ColumnTypes.BigInteger =>
-        (out: ValueOut, fkVal: Any) => out.`object`(fkVal.asInstanceOf[BigInteger])
-      case ColumnTypes.String =>
-        (out: ValueOut, fkVal: Any) => out.text(fkVal.asInstanceOf[String])
-      case ColumnTypes.ByteArray =>
-        (out: ValueOut, fkVal: Any) => out.bytes(fkVal.asInstanceOf[Array[Byte]])
-      case ColumnTypes.Uuid =>
-        (out: ValueOut, fkVal: Any) => out.uuid(fkVal.asInstanceOf[UUID])
-      case ColumnTypes.Unknown(description) =>
+      case Short | Int | Long | Uuid =>
+        (out: ValueOut, fkVal: Any) => {
+          val bytes: Array[Byte] = fkVal.asInstanceOf[Array[Byte]]
+          out.rawBytes(bytes)
+        }
+      case ColumnTypes.BigInteger | String | ByteArray =>
+        (out: ValueOut, fkVal: Any) => {
+          val bytes: Array[Byte] = fkVal.asInstanceOf[Array[Byte]]
+          out.writeInt(bytes.length)
+          out.rawBytes(bytes)
+        }
+      case Unknown(description) =>
         val errorMessage =
           s"Column type not yet fully supported: $description. " +
             "Please open a GitHub issue and we will try to address it promptly."

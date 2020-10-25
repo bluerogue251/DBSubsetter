@@ -25,7 +25,7 @@ private[db] class JdbcResultConverterImpl(schemaInfo: SchemaInfo) extends JdbcRe
     while (jdbcResultSet.next()) {
       val singleRowRawData = new Array[Any](columnCount)
       (1 to columnCount).foreach { i =>
-        singleRowRawData(i - 1) = jdbcResultSet.getObject(i)
+        singleRowRawData(i - 1) = jdbcResultSet.getBytes(i)
       }
       multipleRowsRawData += singleRowRawData
     }
