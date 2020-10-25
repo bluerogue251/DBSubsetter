@@ -58,12 +58,13 @@ private[pkstore] final class PrimaryKeyStoreSingleTableImpl extends PrimaryKeySt
   private def extractSingle(value: Any): ByteBuffer = {
     val buffer: ByteBuffer = {
       value match {
-        case short: Short       => ByteBuffer.allocate(2).putShort(short)
-        case int: Int           => ByteBuffer.allocate(4).putInt(int)
-        case long: Long         => ByteBuffer.allocate(8).putLong(long)
-        case bigInt: BigInt     => ByteBuffer.wrap(bigInt.toByteArray)
-        case string: String     => ByteBuffer.wrap(string.getBytes)
-        case bytes: Array[Byte] => ByteBuffer.wrap(bytes)
+        case short: Short                     => ByteBuffer.allocate(2).putShort(short)
+        case int: Int                         => ByteBuffer.allocate(4).putInt(int)
+        case long: Long                       => ByteBuffer.allocate(8).putLong(long)
+        case bigInt: BigInt                   => ByteBuffer.wrap(bigInt.toByteArray)
+        case bigInteger: java.math.BigInteger => ByteBuffer.wrap(bigInteger.toByteArray)
+        case string: String                   => ByteBuffer.wrap(string.getBytes)
+        case bytes: Array[Byte]               => ByteBuffer.wrap(bytes)
         case uuid: UUID =>
           val buffer: ByteBuffer = ByteBuffer.allocate(16)
           buffer.putLong(uuid.getMostSignificantBits)
