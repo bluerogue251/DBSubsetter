@@ -10,7 +10,7 @@ private[pkstore] trait PrimaryKeyStore {
 
 private[pkstore] object PrimaryKeyStore {
   def from(tables: Seq[Table]): PrimaryKeyStore = {
-    val base: PrimaryKeyStore = new PrimaryKeyStoreInMemoryImpl(tables)
+    val base: PrimaryKeyStore = new PrimaryKeyStoreImpl(tables)
     new PrimaryKeyStoreInstrumentedImpl(base)
   }
 }
