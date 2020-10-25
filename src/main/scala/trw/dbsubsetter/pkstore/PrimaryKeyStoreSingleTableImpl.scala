@@ -14,7 +14,7 @@ private[pkstore] final class PrimaryKeyStoreSingleTableImpl extends PrimaryKeySt
    * If `storage(pkValue) == true`, then both its children and its parents have been fetched.
    * There is no such thing as having fetched a row's children but not having fetched its parents.
    */
-  private[this] val storage: ConcurrentHashMap[ByteBuffer, Boolean] = new ConcurrentHashMap()
+  private[this] val storage: ConcurrentHashMap[ByteBuffer, java.lang.Boolean] = new ConcurrentHashMap()
 
   override def markSeen(value: PrimaryKeyValue): WriteOutcome = {
     val valueBytes: ByteBuffer = extract(value)
