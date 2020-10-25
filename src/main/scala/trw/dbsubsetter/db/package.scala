@@ -47,7 +47,11 @@ package object db {
       val dataType: ColumnType
   )
 
-  class PrimaryKey(val columns: Seq[Column])
+  class PrimaryKey(val columns: Seq[Column]) {
+    def foo(data: Array[Any]): values.PrimaryKeyValue = {
+      columns
+    }
+  }
 
   class ForeignKey(
       val fromCols: Seq[Column],
@@ -79,6 +83,11 @@ package object db {
   class Keys(data: Array[Any]) {
 
     def getValue(pk: PrimaryKey): PrimaryKeyValue = {
+      val individualColumnValues: Seq[Any] = pk.columns.map(_.keyOrdinalPosition).map(data)
+      new PrimaryKeyValue(individualColumnValues)
+    }
+
+    def getNewValue(pk: PrimaryKey): values.PrimaryKeyValue = {
       val individualColumnValues: Seq[Any] = pk.columns.map(_.keyOrdinalPosition).map(data)
       new PrimaryKeyValue(individualColumnValues)
     }
