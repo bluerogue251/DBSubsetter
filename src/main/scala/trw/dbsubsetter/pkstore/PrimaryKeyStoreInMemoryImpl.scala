@@ -101,18 +101,17 @@ private object PrimaryKeyStoreInMemoryImpl {
 
   private def extractSingle(value: Any): ByteBuffer = {
     value match {
-      case _: Short  => ByteBuffer.allocate(2).putShort(value.asInstanceOf[Short])
-      case _: Int    => ByteBuffer.allocate(4).putInt(value.asInstanceOf[Int])
-      case _: Long   => ByteBuffer.allocate(8).putLong(value.asInstanceOf[Long])
-      case _: BigInt => ByteBuffer.wrap(value.asInstanceOf[BigInt].toByteArray)
-      case _: String => ByteBuffer.wrap(value.asInstanceOf[String].getBytes)
-      case _: UUID =>
+      case short: Short       => ByteBuffer.allocate(2).putShort(short)
+      case int: Int           => ByteBuffer.allocate(4).putInt(int)
+      case long: Long         => ByteBuffer.allocate(8).putLong(long)
+      case bigInt: BigInt     => ByteBuffer.wrap(bigInt.toByteArray)
+      case string: String     => ByteBuffer.wrap(string.getBytes)
+      case bytes: Array[Byte] => ByteBuffer.wrap(bytes)
+      case uuid: UUID =>
         val buffer: ByteBuffer = ByteBuffer.allocate(16)
-        val uuid: UUID = value.asInstanceOf[UUID]
         buffer.putLong(uuid.getMostSignificantBits)
-        buffer.putLong(uuid.getLeastSignificantBits)
+        buffer.putLong(uuid.getMostSignificantBits)
         buffer
-      case _ => ByteBuffer.wrap(value.asInstanceOf[Array[Byte]])
     }
   }
 }
