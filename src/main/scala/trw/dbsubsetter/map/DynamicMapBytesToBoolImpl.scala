@@ -4,7 +4,7 @@ import java.nio.ByteBuffer
 
 private[map] final class DynamicMapBytesToBoolImpl extends DynamicMap[ByteBuffer, Boolean] {
 
-  private[this] var storage: StaticMap[ByteBuffer, Boolean] = new StaticMapBytesToBoolInMemoryImpl(5000)
+  private[this] var storage: StaticMap[ByteBuffer, Boolean] = new StaticMapBytesToBoolInMemoryImpl(25000)
 
   override def containsKey(key: ByteBuffer): Boolean = {
     this.synchronized {
