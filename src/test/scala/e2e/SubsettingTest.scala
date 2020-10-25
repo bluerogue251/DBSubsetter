@@ -26,8 +26,7 @@ trait SubsettingTest[T <: Database] extends DbEnabledTest[T] {
       "--originDbConnStr", dbs.origin.connectionString,
       "--keyCalculationDbConnectionCount", "10",
       "--dataCopyDbConnectionCount", "10",
-      "--targetDbConnStr", dbs.target.connectionString,
-      "--exposeMetrics"
+      "--targetDbConnStr", dbs.target.connectionString
     )
     // format: on
     val finalArgs: Array[String] = defaultArgs ++ programArgs
