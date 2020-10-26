@@ -1,5 +1,8 @@
 package trw.dbsubsetter.pkstore
 
+import java.nio.ByteBuffer
+import java.util.UUID
+
 import trw.dbsubsetter.db.PrimaryKeyValue
 
 import scala.collection.mutable
@@ -14,20 +17,20 @@ private[pkstore] final class PkStoreInMemoryImpl extends PkStore {
    * is in there at all, then at any given time, it is either in `seenWithoutChildrenStorage` or in
    * `seenWithChildrenStorage` -- it will never be in both at once.
    */
-  private[this] val seenWithoutChildrenStorage: mutable.HashSet[Any] = mutable.HashSet()
+  private[this] val seenWithoutChildrenStorage: mutable.HashSet[ByteBuffer] = mutable.HashSet()
 
-  private[this] val seenWithChildrenStorage: mutable.HashSet[Any] = mutable.HashSet()
+  private[this] val seenWithChildrenStorage: mutable.HashSet[ByteBuffer] = mutable.HashSet()
 
   override def markSeen(value: PrimaryKeyValue): WriteOutcome = {
     this.synchronized {
-      val rawValue: Any = extract(value)
+      val valueBytes: ByteBuffer = extract(value)
 
       val alreadySeenWithChildren: Boolean =
-        seenWithChildrenStorage.contains(rawValue)
+        seenWithChildrenStorage.contains(valueBytes)
 
       // Purposely lazy -- only do this extra work if logically necessary
       lazy val alreadySeenWithoutChildren =
-        !seenWithoutChildrenStorage.add(rawValue)
+        !seenWithoutChildrenStorage.add(valueBytes)
 
       if (alreadySeenWithChildren) {
         AlreadySeenWithChildren
@@ -41,14 +44,14 @@ private[pkstore] final class PkStoreInMemoryImpl extends PkStore {
 
   override def markSeenWithChildren(value: PrimaryKeyValue): WriteOutcome = {
     this.synchronized {
-      val rawValue: Any = extract(value)
+      val valueBytes: ByteBuffer = extract(value)
 
       val alreadySeenWithChildren: Boolean =
-        !seenWithChildrenStorage.add(rawValue)
+        !seenWithChildrenStorage.add(valueBytes)
 
       // Purposely lazy -- only do this extra work if logically necessary
       lazy val alreadySeenWithoutChildren: Boolean =
-        seenWithoutChildrenStorage.remove(rawValue)
+        seenWithoutChildrenStorage.remove(valueBytes)
 
       if (alreadySeenWithChildren) {
         AlreadySeenWithChildren
@@ -62,16 +65,50 @@ private[pkstore] final class PkStoreInMemoryImpl extends PkStore {
 
   override def alreadySeen(value: PrimaryKeyValue): Boolean = {
     this.synchronized {
-      val rawValue: Any = extract(value)
-      seenWithChildrenStorage.contains(rawValue) || seenWithoutChildrenStorage.contains(rawValue)
+      val valueBytes: ByteBuffer = extract(value)
+      seenWithChildrenStorage.contains(valueBytes) || seenWithoutChildrenStorage.contains(valueBytes)
     }
   }
 
-  private[this] def extract(primaryKeyValue: PrimaryKeyValue): Any = {
+  private def extract(primaryKeyValue: PrimaryKeyValue): ByteBuffer = {
     if (primaryKeyValue.individualColumnValues.size == 1) {
-      primaryKeyValue.individualColumnValues.head
+      extractSingle(primaryKeyValue.individualColumnValues.head)
     } else {
-      primaryKeyValue.individualColumnValues
+      val buffers: Seq[ByteBuffer] = primaryKeyValue.individualColumnValues.map(extractSingle)
+      val count: Int = buffers.size
+      val bufferSizes: Seq[Int] = buffers.map(_.capacity())
+      /*
+       * 4 Bytes for the count
+       * 4 Bytes per buffer for its size
+       * Rest Bytes for all the contents
+       */
+      val capacity: Int = 4 + (4 * count) + bufferSizes.sum
+      val compositeBuffer: ByteBuffer = ByteBuffer.allocate(capacity)
+      compositeBuffer.putInt(count)
+      bufferSizes.foreach(compositeBuffer.putInt)
+      buffers.foreach(compositeBuffer.put)
+      compositeBuffer.rewind()
+      compositeBuffer
     }
+  }
+
+  private def extractSingle(value: Any): ByteBuffer = {
+    val buffer: ByteBuffer = {
+      value match {
+        case short: Short       => ByteBuffer.allocate(2).putShort(short)
+        case int: Int           => ByteBuffer.allocate(4).putInt(int)
+        case long: Long         => ByteBuffer.allocate(8).putLong(long)
+        case bigInt: BigInt     => ByteBuffer.wrap(bigInt.toByteArray)
+        case string: String     => ByteBuffer.wrap(string.getBytes)
+        case bytes: Array[Byte] => ByteBuffer.wrap(bytes)
+        case uuid: UUID =>
+          val buffer: ByteBuffer = ByteBuffer.allocate(16)
+          buffer.putLong(uuid.getMostSignificantBits)
+          buffer.putLong(uuid.getMostSignificantBits)
+          buffer
+      }
+    }
+    buffer.rewind()
+    buffer
   }
 }
