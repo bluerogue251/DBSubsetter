@@ -2,7 +2,7 @@ package trw.dbsubsetter.pkstore
 
 import trw.dbsubsetter.db.{PrimaryKeyValue, Table}
 
-private[pkstore] final class MultiTablePkStoreInMemoryImpl(tables: Seq[Table]) extends MultiTablePkStore {
+private[pkstore] final class MultiTablePkStoreImpl(tables: Seq[Table]) extends MultiTablePkStore {
 
   private[this] val storesByTable: Map[Table, PkStore] =
     tables

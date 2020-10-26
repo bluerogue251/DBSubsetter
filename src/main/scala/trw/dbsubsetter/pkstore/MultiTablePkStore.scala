@@ -10,7 +10,7 @@ private[pkstore] trait MultiTablePkStore {
 
 private[pkstore] object MultiTablePkStore {
   def from(tables: Seq[Table]): MultiTablePkStore = {
-    val base: MultiTablePkStore = new MultiTablePkStoreInMemoryImpl(tables)
+    val base: MultiTablePkStore = new MultiTablePkStoreImpl(tables)
     new MultiTablePkStoreInstrumentedImpl(base)
   }
 }
