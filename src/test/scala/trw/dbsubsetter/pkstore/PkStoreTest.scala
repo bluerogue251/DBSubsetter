@@ -52,4 +52,28 @@ class PkStoreTest extends FunSuite {
     assert(pkStore.alreadySeen(firstMultiIntValue) === true)
     assert(pkStore.alreadySeen(otherMultiIntValue) === false)
   }
+
+  test("PkStore can handle millions of entries") {
+    val pkStore: PkStore = PkStore.empty()
+
+    (0 until 2500000).foreach { i =>
+      val value: PrimaryKeyValue = new PrimaryKeyValue(Seq(i))
+      assert(pkStore.alreadySeen(value) === false)
+      assert(pkStore.markSeenWithChildren(value) === FirstTimeSeen)
+      assert(pkStore.alreadySeen(value) === true)
+      assert(pkStore.markSeenWithChildren(value) === AlreadySeenWithChildren)
+      assert(pkStore.markSeen(value) === AlreadySeenWithChildren)
+    }
+
+    (2500000 until 5000000).foreach { i =>
+      val value: PrimaryKeyValue = new PrimaryKeyValue(Seq(i))
+      assert(pkStore.alreadySeen(value) === false)
+      assert(pkStore.markSeen(value) === FirstTimeSeen)
+      assert(pkStore.alreadySeen(value) === true)
+      assert(pkStore.markSeen(value) === AlreadySeenWithoutChildren)
+      assert(pkStore.markSeen(value) === AlreadySeenWithoutChildren)
+      assert(pkStore.markSeenWithChildren(value) === AlreadySeenWithoutChildren)
+      assert(pkStore.markSeenWithChildren(value) === AlreadySeenWithChildren)
+    }
+  }
 }
