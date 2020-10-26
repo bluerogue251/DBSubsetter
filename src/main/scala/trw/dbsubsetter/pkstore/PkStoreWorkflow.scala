@@ -4,7 +4,7 @@ import trw.dbsubsetter.OriginDbResult
 import trw.dbsubsetter.db.{Keys, PrimaryKeyValue, SchemaInfo, Table}
 import trw.dbsubsetter.keyextraction.KeyExtractionUtil
 
-final class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
+final class PkStoreWorkflow(multiTablePkStore: MultiTablePkStore, schemaInfo: SchemaInfo) {
 
   private[this] val EmptyMap: Map[WriteOutcome, Vector[Keys]] =
     Map
@@ -15,7 +15,7 @@ final class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
     KeyExtractionUtil.pkExtractionFunctions(schemaInfo)
 
   def alreadySeen(table: Table, primaryKeyValue: PrimaryKeyValue): Boolean = {
-    pkStore.alreadySeen(table, primaryKeyValue)
+    multiTablePkStore.alreadySeen(table, primaryKeyValue)
   }
 
   def add(req: OriginDbResult): PksAdded = {
@@ -25,7 +25,7 @@ final class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
     if (fetchChildren) {
       val outcomes: Vector[(WriteOutcome, Keys)] = rows.map(row => {
         val pkValue: PrimaryKeyValue = pkValueExtractionFunction(row)
-        val outcome: WriteOutcome = pkStore.markSeenWithChildren(table, pkValue)
+        val outcome: WriteOutcome = multiTablePkStore.markSeenWithChildren(table, pkValue)
         outcome -> row
       })
 
@@ -41,7 +41,7 @@ final class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
     } else {
       val newRows = rows.filter(row => {
         val pkValue: PrimaryKeyValue = pkValueExtractionFunction(row)
-        pkStore.markSeen(table, pkValue) match {
+        multiTablePkStore.markSeen(table, pkValue) match {
           case FirstTimeSeen => true
           case _             => false
         }
@@ -53,7 +53,7 @@ final class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
 
 object PkStoreWorkflow {
   def from(schemaInfo: SchemaInfo): PkStoreWorkflow = {
-    val pkStore: PrimaryKeyStore = PrimaryKeyStore.from(schemaInfo.pksByTable.keys.toSeq)
-    new PkStoreWorkflow(pkStore, schemaInfo)
+    val multiTablePkStore: MultiTablePkStore = MultiTablePkStore.from(schemaInfo.pksByTable.keys.toSeq)
+    new PkStoreWorkflow(multiTablePkStore, schemaInfo)
   }
 }
