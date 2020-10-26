@@ -18,9 +18,9 @@ private[pkstore] final class PkStoreInMemoryImpl extends PkStore {
 
   private[this] val seenWithChildrenStorage: mutable.HashSet[Any] = mutable.HashSet()
 
-  override def markSeen(primaryKeyValue: PrimaryKeyValue): WriteOutcome = {
+  override def markSeen(value: PrimaryKeyValue): WriteOutcome = {
     this.synchronized {
-      val rawValue: Any = extract(primaryKeyValue)
+      val rawValue: Any = extract(value)
 
       val alreadySeenWithChildren: Boolean =
         seenWithChildrenStorage.contains(rawValue)
@@ -39,9 +39,9 @@ private[pkstore] final class PkStoreInMemoryImpl extends PkStore {
     }
   }
 
-  override def markSeenWithChildren(primaryKeyValue: PrimaryKeyValue): WriteOutcome = {
+  override def markSeenWithChildren(value: PrimaryKeyValue): WriteOutcome = {
     this.synchronized {
-      val rawValue: Any = extract(primaryKeyValue)
+      val rawValue: Any = extract(value)
 
       val alreadySeenWithChildren: Boolean =
         !seenWithChildrenStorage.add(rawValue)
@@ -60,9 +60,9 @@ private[pkstore] final class PkStoreInMemoryImpl extends PkStore {
     }
   }
 
-  override def alreadySeen(primaryKeyValue: PrimaryKeyValue): Boolean = {
+  override def alreadySeen(value: PrimaryKeyValue): Boolean = {
     this.synchronized {
-      val rawValue: Any = extract(primaryKeyValue)
+      val rawValue: Any = extract(value)
       seenWithChildrenStorage.contains(rawValue) || seenWithoutChildrenStorage.contains(rawValue)
     }
   }
