@@ -1,64 +1,79 @@
 package trw.dbsubsetter.pkstore
 
 import org.scalatest.FunSuite
-import trw.dbsubsetter.db.{PrimaryKeyValue, Schema, Table}
+import trw.dbsubsetter.db.PrimaryKeyValue
 
 class PkStoreTest extends FunSuite {
   test("PkStore is conscious of whether children have been processed yet") {
-    val table: Table =
-      Table(
-        schema = Schema("public"),
-        name = "users"
-      )
-
-    val pkStore: PrimaryKeyStore =
-      PrimaryKeyStore.from(Seq(table))
-
+    val pkStore: PkStore = PkStore.empty()
     val pkValue: PrimaryKeyValue = new PrimaryKeyValue(Seq[String]("pkValue"))
 
     // Add the PK to the pkStore, noting that we are not planning to fetch its children at this time
-    val writeOutcome1 = pkStore.markSeen(table, pkValue)
+    val writeOutcome1 = pkStore.markSeen(pkValue)
     assert(writeOutcome1 === FirstTimeSeen)
 
     // Add the PK to the pkStore again, noting that we are still not planning to fetch its children at this time
-    val writeOutcome2 = pkStore.markSeen(table, pkValue)
+    val writeOutcome2 = pkStore.markSeen(pkValue)
     assert(writeOutcome2 === AlreadySeenWithoutChildren)
 
     // Add the PK to the pkStore, noting that we are now planning to fetch its children
-    val writeOutcome3 = pkStore.markSeenWithChildren(table, pkValue)
+    val writeOutcome3 = pkStore.markSeenWithChildren(pkValue)
     assert(writeOutcome3 === AlreadySeenWithoutChildren)
 
     // Add the PK to the pkStore, noting that we are again planning to fetch its children
-    val writeOutcome4 = pkStore.markSeenWithChildren(table, pkValue)
+    val writeOutcome4 = pkStore.markSeenWithChildren(pkValue)
     assert(writeOutcome4 === AlreadySeenWithChildren)
   }
 
   test("PkStore accurately reports what it has seen previously") {
-    val table: Table = Table(schema = Schema("public"), name = "users")
-    val pkStore: PrimaryKeyStore = PrimaryKeyStore.from(Seq(table))
+    val pkStore: PkStore = PkStore.empty()
 
     val firstStringValue: PrimaryKeyValue = new PrimaryKeyValue(Seq[String]("first-value"))
     val otherStringValue: PrimaryKeyValue = new PrimaryKeyValue(Seq[String]("other-value"))
-    assert(pkStore.alreadySeen(table, firstStringValue) === false)
-    assert(pkStore.alreadySeen(table, otherStringValue) === false)
-    pkStore.markSeen(table, firstStringValue)
-    assert(pkStore.alreadySeen(table, firstStringValue) === true)
-    assert(pkStore.alreadySeen(table, otherStringValue) === false)
+    assert(pkStore.alreadySeen(firstStringValue) === false)
+    assert(pkStore.alreadySeen(otherStringValue) === false)
+    pkStore.markSeen(firstStringValue)
+    assert(pkStore.alreadySeen(firstStringValue) === true)
+    assert(pkStore.alreadySeen(otherStringValue) === false)
 
     val firstIntValue: PrimaryKeyValue = new PrimaryKeyValue(Seq[Int](1))
     val otherIntValue: PrimaryKeyValue = new PrimaryKeyValue(Seq[Int](2))
-    assert(pkStore.alreadySeen(table, firstIntValue) === false)
-    assert(pkStore.alreadySeen(table, otherIntValue) === false)
-    pkStore.markSeen(table, firstIntValue)
-    assert(pkStore.alreadySeen(table, firstIntValue) === true)
-    assert(pkStore.alreadySeen(table, otherIntValue) === false)
+    assert(pkStore.alreadySeen(firstIntValue) === false)
+    assert(pkStore.alreadySeen(otherIntValue) === false)
+    pkStore.markSeen(firstIntValue)
+    assert(pkStore.alreadySeen(firstIntValue) === true)
+    assert(pkStore.alreadySeen(otherIntValue) === false)
 
     val firstMultiIntValue: PrimaryKeyValue = new PrimaryKeyValue(Seq[Int](1, 2))
     val otherMultiIntValue: PrimaryKeyValue = new PrimaryKeyValue(Seq[Int](2, 3))
-    assert(pkStore.alreadySeen(table, firstMultiIntValue) === false)
-    assert(pkStore.alreadySeen(table, otherMultiIntValue) === false)
-    pkStore.markSeen(table, firstMultiIntValue)
-    assert(pkStore.alreadySeen(table, firstMultiIntValue) === true)
-    assert(pkStore.alreadySeen(table, otherMultiIntValue) === false)
+    assert(pkStore.alreadySeen(firstMultiIntValue) === false)
+    assert(pkStore.alreadySeen(otherMultiIntValue) === false)
+    pkStore.markSeen(firstMultiIntValue)
+    assert(pkStore.alreadySeen(firstMultiIntValue) === true)
+    assert(pkStore.alreadySeen(otherMultiIntValue) === false)
+  }
+
+  test("PkStore can handle millions of entries") {
+    val pkStore: PkStore = PkStore.empty()
+
+    (0 until 2500000).foreach { i =>
+      val value: PrimaryKeyValue = new PrimaryKeyValue(Seq(i))
+      assert(pkStore.alreadySeen(value) === false)
+      assert(pkStore.markSeenWithChildren(value) === FirstTimeSeen)
+      assert(pkStore.alreadySeen(value) === true)
+      assert(pkStore.markSeenWithChildren(value) === AlreadySeenWithChildren)
+      assert(pkStore.markSeen(value) === AlreadySeenWithChildren)
+    }
+
+    (2500000 until 5000000).foreach { i =>
+      val value: PrimaryKeyValue = new PrimaryKeyValue(Seq(i))
+      assert(pkStore.alreadySeen(value) === false)
+      assert(pkStore.markSeen(value) === FirstTimeSeen)
+      assert(pkStore.alreadySeen(value) === true)
+      assert(pkStore.markSeen(value) === AlreadySeenWithoutChildren)
+      assert(pkStore.markSeen(value) === AlreadySeenWithoutChildren)
+      assert(pkStore.markSeenWithChildren(value) === AlreadySeenWithoutChildren)
+      assert(pkStore.markSeenWithChildren(value) === AlreadySeenWithChildren)
+    }
   }
 }

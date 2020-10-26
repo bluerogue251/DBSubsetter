@@ -10,6 +10,6 @@ private[pkstore] trait PkStore {
 
 object PkStore {
   def empty(): PkStore = {
-    new PkStoreInMemoryImpl()
+    new PkStoreImpl()
   }
 }

@@ -6,7 +6,7 @@ import java.util.UUID
 import trw.dbsubsetter.db.PrimaryKeyValue
 import trw.dbsubsetter.map.DynamicMap
 
-private[pkstore] final class PrimaryKeyStoreSingleTableImpl extends PrimaryKeyStoreSingleTable {
+private[pkstore] final class PkStoreImpl extends PkStore {
 
   /*
    * If `storage(pkValue) == null`, then neither its parents nor its children have been fetched.
