@@ -4,7 +4,7 @@ import trw.dbsubsetter.OriginDbResult
 import trw.dbsubsetter.db.{Keys, PrimaryKeyValue, SchemaInfo, Table}
 import trw.dbsubsetter.keyextraction.KeyExtractionUtil
 
-final class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
+final class PkStoreWorkflow(pkStore: MultiTablePkStore, schemaInfo: SchemaInfo) {
 
   private[this] val EmptyMap: Map[WriteOutcome, Vector[Keys]] =
     Map
@@ -53,7 +53,7 @@ final class PkStoreWorkflow(pkStore: PrimaryKeyStore, schemaInfo: SchemaInfo) {
 
 object PkStoreWorkflow {
   def from(schemaInfo: SchemaInfo): PkStoreWorkflow = {
-    val pkStore: PrimaryKeyStore = PrimaryKeyStore.from(schemaInfo.pksByTable.keys.toSeq)
+    val pkStore: MultiTablePkStore = MultiTablePkStore.from(schemaInfo.pksByTable.keys.toSeq)
     new PkStoreWorkflow(pkStore, schemaInfo)
   }
 }

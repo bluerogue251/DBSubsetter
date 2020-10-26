@@ -3,7 +3,7 @@ package trw.dbsubsetter.pkstore
 import org.scalatest.FunSuite
 import trw.dbsubsetter.db.{PrimaryKeyValue, Schema, Table}
 
-class PkStoreTest extends FunSuite {
+class PkStoreStressTest extends FunSuite {
   test("PkStore is conscious of whether children have been processed yet") {
     val table: Table =
       Table(
@@ -11,8 +11,8 @@ class PkStoreTest extends FunSuite {
         name = "users"
       )
 
-    val pkStore: PrimaryKeyStore =
-      PrimaryKeyStore.from(Seq(table))
+    val pkStore: MultiTablePkStore =
+      MultiTablePkStore.from(Seq(table))
 
     val pkValue: PrimaryKeyValue = new PrimaryKeyValue(Seq[String]("pkValue"))
 
@@ -35,7 +35,7 @@ class PkStoreTest extends FunSuite {
 
   test("PkStore accurately reports what it has seen previously") {
     val table: Table = Table(schema = Schema("public"), name = "users")
-    val pkStore: PrimaryKeyStore = PrimaryKeyStore.from(Seq(table))
+    val pkStore: MultiTablePkStore = MultiTablePkStore.from(Seq(table))
 
     val firstStringValue: PrimaryKeyValue = new PrimaryKeyValue(Seq[String]("first-value"))
     val otherStringValue: PrimaryKeyValue = new PrimaryKeyValue(Seq[String]("other-value"))
