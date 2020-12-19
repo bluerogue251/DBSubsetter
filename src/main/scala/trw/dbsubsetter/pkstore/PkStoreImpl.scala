@@ -12,7 +12,7 @@ private[pkstore] final class PkStoreImpl extends PkStore {
    */
   private[this] val storage: BooleanMap[Any] = BooleanMap.empty()
 
-  override def markSeenWithoutChildren(value: PrimaryKeyValue): WriteOutcome = {
+  override def markSeen(value: PrimaryKeyValue): WriteOutcome = {
     val rawValue: Any = extract(value)
     val prevState: Option[Boolean] = storage.putIfAbsent(rawValue, value = false)
     interpretPrevState(prevState)
