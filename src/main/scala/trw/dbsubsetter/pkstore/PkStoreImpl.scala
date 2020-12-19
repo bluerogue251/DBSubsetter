@@ -13,13 +13,13 @@ private[pkstore] final class PkStoreImpl(storage: BooleanMap[Any]) extends PkSto
   override def markSeen(value: PrimaryKeyValue): WriteOutcome = {
     val rawValue: Any = extract(value)
     val prevState: Option[Boolean] = storage.putIfAbsent(rawValue, value = false)
-    interpretPrevState(prevState)
+    interpret(prevState)
   }
 
   override def markSeenWithChildren(value: PrimaryKeyValue): WriteOutcome = {
     val rawValue: Any = extract(value)
     val prev: Option[Boolean] = storage.put(rawValue, value = true)
-    interpretPrevState(prev)
+    interpret(prev)
   }
 
   override def alreadySeen(value: PrimaryKeyValue): Boolean = {
@@ -27,7 +27,7 @@ private[pkstore] final class PkStoreImpl(storage: BooleanMap[Any]) extends PkSto
     storage.get(rawValue).isDefined
   }
 
-  private[this] def interpretPrevState(prevState: Option[Boolean]): WriteOutcome = {
+  private[this] def interpret(prevState: Option[Boolean]): WriteOutcome = {
     prevState match {
       case None        => FirstTimeSeen
       case Some(false) => AlreadySeenWithoutChildren
