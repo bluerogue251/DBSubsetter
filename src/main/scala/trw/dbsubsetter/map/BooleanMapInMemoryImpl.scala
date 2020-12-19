@@ -4,7 +4,6 @@ import scala.collection.mutable
 
 /**
   * Invariant: any key at any given moment is in at most one of `falseValues` and `trueValues`; never both.
-  * Invariant: once a given key is `true`, it will never again be `false`.
   */
 private[map] final class BooleanMapInMemoryImpl[K] extends BooleanMap[K] {
 
@@ -31,8 +30,8 @@ private[map] final class BooleanMapInMemoryImpl[K] extends BooleanMap[K] {
         val wasTrue = !trueValues.add(key)
         massage(wasFalse, wasTrue)
       } else {
-        val wasFalse = !falseValues.add(key)
         val wasTrue = trueValues.remove(key)
+        val wasFalse = !falseValues.add(key)
         massage(wasFalse, wasTrue)
       }
     }
