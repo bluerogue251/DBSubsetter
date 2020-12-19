@@ -10,7 +10,7 @@ private[pkstore] final class MultiTablePkStoreImpl(tables: Seq[Table]) extends M
       .toMap
 
   override def markSeen(table: Table, value: PrimaryKeyValue): WriteOutcome = {
-    storesByTable(table).markSeen(value)
+    storesByTable(table).markSeenWithoutChildren(value)
   }
 
   override def markSeenWithChildren(table: Table, value: PrimaryKeyValue): WriteOutcome = {
