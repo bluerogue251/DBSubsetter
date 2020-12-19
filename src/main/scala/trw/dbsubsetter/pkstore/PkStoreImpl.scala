@@ -3,14 +3,12 @@ package trw.dbsubsetter.pkstore
 import trw.dbsubsetter.db.PrimaryKeyValue
 import trw.dbsubsetter.map.BooleanMap
 
-private[pkstore] final class PkStoreImpl extends PkStore {
-
-  /*
-   * `!storage.containsKey(pkValue)` means neither its parents nor its children have been fetched.
-   * `storage(pkValue) == false` means only its parents have been fetched.
-   * `storage(pkValue) == true` means both its children and its parents have been fetched.
-   */
-  private[this] val storage: BooleanMap[Any] = BooleanMap.empty()
+/**
+  * `!storage.containsKey(pkValue)` means neither its parents nor its children have been fetched.
+  * `storage(pkValue) == false` means only its parents have been fetched.
+  * `storage(pkValue) == true` means both its children and its parents have been fetched.
+  */
+private[pkstore] final class PkStoreImpl(storage: BooleanMap[Any]) extends PkStore {
 
   override def markSeen(value: PrimaryKeyValue): WriteOutcome = {
     val rawValue: Any = extract(value)
@@ -26,7 +24,7 @@ private[pkstore] final class PkStoreImpl extends PkStore {
 
   override def alreadySeen(value: PrimaryKeyValue): Boolean = {
     val rawValue: Any = extract(value)
-    storage.get(rawValue)
+    storage.get(rawValue).isDefined
   }
 
   private[this] def interpretPrevState(prevState: Option[Boolean]): WriteOutcome = {

@@ -1,6 +1,7 @@
 package trw.dbsubsetter.pkstore
 
 import trw.dbsubsetter.db.PrimaryKeyValue
+import trw.dbsubsetter.map.BooleanMap
 
 private[pkstore] trait PkStore {
   def markSeen(value: PrimaryKeyValue): WriteOutcome
@@ -10,6 +11,7 @@ private[pkstore] trait PkStore {
 
 object PkStore {
   def empty(): PkStore = {
-    new PkStoreImpl()
+    val storage: BooleanMap[Any] = BooleanMap.empty()
+    new PkStoreImpl(storage)
   }
 }
