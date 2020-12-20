@@ -4,13 +4,15 @@ import org.rocksdb.{Options, RocksDB}
 
 import java.io.File
 import java.nio.ByteBuffer
+import java.nio.file.Files
 import java.util.UUID
 
-private[map] final class BooleanMapRocksDbImpl[K](rocksDbDir: File) extends BooleanMap[K] {
+private[map] final class BooleanMapRocksDbImpl[K]() extends BooleanMap[K] {
   RocksDB.loadLibrary()
   private val options: Options = new Options().setCreateIfMissing(true)
-  private val dbFile: File = new File(rocksDbDir, "rocks-db")
-  private val db: RocksDB = RocksDB.open(options, dbFile.getAbsolutePath)
+  private val dbDir: File = new File("/tmp/" + "rocks-db-" + UUID.randomUUID().toString)
+  Files.createDirectory(dbDir.getAbsoluteFile.toPath)
+  private val db: RocksDB = RocksDB.open(options, dbDir.getAbsolutePath)
 
   private val falseBytes: Array[Byte] = Array[Byte](0)
   private val trueBytes: Array[Byte] = Array[Byte](1)
@@ -58,7 +60,7 @@ private[map] final class BooleanMapRocksDbImpl[K](rocksDbDir: File) extends Bool
   }
 
   private def extract(value: Any): ByteBuffer = {
-    if (!value.isInstanceOf[Seq]) {
+    if (!value.isInstanceOf[Seq[Any]]) {
       extractSingle(value)
     } else {
       val seqValue: Seq[Any] = value.asInstanceOf[Seq[Any]]

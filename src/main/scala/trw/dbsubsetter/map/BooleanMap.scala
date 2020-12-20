@@ -29,6 +29,6 @@ trait BooleanMap[K] {
 
 object BooleanMap {
   def empty[K](): BooleanMap[K] = {
-    new BooleanMapInMemoryImpl[K]()
+    new BooleanMapRocksDbImpl[K]()
   }
 }
