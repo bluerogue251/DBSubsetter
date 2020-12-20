@@ -15,7 +15,7 @@ libraryDependencies ++= Seq(
   "com.microsoft.sqlserver" % "mssql-jdbc" % "6.2.1.jre8",
   // Off-heap data structures
   "net.openhft" % "chronicle-queue" % "5.20.103",
-  "org.rocksdb" % "rocksdbjni" % "5.5.1",
+  "org.rocksdb" % "rocksdbjni" % "6.14.6",
   // No-op logger to silence slf4j warnings
   "org.slf4j" % "slf4j-nop" % "1.7.25",
   // Observability tools
