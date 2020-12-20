@@ -16,12 +16,17 @@ private[map] final class BooleanMapRocksDbImpl[K]() extends BooleanMap[K] {
 
   private val falseBytes: Array[Byte] = Array[Byte](0)
   private val trueBytes: Array[Byte] = Array[Byte](1)
+  private val valueFlyweight: Array[Byte] = Array[Byte](0)
 
   override def get(key: K): Option[Boolean] = {
     this.synchronized {
       val keyBytes: Array[Byte] = extract(key).array()
-      val valueBytes: Array[Byte] = db.get(keyBytes)
-      massage(valueBytes)
+      val result: Int = db.get(keyBytes, valueFlyweight)
+      if (result == RocksDB.NOT_FOUND) {
+        None
+      } else {
+        massage(valueFlyweight)
+      }
     }
   }
 
@@ -50,9 +55,7 @@ private[map] final class BooleanMapRocksDbImpl[K]() extends BooleanMap[K] {
   }
 
   private[this] def massage(valueBytes: Array[Byte]): Option[Boolean] = {
-    if (valueBytes == null) {
-      None
-    } else if (valueBytes(0) == 0) {
+    if (valueBytes(0) == 0) {
       Some(false)
     } else {
       Some(true)
