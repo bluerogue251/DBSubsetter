@@ -3,6 +3,8 @@
 target/*
 project/target/*
 project/project/target/*
+project/project/project/target/*
+project/project/project/project/target/*
 
 # IntelliJ
 *.iml
@@ -20,3 +22,9 @@ load-test.pem
 load-test.pem.pub
 .terraform
 *.tfstate*
+
+# VSCode
+.metals/
+.bloop/
+.ammonite/
+metals.sbt
