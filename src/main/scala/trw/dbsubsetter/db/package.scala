@@ -1,8 +1,8 @@
 package trw.dbsubsetter
 
-import java.sql.Connection
-
 import trw.dbsubsetter.db.ColumnTypes.ColumnType
+
+import java.sql.Connection
 
 package object db {
 
@@ -65,7 +65,15 @@ package object db {
   }
 
   // Primary keys can be multi-column. Therefore a single primary key value is a sequence of individual column values.
-  class PrimaryKeyValue(val individualColumnValues: Seq[Any])
+  class PrimaryKeyValue(val individualColumnValues: Seq[Any]) {
+    def asBytes(): Array[Byte] = {
+      if (individualColumnValues.size == 1) {
+        individualColumnValues.head
+      } else {
+        individualColumnValues
+      }
+    }
+  }
 
   // Foreign keys can be multi-column. Therefore a single foreign key value is a sequence of individual column values.
   class ForeignKeyValue(val individualColumnValues: Seq[Any]) {
