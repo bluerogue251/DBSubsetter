@@ -2,7 +2,9 @@ package trw.dbsubsetter
 
 import trw.dbsubsetter.db.ColumnTypes.ColumnType
 
+import java.nio.ByteBuffer
 import java.sql.Connection
+import java.util.UUID
 
 package object db {
 
@@ -66,12 +68,52 @@ package object db {
 
   // Primary keys can be multi-column. Therefore a single primary key value is a sequence of individual column values.
   class PrimaryKeyValue(val individualColumnValues: Seq[Any]) {
-    def asBytes(): Array[Byte] = {
+    def asBytes(): ByteBuffer = {
       if (individualColumnValues.size == 1) {
-        individualColumnValues.head
+        extractSingle(individualColumnValues.head)
       } else {
-        individualColumnValues
+        extractSeq(individualColumnValues)
       }
+    }
+
+    private def extractSeq(value: Seq[Any]): ByteBuffer = {
+      val seqValue: Seq[Any] = value.asInstanceOf[Seq[Any]]
+      val buffers: Seq[ByteBuffer] = seqValue.map(extractSingle)
+      val count: Int = buffers.size
+      val bufferSizes: Seq[Int] = buffers.map(_.capacity())
+      /*
+       * 4 Bytes for the count
+       * 4 Bytes per buffer for its size
+       * Rest Bytes for all the contents
+       */
+      val capacity: Int = 4 + (4 * count) + bufferSizes.sum
+      val compositeBuffer: ByteBuffer = ByteBuffer.allocate(capacity)
+      compositeBuffer.putInt(count)
+      bufferSizes.foreach(compositeBuffer.putInt)
+      buffers.foreach(compositeBuffer.put)
+      compositeBuffer.rewind()
+      compositeBuffer
+    }
+
+    private def extractSingle(value: Any): ByteBuffer = {
+      val buffer: ByteBuffer = {
+        value match {
+          case short: Short                     => ByteBuffer.allocate(2).putShort(short)
+          case int: Int                         => ByteBuffer.allocate(4).putInt(int)
+          case long: Long                       => ByteBuffer.allocate(8).putLong(long)
+          case bigInt: BigInt                   => ByteBuffer.wrap(bigInt.toByteArray)
+          case bigInteger: java.math.BigInteger => ByteBuffer.wrap(bigInteger.toByteArray)
+          case string: String                   => ByteBuffer.wrap(string.getBytes)
+          case bytes: Array[Byte]               => ByteBuffer.wrap(bytes)
+          case uuid: UUID =>
+            val buffer: ByteBuffer = ByteBuffer.allocate(16)
+            buffer.putLong(uuid.getMostSignificantBits)
+            buffer.putLong(uuid.getMostSignificantBits)
+            buffer
+        }
+      }
+      buffer.rewind()
+      buffer
     }
   }
 

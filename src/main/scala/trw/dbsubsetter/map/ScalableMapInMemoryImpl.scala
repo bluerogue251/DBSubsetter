@@ -1,5 +1,6 @@
 package trw.dbsubsetter.map
 
+import java.nio.ByteBuffer
 import scala.collection.mutable
 
 /**
@@ -7,11 +8,11 @@ import scala.collection.mutable
   */
 private[map] final class ScalableMapInMemoryImpl extends ScalableMap {
 
-  private[this] val falseValues: mutable.HashSet[Array[Byte]] = mutable.HashSet()
+  private[this] val falseValues: mutable.HashSet[ByteBuffer] = mutable.HashSet()
 
-  private[this] val trueValues: mutable.HashSet[Array[Byte]] = mutable.HashSet()
+  private[this] val trueValues: mutable.HashSet[ByteBuffer] = mutable.HashSet()
 
-  override def get(key: Array[Byte]): Option[Boolean] = {
+  override def get(key: ByteBuffer): Option[Boolean] = {
     this.synchronized {
       if (falseValues.contains(key)) {
         Some(false)
@@ -23,7 +24,7 @@ private[map] final class ScalableMapInMemoryImpl extends ScalableMap {
     }
   }
 
-  override def put(key: Array[Byte], value: Boolean): Option[Boolean] = {
+  override def put(key: ByteBuffer, value: Boolean): Option[Boolean] = {
     this.synchronized {
       if (value) {
         val wasFalse = falseValues.remove(key)
@@ -37,7 +38,7 @@ private[map] final class ScalableMapInMemoryImpl extends ScalableMap {
     }
   }
 
-  override def putIfAbsent(key: Array[Byte], value: Boolean): Option[Boolean] = {
+  override def putIfAbsent(key: ByteBuffer, value: Boolean): Option[Boolean] = {
     this.synchronized {
       val existingValue: Option[Boolean] = get(key)
       if (existingValue.isDefined) {
