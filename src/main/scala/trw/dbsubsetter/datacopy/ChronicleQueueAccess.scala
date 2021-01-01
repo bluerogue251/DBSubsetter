@@ -1,13 +1,13 @@
 package trw.dbsubsetter.datacopy
 
-import java.nio.file.Path
-import java.util.function.BiConsumer
-
 import net.openhft.chronicle.queue.impl.single.SingleChronicleQueue
 import net.openhft.chronicle.wire.{ValueIn, ValueOut, WireOut}
-import trw.dbsubsetter.chronicle.{ChronicleQueueFactory, ChronicleQueueFunctions}
+import trw.dbsubsetter.chronicle.ChronicleQueueFactory
 import trw.dbsubsetter.db.ColumnTypes.ColumnType
 import trw.dbsubsetter.db.PrimaryKeyValue
+
+import java.nio.file.Path
+import java.util.function.BiConsumer
 
 private[datacopy] final class ChronicleQueueAccess(storageDirectory: Path, columnTypes: Seq[ColumnType]) {
 

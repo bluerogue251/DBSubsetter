@@ -1,7 +1,6 @@
 package trw.dbsubsetter.fktaskqueue
 
 import net.openhft.chronicle.wire.ValueIn
-import trw.dbsubsetter.chronicle.ChronicleQueueFunctions
 import trw.dbsubsetter.db.ColumnTypes.ColumnType
 import trw.dbsubsetter.db.ForeignKeyValue
 
