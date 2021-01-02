@@ -36,12 +36,11 @@ package object db {
   class Column(
       val table: Table,
       val name: String,
-      val getValue: Function[ResultSet, ColumnValue]
+      val getValue: Function[ResultSet, ColumnValue],
+      val getValueMaybe: Function[ResultSet, Option[ColumnValue]]
   )
 
-  class PrimaryKey(val columns: Seq[Column]) {
-    def
-  }
+  class PrimaryKey(val columns: Seq[Column])
 
   class ForeignKey(
       val fromCols: Seq[Column],
@@ -67,20 +66,8 @@ package object db {
   // Represents a single row from the origin database including all columns
   class Row(val data: Map[Column, Any])
 
-  // Represents a single row from the origin database including only primary and foreign key columns
-  class Keys(data: Map[Column, ColumnValue]) {
-
-    def getValue(pk: PrimaryKey): PrimaryKeyValue = {
-      val columnValues: Seq[Any] = pk.columns.map(data)
-      new PrimaryKeyValue(columnValues)
-    }
-
-    def getValue(fk: ForeignKey, confusingTechDebt: Boolean): ForeignKeyValue = {
-      val columns: Seq[Column] = if (confusingTechDebt) fk.toCols else fk.fromCols
-      val columnValues: Seq[Any] = columns.map(data)
-      new ForeignKeyValue(columnValues)
-    }
-  }
+  // Represents a single row from the origin database including only primary and foreign key values
+  class Keys(val pkValue: PrimaryKeyValue, val fkValues: Map[(ForeignKey, Boolean), ForeignKeyValue])
 
   implicit class VendorAwareJdbcConnection(private val conn: Connection) {
     private val vendorName: String = conn.getMetaData.getDatabaseProductName
