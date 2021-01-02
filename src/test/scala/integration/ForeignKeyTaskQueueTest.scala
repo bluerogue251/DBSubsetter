@@ -56,9 +56,9 @@ class ForeignKeyTaskQueueTest extends FunSuite {
       assert(dequeuedTask.fk.toTable === ForeignKeyTaskQueueTest.parentTable)
     }
 
-    assert(firstTask.fkValueFromChild.x === fkValue1.x)
-    assert(secondTask.fkValueFromChild.x === fkValue2.x)
-    assert(thirdTask.fkValueFromChild.x === fkValue3.x)
+    assert(firstTask.fkValueFromChild === fkValue1)
+    assert(secondTask.fkValueFromChild === fkValue2)
+    assert(thirdTask.fkValueFromChild === fkValue3)
   }
 
   private[this] def createStorageDir(): Path = {

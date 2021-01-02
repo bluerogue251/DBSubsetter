@@ -27,16 +27,6 @@ private[db] class JdbcResultConverterImpl(schemaInfo: SchemaInfo) extends JdbcRe
     rows.map { row =>
       pk.columns.map(row)
     }
-  }
-
-  private[this] def extractMultiRowRawData(jdbcResultSet: ResultSet, columnCount: Int): Seq[Array[Any]] = {}
-
-  private[this] def extractMaps(jdbcResultSet: ResultSet, cols: Seq[Column]): Seq[Map[Column, Any]] = {
-    val multipleRowsRawData = ArrayBuffer.empty[Map[Column, Any]]
-    while (jdbcResultSet.next()) {
-
-      multipleRowsRawData.append(singleRowData)
-    }
-    multipleRowsRawData
+    ???
   }
 }

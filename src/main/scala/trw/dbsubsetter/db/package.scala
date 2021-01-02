@@ -36,13 +36,8 @@ package object db {
   class Column(
       val table: Table,
       val name: String,
-      val getValue: Function[ResultSet, ColumnValue]
-  ) {
-    def getValueMaybe(rs: ResultSet): Option[ColumnValue] = {
-      val columnValue: ColumnValue = getValue(rs)
-      if (rs.wasNull()) None else Some(columnValue)
-    }
-  }
+      val extractValue: Function[ResultSet, ColumnValue]
+  )
 
   class PrimaryKey(val columns: Seq[Column])
 
@@ -55,8 +50,8 @@ package object db {
     val toTable: Table = toCols.head.table
   }
 
-  class PrimaryKeyValue(val x: KeyValue)
-  class ForeignKeyValue(val x: KeyValue)
+  case class PrimaryKeyValue(x: KeyValue)
+  case class ForeignKeyValue(x: KeyValue)
 
   // Represents a single row from the origin database including all columns
   class Row(val data: Map[Column, Any])

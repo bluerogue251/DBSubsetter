@@ -35,10 +35,7 @@ final class PkStoreWorkflow(multiTablePkStore: MultiTablePkStore) {
     } else {
       val newRows =
         rows.filter { row =>
-          multiTablePkStore.markSeen(table, row.pkValue) match {
-            case FirstTimeSeen => true
-            case _             => false
-          }
+          multiTablePkStore.markSeen(table, row.pkValue) == FirstTimeSeen
         }
       PksAdded(table, newRows, Vector.empty, viaTableOpt)
     }
