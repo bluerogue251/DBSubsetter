@@ -5,9 +5,6 @@ import trw.dbsubsetter.pkstore.PksAdded
 
 final class FkTaskGenerator(schemaInfo: SchemaInfo) {
 
-  private[this] val fkExtractionFunctions: Map[(ForeignKey, Boolean), Keys => ForeignKeyValue] =
-    FkExtractor.fkExtractionFunctions(schemaInfo)
-
   def generateFrom(pksAdded: PksAdded): IndexedSeq[ForeignKeyTask] = {
     val PksAdded(table, rowsNeedingParentTasks, rowsNeedingChildTasks, viaTableOpt) = pksAdded
     val parentTasks = calcParentTasks(table, rowsNeedingParentTasks, viaTableOpt)
@@ -30,8 +27,7 @@ final class FkTaskGenerator(schemaInfo: SchemaInfo) {
     val useForeignKeys =
       viaTableOpt.fold(allForeignKeys)(viaTable => allForeignKeys.filterNot(fk => fk.toTable == viaTable))
     useForeignKeys.flatMap { foreignKey =>
-      val extractionFunction: Keys => ForeignKeyValue = fkExtractionFunctions(foreignKey, false)
-      val fkValues: Seq[ForeignKeyValue] = rows.map(extractionFunction).filterNot(_.isEmpty)
+      val fkValues: Seq[ForeignKeyValue] = rows.flatMap(_.fkValues.get(foreignKey, false))
       fkValues.map(fkValue => FetchParentTask(foreignKey, fkValue))
     }
   }
@@ -39,8 +35,7 @@ final class FkTaskGenerator(schemaInfo: SchemaInfo) {
   private[this] def calcChildTasks(table: Table, rows: Vector[Keys]): IndexedSeq[ForeignKeyTask] = {
     val allForeignKeys = schemaInfo.fksToTable(table)
     allForeignKeys.flatMap { foreignKey =>
-      val extractionFunction: Keys => ForeignKeyValue = fkExtractionFunctions(foreignKey, true)
-      val fkValues: Seq[ForeignKeyValue] = rows.map(extractionFunction)
+      val fkValues: Seq[ForeignKeyValue] = rows.flatMap(_.fkValues.get(foreignKey, true))
       fkValues.map(fkValue => FetchChildrenTask(foreignKey, fkValue))
     }
   }

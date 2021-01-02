@@ -62,10 +62,7 @@ package object db {
   }
 
   class PrimaryKeyValue(val x: KeyValue)
-
-  class ForeignKeyValue(val x: KeyValue) {
-    val isEmpty: Boolean = x.forall(_ == null)
-  }
+  class ForeignKeyValue(val x: KeyValue)
 
   // Represents a single row from the origin database including all columns
   class Row(val data: Map[Column, Any])
