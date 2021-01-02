@@ -4,7 +4,7 @@ import trw.dbsubsetter.db.{ForeignKey, ForeignKeyValue, Keys, SchemaInfo}
 
 private[fkcalc] object FkExtractor {
   def fkExtractionFunctions(schemaInfo: SchemaInfo): Map[(ForeignKey, Boolean), Keys => ForeignKeyValue] = {
-    schemaInfo.fksOrdered.flatMap { foreignKey =>
+    schemaInfo.foreignKeys.flatMap { foreignKey =>
       val parentExtractionFunction: Keys => ForeignKeyValue =
         keys => keys.getValue(foreignKey, confusingTechDebt = false)
 

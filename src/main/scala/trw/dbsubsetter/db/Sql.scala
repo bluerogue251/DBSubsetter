@@ -3,7 +3,7 @@ package trw.dbsubsetter.db
 private[db] object Sql {
   def queryByFkSqlTemplates(sch: SchemaInfo): ForeignKeySqlTemplates = {
     val allCombos = for {
-      fk <- sch.fksOrdered
+      fk <- sch.foreignKeys
       table <- Set(fk.fromTable, fk.toTable)
     } yield (fk, table)
 

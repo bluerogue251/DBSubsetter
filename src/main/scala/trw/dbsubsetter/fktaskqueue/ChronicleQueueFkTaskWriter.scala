@@ -5,7 +5,7 @@ import trw.dbsubsetter.chronicle.ChronicleQueueFunctions
 import trw.dbsubsetter.db.ColumnTypes.ColumnType
 import trw.dbsubsetter.db.ForeignKeyValue
 
-private[fktaskqueue] final class ChronicleQueueFkTaskWriter(fkOrdinal: Short, columnTypes: Seq[ColumnType]) {
+private[fktaskqueue] final class ChronicleQueueFkTaskWriter(fkOrdinal: Int, columnTypes: Seq[ColumnType]) {
   private[this] val valueWriter: (ValueOut, ForeignKeyValue) => Unit = {
     val singleColumnWriteFunctions: Seq[(ValueOut, Any) => WireOut] =
       columnTypes.map(ChronicleQueueFunctions.singleValueWrite)
