@@ -48,7 +48,9 @@ package object db {
       val dataType: ColumnType
   )
 
-  class PrimaryKey(val columns: Seq[Column])
+  class PrimaryKey(val columns: Seq[Column]) {
+    def valueOf(bytes: Array[Byte]): PrimaryKeyValue = {}
+  }
 
   class ForeignKey(
       val fromCols: Seq[Column],

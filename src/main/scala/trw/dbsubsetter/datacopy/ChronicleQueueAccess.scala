@@ -8,10 +8,10 @@ import trw.dbsubsetter.db.PrimaryKeyValue
 
 import java.nio.file.Path
 
-private[datacopy] final class ChronicleQueueAccess(storageDirectory: Path) {
+private[datacopy] final class ChronicleQueueAccess(dir: Path, bytesToPk: Function[Array[Byte], PrimaryKeyValue]) {
 
   private[this] val queue: SingleChronicleQueue =
-    ChronicleQueueFactory.createQueue(storageDirectory)
+    ChronicleQueueFactory.createQueue(dir)
 
   private[this] val appender = queue.acquireAppender()
 
@@ -36,7 +36,8 @@ private[datacopy] final class ChronicleQueueAccess(storageDirectory: Path) {
       var optionalValue: Option[PrimaryKeyValue] = None
 
       tailer.readDocument { wire: WireIn =>
-        val primaryKeyValue: PrimaryKeyValue = reader.apply(r.getValueIn)
+        val bytes = wire.getValueIn.bytes()
+        val primaryKeyValue = bytesToPk(bytes)
         optionalValue = Some(primaryKeyValue)
       }
 
