@@ -29,7 +29,7 @@ private[db] class OriginDbAccessImpl(
     val stmt = foreignKeyTemplateStatements(fk, table)
     stmt.clearParameters()
 
-    fkValue.individualColumnValues.zipWithIndex.foreach { case (value, i) =>
+    fkValue.x.zipWithIndex.foreach { case (value, i) =>
       stmt.setObject(i + 1, value)
     }
 
@@ -43,7 +43,7 @@ private[db] class OriginDbAccessImpl(
 
     var i: Int = 1
     primaryKeyValues.foreach { primaryKeyValue =>
-      primaryKeyValue.individualColumnValues.foreach { individualColumnValue =>
+      primaryKeyValue.x.foreach { individualColumnValue =>
         stmt.setObject(i, individualColumnValue)
         i += 1
       }

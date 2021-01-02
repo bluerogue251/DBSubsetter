@@ -1,12 +1,12 @@
 package trw.dbsubsetter.fkcalc
 
-import java.util.concurrent.atomic.AtomicLong
-import java.util.concurrent.{CountDownLatch, ExecutorService, Executors}
-
 import trw.dbsubsetter.db.{PrimaryKeyValue, Table}
 import trw.dbsubsetter.fktaskqueue.ForeignKeyTaskQueue
 import trw.dbsubsetter.keyingestion.KeyIngester
 import trw.dbsubsetter.pkstore.PkStoreWorkflow
+
+import java.util.concurrent.atomic.AtomicLong
+import java.util.concurrent.{CountDownLatch, ExecutorService, Executors}
 
 final class ForeignKeyCalculationPhaseImpl(
     fkTaskQueue: ForeignKeyTaskQueue,
@@ -60,7 +60,7 @@ final class ForeignKeyCalculationPhaseImpl(
         case fetchParentTask: FetchParentTask if FkTaskPreCheck.shouldPrecheck(fetchParentTask) =>
           val tableToCheck: Table = fetchParentTask.fk.toTable
           val primaryKeyValueToCheck: PrimaryKeyValue =
-            new PrimaryKeyValue(fetchParentTask.fkValueFromChild.individualColumnValues)
+            new PrimaryKeyValue(fetchParentTask.fkValueFromChild.x)
           pkStoreWorkflow.alreadySeen(tableToCheck, primaryKeyValueToCheck)
         case _ => false
       }

@@ -36,10 +36,10 @@ private[pkstore] final class PkStoreImpl(storage: BooleanMap[Any]) extends PkSto
   }
 
   private[this] def extract(primaryKeyValue: PrimaryKeyValue): Any = {
-    if (primaryKeyValue.individualColumnValues.size == 1) {
-      primaryKeyValue.individualColumnValues.head
+    if (primaryKeyValue.x.size == 1) {
+      primaryKeyValue.x.head
     } else {
-      primaryKeyValue.individualColumnValues
+      primaryKeyValue.x
     }
   }
 }

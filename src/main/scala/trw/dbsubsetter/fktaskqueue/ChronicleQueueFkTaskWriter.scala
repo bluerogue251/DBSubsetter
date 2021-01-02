@@ -12,7 +12,7 @@ private[fktaskqueue] final class ChronicleQueueFkTaskWriter(fkOrdinal: Short, co
 
     (out, foreignKeyValue) => {
       singleColumnWriteFunctions
-        .zip(foreignKeyValue.individualColumnValues)
+        .zip(foreignKeyValue.x)
         .foreach { case (f, singleColumnValue) => f(out, singleColumnValue) }
     }
   }

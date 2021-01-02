@@ -1,8 +1,8 @@
 package trw.dbsubsetter
 
-import trw.dbsubsetter.db.ColumnTypes.ColumnType
+import trw.dbsubsetter.db.value.{ColumnValue, KeyValue}
 
-import java.sql.Connection
+import java.sql.{Connection, ResultSet}
 
 package object db {
 
@@ -36,10 +36,12 @@ package object db {
   class Column(
       val table: Table,
       val name: String,
-      val dataType: ColumnType
+      val getValue: Function[ResultSet, ColumnValue]
   )
 
-  class PrimaryKey(val columns: Seq[Column])
+  class PrimaryKey(val columns: Seq[Column]) {
+    def
+  }
 
   class ForeignKey(
       val fromCols: Seq[Column],
@@ -56,19 +58,17 @@ package object db {
     }
   }
 
-  // Primary keys can be multi-column. Therefore a single primary key value is a sequence of individual column values.
-  class PrimaryKeyValue(val individualColumnValues: Seq[Any])
+  class PrimaryKeyValue(val x: KeyValue)
 
-  // Foreign keys can be multi-column. Therefore a single foreign key value is a sequence of individual column values.
-  class ForeignKeyValue(val individualColumnValues: Seq[Any]) {
-    val isEmpty: Boolean = individualColumnValues.forall(_ == null)
+  class ForeignKeyValue(val x: KeyValue) {
+    val isEmpty: Boolean = x.forall(_ == null)
   }
 
   // Represents a single row from the origin database including all columns
   class Row(val data: Map[Column, Any])
 
   // Represents a single row from the origin database including only primary and foreign key columns
-  class Keys(data: Map[Column, Any]) {
+  class Keys(data: Map[Column, ColumnValue]) {
 
     def getValue(pk: PrimaryKey): PrimaryKeyValue = {
       val columnValues: Seq[Any] = pk.columns.map(data)
