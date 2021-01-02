@@ -36,9 +36,13 @@ package object db {
   class Column(
       val table: Table,
       val name: String,
-      val getValue: Function[ResultSet, ColumnValue],
-      val getValueMaybe: Function[ResultSet, Option[ColumnValue]]
-  )
+      val getValue: Function[ResultSet, ColumnValue]
+  ) {
+    def getValueMaybe(rs: ResultSet): Option[ColumnValue] = {
+      val columnValue: ColumnValue = getValue(rs)
+      if (rs.wasNull()) None else Some(columnValue)
+    }
+  }
 
   class PrimaryKey(val columns: Seq[Column])
 

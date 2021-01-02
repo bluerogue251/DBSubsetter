@@ -1,49 +1,26 @@
 package trw.dbsubsetter.datacopy
 
 import net.openhft.chronicle.queue.impl.single.SingleChronicleQueue
-import net.openhft.chronicle.wire.{ValueIn, ValueOut, WireOut}
-import trw.dbsubsetter.chronicle.{ChronicleQueueFactory, ChronicleQueueFunctions}
-import trw.dbsubsetter.db.ColumnTypes.ColumnType
+import net.openhft.chronicle.wire.WireOut
+import trw.dbsubsetter.chronicle.ChronicleQueueFactory
 import trw.dbsubsetter.db.PrimaryKeyValue
 
 import java.nio.file.Path
-import java.util.function.BiConsumer
 
-private[datacopy] final class ChronicleQueueAccess(storageDirectory: Path, columnTypes: Seq[ColumnType]) {
+private[datacopy] final class ChronicleQueueAccess(dir: Path, reader: Function[Array[Byte], PrimaryKeyValue]) {
 
   private[this] val queue: SingleChronicleQueue =
-    ChronicleQueueFactory.createQueue(storageDirectory)
-
-  private[this] val writer: BiConsumer[ValueOut, PrimaryKeyValue] = {
-    val singleColumnWriters: Seq[(ValueOut, Any) => WireOut] =
-      columnTypes.map(ChronicleQueueFunctions.singleValueWrite)
-
-    (valueOut, primaryKeyValue) => {
-      singleColumnWriters
-        .zip(primaryKeyValue.x)
-        .foreach { case (singleColumnWriter, singleColumnValue) =>
-          singleColumnWriter.apply(valueOut, singleColumnValue)
-        }
-    }
-  }
-
-  private[this] val reader: Function[ValueIn, PrimaryKeyValue] = {
-    val singleColumnReaders: Seq[ValueIn => Any] =
-      columnTypes.map(ChronicleQueueFunctions.singleValueRead)
-
-    valueIn => {
-      val individualColumnValues: Seq[Any] = singleColumnReaders.map(_.apply(valueIn))
-      new PrimaryKeyValue(individualColumnValues)
-    }
-  }
+    ChronicleQueueFactory.createQueue(dir)
 
   private[this] val appender = queue.acquireAppender()
 
   private[this] val tailer = queue.createTailer()
 
-  def write(primaryKeyValues: Seq[PrimaryKeyValue]): Unit = {
-    primaryKeyValues.foreach { primaryKeyValue =>
-      appender.writeDocument(primaryKeyValue, writer)
+  def write(pkValues: Seq[PrimaryKeyValue]): Unit = {
+    pkValues.foreach { pkValue =>
+      appender.writeDocument { wire: WireOut =>
+        wire.getValueOut.bytes(pkValue.x.bytes)
+      }
     }
   }
 
@@ -56,8 +33,8 @@ private[datacopy] final class ChronicleQueueAccess(storageDirectory: Path, colum
       var optionalValue: Option[PrimaryKeyValue] = None
 
       tailer.readDocument { r =>
-        val primaryKeyValue: PrimaryKeyValue = reader.apply(r.getValueIn)
-        optionalValue = Some(primaryKeyValue)
+        val pkValue: PrimaryKeyValue = reader(r.getValueIn.bytes())
+        optionalValue = Some(pkValue)
       }
 
       if (optionalValue.isEmpty) {

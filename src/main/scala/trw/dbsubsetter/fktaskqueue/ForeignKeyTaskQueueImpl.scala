@@ -1,12 +1,12 @@
 package trw.dbsubsetter.fktaskqueue
 
-import java.nio.file.Path
-
 import net.openhft.chronicle.queue.impl.single.SingleChronicleQueue
 import net.openhft.chronicle.wire.WriteMarshallable
 import trw.dbsubsetter.chronicle.ChronicleQueueFactory
 import trw.dbsubsetter.db.{ForeignKey, ForeignKeyValue, SchemaInfo}
 import trw.dbsubsetter.fkcalc.{FetchChildrenTask, FetchParentTask, ForeignKeyTask}
+
+import java.nio.file.Path
 
 /**
   * WARNING: this class is not threadsafe
@@ -44,6 +44,14 @@ private[fktaskqueue] final class ForeignKeyTaskQueueImpl(storageDirectory: Path,
       .map { fk =>
         new ChronicleQueueFkTaskWriter(fk.i, fk.fromCols.map(_.dataType))
       }
+
+//  def writeHandler(fetchChildren: Boolean, fkValue: ForeignKeyValue): WriteMarshallable =
+//    wireOut => {
+//      val out = wireOut.getValueOut
+//      out.bool(fetchChildren)
+//      out.int16(fkOrdinal)
+//      valueWriter(out, fkValue)
+//    }
 
   override def enqueue(foreignKeyTask: ForeignKeyTask): Unit = {
     this.synchronized {
