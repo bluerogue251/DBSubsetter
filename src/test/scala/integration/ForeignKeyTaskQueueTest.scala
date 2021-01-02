@@ -82,8 +82,6 @@ private[this] object ForeignKeyTaskQueueTest {
     new Column(
       table = parentTable,
       name = "id",
-      keyOrdinalPosition = 4,
-      dataOrdinalPosition = -1, // n/a
       ColumnTypes.Long
     )
 
@@ -97,8 +95,6 @@ private[this] object ForeignKeyTaskQueueTest {
     new Column(
       table = childTable,
       name = "parentId",
-      keyOrdinalPosition = 7,
-      dataOrdinalPosition = -1, // n/a
       ColumnTypes.Long
     )
 
@@ -112,8 +108,8 @@ private[this] object ForeignKeyTaskQueueTest {
   private val schemaInfo: SchemaInfo =
     new SchemaInfo(
       tables = Seq.empty,
-      keyColumnsByTableOrdered = Map.empty,
-      dataColumnsByTableOrdered = Map.empty,
+      keyColumnsByTable = Map.empty,
+      dataColumnsByTable = Map.empty,
       pksByTable = Map.empty,
       foreignKeys = Array(foreignKey),
       fksFromTable = Map.empty,

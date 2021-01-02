@@ -1,10 +1,10 @@
 package trw.dbsubsetter.db.impl.origin
 
-import java.sql.PreparedStatement
-
 import trw.dbsubsetter.db._
 import trw.dbsubsetter.db.impl.ConnectionFactory
 import trw.dbsubsetter.db.impl.mapper.JdbcResultConverter
+
+import java.sql.PreparedStatement
 
 private[db] class OriginDbAccessImpl(
     connStr: String,
@@ -54,7 +54,7 @@ private[db] class OriginDbAccessImpl(
   }
 
   override def getRowsFromWhereClause(table: Table, whereClause: String): Vector[Keys] = {
-    val selectColumns = schemaInfo.keyColumnsByTableOrdered(table)
+    val selectColumns = schemaInfo.keyColumnsByTable(table)
     val sqlString = Sql.makeQueryString(table, selectColumns, whereClause)
     val jdbcResult = conn.createStatement().executeQuery(sqlString.value)
     mapper.convertToKeys(jdbcResult, table)
