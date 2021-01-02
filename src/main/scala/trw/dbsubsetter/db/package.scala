@@ -65,7 +65,7 @@ package object db {
     }
   }
 
-  class PrimaryKeyValue(x: Value)
+  class PrimaryKeyValue(val x: Value)
 
   // Foreign keys can be multi-column. Therefore a single foreign key value is a sequence of individual column values.
   class ForeignKeyValue(val individualColumnValues: Seq[Any]) {
