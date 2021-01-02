@@ -166,14 +166,11 @@ object SchemaInfoRetrieval {
 
     val keyColumnsByTable: Map[Table, Seq[Column]] = {
       tablesByName.map { case (_, table) =>
-        val primaryKey: PrimaryKey = pksByTable(table)
-        val foreignKeysFromTable: Seq[ForeignKey] = fksFromTable(table)
-        val foreignKeysToTable: Seq[ForeignKey] = fksToTable(table)
-        val allColumns: Set[Column] =
-          primaryKey.columns.toSet ++
-            foreignKeysFromTable.flatMap(_.fromCols).toSet ++
-            foreignKeysToTable.flatMap(_.toCols).toSet
-        table -> allColumns.toSeq
+        val allColumns: Seq[Column] =
+          pksByTable(table).columns ++
+            fksFromTable(table).flatMap(_.fromCols) ++
+            fksToTable(table).flatMap(_.toCols)
+        table -> allColumns.distinct
       }
     }
 
