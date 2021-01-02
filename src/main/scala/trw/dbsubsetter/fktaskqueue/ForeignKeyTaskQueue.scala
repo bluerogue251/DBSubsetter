@@ -1,9 +1,9 @@
 package trw.dbsubsetter.fktaskqueue
 
-import java.nio.file.Path
-
 import trw.dbsubsetter.db.SchemaInfo
 import trw.dbsubsetter.fkcalc.ForeignKeyTask
+
+import java.nio.file.Path
 
 trait ForeignKeyTaskQueue {
   def enqueue(foreignKeyTask: ForeignKeyTask): Unit
@@ -14,7 +14,7 @@ trait ForeignKeyTaskQueue {
 
 object ForeignKeyTaskQueue {
   def from(storageDirectory: Path, schemaInfo: SchemaInfo): ForeignKeyTaskQueue = {
-    val base: ForeignKeyTaskQueue = new ForeignKeyTaskQueueImpl(storageDirectory, schemaInfo)
+    val base: ForeignKeyTaskQueue = new ForeignKeyTaskQueueImpl(storageDirectory, schemaInfo.foreignKeys)
     new ForeignKeyTaskQueueInstrumentedImpl(base)
   }
 }

@@ -23,7 +23,7 @@ package object db {
       // All columns, even those uninvolved in a primary or foreign key
       val dataColumnsByTable: Map[Table, Seq[Column]],
       val pksByTable: Map[Table, PrimaryKey],
-      val fksOrdered: Array[ForeignKey],
+      val foreignKeys: Seq[ForeignKey],
       val fksFromTable: Map[Table, Vector[ForeignKey]],
       val fksToTable: Map[Table, Vector[ForeignKey]]
   )
@@ -44,16 +44,10 @@ package object db {
   class ForeignKey(
       val fromCols: Seq[Column],
       val toCols: Seq[Column],
-      val pointsToPk: Boolean,
-      var i: Short
+      val pointsToPk: Boolean
   ) {
     val fromTable: Table = fromCols.head.table
     val toTable: Table = toCols.head.table
-
-    // TODO Refactor to remove mutability
-    def setIndex(index: Short): Unit = {
-      i = index
-    }
   }
 
   // Primary keys can be multi-column. Therefore a single primary key value is a sequence of individual column values.

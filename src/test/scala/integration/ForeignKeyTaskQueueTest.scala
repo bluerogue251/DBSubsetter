@@ -102,8 +102,7 @@ private[this] object ForeignKeyTaskQueueTest {
     new ForeignKey(
       fromCols = Vector(childFkColumn),
       toCols = Vector(parentPkColumn),
-      pointsToPk = true,
-      i = 0
+      pointsToPk = true
     )
 
   private val schemaInfo: SchemaInfo =
@@ -112,7 +111,7 @@ private[this] object ForeignKeyTaskQueueTest {
       keyColumnsByTable = Map.empty,
       dataColumnsByTable = Map.empty,
       pksByTable = Map.empty,
-      fksOrdered = Array(foreignKey),
+      foreignKeys = Array(foreignKey),
       fksFromTable = Map.empty,
       fksToTable = Map.empty
     )
