@@ -65,19 +65,19 @@ package object db {
   }
 
   // Represents a single row from the origin database including all columns
-  class Row(val data: Array[Any])
+  class Row(val data: Map[Column, Any])
 
   // Represents a single row from the origin database including only primary and foreign key columns
-  class Keys(data: Map[String, Any]) {
+  class Keys(data: Map[Column, Any]) {
 
     def getValue(pk: PrimaryKey): PrimaryKeyValue = {
-      val columnValues: Seq[Any] = pk.columns.map(_.name).map(data)
+      val columnValues: Seq[Any] = pk.columns.map(data)
       new PrimaryKeyValue(columnValues)
     }
 
     def getValue(fk: ForeignKey, confusingTechDebt: Boolean): ForeignKeyValue = {
       val columns: Seq[Column] = if (confusingTechDebt) fk.toCols else fk.fromCols
-      val columnValues: Seq[Any] = columns.map(_.name).map(data)
+      val columnValues: Seq[Any] = columns.map(data)
       new ForeignKeyValue(columnValues)
     }
   }

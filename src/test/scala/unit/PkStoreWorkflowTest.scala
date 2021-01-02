@@ -17,8 +17,6 @@ class PkStoreWorkflowTest extends FunSuite {
       new Column(
         table = table,
         name = null,
-        keyOrdinalPosition = 0,
-        dataOrdinalPosition = -1, // n/a
         dataType = null
       )
 
@@ -38,7 +36,7 @@ class PkStoreWorkflowTest extends FunSuite {
 
     val fkValue: String = "fkValue"
 
-    val singleRowKeys: Keys = new Keys(Array(fkValue))
+    val singleRowKeys: Keys = new Keys(Map(pkCol -> fkValue))
 
     val multiRowKeys: Vector[Keys] = Vector(singleRowKeys)
 
@@ -79,8 +77,6 @@ class PkStoreWorkflowTest extends FunSuite {
       new Column(
         table = table,
         name = null,
-        keyOrdinalPosition = 0,
-        dataOrdinalPosition = -1, // n/a
         dataType = null
       )
 
@@ -99,7 +95,7 @@ class PkStoreWorkflowTest extends FunSuite {
       PkStoreWorkflow.from(schemaInfo)
 
     val fkValue: String = "fkValue"
-    val singleRowKeys: Keys = new Keys(Array(fkValue))
+    val singleRowKeys: Keys = new Keys(Map(primaryKeyColumn -> fkValue))
     val multiRowKeys: Vector[Keys] = Vector(singleRowKeys)
 
     // Add the PK to the pkStore, noting that we have NOT yet fetched children

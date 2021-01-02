@@ -9,24 +9,21 @@ private[db] class JdbcResultConverterImpl(schemaInfo: SchemaInfo) extends JdbcRe
 
   def convertToRows(jdbcResultSet: ResultSet, table: Table): Vector[Row] = {
     val cols: Seq[Column] = schemaInfo.dataColumnsByTable(table)
-    val multipleRowsRawData = extractMultiRowRawData(jdbcResultSet, cols.size)
+    val multipleRowsRawData = extractMultiRowRawData(jdbcResultSet, cols)
     multipleRowsRawData.map(singleRowRawData => new Row(singleRowRawData)).toVector
   }
 
-  override def convertToKeys(jdbcResultSet: ResultSet, table: Table): Seq[Keys] = {
+  override def convertToKeys(jdbcResultSet: ResultSet, table: Table): Vector[Keys] = {
     val cols: Seq[Column] = schemaInfo.keyColumnsByTable(table)
-    val multipleRowsRawData = extractMultiRowRawData(jdbcResultSet, cols.size)
+    val multipleRowsRawData = extractMultiRowRawData(jdbcResultSet, cols)
     multipleRowsRawData.map(singleRowRawData => new Keys(singleRowRawData)).toVector
   }
 
-  private[this] def extractMultiRowRawData(jdbcResultSet: ResultSet, columnCount: Int): Seq[Array[Any]] = {
-    val multipleRowsRawData = ArrayBuffer.empty[Array[Any]]
+  private[this] def extractMultiRowRawData(jdbcResultSet: ResultSet, cols: Seq[Column]): Seq[Map[Column, Any]] = {
+    val multipleRowsRawData = ArrayBuffer.empty[Map[Column, Any]]
     while (jdbcResultSet.next()) {
-      val singleRowRawData = new Array[Any](columnCount)
-      (1 to columnCount).foreach { i =>
-        singleRowRawData(i - 1) = jdbcResultSet.getObject(i)
-      }
-      multipleRowsRawData += singleRowRawData
+      val singleRowData: Map[Column, Any] = cols.map(col => col -> jdbcResultSet.getObject(col.name)).toMap
+      multipleRowsRawData.append(singleRowData)
     }
     multipleRowsRawData
   }
