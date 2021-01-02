@@ -1,21 +1,20 @@
 package trw.dbsubsetter.db.impl.mapper
 
-import java.sql.ResultSet
-
 import trw.dbsubsetter.db.{Column, Keys, Row, SchemaInfo, Table}
 
+import java.sql.ResultSet
 import scala.collection.mutable.ArrayBuffer
 
 private[db] class JdbcResultConverterImpl(schemaInfo: SchemaInfo) extends JdbcResultConverter {
 
   def convertToRows(jdbcResultSet: ResultSet, table: Table): Vector[Row] = {
-    val cols: Seq[Column] = schemaInfo.dataColumnsByTableOrdered(table)
+    val cols: Seq[Column] = schemaInfo.dataColumnsByTable(table)
     val multipleRowsRawData = extractMultiRowRawData(jdbcResultSet, cols.size)
     multipleRowsRawData.map(singleRowRawData => new Row(singleRowRawData)).toVector
   }
 
-  override def convertToKeys(jdbcResultSet: ResultSet, table: Table): Vector[Keys] = {
-    val cols: Seq[Column] = schemaInfo.keyColumnsByTableOrdered(table)
+  override def convertToKeys(jdbcResultSet: ResultSet, table: Table): Seq[Keys] = {
+    val cols: Seq[Column] = schemaInfo.keyColumnsByTable(table)
     val multipleRowsRawData = extractMultiRowRawData(jdbcResultSet, cols.size)
     multipleRowsRawData.map(singleRowRawData => new Keys(singleRowRawData)).toVector
   }

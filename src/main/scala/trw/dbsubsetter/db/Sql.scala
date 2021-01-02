@@ -20,7 +20,7 @@ private[db] object Sql {
           makeSimpleWhereClause(whereClauseColumns)
 
         val selectColumns: Seq[Column] =
-          sch.keyColumnsByTableOrdered(table)
+          sch.keyColumnsByTable(table)
 
         (fk, table) -> makeQueryString(table, selectColumns, whereClause)
       }.toMap
@@ -33,7 +33,7 @@ private[db] object Sql {
       sch.pksByTable.flatMap { case (table, primaryKey) =>
         Constants.dataCopyBatchSizes.map(batchSize => {
           val whereClause: String = makeCompositeWhereClause(primaryKey.columns, batchSize)
-          val selectColumns: Seq[Column] = sch.dataColumnsByTableOrdered(table)
+          val selectColumns: Seq[Column] = sch.dataColumnsByTable(table)
           (table, batchSize) -> makeQueryString(table, selectColumns, whereClause)
         })
       }
@@ -44,7 +44,7 @@ private[db] object Sql {
   def insertSqlTemplates(sch: SchemaInfo): Map[Table, SqlQuery] = {
     sch.tables.map { case TableWithAutoincrementMetadata(table, hasSqlServerAutoIncrement) =>
       val cols =
-        sch.dataColumnsByTableOrdered(table)
+        sch.dataColumnsByTable(table)
 
       val sqlString =
         s"""insert into ${quote(table)}

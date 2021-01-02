@@ -1,11 +1,11 @@
 package integration
 
-import java.nio.file.{Files, Path}
-
 import org.scalatest.FunSuite
 import trw.dbsubsetter.db.{Column, ColumnTypes, ForeignKey, ForeignKeyValue, Schema, SchemaInfo, Table}
 import trw.dbsubsetter.fkcalc.{FetchParentTask, ForeignKeyTask}
 import trw.dbsubsetter.fktaskqueue.ForeignKeyTaskQueue
+
+import java.nio.file.{Files, Path}
 
 /*
  * TODO add more test cases covering various combinations of:
@@ -113,8 +113,8 @@ private[this] object ForeignKeyTaskQueueTest {
   private val schemaInfo: SchemaInfo =
     new SchemaInfo(
       tables = Seq.empty,
-      keyColumnsByTableOrdered = Map.empty,
-      dataColumnsByTableOrdered = Map.empty,
+      keyColumnsByTable = Map.empty,
+      dataColumnsByTable = Map.empty,
       pksByTable = Map.empty,
       fksOrdered = Array(foreignKey),
       fksFromTable = Map.empty,
