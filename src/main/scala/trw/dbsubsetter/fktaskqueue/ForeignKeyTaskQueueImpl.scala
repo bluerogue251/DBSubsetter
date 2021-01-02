@@ -1,12 +1,12 @@
 package trw.dbsubsetter.fktaskqueue
 
-import java.nio.file.Path
-
 import net.openhft.chronicle.queue.impl.single.SingleChronicleQueue
 import net.openhft.chronicle.wire.WriteMarshallable
 import trw.dbsubsetter.chronicle.ChronicleQueueFactory
 import trw.dbsubsetter.db.{ForeignKey, ForeignKeyValue, SchemaInfo}
 import trw.dbsubsetter.fkcalc.{FetchChildrenTask, FetchParentTask, ForeignKeyTask}
+
+import java.nio.file.Path
 
 /**
   * WARNING: this class is not threadsafe
@@ -23,24 +23,24 @@ private[fktaskqueue] final class ForeignKeyTaskQueueImpl(storageDirectory: Path,
   private[this] val tailer = queue.createTailer()
 
   private[this] val childReaders =
-    schemaInfo.fksOrdered
+    schemaInfo.foreignKeys
       .map { fk =>
         new ChronicleQueueFkTaskReader(fk.fromCols.map(_.dataType))
       }
 
   private[this] val parentReaders =
-    schemaInfo.fksOrdered.map { fk =>
+    schemaInfo.foreignKeys.map { fk =>
       new ChronicleQueueFkTaskReader(fk.toCols.map(_.dataType))
     }
 
   private[this] val parentFkWriters =
-    schemaInfo.fksOrdered
+    schemaInfo.foreignKeys
       .map { fk =>
         new ChronicleQueueFkTaskWriter(fk.i, fk.toCols.map(_.dataType))
       }
 
   private[this] val childFkWriters =
-    schemaInfo.fksOrdered
+    schemaInfo.foreignKeys
       .map { fk =>
         new ChronicleQueueFkTaskWriter(fk.i, fk.fromCols.map(_.dataType))
       }
@@ -89,7 +89,7 @@ private[fktaskqueue] final class ForeignKeyTaskQueueImpl(storageDirectory: Path,
 
         val fkValue: ForeignKeyValue = reader.read(in)
 
-        val foreignKey: ForeignKey = schemaInfo.fksOrdered(fkOrdinal)
+        val foreignKey: ForeignKey = schemaInfo.foreignKeys(fkOrdinal)
 
         val task: ForeignKeyTask =
           if (fetchChildren) {

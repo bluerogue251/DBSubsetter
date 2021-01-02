@@ -28,7 +28,7 @@ class PkStoreWorkflowTest extends FunSuite {
         keyColumnsByTableOrdered = Map.empty,
         dataColumnsByTableOrdered = Map.empty,
         pksByTable = Map(table -> new PrimaryKey(Seq(pkCol))),
-        fksOrdered = Array.empty,
+        foreignKeys = Array.empty,
         fksFromTable = Map.empty,
         fksToTable = Map.empty
       )
@@ -90,7 +90,7 @@ class PkStoreWorkflowTest extends FunSuite {
         keyColumnsByTableOrdered = Map.empty,
         dataColumnsByTableOrdered = Map.empty,
         pksByTable = Map(table -> new PrimaryKey(Seq(primaryKeyColumn))),
-        fksOrdered = Array.empty,
+        foreignKeys = Array.empty,
         fksFromTable = Map.empty,
         fksToTable = Map.empty
       )
