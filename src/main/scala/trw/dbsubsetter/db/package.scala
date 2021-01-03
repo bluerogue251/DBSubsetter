@@ -36,7 +36,8 @@ package object db {
   class Column(
       val table: Table,
       val name: String,
-      val extractValue: Function[ResultSet, ColumnValue]
+      val getValue: Function[ResultSet, ColumnValue],
+      val setValue: Function[ColumnValue, ResultSet]
   )
 
   class PrimaryKey(

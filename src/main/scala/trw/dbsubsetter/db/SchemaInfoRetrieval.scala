@@ -51,7 +51,7 @@ object SchemaInfoRetrieval {
             new Column(
               table = table,
               name = col.name,
-              extractValue = ColumnTypes.extraction(col.jdbcType, col.typeName, dbMetadata.vendor)
+              getValue = ColumnTypes.extraction(col.jdbcType, col.typeName, dbMetadata.vendor)
             )
           }
         }
