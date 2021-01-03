@@ -37,7 +37,7 @@ package object db {
       val table: Table,
       val name: String,
       val getValue: Function[ResultSet, ColumnValue],
-      val setValue: Function[ColumnValue, ResultSet]
+      val setValue: Function[(ColumnValue, ResultSet), Unit]
   )
 
   class PrimaryKey(

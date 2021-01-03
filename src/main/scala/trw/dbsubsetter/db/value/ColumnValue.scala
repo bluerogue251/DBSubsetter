@@ -34,7 +34,7 @@ private[this] class UUIDColumnValue(x: UUID) extends ColumnValue {
       .array()
 }
 
-private[this] class ByteArrayColumnValue(val x: Array[Byte]) extends ColumnValue {
+private[this] class BytesColumnValue(val x: Array[Byte]) extends ColumnValue {
   override def bytes: Array[Byte] = x
 }
 
@@ -48,6 +48,6 @@ object ColumnValue {
   def bigInt(x: BigInt): ColumnValue = new BigIntColumnValue(x)
   def string(x: String): ColumnValue = new StringColumnValue(x)
   def uuid(x: UUID): ColumnValue = new UUIDColumnValue(x)
-  def bytes(x: Array[Byte]): ColumnValue = new ByteArrayColumnValue(x)
+  def bytes(x: Array[Byte]): ColumnValue = new BytesColumnValue(x)
   def unknown(x: AnyRef): ColumnValue = new ObjectColumnValue(x)
 }
