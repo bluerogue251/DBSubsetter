@@ -1,6 +1,5 @@
 package trw.dbsubsetter.db.impl.mapper
 
-import trw.dbsubsetter.db.value.ColumnValue
 import trw.dbsubsetter.db.{Column, ForeignKey, Keys, PrimaryKey, Row, SchemaInfo, Table}
 
 import java.sql.ResultSet
@@ -12,21 +11,24 @@ private[db] class JdbcResultConverterImpl(schemaInfo: SchemaInfo) extends JdbcRe
     val cols: Seq[Column] = schemaInfo.dataColumnsByTable(table)
     val multipleRowsRawData = ArrayBuffer.empty[Row]
     while (jdbcResultSet.next()) {
-      val m: Map[Column, Any] = cols.map { col => col -> jdbcResultSet.getObject(col.name) }.toMap
-      multipleRowsRawData.append(new Row(m))
+      val dataByColumn: Map[Column, Any] = cols.map { col => col -> jdbcResultSet.getObject(col.name) }.toMap
+      multipleRowsRawData.append(new Row(dataByColumn))
     }
     multipleRowsRawData.toVector
   }
 
-  override def convertToKeys(jdbcResultSet: ResultSet, table: Table): Vector[Keys] = {
-    val cols: Seq[Column] = schemaInfo.keyColumnsByTable(table)
+  override def convertToKeys(resultSet: ResultSet, table: Table): Vector[Keys] = {
     val pk: PrimaryKey = schemaInfo.pksByTable(table)
-    val fksFromTable: Seq[ForeignKey] = schemaInfo.fksFromTable(table)
-    val fksToTable: Seq[ForeignKey] = schemaInfo.fksToTable(table)
-    val rows: Seq[Map[Column, Option[ColumnValue]]] = extractMaps(jdbcResultSet, cols)
-    rows.map { row =>
-      pk.columns.map(row)
+    val fks: Seq[ForeignKey] = schemaInfo.fksFromTable(table) ++ schemaInfo.fksFromTable(table)
+    val multiRowKeys = ArrayBuffer.empty[Keys]
+    while (resultSet.next()) {
+      val pkValue = pk.extractValue(resultSet)
+      val fkValues =
+        fks.flatMap { fk =>
+          fk.extractValue(table, resultSet).map { fkValue => fk -> fkValue }
+        }.toMap
+      multiRowKeys.append(new Keys(pkValue, fkValues))
     }
-    ???
+    multiRowKeys.toVector
   }
 }

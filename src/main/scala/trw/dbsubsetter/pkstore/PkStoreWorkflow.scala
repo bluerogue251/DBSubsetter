@@ -45,6 +45,6 @@ final class PkStoreWorkflow(multiTablePkStore: MultiTablePkStore) {
 object PkStoreWorkflow {
   def from(schemaInfo: SchemaInfo): PkStoreWorkflow = {
     val multiTablePkStore: MultiTablePkStore = MultiTablePkStore.from(schemaInfo.pksByTable.keys.toSeq)
-    new PkStoreWorkflow(multiTablePkStore, schemaInfo)
+    new PkStoreWorkflow(multiTablePkStore)
   }
 }

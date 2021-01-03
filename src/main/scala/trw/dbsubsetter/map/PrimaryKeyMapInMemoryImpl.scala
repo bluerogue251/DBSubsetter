@@ -1,17 +1,19 @@
 package trw.dbsubsetter.map
 
+import trw.dbsubsetter.db.PrimaryKeyValue
+
 import scala.collection.mutable
 
 /**
   * Invariant: any key at any given moment is in at most one of `falseValues` and `trueValues`; never both.
   */
-private[map] final class BooleanMapInMemoryImpl[K] extends BooleanMap[K] {
+private[map] final class PrimaryKeyMapInMemoryImpl extends PrimaryKeyMap {
 
-  private[this] val falseValues: mutable.HashSet[K] = mutable.HashSet()
+  private[this] val falseValues: mutable.HashSet[PrimaryKeyValue] = mutable.HashSet()
 
-  private[this] val trueValues: mutable.HashSet[K] = mutable.HashSet()
+  private[this] val trueValues: mutable.HashSet[PrimaryKeyValue] = mutable.HashSet()
 
-  override def get(key: K): Option[Boolean] = {
+  override def get(key: PrimaryKeyValue): Option[Boolean] = {
     this.synchronized {
       if (falseValues.contains(key)) {
         Some(false)
@@ -23,7 +25,7 @@ private[map] final class BooleanMapInMemoryImpl[K] extends BooleanMap[K] {
     }
   }
 
-  override def put(key: K, value: Boolean): Option[Boolean] = {
+  override def put(key: PrimaryKeyValue, value: Boolean): Option[Boolean] = {
     this.synchronized {
       if (value) {
         val wasFalse = falseValues.remove(key)
@@ -37,7 +39,7 @@ private[map] final class BooleanMapInMemoryImpl[K] extends BooleanMap[K] {
     }
   }
 
-  override def putIfAbsent(key: K, value: Boolean): Option[Boolean] = {
+  override def putIfAbsent(key: PrimaryKeyValue, value: Boolean): Option[Boolean] = {
     this.synchronized {
       val existingValue: Option[Boolean] = get(key)
       if (existingValue.isDefined) {

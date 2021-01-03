@@ -26,6 +26,11 @@ private[this] class MultiColumnKeyValue(members: Seq[ColumnValue]) extends KeyVa
 }
 
 object KeyValue {
-  def apply(x: ColumnValue): KeyValue = new SingleColumnKeyValue(x)
-  def apply(members: Seq[ColumnValue]): KeyValue = new MultiColumnKeyValue(members)
+  def apply(members: Seq[ColumnValue]): KeyValue = {
+    if (members.size == 1) {
+      new SingleColumnKeyValue(members.head)
+    } else {
+      new MultiColumnKeyValue(members)
+    }
+  }
 }

@@ -1,21 +1,23 @@
 package trw.dbsubsetter.map
 
+import trw.dbsubsetter.db.PrimaryKeyValue
+
 /**
-  * A mutable, threadsafe map. Keys may be of any type. Values are restricted to Booleans.
+  * A mutable, threadsafe map. Keys are primary key values. Values are Booleans.
   */
-trait BooleanMap[K] {
+trait PrimaryKeyMap {
 
   /**
     * @return The current value, or None if the key is not in the map
     */
-  def get(key: K): Option[Boolean]
+  def get(key: PrimaryKeyValue): Option[Boolean]
 
   /**
     * Set the value for this key, overwriting any previous value
     *
     * @return The previous value, or None if the key was not previously in the map
     */
-  def put(key: K, value: Boolean): Option[Boolean]
+  def put(key: PrimaryKeyValue, value: Boolean): Option[Boolean]
 
   /**
     * Add the value to the map, but only if the key does not already exist in the map. A return value of None
@@ -23,12 +25,12 @@ trait BooleanMap[K] {
     *
     * @return The previously existing value, or None if the key was not previously in the map
     */
-  def putIfAbsent(key: K, value: Boolean): Option[Boolean]
+  def putIfAbsent(key: PrimaryKeyValue, value: Boolean): Option[Boolean]
 
 }
 
-object BooleanMap {
-  def empty[K](): BooleanMap[K] = {
-    new BooleanMapInMemoryImpl[K]()
+object PrimaryKeyMap {
+  def empty(): PrimaryKeyMap = {
+    new PrimaryKeyMapInMemoryImpl()
   }
 }
