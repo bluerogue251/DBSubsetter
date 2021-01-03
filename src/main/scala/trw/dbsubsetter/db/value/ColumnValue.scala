@@ -38,11 +38,16 @@ private[this] class ByteArrayColumnValue(val x: Array[Byte]) extends ColumnValue
   override def bytes: Array[Byte] = x
 }
 
+private[this] class ObjectColumnValue(val x: AnyRef) extends ColumnValue {
+  override def bytes: Array[Byte] = throw new RuntimeException("Can't serialize generic object type column.")
+}
+
 object ColumnValue {
-  def apply(x: Int): ColumnValue = new IntColumnValue(x)
-  def apply(x: Long): ColumnValue = new LongColumnValue(x)
-  def apply(x: BigInt): ColumnValue = new BigIntColumnValue(x)
-  def apply(x: String): ColumnValue = new StringColumnValue(x)
-  def apply(x: UUID): ColumnValue = new UUIDColumnValue(x)
-  def apply(x: Array[Byte]): ColumnValue = new ByteArrayColumnValue(x)
+  def int(x: Int): ColumnValue = new IntColumnValue(x)
+  def long(x: Long): ColumnValue = new LongColumnValue(x)
+  def bigInt(x: BigInt): ColumnValue = new BigIntColumnValue(x)
+  def string(x: String): ColumnValue = new StringColumnValue(x)
+  def uuid(x: UUID): ColumnValue = new UUIDColumnValue(x)
+  def bytes(x: Array[Byte]): ColumnValue = new ByteArrayColumnValue(x)
+  def unknown(x: AnyRef): ColumnValue = new ObjectColumnValue(x)
 }

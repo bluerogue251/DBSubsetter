@@ -4,8 +4,6 @@ import trw.dbsubsetter.config.{ConfigColumn, SchemaConfig}
 
 import java.util.NoSuchElementException
 
-import java.util.NoSuchElementException
-
 object SchemaInfoRetrieval {
   def getSchemaInfo(dbMetadata: DbMetadataQueryResult, schemaConfig: SchemaConfig): SchemaInfo = {
     val includedTables = {
@@ -53,7 +51,7 @@ object SchemaInfoRetrieval {
             new Column(
               table = table,
               name = col.name,
-              dataType = ColumnTypes.fromRawInfo(col.jdbcType, col.typeName, dbMetadata.vendor)
+              extractValue = ColumnTypes.extraction(col.jdbcType, col.typeName, dbMetadata.vendor)
             )
           }
         }

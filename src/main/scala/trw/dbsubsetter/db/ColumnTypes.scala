@@ -1,32 +1,47 @@
 package trw.dbsubsetter.db
 
-import java.sql.JDBCType
+import trw.dbsubsetter.db.DbVendor.{MySQL, PostgreSQL}
+import trw.dbsubsetter.db.value.ColumnValue
 
-import trw.dbsubsetter.db.DbVendor.{MicrosoftSQLServer, MySQL, PostgreSQL}
+import java.sql.{JDBCType, ResultSet}
+import java.util.UUID
 
 object ColumnTypes {
-  sealed trait ColumnType
 
-  case object Short extends ColumnType
-  case object Int extends ColumnType
-  case object Long extends ColumnType
-  case object BigInteger extends ColumnType
-  case object String extends ColumnType
-  case object ByteArray extends ColumnType
-  case object Uuid extends ColumnType
-  case class Unknown(description: String) extends ColumnType
-
-  def fromRawInfo(jdbcType: JDBCType, typeName: String, vendor: DbVendor): ColumnType = {
+  def extraction(jdbcType: JDBCType, typeName: String, vendor: DbVendor): Function[(String, ResultSet), ColumnValue] = {
     (jdbcType, typeName, vendor) match {
-      case (JDBCType.TINYINT | JDBCType.SMALLINT, _, MicrosoftSQLServer)                    => ColumnTypes.Short
-      case (JDBCType.INTEGER, "INT UNSIGNED", MySQL)                                        => ColumnTypes.Long
-      case (JDBCType.TINYINT | JDBCType.SMALLINT | JDBCType.INTEGER, _, _)                  => ColumnTypes.Int
-      case (JDBCType.BIGINT, "BIGINT UNSIGNED", MySQL)                                      => ColumnTypes.BigInteger
-      case (JDBCType.BIGINT, _, _)                                                          => ColumnTypes.Long
-      case (JDBCType.CHAR | JDBCType.VARCHAR | JDBCType.LONGVARCHAR | JDBCType.NCHAR, _, _) => ColumnTypes.String
-      case (JDBCType.BINARY | JDBCType.VARBINARY | JDBCType.LONGVARBINARY, _, _)            => ColumnTypes.ByteArray
-      case (_, "uuid", PostgreSQL)                                                          => ColumnTypes.Uuid
-      case _                                                                                => ColumnTypes.Unknown(s"JDBC Type: $jdbcType, TypeName: $typeName")
+      case (JDBCType.INTEGER, "INT UNSIGNED", MySQL) => { case (columnName, resultSet) =>
+        ColumnValue.long(resultSet.getLong(columnName))
+      }
+
+      case (JDBCType.BIGINT, "BIGINT UNSIGNED", MySQL) => { case (columnName, resultSet) =>
+        ColumnValue.bigInt(resultSet.getObject(columnName, classOf[BigInt]))
+      }
+
+      case (JDBCType.TINYINT | JDBCType.SMALLINT | JDBCType.INTEGER, _, _) => { case (columnName, resultSet) =>
+        ColumnValue.int(resultSet.getInt(columnName))
+      }
+
+      case (JDBCType.BIGINT, _, _) => { case (columnName, resultSet) =>
+        ColumnValue.long(resultSet.getLong(columnName))
+      }
+
+      case (JDBCType.CHAR | JDBCType.VARCHAR | JDBCType.LONGVARCHAR | JDBCType.NCHAR, _, _) => {
+        case (columnName, resultSet) =>
+          ColumnValue.string(resultSet.getString(columnName))
+      }
+
+      case (JDBCType.BINARY | JDBCType.VARBINARY | JDBCType.LONGVARBINARY, _, _) => { case (columnName, resultSet) =>
+        ColumnValue.bytes(resultSet.getBytes(columnName))
+      }
+
+      case (_, "uuid", PostgreSQL) => { case (columnName, resultSet) =>
+        ColumnValue.uuid(resultSet.getObject(columnName, classOf[UUID]))
+      }
+
+      case _ => { case (columnName, resultSet) =>
+        ColumnValue.unknown(resultSet.getObject(columnName))
+      }
     }
   }
 }
